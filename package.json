@@ -4,14 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --open true",
+    "dev": "vite --open",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
-    "@types/alpinejs": "^3.13.10",
-    "alpinejs": "^3.14.1",
-    "sass": "^1.79.3",
     "typescript": "^5.5.3",
     "vite": "^5.4.1"
   }
