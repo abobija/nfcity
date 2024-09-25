@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+import Mqtt from './components/Mqtt.vue'
 </script>
 
 <template>
-  <HelloWorld msg="NFCity" />
+  <Mqtt msg="NFCity" />
 </template>
 
 <style scoped>
