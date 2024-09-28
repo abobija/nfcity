@@ -4,12 +4,14 @@
             "name": "ESP-IDF",
             "includePath": [
                 "${env:IDF_PATH}/components/**",
+                "${env:IDF_PATH}/examples/common_components/protocol_examples_common/**",
                 "${workspaceFolder}/**"
             ],
             "browse": {
                 "path": [
                     "${env:IDF_PATH}/components",
-                    "${workspaceFolder}"
+                    "${workspaceFolder}",
+                    "${env:IDF_PATH}/examples/common_components/protocol_examples_common"
                 ]
             }
         }
