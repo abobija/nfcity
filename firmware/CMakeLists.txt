@@ -8,3 +8,5 @@ set(SDKCONFIG_DEFAULTS "sdkconfig.defaults;sdkconfig.defaults.local")
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(nfcity)
+
+target_add_binary_data(nfcity.elf "main/mqtt_emqx_io.pem" TEXT)
