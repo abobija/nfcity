@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <inttypes.h>
+#include <string.h>
 #include "esp_wifi.h"
 #include "esp_system.h"
 #include "esp_log.h"
@@ -19,6 +20,9 @@
 #define MQTT_BROKER_URL "wss://broker.emqx.io:8084/mqtt"
 #define MQTT_USERNAME   "emqx"
 #define MQTT_PASSWORD   "public"
+#define MQTT_QOS_0      0
+#define MQTT_QOS_1      1
+#define MQTT_QOS_2      2
 
 #define RC522_SPI_BUS_GPIO_MISO    (21)
 #define RC522_SPI_BUS_GPIO_MOSI    (23)
@@ -52,34 +56,38 @@ static rc522_handle_t rc522_scanner;
 #define MQTT_READY_BIT (BIT0)
 static EventGroupHandle_t wait_bits;
 
-static void mqtt_event_handler(void *arg, esp_event_base_t base, int32_t eid, void *data)
+static char mqtt_topic_buffer[64] = { 0 };
+static char *mqtt_subtopic_ptr = NULL;
+
+static char *mqtt_subtopic(const char *subtopic)
+{
+    strcpy(mqtt_subtopic_ptr, subtopic);
+    return mqtt_topic_buffer;
+}
+
+static inline int mqtt_pub(const char *data, int len, int qos)
+{
+    return esp_mqtt_client_publish(mqtt_client, mqtt_subtopic("dev"), data, len, qos, 0);
+}
+
+static void mqtt_event_handler(void *arg, esp_event_base_t base, int32_t id, void *data)
 {
     esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)data;
     ESP_LOGW(TAG, "mqtt event id: %d", event->event_id);
 }
 
-static void on_mqtt_connected(void *arg, esp_event_base_t base, int32_t eid, void *data)
+static void on_mqtt_connected(void *arg, esp_event_base_t base, int32_t id, void *data)
 {
     ESP_LOGW(TAG, "mqtt connected");
-    esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)data;
-
-    esp_mqtt_client_subscribe_single(event->client, "/nfcity/7493/web", 0);
+    esp_mqtt_client_subscribe_single(mqtt_client, mqtt_subtopic("web"), MQTT_QOS_0);
 
     uint8_t buffer[ENC_HELLO_BYTES];
     size_t len;
     enc_hello(buffer, &len);
 
-    esp_mqtt_client_publish(event->client, "/nfcity/7493/dev", (char *)buffer, len, 1, 0);
+    mqtt_pub((char *)buffer, len, MQTT_QOS_0);
 
     xEventGroupSetBits(wait_bits, MQTT_READY_BIT);
-}
-
-static void on_mqtt_data(void *arg, esp_event_base_t base, int32_t eid, void *data)
-{
-    esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)data;
-
-    ESP_LOGW(TAG, "mqtt data (topic=%.*s):", event->topic_len, event->topic);
-    ESP_LOG_BUFFER_HEXDUMP(TAG, event->data, event->data_len, ESP_LOG_INFO);
 }
 
 static void on_picc_state_changed(void *arg, esp_event_base_t base, int32_t event_id, void *data)
@@ -92,7 +100,15 @@ static void on_picc_state_changed(void *arg, esp_event_base_t base, int32_t even
     size_t len;
     enc_picc_state_changed(buffer, event->picc, event->old_state, &len);
 
-    esp_mqtt_client_publish(mqtt_client, "/nfcity/7493/dev", (char *)buffer, len, 1, 0);
+    mqtt_pub((char *)buffer, len, MQTT_QOS_0);
+}
+
+static void on_mqtt_data(void *arg, esp_event_base_t base, int32_t eid, void *data)
+{
+    esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)data;
+
+    ESP_LOGW(TAG, "mqtt data (topic=%.*s):", event->topic_len, event->topic);
+    ESP_LOG_BUFFER_HEXDUMP(TAG, event->data, event->data_len, ESP_LOG_INFO);
 }
 
 void app_main()
@@ -114,6 +130,10 @@ void app_main()
     // }}
 
     // {{ mqtt
+    const char *mqtt_root_topic = "/nfcity/7493/"; // TODO: Generate random ID
+    strcpy(mqtt_topic_buffer, mqtt_root_topic);
+    mqtt_subtopic_ptr = mqtt_topic_buffer + strlen(mqtt_topic_buffer);
+
     const esp_mqtt_client_config_t mqtt_cfg = {
         .broker.address.uri = MQTT_BROKER_URL,
         .broker.verification.certificate = (const char *)mqtt_emqx_cert_start,
