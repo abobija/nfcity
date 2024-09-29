@@ -1,7 +1,8 @@
 ## IDF Component Manager Manifest File
 dependencies:
   idf: ^5.3
-  abobija/rc522: ^3.2.1
+  abobija/rc522:
+    path: /home/abobija/repos/rc522
   espressif/cbor: ^0.6
   protocol_examples_common:
     path: ${IDF_PATH}/examples/common_components/protocol_examples_common
