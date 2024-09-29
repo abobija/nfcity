@@ -108,6 +108,20 @@ static void on_picc_state_changed(void *arg, esp_event_base_t base, int32_t even
 
 static esp_err_t handle_message_from_web(const char *kind, const uint8_t *data, size_t data_len)
 {
+    if (strcmp("mem_read", kind) == 0) {
+        dec_mem_read_t mem_read = { 0 };
+        dec_mem_read(data, data_len, &mem_read);
+
+        ESP_LOGW(TAG,
+            "mem_read (block_addr=%d, key_type=%d, key: %.*s)",
+            mem_read.block_addr,
+            mem_read.key_type,
+            RC522_MIFARE_KEY_SIZE,
+            mem_read.key);
+
+        return ESP_OK;
+    }
+
     ESP_LOGW(TAG, "TODO: %s", kind);
 
     return ESP_OK;
