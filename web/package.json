@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "cbor-x": "^1.6.0",
     "mqtt": "^5.10.1",
     "vue": "^3.4.37"
   },

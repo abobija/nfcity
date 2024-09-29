@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import { decode } from 'cbor-x';
+import mqtt, { MqttClient } from 'mqtt';
 import { ref } from 'vue';
 import ExampleComponent from './components/ExampleComponent.vue';
-import mqtt, { MqttClient } from 'mqtt';
+import { u8ArrToHex } from './helpers';
+import { isPiccStateChanged } from './messages/PiccStateChanged';
 
 const brokerUrl = 'wss://broker.emqx.io:8084/mqtt';
 const rootTopic = '/nfcity-7493/';
@@ -65,8 +68,22 @@ function connect() {
     connected.value = false;
   });
 
-  client.on('message', function (topic, message) {
+  client.on('message', (topic, message) => {
     console.debug('message', topic, message);
+
+    const msg = decode(message);
+
+    if (isPiccStateChanged(msg)) {
+      console.log(
+        'PiccStateChanged',
+        u8ArrToHex(msg.picc.uid),
+        'from',
+        msg.old_state,
+        'to',
+        msg.picc.state,
+        'state'
+      );
+    }
   });
 }
 
