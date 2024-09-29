@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include <string.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/event_groups.h"
 #include "esp_wifi.h"
 #include "esp_system.h"
+#include "esp_check.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
 #include "esp_event.h"
@@ -13,10 +16,9 @@
 #include "dec.h"
 #include "rc522.h"
 #include "driver/rc522_spi.h"
-#include "rc522_picc.h"
+#include "picc/rc522_mifare.h"
 
-#include "freertos/FreeRTOS.h"
-#include "freertos/event_groups.h"
+#define MQTT_READY_BIT (BIT0)
 
 #define MQTT_BROKER_URL "wss://broker.emqx.io:8084/mqtt"
 #define MQTT_USERNAME   "emqx"
@@ -37,6 +39,13 @@ extern const uint8_t mqtt_emqx_cert_start[] asm("_binary_mqtt_emqx_io_pem_start"
 extern const uint8_t mqtt_emqx_cert_end[] asm("_binary_mqtt_emqx_io_pem_end");
 
 static esp_mqtt_client_handle_t mqtt_client;
+static SemaphoreHandle_t rc522_task_mutex;
+static rc522_driver_handle_t rc522_driver;
+static rc522_handle_t rc522_scanner;
+static EventGroupHandle_t wait_bits;
+static char mqtt_topic_buffer[64] = { 0 };
+static char *mqtt_subtopic_ptr = NULL;
+static rc522_picc_t picc = { 0 };
 
 static rc522_spi_config_t rc522_driver_config = {
     .host_id = VSPI_HOST,
@@ -51,15 +60,6 @@ static rc522_spi_config_t rc522_driver_config = {
     .rst_io_num = RC522_SCANNER_GPIO_RST,
 };
 
-static rc522_driver_handle_t rc522_driver;
-static rc522_handle_t rc522_scanner;
-
-#define MQTT_READY_BIT (BIT0)
-static EventGroupHandle_t wait_bits;
-
-static char mqtt_topic_buffer[64] = { 0 };
-static char *mqtt_subtopic_ptr = NULL;
-
 // TODO: Check for return values everywhere
 
 static char *mqtt_subtopic(const char *subtopic)
@@ -68,9 +68,9 @@ static char *mqtt_subtopic(const char *subtopic)
     return mqtt_topic_buffer;
 }
 
-static inline int mqtt_pub(const char *data, int len, int qos)
+static inline int mqtt_pub(const uint8_t *data, int len, int qos)
 {
-    return esp_mqtt_client_publish(mqtt_client, mqtt_subtopic("dev"), data, len, qos, 0);
+    return esp_mqtt_client_publish(mqtt_client, mqtt_subtopic("dev"), (char *)data, len, qos, 0);
 }
 
 static void mqtt_event_handler(void *arg, esp_event_base_t base, int32_t id, void *data)
@@ -88,7 +88,7 @@ static void on_mqtt_connected(void *arg, esp_event_base_t base, int32_t id, void
     size_t len;
     enc_hello(buffer, &len);
 
-    mqtt_pub((char *)buffer, len, MQTT_QOS_0);
+    mqtt_pub(buffer, len, MQTT_QOS_0);
 
     xEventGroupSetBits(wait_bits, MQTT_READY_BIT);
 }
@@ -99,27 +99,76 @@ static void on_picc_state_changed(void *arg, esp_event_base_t base, int32_t even
 
     ESP_LOGW(TAG, "picc state changed (state=%d, old_state=%d)", event->picc->state, event->old_state);
 
-    uint8_t buffer[ENC_PICC_STATE_CHANGED_BYTES];
-    size_t len;
-    enc_picc_state_changed(buffer, event->picc, event->old_state, &len);
+    memcpy(&picc, event->picc, sizeof(rc522_picc_t));
 
-    mqtt_pub((char *)buffer, len, MQTT_QOS_0);
+    uint8_t buffer[ENC_PICC_STATE_CHANGED_BYTES] = { 0 };
+    size_t len = 0;
+    enc_picc_state_changed(buffer, &picc, event->old_state, &len);
+
+    mqtt_pub(buffer, len, MQTT_QOS_0);
+}
+
+static esp_err_t mem_read(mem_read_msg_t *mem_read_msg)
+{
+    ESP_LOGW(TAG,
+        "mem_read (block_addr=%d, key_type=%d, key: %.*s)",
+        mem_read_msg->block_addr,
+        mem_read_msg->key_type,
+        RC522_MIFARE_KEY_SIZE,
+        mem_read_msg->key);
+
+    if (picc.state != RC522_PICC_STATE_ACTIVE && picc.state != RC522_PICC_STATE_ACTIVE_H) {
+        ESP_LOGW(TAG, "cannot read memory. picc is not active");
+        return ESP_FAIL;
+    }
+
+    if (xSemaphoreTake(rc522_task_mutex, pdMS_TO_TICKS(1000)) != pdTRUE) {
+        ESP_LOGE(TAG, "Failed to take mutex");
+        return ESP_FAIL;
+    }
+
+    rc522_mifare_key_t key = {
+        .type = mem_read_msg->key_type,
+    };
+
+    memcpy(key.value, mem_read_msg->key, RC522_MIFARE_KEY_SIZE);
+
+    esp_err_t ret = ESP_OK;
+
+    ESP_GOTO_ON_ERROR(rc522_mifare_auth(rc522_scanner, &picc, mem_read_msg->block_addr, &key),
+        _exit,
+        TAG,
+        "auth failed");
+
+    uint8_t buffer[RC522_MIFARE_BLOCK_SIZE] = { 0 };
+    ESP_GOTO_ON_ERROR(rc522_mifare_read(rc522_scanner, &picc, mem_read_msg->block_addr, buffer),
+        _exit,
+        TAG,
+        "read failed");
+
+    ESP_LOGW(TAG, "data at block %d:", mem_read_msg->block_addr);
+    ESP_LOG_BUFFER_HEXDUMP(TAG, buffer, RC522_MIFARE_BLOCK_SIZE, ESP_LOG_WARN);
+
+    uint8_t enc_buffer[ENC_PICC_BLOCK_BYTES] = { 0 };
+    size_t enc_len = 0;
+    enc_picc_block(enc_buffer, mem_read_msg->block_addr, buffer, &enc_len);
+
+    mqtt_pub(enc_buffer, enc_len, MQTT_QOS_0);
+
+_exit:
+    rc522_mifare_deauth(rc522_scanner, &picc);
+    xSemaphoreGive(rc522_task_mutex);
+
+    return ret;
 }
 
 static esp_err_t handle_message_from_web(const char *kind, const uint8_t *data, size_t data_len)
 {
     if (strcmp("mem_read", kind) == 0) {
-        dec_mem_read_t mem_read = { 0 };
-        dec_mem_read(data, data_len, &mem_read);
+        mem_read_msg_t mem_read_msg = { 0 };
+        dec_mem_read(data, data_len, &mem_read_msg);
 
-        ESP_LOGW(TAG,
-            "mem_read (block_addr=%d, key_type=%d, key: %.*s)",
-            mem_read.block_addr,
-            mem_read.key_type,
-            RC522_MIFARE_KEY_SIZE,
-            mem_read.key);
-
-        return ESP_OK;
+        return mem_read(&mem_read_msg);
     }
 
     ESP_LOGW(TAG, "TODO: %s", kind);
@@ -189,11 +238,19 @@ void app_main()
     xEventGroupWaitBits(wait_bits, MQTT_READY_BIT, pdFALSE, pdTRUE, portMAX_DELAY);
 
     // {{ rc522
+    rc522_task_mutex = xSemaphoreCreateMutex();
+
+    if (rc522_task_mutex == NULL) {
+        ESP_LOGE(TAG, "Failed to create mutex");
+        return;
+    }
+
     ESP_ERROR_CHECK(rc522_spi_create(&rc522_driver_config, &rc522_driver));
     ESP_ERROR_CHECK(rc522_driver_install(rc522_driver));
 
     rc522_config_t rc522_scanner_config = {
         .driver = rc522_driver,
+        .task_mutex = rc522_task_mutex,
     };
 
     ESP_ERROR_CHECK(rc522_create(&rc522_scanner_config, &rc522_scanner));

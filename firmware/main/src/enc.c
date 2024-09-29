@@ -64,3 +64,23 @@ CborError enc_picc_state_changed(uint8_t *buffer, rc522_picc_t *picc, rc522_picc
 
     return CborNoError;
 }
+
+CborError enc_picc_block(uint8_t *buffer, uint8_t block_address, uint8_t *data, size_t *encoded_len)
+{
+    CborEncoder root;
+    cbor_encoder_init(&root, buffer, ENC_PICC_BLOCK_BYTES, 0);
+
+    CborEncoder map;
+    cbor_encoder_create_map(&root, &map, 3);
+    cbor_encode_text_stringz(&map, "kind");
+    cbor_encode_text_stringz(&map, "picc_block");
+    cbor_encode_text_stringz(&map, "address");
+    cbor_encode_uint(&map, block_address);
+    cbor_encode_text_stringz(&map, "data");
+    cbor_encode_byte_string(&map, data, RC522_MIFARE_BLOCK_SIZE);
+    cbor_encoder_close_container(&root, &map);
+
+    *encoded_len = cbor_encoder_get_buffer_size(&root, buffer);
+
+    return CborNoError;
+}

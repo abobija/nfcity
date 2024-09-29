@@ -8,4 +8,4 @@ echo "CONFIG_EXAMPLE_WIFI_PASSWORD=\"YOUR_WIFI_PASSWORD_HERE\"" >> sdkconfig.def
 openssl s_client -showcerts -connect broker.emqx.io:8084 2>&1 | sed -n "1,/Root/d; /BEGIN/,/END/p" | openssl x509 -outform PEM >main/mqtt_emqx_io.pem
 ```
 
-- [CBOR Playground](https://cbor.nemo157.com/)
+- [CBOR Playground](https://cbor.me)
