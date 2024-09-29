@@ -19,6 +19,24 @@ static const char *TAG = "nfcity";
 extern const uint8_t mqtt_emqx_cert_start[] asm("_binary_mqtt_emqx_io_pem_start");
 extern const uint8_t mqtt_emqx_cert_end[] asm("_binary_mqtt_emqx_io_pem_end");
 
+#define ENC_HELLO_BYTES 32
+
+static CborError enc_hello(uint8_t *buffer, size_t buffer_len, size_t *encoded_len)
+{
+    CborEncoder root_enc;
+    cbor_encoder_init(&root_enc, buffer, buffer_len, 0);
+
+    CborEncoder map_encoder;
+    cbor_encoder_create_map(&root_enc, &map_encoder, 1);
+    cbor_encode_text_stringz(&map_encoder, "kind");
+    cbor_encode_text_stringz(&map_encoder, "hello");
+    cbor_encoder_close_container(&root_enc, &map_encoder);
+
+    *encoded_len = cbor_encoder_get_buffer_size(&root_enc, buffer);
+
+    return CborNoError;
+}
+
 static void mqtt_event_handler(void *arg, esp_event_base_t base, int32_t eid, void *data)
 {
     esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)data;
@@ -31,7 +49,12 @@ static void on_mqtt_connected(void *arg, esp_event_base_t base, int32_t eid, voi
     esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)data;
 
     esp_mqtt_client_subscribe_single(event->client, "/nfcity/7493/web", 0);
-    esp_mqtt_client_publish(event->client, "/nfcity/7493/dev", "{\"kind\": \"hello\"}", 17, 1, 0);
+
+    uint8_t buffer[ENC_HELLO_BYTES];
+    uint8_t len;
+    enc_hello(buffer, sizeof(buffer), (size_t *)&len);
+
+    esp_mqtt_client_publish(event->client, "/nfcity/7493/dev", (char *)buffer, len, 1, 0);
 }
 
 static void on_mqtt_data(void *arg, esp_event_base_t base, int32_t eid, void *data)
