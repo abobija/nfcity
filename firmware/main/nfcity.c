@@ -18,20 +18,22 @@
 #include "driver/rc522_spi.h"
 #include "picc/rc522_mifare.h"
 
-#define MQTT_READY_BIT (BIT0)
+#define MQTT_READY_BIT BIT0
 
-#define MQTT_BROKER_URL "wss://broker.emqx.io:8084/mqtt"
-#define MQTT_USERNAME   "emqx"
-#define MQTT_PASSWORD   "public"
-#define MQTT_QOS_0      0
-#define MQTT_QOS_1      1
-#define MQTT_QOS_2      2
+#define MQTT_BROKER_URL   "wss://broker.emqx.io:8084/mqtt"
+#define MQTT_USERNAME     "emqx"
+#define MQTT_PASSWORD     "public"
+#define MQTT_QOS_0        0
+#define MQTT_QOS_1        1
+#define MQTT_QOS_2        2
+#define MQTT_DEV_SUBTOPIC "dev"
+#define MQTT_WEB_SUBTOPIC "web"
 
-#define RC522_SPI_BUS_GPIO_MISO    (21)
-#define RC522_SPI_BUS_GPIO_MOSI    (23)
-#define RC522_SPI_BUS_GPIO_SCLK    (19)
-#define RC522_SPI_SCANNER_GPIO_SDA (22)
-#define RC522_SCANNER_GPIO_RST     (18)
+#define RC522_SPI_BUS_GPIO_MISO    21
+#define RC522_SPI_BUS_GPIO_MOSI    23
+#define RC522_SPI_BUS_GPIO_SCLK    19
+#define RC522_SPI_SCANNER_GPIO_SDA 22
+#define RC522_SCANNER_GPIO_RST     18
 
 static const char *TAG = "nfcity";
 
@@ -70,7 +72,7 @@ static char *mqtt_subtopic(const char *subtopic)
 
 static inline int mqtt_pub(const uint8_t *data, int len, int qos)
 {
-    return esp_mqtt_client_publish(mqtt_client, mqtt_subtopic("dev"), (char *)data, len, qos, 0);
+    return esp_mqtt_client_publish(mqtt_client, mqtt_subtopic(MQTT_DEV_SUBTOPIC), (char *)data, len, qos, 0);
 }
 
 static void mqtt_event_handler(void *arg, esp_event_base_t base, int32_t id, void *data)
@@ -82,7 +84,7 @@ static void mqtt_event_handler(void *arg, esp_event_base_t base, int32_t id, voi
 static void on_mqtt_connected(void *arg, esp_event_base_t base, int32_t id, void *data)
 {
     ESP_LOGW(TAG, "mqtt connected");
-    esp_mqtt_client_subscribe_single(mqtt_client, mqtt_subtopic("web"), MQTT_QOS_0);
+    esp_mqtt_client_subscribe_single(mqtt_client, mqtt_subtopic(MQTT_WEB_SUBTOPIC), MQTT_QOS_0);
 
     uint8_t buffer[ENC_HELLO_BYTES];
     size_t len;
@@ -108,14 +110,14 @@ static void on_picc_state_changed(void *arg, esp_event_base_t base, int32_t even
     mqtt_pub(buffer, len, MQTT_QOS_0);
 }
 
-static esp_err_t mem_read(mem_read_msg_t *mem_read_msg)
+static esp_err_t mem_read(picc_block_read_msg_t *msg)
 {
     ESP_LOGW(TAG,
         "mem_read (block_addr=%d, key_type=%d, key: %.*s)",
-        mem_read_msg->block_addr,
-        mem_read_msg->key_type,
+        msg->address,
+        msg->key_type,
         RC522_MIFARE_KEY_SIZE,
-        mem_read_msg->key);
+        msg->key);
 
     if (picc.state != RC522_PICC_STATE_ACTIVE && picc.state != RC522_PICC_STATE_ACTIVE_H) {
         ESP_LOGW(TAG, "cannot read memory. picc is not active");
@@ -128,30 +130,24 @@ static esp_err_t mem_read(mem_read_msg_t *mem_read_msg)
     }
 
     rc522_mifare_key_t key = {
-        .type = mem_read_msg->key_type,
+        .type = msg->key_type,
     };
 
-    memcpy(key.value, mem_read_msg->key, RC522_MIFARE_KEY_SIZE);
+    memcpy(key.value, msg->key, RC522_MIFARE_KEY_SIZE);
 
     esp_err_t ret = ESP_OK;
 
-    ESP_GOTO_ON_ERROR(rc522_mifare_auth(rc522_scanner, &picc, mem_read_msg->block_addr, &key),
-        _exit,
-        TAG,
-        "auth failed");
+    ESP_GOTO_ON_ERROR(rc522_mifare_auth(rc522_scanner, &picc, msg->address, &key), _exit, TAG, "auth failed");
 
     uint8_t buffer[RC522_MIFARE_BLOCK_SIZE] = { 0 };
-    ESP_GOTO_ON_ERROR(rc522_mifare_read(rc522_scanner, &picc, mem_read_msg->block_addr, buffer),
-        _exit,
-        TAG,
-        "read failed");
+    ESP_GOTO_ON_ERROR(rc522_mifare_read(rc522_scanner, &picc, msg->address, buffer), _exit, TAG, "read failed");
 
-    ESP_LOGW(TAG, "data at block %d:", mem_read_msg->block_addr);
+    ESP_LOGW(TAG, "data at block %d:", msg->address);
     ESP_LOG_BUFFER_HEXDUMP(TAG, buffer, RC522_MIFARE_BLOCK_SIZE, ESP_LOG_WARN);
 
     uint8_t enc_buffer[ENC_PICC_BLOCK_BYTES] = { 0 };
     size_t enc_len = 0;
-    enc_picc_block(enc_buffer, mem_read_msg->block_addr, buffer, &enc_len);
+    enc_picc_block(enc_buffer, msg->address, buffer, &enc_len);
 
     mqtt_pub(enc_buffer, enc_len, MQTT_QOS_0);
 
@@ -164,11 +160,11 @@ _exit:
 
 static esp_err_t handle_message_from_web(const char *kind, const uint8_t *data, size_t data_len)
 {
-    if (strcmp("mem_read", kind) == 0) {
-        mem_read_msg_t mem_read_msg = { 0 };
-        dec_mem_read(data, data_len, &mem_read_msg);
+    if (strcmp(kind, PICC_BLOCK_READ_MSG_KIND) == 0) {
+        picc_block_read_msg_t msg = { 0 };
+        dec_picc_block_read(data, data_len, &msg);
 
-        return mem_read(&mem_read_msg);
+        return mem_read(&msg);
     }
 
     ESP_LOGW(TAG, "TODO: %s", kind);
