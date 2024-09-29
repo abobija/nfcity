@@ -146,7 +146,7 @@ void app_main()
     // }}
 
     // {{ mqtt
-    const char *mqtt_root_topic = "/nfcity/7493/"; // TODO: Generate random ID
+    const char *mqtt_root_topic = "/nfcity-7493/"; // TODO: Generate random ID
     strcpy(mqtt_topic_buffer, mqtt_root_topic);
     mqtt_subtopic_ptr = mqtt_topic_buffer + strlen(mqtt_topic_buffer);
 
