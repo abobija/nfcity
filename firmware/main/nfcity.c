@@ -10,6 +10,7 @@
 #include "protocol_examples_common.h"
 #include "mqtt_client.h"
 #include "enc.h"
+#include "dec.h"
 #include "rc522.h"
 #include "driver/rc522_spi.h"
 #include "rc522_picc.h"
@@ -59,6 +60,8 @@ static EventGroupHandle_t wait_bits;
 static char mqtt_topic_buffer[64] = { 0 };
 static char *mqtt_subtopic_ptr = NULL;
 
+// TODO: Check for return values everywhere
+
 static char *mqtt_subtopic(const char *subtopic)
 {
     strcpy(mqtt_subtopic_ptr, subtopic);
@@ -103,12 +106,25 @@ static void on_picc_state_changed(void *arg, esp_event_base_t base, int32_t even
     mqtt_pub((char *)buffer, len, MQTT_QOS_0);
 }
 
+static esp_err_t handle_message_from_web(const char *kind, const uint8_t *data, size_t data_len)
+{
+    ESP_LOGW(TAG, "TODO: %s", kind);
+
+    return ESP_OK;
+}
+
 static void on_mqtt_data(void *arg, esp_event_base_t base, int32_t eid, void *data)
 {
     esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)data;
 
     ESP_LOGW(TAG, "mqtt data (topic=%.*s):", event->topic_len, event->topic);
-    ESP_LOG_BUFFER_HEXDUMP(TAG, event->data, event->data_len, ESP_LOG_INFO);
+    ESP_LOG_BUFFER_HEXDUMP(TAG, event->data, event->data_len, ESP_LOG_WARN);
+
+    char kind[DEC_KIND_BYTES];
+    size_t len;
+    dec_kind((uint8_t *)event->data, event->data_len, kind, &len);
+
+    handle_message_from_web(kind, (uint8_t *)event->data, event->data_len);
 }
 
 void app_main()

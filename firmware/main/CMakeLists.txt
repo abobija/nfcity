@@ -4,4 +4,5 @@ idf_component_register(
     SRCS
         nfcity.c
         src/enc.c
+        src/dec.c
 )
