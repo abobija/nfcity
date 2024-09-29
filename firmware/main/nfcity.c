@@ -8,7 +8,7 @@
 #include "esp_netif.h"
 #include "protocol_examples_common.h"
 #include "mqtt_client.h"
-#include "cbor.h"
+#include "enc.h"
 
 #define MQTT_BROKER_URL "wss://broker.emqx.io:8084/mqtt"
 #define MQTT_USERNAME   "emqx"
@@ -18,24 +18,6 @@ static const char *TAG = "nfcity";
 
 extern const uint8_t mqtt_emqx_cert_start[] asm("_binary_mqtt_emqx_io_pem_start");
 extern const uint8_t mqtt_emqx_cert_end[] asm("_binary_mqtt_emqx_io_pem_end");
-
-#define ENC_HELLO_BYTES 32
-
-static CborError enc_hello(uint8_t *buffer, size_t buffer_len, size_t *encoded_len)
-{
-    CborEncoder root_enc;
-    cbor_encoder_init(&root_enc, buffer, buffer_len, 0);
-
-    CborEncoder map_encoder;
-    cbor_encoder_create_map(&root_enc, &map_encoder, 1);
-    cbor_encode_text_stringz(&map_encoder, "kind");
-    cbor_encode_text_stringz(&map_encoder, "hello");
-    cbor_encoder_close_container(&root_enc, &map_encoder);
-
-    *encoded_len = cbor_encoder_get_buffer_size(&root_enc, buffer);
-
-    return CborNoError;
-}
 
 static void mqtt_event_handler(void *arg, esp_event_base_t base, int32_t eid, void *data)
 {
