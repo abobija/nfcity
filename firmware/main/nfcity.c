@@ -43,7 +43,8 @@ static void on_mqtt_data(void *arg, esp_event_base_t base, int32_t eid, void *da
 {
     esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)data;
 
-    ESP_LOGI(TAG, "mqtt data (topic=%.*s): %.*s", event->topic_len, event->topic, event->data_len, event->data);
+    ESP_LOGI(TAG, "mqtt data (topic=%.*s):", event->topic_len, event->topic);
+    ESP_LOG_BUFFER_HEXDUMP(TAG, event->data, event->data_len, ESP_LOG_INFO);
 }
 
 void app_main()
