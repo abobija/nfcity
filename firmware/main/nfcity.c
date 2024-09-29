@@ -19,13 +19,26 @@ static const char *TAG = "nfcity";
 extern const uint8_t mqtt_emqx_cert_start[] asm("_binary_mqtt_emqx_io_pem_start");
 extern const uint8_t mqtt_emqx_cert_end[] asm("_binary_mqtt_emqx_io_pem_end");
 
-static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data)
+static void mqtt_event_handler(void *arg, esp_event_base_t base, int32_t eid, void *data)
 {
-    ESP_LOGD(TAG, "Event dispatched from event loop base=%s, event_id=%" PRIi32, base, event_id);
+    esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)data;
+    ESP_LOGW(TAG, "mqtt event id: %d", event->event_id);
+}
 
-    esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)event_data;
+static void on_mqtt_connected(void *arg, esp_event_base_t base, int32_t eid, void *data)
+{
+    ESP_LOGI(TAG, "mqtt connected");
+    esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)data;
 
-    ESP_LOGI(TAG, "MQTT EVENT ID: %d", event->event_id);
+    esp_mqtt_client_subscribe_single(event->client, "/nfcity/7493/web", 0);
+    esp_mqtt_client_publish(event->client, "/nfcity/7493/dev", "{\"kind\": \"hello\"}", 17, 1, 0);
+}
+
+static void on_mqtt_data(void *arg, esp_event_base_t base, int32_t eid, void *data)
+{
+    esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)data;
+
+    ESP_LOGI(TAG, "mqtt data (topic=%.*s): %.*s", event->topic_len, event->topic, event->data_len, event->data);
 }
 
 void app_main()
@@ -51,5 +64,8 @@ void app_main()
     }
 
     ESP_ERROR_CHECK(esp_mqtt_client_register_event(client, ESP_EVENT_ANY_ID, mqtt_event_handler, NULL));
+    ESP_ERROR_CHECK(esp_mqtt_client_register_event(client, MQTT_EVENT_CONNECTED, on_mqtt_connected, NULL));
+    ESP_ERROR_CHECK(esp_mqtt_client_register_event(client, MQTT_EVENT_DATA, on_mqtt_data, NULL));
+
     ESP_ERROR_CHECK(esp_mqtt_client_start(client));
 }
