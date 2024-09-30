@@ -2,7 +2,7 @@
 import { inject, ref } from 'vue';
 import ExampleComponent from './components/ExampleComponent.vue';
 import Client from './communication/Client';
-import { isPiccStateChanged } from './communication/messages/PiccStateChanged';
+import { isPiccStateChanged } from './communication/messages/PiccStateChangedMessage';
 import { u8ArrToHex } from './helpers';
 import { DeviceMessage } from './communication/messages/Message';
 
