@@ -1,13 +1,13 @@
 import Picc, { PiccState } from "../../models/Picc";
-import Message from "./Message";
+import { DeviceMessage } from "./Message";
 
-export default interface PiccStateChanged extends Message {
+export default interface PiccStateChanged extends DeviceMessage {
     old_state: PiccState;
     picc: Picc;
 }
 
 export const piccStateChangedKind = 'picc_state_changed';
 
-export function isPiccStateChanged(message: Message): message is PiccStateChanged {
+export function isPiccStateChanged(message: DeviceMessage): message is PiccStateChanged {
     return message.kind === piccStateChangedKind;
 }

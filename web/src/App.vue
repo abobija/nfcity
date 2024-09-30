@@ -2,9 +2,9 @@
 import { inject, ref } from 'vue';
 import ExampleComponent from './components/ExampleComponent.vue';
 import Client from './communication/Client';
-import Message from './communication/messages/Message';
 import { isPiccStateChanged } from './communication/messages/PiccStateChanged';
 import { u8ArrToHex } from './helpers';
+import { DeviceMessage } from './communication/messages/Message';
 
 const client = inject('client') as Client;
 const connected = ref(false);
@@ -16,7 +16,7 @@ function connect() {
     .on('end', () => connected.value = false)
     .on('offline', () => connected.value = false)
     .on('close', () => connected.value = false)
-    .on('message', (message: Message) => {
+    .on('deviceMessage', (message: DeviceMessage) => {
       if (isPiccStateChanged(message)) {
         console.log(
           'picc',

@@ -1,8 +1,8 @@
 import mqtt, { MqttClient } from 'mqtt';
 import { decode } from 'cbor-x';
-import Message from './messages/Message';
+import { DeviceMessage } from './messages/Message';
 
-type Events = 'connect' | 'message' | 'reconnect' | 'close' | 'disconnect' | 'offline' | 'end';
+type Events = 'connect' | 'deviceMessage' | 'reconnect' | 'close' | 'disconnect' | 'offline' | 'end';
 
 class Client {
     private _broker?: string;
@@ -10,7 +10,7 @@ class Client {
     private devTopic: string = 'dev';
     private webTopic: string = 'web';
     private mqttClient: MqttClient | null = null;
-    private messageListeners: Array<(message: Message) => void> = [];
+    private deviceMessageListeners: Array<(message: DeviceMessage) => void> = [];
 
     get broker(): string | undefined {
         return this._broker;
@@ -33,8 +33,8 @@ class Client {
             throw new Error('not connected');
         }
 
-        if (event === 'message') {
-            this.messageListeners.push(listener);
+        if (event === 'deviceMessage') {
+            this.deviceMessageListeners.push(listener);
         } else {
             this.mqttClient.on(event, listener);
         }
@@ -101,7 +101,7 @@ class Client {
 
             const msg = decode(message);
 
-            this.messageListeners.forEach(listener => listener(msg));
+            this.deviceMessageListeners.forEach(listener => listener(msg));
         });
 
         return this;
