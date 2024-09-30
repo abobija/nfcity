@@ -1,12 +1,44 @@
 <script setup lang="ts">
+import { inject, onMounted, onUnmounted, ref } from 'vue';
+import Client from '../../communication/Client';
+import { DeviceMessage } from '../../communication/messages/Message';
+import { isPiccBlock } from '../../communication/messages/PiccBlockMessage';
 import { hex } from '../../helpers';
-import Picc, { PiccType } from '../../models/Picc';
+import { logger } from '../../Logger';
+import Picc, { numberOfSectors, PiccKeyType, PiccMemory, PiccType } from '../../models/Picc';
 import './PiccDashboard.scss';
 import PiccMemoryLayout from './PiccMemoryLayout.vue';
 
 defineProps<{
   picc: Picc;
 }>();
+
+const memory = ref<PiccMemory>({
+  sectors: new Map(
+    Array.from({ length: numberOfSectors }).map((_, i) => [i, { blocks: new Map() }])
+  )
+});
+
+const client = inject('client') as Client;
+
+function readBlockDemo() {
+  client.readBlock({
+    address: 0,
+    key_type: PiccKeyType.A,
+    key: new Uint8Array([0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
+  });
+}
+
+const deviceListener = (message: DeviceMessage) => {
+  if (!isPiccBlock(message)) {
+    return;
+  }
+
+  logger.info('Received block', message);
+};
+
+onMounted(() => client.on('deviceMessage', deviceListener));
+onUnmounted(() => client.off('deviceMessage', deviceListener));
 </script>
 
 <template>
@@ -26,13 +58,11 @@ defineProps<{
           <span class="name">SAK</span>
           <span class="value">{{ hex(picc.sak) }}</span>
         </li>
-        <!-- <li class="meta">
-          <span class="name">State</span>
-          <span class="value">{{ PiccState[picc.state] }}</span>
-        </li> -->
       </ul>
     </div>
 
-    <PiccMemoryLayout />
+    <button @click="readBlockDemo">read block demo</button>
+
+    <PiccMemoryLayout :memory="memory" />
   </div>
 </template>

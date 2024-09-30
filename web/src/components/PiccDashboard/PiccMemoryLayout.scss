@@ -7,19 +7,28 @@ $transition: .3s ease-in-out;
   display: flex;
 
   .layout {
+    display: flex;
+    flex-direction: column-reverse;
+
     .sector {
       display: flex;
       flex-direction: row;
       justify-content: right;
 
       .blocks {
-        transition: border $transition, box-shadow $transition;
+        display: flex;
+        flex-direction: column-reverse;
         border-style: solid;
         border-color: rgba($color-fg, .2);
         border-width: 2px 1px 2px 1px;
+        transition: border $transition, box-shadow $transition;
 
         .block {
           color: rgba($color-fg, 0.4);
+
+          &.empty {
+            color: transparent;
+          }
 
           .bytes {
             display: flex;
@@ -45,7 +54,9 @@ $transition: .3s ease-in-out;
           }
 
           &:hover {
-            color: $color-fg;
+            &:not(.empty) {
+              color: $color-fg;
+            }
           }
         }
 

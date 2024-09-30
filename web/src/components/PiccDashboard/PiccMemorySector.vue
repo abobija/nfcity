@@ -1,16 +1,17 @@
 <script setup lang="ts">
-import { randomBytes } from '../../helpers';
+import { numberOfBlocks, PiccSector } from '../../models/Picc';
 import Block from './PiccMemoryBlock.vue';
 
 defineProps<{
-  index: number;
+  sector?: PiccSector;
 }>();
 </script>
 
 <template>
-  <div :data-index="index" class="sector">
+  <div class="sector">
     <div class="blocks">
-      <Block :bytes="randomBytes(16)" v-for="offset in [3, 2, 1, 0]" :key="offset" :offset="offset" />
+      <Block v-for="(_, offset) in Array.from({ length: numberOfBlocks })" :key="offset"
+        :block="sector?.blocks.get(offset)" :data-offset="offset" />
     </div>
   </div>
 </template>

@@ -1,14 +1,18 @@
 <script setup lang="ts">
+import { numberOfSectors, PiccMemory } from '../../models/Picc';
 import './PiccMemoryLayout.scss';
 import Sector from './PiccMemorySector.vue';
 
-// defineProps<{ msg: string }>();
+defineProps<{
+  memory: PiccMemory;
+}>();
 </script>
 
 <template>
   <div class="memory">
     <div class="layout">
-      <Sector v-for="index in [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]" :key="index" :index="index" />
+      <Sector v-for="(_, offset) in Array.from({ length: numberOfSectors })" :key="offset"
+        :sector="memory.sectors.get(offset)" :data-offset="offset" />
     </div>
   </div>
 </template>
