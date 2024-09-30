@@ -1,4 +1,4 @@
-import { DeviceMessage } from "./Message";
+import { DeviceMessage } from "../Message";
 
 export const piccBlockKind = 'picc_block';
 

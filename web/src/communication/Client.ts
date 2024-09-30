@@ -2,7 +2,7 @@ import { decode, encode } from 'cbor-x';
 import mqtt, { MqttClient } from 'mqtt';
 import { logger } from '../Logger';
 import { DeviceMessage, WebMessage } from './messages/Message';
-import PiccBlockReadMessage, { piccBlockReadKind } from './messages/PiccBlockReadMessage';
+import PiccBlockReadMessage, { piccBlockReadKind } from './messages/web/PiccBlockReadMessage';
 
 type Events =
   'connect' |

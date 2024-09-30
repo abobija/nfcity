@@ -9,7 +9,8 @@ import { MifareClassic } from './models/Picc';
 const client = inject('client') as Client;
 const connected = ref(false);
 
-const picc = ref<MifareClassic | null>(null);
+// const picc = ref<MifareClassic | null>(null);
+const picc = ref<MifareClassic | null>(new MifareClassic());
 
 function connect() {
   client.connect()
@@ -40,7 +41,7 @@ watch(connected, connected => {
         made by <a href="https://github.com/abobija" target="_blank">ab</a>
       </div>
     </div>
-    <div class="center-screen" v-if="picc == null">
+    <div class="center-screen" v-else-if="picc == null">
       picc fetching...
     </div>
     <PiccDashboard :picc="picc" v-else />
