@@ -1,13 +1,13 @@
-const colorReset = "\x1b[0m";
 const red = "\x1b[31m";
 const orange = "\x1b[33m";
 const green = "\x1b[32m";
 const pink = "\x1b[95m";
 const cyan = "\x1b[36m";
+const resetColor = "\x1b[0m";
 
 enum LogLevel {
   ERROR,
-  WARN,
+  WARNING,
   INFO,
   DEBUG,
   VERBOSE
@@ -15,7 +15,7 @@ enum LogLevel {
 
 const levelColor = {
   [LogLevel.ERROR]: red,
-  [LogLevel.WARN]: orange,
+  [LogLevel.WARNING]: orange,
   [LogLevel.INFO]: green,
   [LogLevel.DEBUG]: cyan,
   [LogLevel.VERBOSE]: pink
@@ -32,8 +32,8 @@ class Logger {
     this.log(LogLevel.ERROR, message, ...optionalParams);
   }
 
-  warn(message?: any, ...optionalParams: any[]): void {
-    this.log(LogLevel.WARN, message, ...optionalParams);
+  warning(message?: any, ...optionalParams: any[]): void {
+    this.log(LogLevel.WARNING, message, ...optionalParams);
   }
 
   info(message?: any, ...optionalParams: any[]): void {
@@ -53,14 +53,13 @@ class Logger {
       return;
     }
 
-    console.info(
-      `${levelColor[level]}[nfcity][${LogLevel[level].at(0)}]${colorReset}`,
-      message,
+    console.log(
+      `${levelColor[level]}[nfcity][${LogLevel[level].at(0)}]${resetColor} ${message}`,
       ...optionalParams
     );
   }
 }
 
 export const logger = new Logger(
-  LogLevel[import.meta.env.VITE_LOG_LEVEL as keyof typeof LogLevel] || LogLevel.INFO
+  LogLevel[import.meta.env.VITE_LOG_LEVEL as keyof typeof LogLevel] || LogLevel.ERROR
 );

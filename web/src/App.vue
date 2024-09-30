@@ -27,7 +27,7 @@ watch(connected, connected => {
     return;
   }
 
-  logger.warn('TODO: Fetch picc');
+  logger.warning('TODO: Fetch picc');
 });
 </script>
 
