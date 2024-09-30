@@ -1,19 +1,15 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue';
-import PiccDashboard from './components/PiccDashboard/PiccDashboard.vue';
-import Picc, { PiccState, PiccType } from './models/Picc';
+import { inject, ref, watch } from 'vue';
+import './App.scss';
 import Client from './communication/Client';
+import PiccDashboard from './components/PiccDashboard/PiccDashboard.vue';
+import { logger } from './Logger';
+import { MifareClassic } from './models/Picc';
 
 const client = inject('client') as Client;
 const connected = ref(false);
 
-const picc = {
-  type: PiccType.Mifare1K,
-  state: PiccState.Active,
-  atqa: 0x4,
-  sak: 0x8,
-  uid: new Uint8Array([0xaa, 0xbb, 0xcc, 0xdd]),
-} as Picc;
+const picc = ref<MifareClassic | null>(null);
 
 function connect() {
   client.connect()
@@ -23,13 +19,30 @@ function connect() {
     .on('offline', () => connected.value = false)
     .on('close', () => connected.value = false);
 }
+
+watch(connected, connected => {
+  if (!connected) {
+    picc.value = null;
+    return;
+  }
+
+  logger.warn('TODO: Fetch picc');
+});
 </script>
 
 <template>
   <div class="app">
-    <PiccDashboard :picc="picc" v-if="connected" />
-    <div v-else>
-      <button @click="connect" v-if="!connected">Connect</button>
+    <div class="enter center-screen" v-if="!connected">
+      <h1 class="title">nfcity</h1>
+      <h2 class="subtitle">deep dive into NFC cards</h2>
+      <button class="connect btn primary" @click="connect">connect</button>
+      <div class="credits">
+        made by <a href="https://github.com/abobija" target="_blank">ab</a>
+      </div>
     </div>
+    <div class="center-screen" v-if="picc == null">
+      picc fetching...
+    </div>
+    <PiccDashboard :picc="picc" v-else />
   </div>
 </template>

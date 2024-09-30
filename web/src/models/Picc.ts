@@ -31,14 +31,6 @@ export enum PiccKeyType {
   B = 1,
 }
 
-export default interface Picc {
-  type: PiccType;
-  state: PiccState;
-  atqa: number;
-  sak: number;
-  uid: Uint8Array;
-}
-
 export type Offset = number;
 
 export interface PiccBlock {
@@ -51,4 +43,20 @@ export interface PiccSector {
 
 export interface PiccMemory {
   sectors: Map<Offset, PiccSector>;
+}
+
+export default interface Picc {
+  type: PiccType;
+  state: PiccState;
+  atqa: number;
+  sak: number;
+  uid: Uint8Array;
+}
+
+export class MifareClassic implements Picc {
+  type: PiccType = PiccType.Mifare1K;
+  state: PiccState = PiccState.Active;
+  atqa: number = 0x4;
+  sak: number = 0x8;
+  uid: Uint8Array = new Uint8Array([0xaa, 0xbb, 0xcc, 0xdd]);
 }

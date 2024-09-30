@@ -16,21 +16,3 @@ button {
   font-weight: 200;
   font-size: large;
 }
-
-.app {
-  margin: 1.5rem;
-}
-
-button {
-  color: $color-3;
-  background-color: $color-bg;
-  border: 1px solid rgba($color-3, 0.3);
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  transition: box-shadow 0.2s ease-in-out;
-  border-radius: 0.3rem;
-
-  &:hover {
-    box-shadow: 0 0 0.3rem rgba($color-3, 0.3);
-  }
-}
