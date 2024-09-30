@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { toHex } from '../../helpers';
+import { hex } from '../../helpers';
 
 defineProps<{
   offset: number,
@@ -11,7 +11,7 @@ defineProps<{
   <div :class="`block block-${offset}`">
     <ul class="bytes">
       <li class="byte" v-for="(byte, offset) in bytes" :key="offset">
-        {{ toHex(byte) }}
+        {{ hex(byte) }}
       </li>
     </ul>
   </div>

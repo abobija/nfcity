@@ -1,11 +1,15 @@
-export function toHex(num: number) {
+function num2hex(num: number) {
   const hex = num.toString(16).toUpperCase();
 
   return hex.length % 2 ? '0' + hex : hex;
 }
 
-export function u8ToHex(u8: Uint8Array) {
-  return Array.from(u8).map(toHex).join(' ');
+function arr2hex(arr: Uint8Array) {
+  return Array.from(arr).map(num2hex).join(' ');
+}
+
+export function hex(bytes: number | Uint8Array) {
+  return bytes instanceof Uint8Array ? arr2hex(bytes) : num2hex(bytes);
 }
 
 export function randomBytes(length: number) {
