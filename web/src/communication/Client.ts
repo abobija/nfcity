@@ -1,9 +1,17 @@
-import mqtt, { MqttClient } from 'mqtt';
 import { decode, encode } from 'cbor-x';
+import mqtt, { MqttClient } from 'mqtt';
+import { logger } from '../Logger';
 import { DeviceMessage, WebMessage } from './messages/Message';
 import PiccBlockReadMessage, { piccBlockReadKind } from './messages/PiccBlockReadMessage';
 
-type Events = 'connect' | 'deviceMessage' | 'reconnect' | 'close' | 'disconnect' | 'offline' | 'end';
+type Events =
+    'connect' |
+    'deviceMessage' |
+    'reconnect' |
+    'close' |
+    'disconnect' |
+    'offline' |
+    'end';
 
 class Client {
     private _broker?: string;
@@ -39,12 +47,12 @@ class Client {
 
         this.mqttClient.publish(topic, encodedMessage, { qos: 0 }, err => {
             if (err) {
-                console.error('publish error', err);
+                logger.error('publish error', err);
                 return;
             }
 
-            console.debug('published', topic, message);
-            //console.debug('encoded:', encodedMessage);
+            logger.debug('published', topic, message);
+            logger.verbose('encoded:', encodedMessage);
         });
     }
 
@@ -78,49 +86,49 @@ class Client {
         this.mqttClient = mqtt.connect(this._broker);
 
         this.mqttClient.on('error', error => {
-            console.debug('error', error);
+            logger.debug('error', error);
         });
 
         this.mqttClient.on('connect', () => {
-            console.debug('connected');
+            logger.debug('connected');
 
             const topic = this.rootTopic + this.devTopic;
 
             this.mqttClient!.subscribe(topic, { qos: 0 }, err => {
                 if (err) {
-                    console.error('subscribe error', err);
+                    logger.error('subscribe error', err);
                     return;
                 }
 
-                console.debug('subscribed', topic);
+                logger.debug('subscribed', topic);
             });
         });
 
         this.mqttClient.on('reconnect', () => {
-            console.debug('reconnect');
+            logger.debug('reconnect');
         });
 
         this.mqttClient.on('close', () => {
-            console.debug('close');
+            logger.debug('close');
         });
 
         this.mqttClient.on('disconnect', () => {
-            console.debug('disconnected');
+            logger.debug('disconnected');
         });
 
         this.mqttClient.on('offline', () => {
-            console.debug('offline');
+            logger.debug('offline');
         });
 
         this.mqttClient.on('end', () => {
-            console.debug('end');
+            logger.debug('end');
         });
 
         this.mqttClient.on('message', (topic, encodedMessage) => {
             const decodedMessage = decode(encodedMessage);
 
-            console.debug('message', topic, decodedMessage);
-            //console.debug('encoded:', encodedMessage);
+            logger.debug('message', topic, decodedMessage);
+            logger.verbose('encoded:', encodedMessage);
 
             this.deviceMessageListeners.forEach(listener => listener(decodedMessage));
         });
@@ -141,7 +149,7 @@ class Client {
 
     readBlock(message: PiccBlockReadMessage): void {
         message.kind = piccBlockReadKind;
-        console.debug('readBlock', message);
+        logger.debug('readBlock', message);
 
         this.send(message);
     }

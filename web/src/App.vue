@@ -6,6 +6,7 @@ import { isPiccStateChanged } from './communication/messages/PiccStateChangedMes
 import { u8ArrToHex } from './helpers';
 import { DeviceMessage } from './communication/messages/Message';
 import { PiccKeyType } from './models/Picc';
+import { logger } from './Logger';
 
 const client = inject('client') as Client;
 const connected = ref(false);
@@ -19,7 +20,7 @@ function connect() {
     .on('close', () => connected.value = false)
     .on('deviceMessage', (message: DeviceMessage) => {
       if (isPiccStateChanged(message)) {
-        console.log(
+        logger.info(
           'picc',
           u8ArrToHex(message.picc.uid),
           'changed state from',
