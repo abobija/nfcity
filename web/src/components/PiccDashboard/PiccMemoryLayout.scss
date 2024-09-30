@@ -1,0 +1,63 @@
+@import '../../theme.scss';
+
+$color: $color-1;
+$transition: .3s ease-in-out;
+
+.memory {
+  display: flex;
+
+  .layout {
+    .sector {
+      display: flex;
+      flex-direction: row;
+      justify-content: right;
+
+      .blocks {
+        transition: border $transition, box-shadow $transition;
+        border-style: solid;
+        border-color: rgba($color-fg, .2);
+        border-width: 2px 1px 2px 1px;
+
+        .block {
+          color: rgba($color-fg, 0.4);
+
+          .bytes {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+
+            .byte {
+              cursor: pointer;
+              font-size: 0.8rem;
+              border: 1px solid rgba($color-fg, .1);
+              padding: 0.3rem;
+
+              &:hover {
+                background-color: rgba($color, .2);
+                border-color: rgba($color, 1) !important;
+                box-shadow: 0 0 1rem rgba($color, .8);
+              }
+            }
+
+            &:hover {
+              background-color: rgba($color, .08);
+            }
+          }
+
+          &:hover {
+            color: $color-fg;
+          }
+        }
+
+        &:hover {
+          border-color: rgba($color, 1) !important;
+          box-shadow: 0 0 1rem rgba($color, .3);
+
+          .block .bytes .byte {
+            border: 1px solid rgba($color, .4);
+          }
+        }
+      }
+    }
+  }
+}

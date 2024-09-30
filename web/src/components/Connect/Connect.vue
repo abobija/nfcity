@@ -3,7 +3,7 @@ import { inject, ref } from 'vue';
 import Client from '../../communication/Client';
 import { DeviceMessage } from '../../communication/messages/Message';
 import { isPiccStateChanged } from '../../communication/messages/PiccStateChangedMessage';
-import { u8ArrToHex } from '../../helpers';
+import { u8ToHex } from '../../helpers';
 import { logger } from '../../Logger';
 import { PiccKeyType } from '../../models/Picc';
 
@@ -21,7 +21,7 @@ function connect() {
       if (isPiccStateChanged(message)) {
         logger.info(
           'picc',
-          u8ArrToHex(message.picc.uid),
+          u8ToHex(message.picc.uid),
           'changed state from',
           message.old_state,
           'to',

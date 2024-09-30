@@ -1,33 +1,36 @@
 @import url(https://fonts.bunny.net/css?family=jetbrains-mono:200,600);
-
-$button-color: rgb(0, 233, 120);
+@import './theme.scss';
 
 :root {
-  color-scheme: dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: $color-fg;
+  background-color: $color-bg;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-* {
+:root,
+button {
   font-family: 'JetBrains Mono', monospace;
   font-weight: 200;
-  font-size: larger;
+  font-size: large;
+}
+
+.app {
+  margin: 1.5rem;
 }
 
 button {
-  color: $button-color;
-  background-color: rgb(27, 27, 27);
-  border: 1px solid rgba($button-color, 0.3);
+  color: $color-3;
+  background-color: $color-bg;
+  border: 1px solid rgba($color-3, 0.3);
   padding: 0.5rem 1rem;
   cursor: pointer;
   transition: box-shadow 0.2s ease-in-out;
   border-radius: 0.3rem;
 
   &:hover {
-    box-shadow: 0 0 0.3rem rgba($button-color, 0.3);
+    box-shadow: 0 0 0.3rem rgba($color-3, 0.3);
   }
 }

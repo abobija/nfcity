@@ -1,0 +1,32 @@
+@import '../../theme.scss';
+
+.picc-dashboard {
+  .picc {
+    margin-bottom: 0.8rem;
+
+    .type {
+      font-size: 1.5rem;
+      color: $color-5;
+      font-weight: 600;
+    }
+
+    .metas {
+      display: flex;
+      margin-top: .5rem;
+
+      .meta {
+        margin-right: 1rem;
+
+        .name {
+          margin-right: 1rem;
+          color: rgba($color-fg, 0.5);
+        }
+
+        .value {
+          font-weight: 600;
+          color: $color-4;
+        }
+      }
+    }
+  }
+}
