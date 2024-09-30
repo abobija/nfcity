@@ -8,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-  <div :class="`sector sector-${index}`">
+  <div :data-index="index" class="sector">
     <div class="blocks">
       <Block :bytes="randomBytes(16)" v-for="offset in [3, 2, 1, 0]" :key="offset" :offset="offset" />
     </div>

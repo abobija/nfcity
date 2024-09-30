@@ -8,9 +8,9 @@ defineProps<{
 </script>
 
 <template>
-  <div :class="`block block-${offset}`">
+  <div :data-offset="offset" class="block">
     <ul class="bytes">
-      <li class="byte" v-for="(byte, offset) in bytes" :key="offset">
+      <li :data-index="i" class="byte" v-for="(byte, i) in bytes" :key="i">
         {{ hex(byte) }}
       </li>
     </ul>
