@@ -1,6 +1,7 @@
 import mqtt, { MqttClient } from 'mqtt';
-import { decode } from 'cbor-x';
-import { DeviceMessage } from './messages/Message';
+import { decode, encode } from 'cbor-x';
+import { DeviceMessage, WebMessage } from './messages/Message';
+import PiccBlockReadMessage, { piccBlockReadKind } from './messages/PiccBlockReadMessage';
 
 type Events = 'connect' | 'deviceMessage' | 'reconnect' | 'close' | 'disconnect' | 'offline' | 'end';
 
@@ -26,6 +27,25 @@ class Client {
 
     set rootTopic(value: string) {
         this._rootTopic = value;
+    }
+
+    private send(message: WebMessage): void {
+        if (this.mqttClient == null) {
+            throw new Error('not connected');
+        }
+
+        const topic = this.rootTopic + this.webTopic;
+        const encodedMessage = encode(message);
+
+        this.mqttClient.publish(topic, encodedMessage, { qos: 0 }, err => {
+            if (err) {
+                console.error('publish error', err);
+                return;
+            }
+
+            console.debug('published', topic, message);
+            //console.debug('encoded:', encodedMessage);
+        });
     }
 
     on(event: Events, listener: (...args: any[]) => void): Client {
@@ -96,12 +116,13 @@ class Client {
             console.debug('end');
         });
 
-        this.mqttClient.on('message', (topic, message) => {
-            console.debug('message', topic, message);
+        this.mqttClient.on('message', (topic, encodedMessage) => {
+            const decodedMessage = decode(encodedMessage);
 
-            const msg = decode(message);
+            console.debug('message', topic, decodedMessage);
+            //console.debug('encoded:', encodedMessage);
 
-            this.deviceMessageListeners.forEach(listener => listener(msg));
+            this.deviceMessageListeners.forEach(listener => listener(decodedMessage));
         });
 
         return this;
@@ -116,6 +137,13 @@ class Client {
         this.mqttClient = null;
 
         return this;
+    }
+
+    readBlock(message: PiccBlockReadMessage): void {
+        message.kind = piccBlockReadKind;
+        console.debug('readBlock', message);
+
+        this.send(message);
     }
 }
 

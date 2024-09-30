@@ -22,6 +22,11 @@ export enum PiccType {
     Tnp3XXX,
 }
 
+export enum PiccKeyType {
+    A = 0,
+    B = 1,
+}
+
 export default interface Picc {
     type: PiccType;
     state: PiccState;

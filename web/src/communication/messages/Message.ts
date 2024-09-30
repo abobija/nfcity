@@ -1,7 +1,9 @@
-interface Message {
+interface Message { }
+
+export interface DeviceMessage extends Message {
     kind: string;
 }
 
-export interface DeviceMessage extends Message { }
-
-export interface WebMessage extends Message { }
+export interface WebMessage extends Message {
+    kind?: string;
+}

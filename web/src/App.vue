@@ -5,6 +5,7 @@ import Client from './communication/Client';
 import { isPiccStateChanged } from './communication/messages/PiccStateChangedMessage';
 import { u8ArrToHex } from './helpers';
 import { DeviceMessage } from './communication/messages/Message';
+import { PiccKeyType } from './models/Picc';
 
 const client = inject('client') as Client;
 const connected = ref(false);
@@ -30,6 +31,14 @@ function connect() {
       }
     });
 }
+
+function readBlock() {
+  client.readBlock({
+    address: 0,
+    key: Uint8Array.from([0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
+    key_type: PiccKeyType.A,
+  });
+}
 </script>
 
 <template>
@@ -41,6 +50,7 @@ function connect() {
     </div>
     <div v-else>
       <button type="button" @click="client.disconnect">disconnect</button>
+      <button type="button" @click="readBlock">read block</button>
     </div>
   </div>
 </template>
