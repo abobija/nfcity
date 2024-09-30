@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { inject, ref } from 'vue';
-import ExampleComponent from './components/ExampleComponent.vue';
-import Client from './communication/Client';
-import { isPiccStateChanged } from './communication/messages/PiccStateChangedMessage';
-import { u8ArrToHex } from './helpers';
-import { DeviceMessage } from './communication/messages/Message';
-import { PiccKeyType } from './models/Picc';
-import { logger } from './Logger';
+import Client from '../../communication/Client';
+import { DeviceMessage } from '../../communication/messages/Message';
+import { isPiccStateChanged } from '../../communication/messages/PiccStateChangedMessage';
+import { u8ArrToHex } from '../../helpers';
+import { logger } from '../../Logger';
+import { PiccKeyType } from '../../models/Picc';
 
 const client = inject('client') as Client;
 const connected = ref(false);
@@ -40,11 +39,11 @@ function readBlock() {
     key_type: PiccKeyType.A,
   });
 }
+
 </script>
 
-<template>
-  <ExampleComponent :msg="client.rootTopic!" />
 
+<template>
   <div class="card">
     <div v-if="!connected">
       <button type="button" @click="connect">connect</button>
@@ -55,7 +54,3 @@ function readBlock() {
     </div>
   </div>
 </template>
-
-<style scoped>
-/* Add some styles here */
-</style>
