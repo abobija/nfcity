@@ -13,18 +13,12 @@
 #define ENC_PICC_SECTOR_MSG_KIND        "picc_sector"
 #define ENC_PICC_SECTOR_BYTES           4 * ENC_PICC_BLOCK_BYTES // FIXME: for mifare 4k
 
-CborError enc_message(CborEncoder *encoder, size_t length, const char *kind, CborEncoder *out_message_encoder);
-
 CborError enc_hello_message(CborEncoder *encoder);
-
-CborError enc_picc(CborEncoder *encoder, rc522_picc_t *picc, CborEncoder *out_picc_encoder);
 
 CborError enc_picc_message(CborEncoder *encoder, rc522_picc_t *picc);
 
 CborError enc_picc_state_changed_message(CborEncoder *encoder, rc522_picc_t *picc, rc522_picc_state_t old_state);
 
-CborError enc_picc_block(CborEncoder *encoder, uint8_t block_address, uint8_t *data, CborEncoder *out_block_encoder);
-
-CborError enc_picc_block_message(CborEncoder *encoder, uint8_t block_address, uint8_t *data);
+CborError enc_picc_block_message(CborEncoder *encoder, uint8_t address, uint8_t offset, uint8_t *data);
 
 CborError enc_picc_sector_message(CborEncoder *encoder, uint8_t sector_offset, uint8_t *sector_data);

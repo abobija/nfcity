@@ -219,10 +219,14 @@ static esp_err_t handle_message_from_web(const char *kind, const uint8_t *data, 
         dec_read_block(data, data_len, &msg);
         uint8_t block_buffer[RC522_MIFARE_BLOCK_SIZE] = { 0 };
         if (read_block(&msg, block_buffer) == ESP_OK) {
+            uint8_t sector_offset = rc522_mifare_get_sector_index_by_block_address(msg.address);
+            uint8_t sector_block_0_address = 0;
+            rc522_mifare_get_sector_block_0_address(sector_offset, &sector_block_0_address);
+            uint8_t offset = msg.address - sector_block_0_address;
             CborEncoder root = { 0 };
             uint8_t buffer[ENC_PICC_BLOCK_BYTES] = { 0 };
             cbor_encoder_init(&root, buffer, sizeof(buffer), 0);
-            enc_picc_block_message(&root, msg.address, block_buffer);
+            enc_picc_block_message(&root, msg.address, offset, block_buffer);
             size_t len = cbor_encoder_get_buffer_size(&root, buffer);
             mqtt_pub(buffer, len, MQTT_QOS_0);
         }

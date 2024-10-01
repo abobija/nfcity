@@ -1,6 +1,6 @@
 dependencies:
   abobija/rc522:
-    component_hash: 49fd9fcfa50093924f8d3f79589a981e1735257b7c65226918e88bb0534883d7
+    component_hash: dae67d96d21954f02d5b6d70cf996a976f9921ec909adf6749a72731a4ff8eb3
     dependencies:
     - name: idf
       require: private
@@ -8,7 +8,7 @@ dependencies:
     source:
       registry_url: https://components.espressif.com/
       type: service
-    version: 3.2.2
+    version: 3.2.3
   espressif/cbor:
     component_hash: 440f4ee4504841cc9b4f3a8ef755776a612ac9dace355514c68b999868f990ff
     dependencies:
@@ -34,6 +34,6 @@ direct_dependencies:
 - espressif/cbor
 - idf
 - protocol_examples_common
-manifest_hash: 86f26bd1e2d7ad4daa3cb56492c4ff94a3d32f7118f0ea170026b0143ca4cbf6
+manifest_hash: 8113de4ca88907e54c009d24d3d169cf97bd44193140f16a11958aa99dba3cd8
 target: esp32
 version: 2.0.0
