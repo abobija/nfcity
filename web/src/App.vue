@@ -26,7 +26,7 @@ const state = ref<AppState>(AppState.Initialized);
 const picc = ref<MifareClassic | null>(null);
 
 watch(state, (newState, oldState) => {
-  logger.debug('app state changed from', AppState[oldState], 'to', AppState[newState]);
+  logger.verbose('app state changed from', AppState[oldState], 'to', AppState[newState]);
 
   switch (newState) {
     case AppState.Disconnected:

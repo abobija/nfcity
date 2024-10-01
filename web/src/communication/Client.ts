@@ -52,8 +52,8 @@ class Client {
         return;
       }
 
-      logger.debug('published', topic, message);
-      logger.verbose('encoded:', encodedMessage);
+      logger.debug('message sent', topic, message);
+      logger.verbose('encoded sent message:', encodedMessage);
     });
   }
 
@@ -121,6 +121,7 @@ class Client {
           return;
         }
 
+        // TODO: fire subscribed event and use it in the App to send inital messages
         logger.debug('subscribed', topic);
       });
     });
@@ -148,8 +149,8 @@ class Client {
     this.mqttClient.on('message', (topic, encodedMessage) => {
       const decodedMessage = decode(encodedMessage);
 
-      logger.debug('message', topic, decodedMessage);
-      logger.verbose('encoded:', encodedMessage);
+      logger.debug('message received', topic, decodedMessage);
+      logger.verbose('encoded received message:', encodedMessage);
 
       this.deviceMessageListeners.forEach(listener => listener(decodedMessage));
     });
@@ -170,17 +171,12 @@ class Client {
 
   getPicc(message?: GetPiccMessage): void {
     message ||= {};
-
     message.kind = getPiccMessageKind;
-    logger.debug('getPicc', message);
-
     this.send(message);
   }
 
   readBlock(message: ReadBlockMessage): void {
     message.kind = readBlockMessageKind;
-    logger.debug('readBlock', message);
-
     this.send(message);
   }
 }
