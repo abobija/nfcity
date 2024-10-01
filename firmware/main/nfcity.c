@@ -110,7 +110,7 @@ static void on_picc_state_changed(void *arg, esp_event_base_t base, int32_t even
     mqtt_pub(buffer, len, MQTT_QOS_0);
 }
 
-static esp_err_t read_block(dec_read_block_msg_t *msg)
+static esp_err_t read_block(dec_read_block_msg_t *msg, uint8_t *enc_buffer, size_t *enc_len)
 {
     ESP_LOGW(TAG,
         "read_block (block_addr=%d, key_type=%d, key: %.*s)",
@@ -145,11 +145,7 @@ static esp_err_t read_block(dec_read_block_msg_t *msg)
     ESP_LOGW(TAG, "data at block %d:", msg->address);
     ESP_LOG_BUFFER_HEXDUMP(TAG, buffer, RC522_MIFARE_BLOCK_SIZE, ESP_LOG_WARN);
 
-    uint8_t enc_buffer[ENC_PICC_BLOCK_BYTES] = { 0 };
-    size_t enc_len = 0;
-    enc_picc_block(enc_buffer, msg->address, buffer, &enc_len);
-
-    mqtt_pub(enc_buffer, enc_len, MQTT_QOS_0);
+    enc_picc_block(enc_buffer, msg->address, buffer, enc_len);
 
 _exit:
     rc522_mifare_deauth(rc522_scanner, &picc);
@@ -160,14 +156,28 @@ _exit:
 
 static esp_err_t handle_message_from_web(const char *kind, const uint8_t *data, size_t data_len)
 {
-    if (strcmp(kind, DEC_READ_BLOCK_MSG_KIND) == 0) {
+    if (strcmp(kind, DEC_GET_PICC_MSG_KIND) == 0) {
+        uint8_t buffer[ENC_PICC_BYTES] = { 0 };
+        size_t len = 0;
+        enc_picc(buffer, &picc, &len);
+        mqtt_pub(buffer, len, MQTT_QOS_0);
+
+        return ESP_OK;
+    }
+    else if (strcmp(kind, DEC_READ_BLOCK_MSG_KIND) == 0) {
         dec_read_block_msg_t msg = { 0 };
         dec_read_block(data, data_len, &msg);
+        uint8_t buffer[ENC_PICC_BLOCK_BYTES] = { 0 };
+        size_t len = 0;
+        if (read_block(&msg, buffer, &len) == ESP_OK) {
+            mqtt_pub(buffer, len, MQTT_QOS_0);
+        }
 
-        return read_block(&msg);
+        return ESP_OK;
     }
-
-    ESP_LOGW(TAG, "TODO: %s", kind);
+    else {
+        ESP_LOGW(TAG, "Unsupported meessage kind: %s", kind);
+    }
 
     return ESP_OK;
 }

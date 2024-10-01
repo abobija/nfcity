@@ -3,6 +3,7 @@
 
 #define DEC_KIND_BYTES 32
 
+#define DEC_GET_PICC_MSG_KIND   "get_picc"
 #define DEC_READ_BLOCK_MSG_KIND "read_block"
 
 typedef struct
