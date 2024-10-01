@@ -1,10 +1,7 @@
-import { PiccKeyType } from "../../../models/Picc";
-import { WebMessage } from "../Message";
+import { AuthorizedWebMessage } from "../Message";
 
 export const readBlockMessageKind = 'read_block';
 
-export default interface ReadBlockMessage extends WebMessage {
+export default interface ReadBlockMessage extends AuthorizedWebMessage {
   address: number;
-  key: Uint8Array;
-  key_type: PiccKeyType;
 }

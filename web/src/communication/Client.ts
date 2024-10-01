@@ -4,6 +4,7 @@ import { logger } from '../Logger';
 import { DeviceMessage, WebMessage } from './messages/Message';
 import GetPiccMessage, { getPiccMessageKind } from './messages/web/GetPiccMessage';
 import ReadBlockMessage, { readBlockMessageKind } from './messages/web/ReadBlockMessage';
+import ReadSectorMessage, { readSectorMessageKind } from './messages/web/ReadSectorMessage';
 
 type Events =
   'ready' |
@@ -167,6 +168,11 @@ class Client {
 
   readBlock(message: ReadBlockMessage): void {
     message.kind = readBlockMessageKind;
+    this.send(message);
+  }
+
+  readSector(message: ReadSectorMessage): void {
+    message.kind = readSectorMessageKind;
     this.send(message);
   }
 }

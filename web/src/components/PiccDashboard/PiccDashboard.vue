@@ -1,25 +1,13 @@
 <script setup lang="ts">
-import { inject } from 'vue';
-import Client from '../../communication/Client';
 import { hex } from '../../helpers';
 import MifareClassic from '../../models/MifareClassic';
-import { PiccKeyType, PiccType } from '../../models/Picc';
+import { PiccType } from '../../models/Picc';
 import './PiccDashboard.scss';
 import PiccMemoryLayout from './PiccMemoryLayout.vue';
 
 defineProps<{
   picc: MifareClassic;
 }>();
-
-const client = inject('client') as Client;
-
-function readBlockDemo() {
-  client.readBlock({
-    address: 15 * 4,
-    key_type: PiccKeyType.A,
-    key: new Uint8Array([0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
-  });
-}
 </script>
 
 <template>
@@ -41,8 +29,6 @@ function readBlockDemo() {
         </li>
       </ul>
     </div>
-
-    <button class="btn primary" @click="readBlockDemo">read block demo</button>
 
     <PiccMemoryLayout :picc="picc" />
   </div>

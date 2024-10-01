@@ -29,6 +29,11 @@ export enum PiccKeyType {
 
 export type Offset = number;
 
+export interface PiccKey {
+  value: Uint8Array;
+  type: PiccKeyType;
+}
+
 export interface PiccBlock {
   bytes: Uint8Array;
 }

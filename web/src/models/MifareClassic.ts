@@ -1,4 +1,9 @@
-import Picc, { PiccBlock, PiccMemory, PiccSector, PiccState, PiccType } from "./Picc";
+import Picc, { PiccBlock, PiccKey, PiccKeyType, PiccMemory, PiccSector, PiccState, PiccType } from "./Picc";
+
+export const defaultKey: PiccKey = {
+  type: PiccKeyType.A,
+  value: Uint8Array.from([0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]),
+};
 
 class MifareClassicMemory implements PiccMemory {
   public readonly sectors: Map<number, PiccSector>;

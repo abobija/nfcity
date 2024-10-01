@@ -1,6 +1,5 @@
 @import '../../theme.scss';
 
-$color: $color-1;
 $transition: .3s ease-in-out;
 
 .memory {
@@ -15,20 +14,29 @@ $transition: .3s ease-in-out;
       flex-direction: row;
       justify-content: right;
 
+      .meta {
+        display: flex;
+        flex-direction: column;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: $color-4;
+        transition: color $transition;
+
+        .offset {
+          padding-right: 0.3rem;
+        }
+      }
+
       .blocks {
         display: flex;
         flex-direction: column-reverse;
         border-style: solid;
         border-color: rgba($color-fg, .2);
-        border-width: 2px 1px 2px 1px;
+        border-width: 2px 1px 1px 1px;
         transition: border $transition, box-shadow $transition;
 
         .block {
           color: rgba($color-fg, 0.4);
-
-          &.empty {
-            color: transparent;
-          }
 
           .bytes {
             display: flex;
@@ -38,35 +46,55 @@ $transition: .3s ease-in-out;
             .byte {
               cursor: pointer;
               font-size: 0.8rem;
-              border: 1px solid rgba($color-fg, .1);
+              border-style: dashed;
+              border-color: rgba($color-fg, .1);
+              border-width: 0 1px 1px 0;
               padding: 0.3rem;
-
-              &:hover {
-                background-color: rgba($color, .2);
-                border-color: rgba($color, 1) !important;
-                box-shadow: 0 0 1rem rgba($color, .8);
-              }
-            }
-
-            &:hover {
-              background-color: rgba($color, .08);
             }
           }
 
-          &:hover {
-            &:not(.empty) {
-              color: $color-fg;
+          &.empty {
+            color: transparent;
+          }
+
+          &:not(.empty) {
+            color: $color-4;
+
+            .bytes {
+              .byte {
+                &:hover {
+                  box-shadow: 0 0 .4rem rgba($color-4, .5);
+                  font-weight: 600;
+                }
+              }
             }
           }
         }
 
-        &:hover {
-          border-color: rgba($color, 1) !important;
-          box-shadow: 0 0 1rem rgba($color, .3);
+      }
 
+      &:not(.empty) {
+        .blocks {
           .block .bytes .byte {
-            border: 1px solid rgba($color, .4);
+            border-style: solid;
           }
+
+          &:hover {
+            .block .bytes .byte {
+              border-color: rgba($color-fg, .15);
+            }
+          }
+        }
+      }
+
+      &:hover {
+        .meta {
+          color: $color-fg;
+        }
+
+        .blocks {
+          border-color: rgba($color-fg, .6) !important;
+          box-shadow: 0 0 1rem rgba($color-fg, .15);
         }
       }
     }

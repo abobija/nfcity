@@ -1,17 +1,42 @@
 <script setup lang="ts">
-import MifareClassic from '../../models/MifareClassic';
-import Block from './PiccMemoryBlock.vue';
+import { computed, inject } from 'vue';
+import Client from '../../communication/Client';
+import { logger } from '../../Logger';
+import MifareClassic, { defaultKey } from '../../models/MifareClassic';
+import PiccMemoryBlock from './PiccMemoryBlock.vue';
 
-defineProps<{
+const props = defineProps<{
   picc: MifareClassic;
   sectorOffset: number;
 }>();
+
+const empty = computed<Boolean>(() => props.picc.memory
+  .sectors.get(props.sectorOffset)!.blocks.size <= 0
+);
+
+const client = inject('client') as Client;
+
+function onSectorClick(offset: number) {
+  if (!empty.value) {
+    logger.debug(`Sector ${offset} is not empty. Skipping load.`);
+    return;
+  }
+
+  client.readSector({
+    offset,
+    key_type: defaultKey.type,
+    key: defaultKey.value,
+  });
+}
 </script>
 
 <template>
-  <div class="sector">
+  <div class="sector" :class="empty && 'empty'" @click="onSectorClick(sectorOffset)">
+    <div class="meta">
+      <span class="offset">{{ sectorOffset }}</span>
+    </div>
     <div class="blocks">
-      <Block v-for="(_, blockOffset) in Array.from({ length: picc.memory.numberOfBlocks(sectorOffset) })"
+      <PiccMemoryBlock v-for="(_, blockOffset) in Array.from({ length: picc.memory.numberOfBlocks(sectorOffset) })"
         :key="blockOffset" :picc="picc" :sector-offset="sectorOffset" :block-offset="blockOffset"
         :data-offset="blockOffset" />
     </div>
