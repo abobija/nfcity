@@ -117,7 +117,8 @@ onDeviceMessage(message => {
     return;
   }
 
-  piccRef.value.memory.setBlockData(message.address, message.data);
+  const { block } = message;
+  piccRef.value.memory.setBlockData(block.address, block.data);
 });
 </script>
 

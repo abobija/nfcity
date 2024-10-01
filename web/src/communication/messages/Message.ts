@@ -1,4 +1,4 @@
-import { PiccKeyType } from "../../models/Picc";
+import { PiccKey } from "../../models/Picc";
 
 interface Message { }
 
@@ -11,6 +11,5 @@ export interface WebMessage extends Message {
 }
 
 export interface AuthorizedWebMessage extends WebMessage {
-  key: Uint8Array;
-  key_type: PiccKeyType;
+  key: PiccKey;
 }

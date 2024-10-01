@@ -24,8 +24,7 @@ function onSectorClick(offset: number) {
 
   client.readSector({
     offset,
-    key_type: defaultKey.type,
-    key: defaultKey.value,
+    key: defaultKey,
   });
 }
 </script>
