@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { inject, onMounted, onUnmounted } from 'vue';
 import Client from '../../communication/Client';
-import { isPiccBlock } from '../../communication/messages/dev/PiccBlockMessage';
+import { isPiccBlockMessage } from '../../communication/messages/dev/PiccBlockMessage';
 import { DeviceMessage } from '../../communication/messages/Message';
 import { hex } from '../../helpers';
 import { logger } from '../../Logger';
@@ -25,7 +25,7 @@ function readBlockDemo() {
 }
 
 const deviceListener = (message: DeviceMessage) => {
-  if (!isPiccBlock(message)) {
+  if (!isPiccBlockMessage(message)) {
     return;
   }
 

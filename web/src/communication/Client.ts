@@ -2,8 +2,8 @@ import { decode, encode } from 'cbor-x';
 import mqtt, { MqttClient } from 'mqtt';
 import { logger } from '../Logger';
 import { DeviceMessage, WebMessage } from './messages/Message';
-import ReadBlockMessage, { readBlockKind } from './messages/web/ReadBlockMessage';
-import GetPiccMessage, { getPiccKind } from './messages/web/GetPiccMessage';
+import GetPiccMessage, { getPiccMessageKind } from './messages/web/GetPiccMessage';
+import ReadBlockMessage, { readBlockMessageKind } from './messages/web/ReadBlockMessage';
 
 type Events =
   'connect' |
@@ -171,14 +171,14 @@ class Client {
   getPicc(message?: GetPiccMessage): void {
     message ||= {};
 
-    message.kind = getPiccKind;
+    message.kind = getPiccMessageKind;
     logger.debug('getPicc', message);
 
     this.send(message);
   }
 
   readBlock(message: ReadBlockMessage): void {
-    message.kind = readBlockKind;
+    message.kind = readBlockMessageKind;
     logger.debug('readBlock', message);
 
     this.send(message);

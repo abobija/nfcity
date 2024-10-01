@@ -2,16 +2,31 @@
 import { inject, ref, watch } from 'vue';
 import './App.scss';
 import Client from './communication/Client';
+import PiccMessage, { isPiccMessage } from './communication/messages/dev/PiccMessage';
 import PiccDashboard from './components/PiccDashboard/PiccDashboard.vue';
-import { isPicc } from './communication/messages/dev/PiccMessage';
+import { logger } from './Logger';
 import MifareClassic from './models/MifareClassic';
 import { PiccType } from './models/Picc';
-import { logger } from './Logger';
 
 const client = inject('client') as Client;
 const connected = ref(false);
 
 const picc = ref<MifareClassic | null>(null);
+
+function setPicc(message: PiccMessage): void {
+  let piccSupported = MifareClassic.isMifareClassic(message.picc);
+
+  // TODO: Remove once other mifare classic cards are supported
+  piccSupported &&= message.picc.type === PiccType.Mifare1K;
+
+  if (!piccSupported) {
+    logger.error('Unsupported PICC type', PiccType[message.picc.type]);
+    client.disconnect();
+    return;
+  }
+
+  picc.value = MifareClassic.from(message.picc);
+}
 
 function connect() {
   client.connect()
@@ -21,19 +36,8 @@ function connect() {
     .on('offline', () => connected.value = false)
     .on('close', () => connected.value = false)
     .on('deviceMessage', message => {
-      if (isPicc(message)) {
-        let piccSupported = MifareClassic.isMifareClassic(message.picc);
-
-        // TODO: Remove once other mifare classic cards are supported
-        piccSupported &&= message.picc.type === PiccType.Mifare1K;
-
-        if (!piccSupported) {
-          logger.error('Unsupported PICC type', PiccType[message.picc.type]);
-          client.disconnect();
-          return;
-        }
-
-        picc.value = MifareClassic.from(message.picc);
+      if (isPiccMessage(message)) {
+        setPicc(message);
       }
     });
 }
