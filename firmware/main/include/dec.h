@@ -8,11 +8,16 @@
 
 typedef struct
 {
+    uint8_t value[RC522_MIFARE_BLOCK_SIZE];
+    rc522_mifare_key_type_t type;
+} dec_picc_key_t;
+
+typedef struct
+{
     uint8_t address; // Block address
-    uint8_t key[RC522_MIFARE_KEY_SIZE];
-    uint8_t key_type;
+    dec_picc_key_t key;
 } dec_read_block_msg_t;
 
 CborError dec_kind(const uint8_t *buffer, size_t buffer_size, char *kind, size_t *decoded_len);
 
-CborError dec_read_block(const uint8_t *buffer, size_t buffer_size, dec_read_block_msg_t *read_block_msg);
+CborError dec_read_block(const uint8_t *buffer, size_t buffer_size, dec_read_block_msg_t *out_read_block_msg);

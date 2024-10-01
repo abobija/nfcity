@@ -119,9 +119,9 @@ static esp_err_t read_block(dec_read_block_msg_t *msg, uint8_t buffer[RC522_MIFA
     ESP_LOGW(TAG,
         "read_block (block_addr=%d, key_type=%d, key: %.*s)",
         msg->address,
-        msg->key_type,
+        msg->key.type,
         RC522_MIFARE_KEY_SIZE,
-        msg->key);
+        msg->key.value);
 
     if (picc.state != RC522_PICC_STATE_ACTIVE && picc.state != RC522_PICC_STATE_ACTIVE_H) {
         ESP_LOGW(TAG, "cannot read memory. picc is not active");
@@ -134,10 +134,10 @@ static esp_err_t read_block(dec_read_block_msg_t *msg, uint8_t buffer[RC522_MIFA
     }
 
     rc522_mifare_key_t key = {
-        .type = msg->key_type,
+        .type = msg->key.type,
     };
 
-    memcpy(key.value, msg->key, RC522_MIFARE_KEY_SIZE);
+    memcpy(key.value, msg->key.value, RC522_MIFARE_KEY_SIZE);
 
     esp_err_t ret = ESP_OK;
 
