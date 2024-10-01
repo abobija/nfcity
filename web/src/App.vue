@@ -126,7 +126,9 @@ onDeviceMessage(message => {
     <div class="enter center-screen" v-if="stateRef < AppState.Connected">
       <h1 class="title">nfcity</h1>
       <h2 class="subtitle">deep dive into NFC cards</h2>
-      <button class="connect btn primary" @click="connect">connect</button>
+      <button class="connect btn primary" @click="connect" :disabled="stateRef == AppState.Connecting">
+        connect
+      </button>
       <div class="credits">
         made by <a href="https://github.com/abobija" target="_blank">ab</a>
       </div>
