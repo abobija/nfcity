@@ -19,7 +19,7 @@ const block = computed(() => props
 <template>
   <div class="block" :class="block === undefined && 'empty'">
     <ul class="bytes">
-      <li :data-index="i" class="byte" v-for="(_, i) in Array.from({ length: picc.blockSize })" :key="i">
+      <li :data-index="i" class="byte" v-for="(_, i) in Array.from({ length: picc.memory.blockSize })" :key="i">
         {{ block ? hex(block.bytes[i]) : '..' }}
       </li>
     </ul>

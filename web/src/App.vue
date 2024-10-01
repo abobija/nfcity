@@ -3,6 +3,7 @@ import { inject, ref, watch } from 'vue';
 import './App.scss';
 import Client from './communication/Client';
 import { isHelloMessage } from './communication/messages/dev/HelloMessage';
+import { isPiccBlockMessage } from './communication/messages/dev/PiccBlockMessage';
 import { isPiccMessage } from './communication/messages/dev/PiccMessage';
 import { isPiccStateChangedMessage } from './communication/messages/dev/PiccStateChangedMessage';
 import PiccDashboard from './components/PiccDashboard/PiccDashboard.vue';
@@ -109,6 +110,14 @@ watch(state, (newState, oldState) => {
       // do nothing, user is in dashboard
     } break;
   }
+});
+
+onDeviceMessage(message => {
+  if (!isPiccBlockMessage(message) || !picc.value) {
+    return;
+  }
+
+  picc.value.memory.setBlock(message.address, { bytes: message.data });
 });
 </script>
 

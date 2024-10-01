@@ -11,8 +11,8 @@ defineProps<{
 <template>
   <div class="memory">
     <div class="layout">
-      <Sector v-for="(_, sectorOffset) in Array.from({ length: picc.numberOfSectors })" :key="sectorOffset" :picc="picc"
-        :sectorOffset="sectorOffset" :data-offset="sectorOffset" />
+      <Sector v-for="(_, sectorOffset) in Array.from({ length: picc.memory.numberOfSectors })" :key="sectorOffset"
+        :picc="picc" :sectorOffset="sectorOffset" :data-offset="sectorOffset" />
     </div>
   </div>
 </template>
