@@ -62,20 +62,12 @@ class Client {
   }
 
   on(event: Events, listener: (...args: any[]) => void): Client {
-    if (this.mqttClient == null) {
-      throw new Error('not connected');
-    }
-
     this.eventListeners[event].push(listener);
 
     return this;
   }
 
   off(event: Events, listener: (...args: any[]) => void): Client {
-    if (this.mqttClient == null) {
-      throw new Error('not connected');
-    }
-
     const index = this.eventListeners[event].indexOf(listener);
 
     if (index !== -1) {

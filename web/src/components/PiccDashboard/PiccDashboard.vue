@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { inject } from 'vue';
 import Client from '../../communication/Client';
-import { isPiccBlockMessage } from '../../communication/messages/dev/PiccBlockMessage';
 import { hex } from '../../helpers';
-import onDeviceMessage from '../../hooks/onDeviceMessage';
-import { logger } from '../../Logger';
 import MifareClassic from '../../models/MifareClassic';
 import { PiccKeyType, PiccType } from '../../models/Picc';
 import './PiccDashboard.scss';
@@ -18,19 +15,11 @@ const client = inject('client') as Client;
 
 function readBlockDemo() {
   client.readBlock({
-    address: 0,
+    address: 15 * 4,
     key_type: PiccKeyType.A,
     key: new Uint8Array([0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
   });
 }
-
-onDeviceMessage(message => {
-  if (!isPiccBlockMessage(message)) {
-    return;
-  }
-
-  logger.info('Received block', message);
-});
 </script>
 
 <template>
