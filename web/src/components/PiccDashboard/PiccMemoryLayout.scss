@@ -55,15 +55,19 @@ $transition: .3s ease-in-out;
 
           &.empty {
             color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
           }
 
           &:not(.empty) {
-            color: $color-4;
+            color: $color-1;
 
             .bytes {
               .byte {
                 &:hover {
-                  box-shadow: 0 0 .4rem rgba($color-4, .5);
+                  box-shadow: 0 0 .4rem rgba($color-fg, .5);
                   font-weight: 600;
                 }
               }
@@ -94,7 +98,7 @@ $transition: .3s ease-in-out;
 
         .blocks {
           border-color: rgba($color-fg, .6) !important;
-          box-shadow: 0 0 1rem rgba($color-fg, .15);
+          box-shadow: 0 0 1rem rgba($color-2, .3);
         }
       }
     }

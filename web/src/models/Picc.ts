@@ -35,7 +35,9 @@ export interface PiccKey {
 }
 
 export interface PiccBlock {
-  bytes: Uint8Array;
+  address: number;
+  offset: number;
+  data: Uint8Array;
 }
 
 export interface PiccSector {

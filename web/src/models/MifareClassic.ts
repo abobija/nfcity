@@ -50,15 +50,15 @@ class MifareClassicMemory implements PiccMemory {
     return blockAddress - this.sectorBlock0Address(sectorOffset);
   }
 
-  public setBlock(blockAddress: number, block: PiccBlock): void {
-    const sectorOffset = this.sectorOffset(blockAddress);
-    const blockOffset = this.blockOffset(blockAddress, sectorOffset);
+  public updateBlock(block: PiccBlock): void {
+    const sectorOffset = this.sectorOffset(block.address);
+    const blockOffset = this.blockOffset(block.address, sectorOffset);
 
     this.sectors.get(sectorOffset)!.blocks.set(blockOffset, block);
   }
 
-  public setBlockData(blockAddress: number, data: Uint8Array): void {
-    this.setBlock(blockAddress, { bytes: data });
+  public updateBlocks(blocks: PiccBlock[]): void {
+    blocks.forEach(block => this.updateBlock(block));
   }
 
   public static numberOfSectors(type: PiccType): number {

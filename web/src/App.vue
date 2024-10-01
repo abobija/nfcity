@@ -5,6 +5,7 @@ import Client from './communication/Client';
 import { isHelloMessage } from './communication/messages/dev/HelloMessage';
 import { isPiccBlockMessage } from './communication/messages/dev/PiccBlockMessage';
 import { isPiccMessage } from './communication/messages/dev/PiccMessage';
+import { isPiccSectorMessage } from './communication/messages/dev/PiccSectorMessage';
 import { isPiccStateChangedMessage } from './communication/messages/dev/PiccStateChangedMessage';
 import PiccDashboard from './components/PiccDashboard/PiccDashboard.vue';
 import onDeviceMessage from './hooks/onDeviceMessage';
@@ -117,8 +118,15 @@ onDeviceMessage(message => {
     return;
   }
 
-  const { block } = message;
-  piccRef.value.memory.setBlockData(block.address, block.data);
+  piccRef.value.memory.updateBlock(message.block);
+});
+
+onDeviceMessage(message => {
+  if (!isPiccSectorMessage(message) || !piccRef.value) {
+    return;
+  }
+
+  piccRef.value.memory.updateBlocks(message.blocks);
 });
 </script>
 

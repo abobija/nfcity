@@ -1,15 +1,10 @@
+import { PiccBlock } from "../../../models/Picc";
 import { DeviceMessage } from "../Message";
 
 export const piccBlockMessageKind = 'picc_block';
 
-export interface PiccBlockMessageData {
-  address: number;
-  offset: number;
-  data: Uint8Array;
-}
-
 export default interface PiccBlockMessage extends DeviceMessage {
-  block: PiccBlockMessageData;
+  block: PiccBlock;
 }
 
 export function isPiccBlockMessage(message: DeviceMessage): message is PiccBlockMessage {
