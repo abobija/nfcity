@@ -11,11 +11,16 @@
 #define ENC_PICC_BLOCK_MSG_KIND         "picc_block"
 #define ENC_PICC_BLOCK_BYTES            64
 
-CborError enc_hello(uint8_t *buffer, size_t *encoded_len);
+CborError enc_message(CborEncoder *encoder, size_t length, const char *kind, CborEncoder *out_message_encoder);
 
-CborError enc_picc(uint8_t *buffer, rc522_picc_t *picc, size_t *encoded_len);
+CborError enc_hello_message(CborEncoder *encoder);
 
-CborError enc_picc_state_changed(
-    uint8_t *buffer, rc522_picc_t *picc, rc522_picc_state_t old_state, size_t *encoded_len);
+CborError enc_picc(CborEncoder *encoder, rc522_picc_t *picc, CborEncoder *out_picc_encoder);
 
-CborError enc_picc_block(uint8_t *buffer, uint8_t block_address, uint8_t *data, size_t *encoded_len);
+CborError enc_picc_message(CborEncoder *encoder, rc522_picc_t *picc);
+
+CborError enc_picc_state_changed_message(CborEncoder *encoder, rc522_picc_t *picc, rc522_picc_state_t old_state);
+
+CborError enc_picc_block(CborEncoder *encoder, uint8_t block_address, uint8_t *data, CborEncoder *out_block_encoder);
+
+CborError enc_picc_block_message(CborEncoder *encoder, uint8_t block_address, uint8_t *data);

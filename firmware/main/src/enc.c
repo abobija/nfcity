@@ -2,100 +2,116 @@
 
 // TODO: Check for return values everywhere
 
-CborError enc_hello(uint8_t *buffer, size_t *encoded_len)
+CborError enc_message(CborEncoder *encoder, size_t length, const char *kind, CborEncoder *out_message_encoder)
 {
-    CborEncoder root;
-    cbor_encoder_init(&root, buffer, ENC_HELLO_BYTES, 0);
+    if (length < 1) {
+        return -1;
+    }
 
-    CborEncoder map;
-    cbor_encoder_create_map(&root, &map, 1);
-    cbor_encode_text_stringz(&map, "kind");
-    cbor_encode_text_stringz(&map, ENC_HELLO_MSG_KIND);
-    cbor_encoder_close_container(&root, &map);
+    CborEncoder message_encoder;
 
-    *encoded_len = cbor_encoder_get_buffer_size(&root, buffer);
+    cbor_encoder_create_map(encoder, &message_encoder, length);
+    cbor_encode_text_stringz(&message_encoder, "kind");
+    cbor_encode_text_stringz(&message_encoder, kind);
 
-    return CborNoError;
-}
-
-static CborError cbor_encode_picc(CborEncoder *parent_encoder, rc522_picc_t *picc)
-{
-    CborEncoder picc_map;
-    cbor_encoder_create_map(parent_encoder, &picc_map, 5);
-    cbor_encode_text_stringz(&picc_map, "state");
-    cbor_encode_int(&picc_map, picc->state);
-    cbor_encode_text_stringz(&picc_map, "uid");
-    if (picc->uid.length == 0) {
-        cbor_encode_null(&picc_map);
+    if (out_message_encoder == NULL) {
+        cbor_encoder_close_container(encoder, &message_encoder);
     }
     else {
-        cbor_encode_byte_string(&picc_map, picc->uid.value, picc->uid.length);
+        memcpy(out_message_encoder, &message_encoder, sizeof(CborEncoder));
     }
-    cbor_encode_text_stringz(&picc_map, "type");
-    cbor_encode_int(&picc_map, picc->type);
-    cbor_encode_text_stringz(&picc_map, "atqa");
-    cbor_encode_uint(&picc_map, picc->atqa.source);
-    cbor_encode_text_stringz(&picc_map, "sak");
-    cbor_encode_uint(&picc_map, picc->sak);
-    cbor_encoder_close_container(parent_encoder, &picc_map);
+    return CborNoError;
+}
+
+inline CborError enc_hello_message(CborEncoder *encoder)
+{
+    return enc_message(encoder, 1, ENC_HELLO_MSG_KIND, NULL);
+}
+
+CborError enc_picc(CborEncoder *encoder, rc522_picc_t *picc, CborEncoder *out_picc_encoder)
+{
+    CborEncoder picc_encoder;
+
+    cbor_encoder_create_map(encoder, &picc_encoder, 5);
+    cbor_encode_text_stringz(&picc_encoder, "state");
+    cbor_encode_int(&picc_encoder, picc->state);
+    cbor_encode_text_stringz(&picc_encoder, "uid");
+    if (picc->uid.length == 0) {
+        cbor_encode_null(&picc_encoder);
+    }
+    else {
+        cbor_encode_byte_string(&picc_encoder, picc->uid.value, picc->uid.length);
+    }
+    cbor_encode_text_stringz(&picc_encoder, "type");
+    cbor_encode_int(&picc_encoder, picc->type);
+    cbor_encode_text_stringz(&picc_encoder, "atqa");
+    cbor_encode_uint(&picc_encoder, picc->atqa.source);
+    cbor_encode_text_stringz(&picc_encoder, "sak");
+    cbor_encode_uint(&picc_encoder, picc->sak);
+
+    if (out_picc_encoder == NULL) {
+        cbor_encoder_close_container(encoder, &picc_encoder);
+    }
+    else {
+        memcpy(out_picc_encoder, &picc_encoder, sizeof(CborEncoder));
+    }
 
     return CborNoError;
 }
 
-CborError enc_picc(uint8_t *buffer, rc522_picc_t *picc, size_t *encoded_len)
+CborError enc_picc_message(CborEncoder *encoder, rc522_picc_t *picc)
 {
-    CborEncoder root;
-    cbor_encoder_init(&root, buffer, ENC_PICC_BYTES, 0);
+    CborEncoder message_encoder;
 
-    CborEncoder map;
-    cbor_encoder_create_map(&root, &map, 2);
-    cbor_encode_text_stringz(&map, "kind");
-    cbor_encode_text_stringz(&map, ENC_PICC_MSG_KIND);
-    cbor_encode_text_stringz(&map, "picc");
-    cbor_encode_picc(&map, picc);
-    cbor_encoder_close_container(&root, &map);
-
-    *encoded_len = cbor_encoder_get_buffer_size(&root, buffer);
+    enc_message(encoder, 2, ENC_PICC_MSG_KIND, &message_encoder);
+    cbor_encode_text_stringz(&message_encoder, "picc");
+    enc_picc(&message_encoder, picc, NULL);
+    cbor_encoder_close_container(encoder, &message_encoder);
 
     return CborNoError;
 }
 
-CborError enc_picc_state_changed(uint8_t *buffer, rc522_picc_t *picc, rc522_picc_state_t old_state, size_t *encoded_len)
+CborError enc_picc_state_changed_message(CborEncoder *encoder, rc522_picc_t *picc, rc522_picc_state_t old_state)
 {
-    CborEncoder root;
-    cbor_encoder_init(&root, buffer, ENC_PICC_STATE_CHANGED_BYTES, 0);
+    CborEncoder message_encoder;
 
-    CborEncoder map;
-    cbor_encoder_create_map(&root, &map, 3);
-    cbor_encode_text_stringz(&map, "kind");
-    cbor_encode_text_stringz(&map, ENC_PICC_STATE_CHANGED_MSG_KIND);
-    cbor_encode_text_stringz(&map, "old_state");
-    cbor_encode_int(&map, old_state);
-    cbor_encode_text_stringz(&map, "picc");
-    cbor_encode_picc(&map, picc);
-    cbor_encoder_close_container(&root, &map);
-
-    *encoded_len = cbor_encoder_get_buffer_size(&root, buffer);
+    enc_message(encoder, 3, ENC_PICC_STATE_CHANGED_MSG_KIND, &message_encoder);
+    cbor_encode_text_stringz(&message_encoder, "old_state");
+    cbor_encode_int(&message_encoder, old_state);
+    cbor_encode_text_stringz(&message_encoder, "picc");
+    enc_picc(&message_encoder, picc, NULL);
+    cbor_encoder_close_container(encoder, &message_encoder);
 
     return CborNoError;
 }
 
-CborError enc_picc_block(uint8_t *buffer, uint8_t block_address, uint8_t *data, size_t *encoded_len)
+CborError enc_picc_block(CborEncoder *encoder, uint8_t block_address, uint8_t *data, CborEncoder *out_block_encoder)
 {
-    CborEncoder root;
-    cbor_encoder_init(&root, buffer, ENC_PICC_BLOCK_BYTES, 0);
+    CborEncoder block_encoder;
 
-    CborEncoder map;
-    cbor_encoder_create_map(&root, &map, 3);
-    cbor_encode_text_stringz(&map, "kind");
-    cbor_encode_text_stringz(&map, ENC_PICC_BLOCK_MSG_KIND);
-    cbor_encode_text_stringz(&map, "address");
-    cbor_encode_uint(&map, block_address);
-    cbor_encode_text_stringz(&map, "data");
-    cbor_encode_byte_string(&map, data, RC522_MIFARE_BLOCK_SIZE);
-    cbor_encoder_close_container(&root, &map);
+    cbor_encoder_create_map(encoder, &block_encoder, 2);
+    cbor_encode_text_stringz(&block_encoder, "address");
+    cbor_encode_uint(&block_encoder, block_address);
+    cbor_encode_text_stringz(&block_encoder, "data");
+    cbor_encode_byte_string(&block_encoder, data, RC522_MIFARE_BLOCK_SIZE);
 
-    *encoded_len = cbor_encoder_get_buffer_size(&root, buffer);
+    if (out_block_encoder == NULL) {
+        cbor_encoder_close_container(encoder, &block_encoder);
+    }
+    else {
+        memcpy(out_block_encoder, &block_encoder, sizeof(CborEncoder));
+    }
+    return CborNoError;
+}
+
+CborError enc_picc_block_message(CborEncoder *encoder, uint8_t block_address, uint8_t *data)
+{
+    CborEncoder message_encoder;
+
+    enc_message(encoder, 2, ENC_PICC_BLOCK_MSG_KIND, &message_encoder);
+    cbor_encode_text_stringz(&message_encoder, "block");
+    enc_picc_block(&message_encoder, block_address, data, NULL);
+    cbor_encoder_close_container(encoder, &message_encoder);
 
     return CborNoError;
 }

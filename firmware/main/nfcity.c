@@ -86,9 +86,11 @@ static void on_mqtt_connected(void *arg, esp_event_base_t base, int32_t id, void
     ESP_LOGW(TAG, "mqtt connected");
     esp_mqtt_client_subscribe_single(mqtt_client, mqtt_subtopic(MQTT_WEB_SUBTOPIC), MQTT_QOS_0);
 
-    uint8_t buffer[ENC_HELLO_BYTES];
-    size_t len;
-    enc_hello(buffer, &len);
+    uint8_t buffer[ENC_HELLO_BYTES] = { 0 };
+    CborEncoder root = { 0 };
+    cbor_encoder_init(&root, buffer, ENC_HELLO_BYTES, 0);
+    enc_hello_message(&root);
+    size_t len = cbor_encoder_get_buffer_size(&root, buffer);
 
     mqtt_pub(buffer, len, MQTT_QOS_0);
 
@@ -104,13 +106,15 @@ static void on_picc_state_changed(void *arg, esp_event_base_t base, int32_t even
     memcpy(&picc, event->picc, sizeof(rc522_picc_t));
 
     uint8_t buffer[ENC_PICC_STATE_CHANGED_BYTES] = { 0 };
-    size_t len = 0;
-    enc_picc_state_changed(buffer, &picc, event->old_state, &len);
+    CborEncoder root = { 0 };
+    cbor_encoder_init(&root, buffer, ENC_PICC_STATE_CHANGED_BYTES, 0);
+    enc_picc_state_changed_message(&root, &picc, event->old_state);
+    size_t len = cbor_encoder_get_buffer_size(&root, buffer);
 
     mqtt_pub(buffer, len, MQTT_QOS_0);
 }
 
-static esp_err_t read_block(dec_read_block_msg_t *msg, uint8_t *enc_buffer, size_t *enc_len)
+static esp_err_t read_block(dec_read_block_msg_t *msg, uint8_t buffer[RC522_MIFARE_BLOCK_SIZE])
 {
     ESP_LOGW(TAG,
         "read_block (block_addr=%d, key_type=%d, key: %.*s)",
@@ -138,15 +142,10 @@ static esp_err_t read_block(dec_read_block_msg_t *msg, uint8_t *enc_buffer, size
     esp_err_t ret = ESP_OK;
 
     ESP_GOTO_ON_ERROR(rc522_mifare_auth(rc522_scanner, &picc, msg->address, &key), _exit, TAG, "auth failed");
-
-    uint8_t buffer[RC522_MIFARE_BLOCK_SIZE] = { 0 };
     ESP_GOTO_ON_ERROR(rc522_mifare_read(rc522_scanner, &picc, msg->address, buffer), _exit, TAG, "read failed");
 
     ESP_LOGW(TAG, "data at block %d:", msg->address);
     ESP_LOG_BUFFER_HEXDUMP(TAG, buffer, RC522_MIFARE_BLOCK_SIZE, ESP_LOG_WARN);
-
-    enc_picc_block(enc_buffer, msg->address, buffer, enc_len);
-
 _exit:
     rc522_mifare_deauth(rc522_scanner, &picc);
     xSemaphoreGive(rc522_task_mutex);
@@ -158,8 +157,11 @@ static esp_err_t handle_message_from_web(const char *kind, const uint8_t *data, 
 {
     if (strcmp(kind, DEC_GET_PICC_MSG_KIND) == 0) {
         uint8_t buffer[ENC_PICC_BYTES] = { 0 };
-        size_t len = 0;
-        enc_picc(buffer, &picc, &len);
+        CborEncoder root = { 0 };
+        cbor_encoder_init(&root, buffer, ENC_PICC_BYTES, 0);
+        enc_picc_message(&root, &picc);
+        size_t len = cbor_encoder_get_buffer_size(&root, buffer);
+
         mqtt_pub(buffer, len, MQTT_QOS_0);
 
         return ESP_OK;
@@ -167,9 +169,13 @@ static esp_err_t handle_message_from_web(const char *kind, const uint8_t *data, 
     else if (strcmp(kind, DEC_READ_BLOCK_MSG_KIND) == 0) {
         dec_read_block_msg_t msg = { 0 };
         dec_read_block(data, data_len, &msg);
-        uint8_t buffer[ENC_PICC_BLOCK_BYTES] = { 0 };
-        size_t len = 0;
-        if (read_block(&msg, buffer, &len) == ESP_OK) {
+        uint8_t blockBuffer[RC522_MIFARE_BLOCK_SIZE] = { 0 };
+        if (read_block(&msg, blockBuffer) == ESP_OK) {
+            CborEncoder root = { 0 };
+            uint8_t buffer[ENC_PICC_BLOCK_BYTES] = { 0 };
+            cbor_encoder_init(&root, buffer, sizeof(buffer), 0);
+            enc_picc_block_message(&root, msg.address, blockBuffer);
+            size_t len = cbor_encoder_get_buffer_size(&root, buffer);
             mqtt_pub(buffer, len, MQTT_QOS_0);
         }
 
