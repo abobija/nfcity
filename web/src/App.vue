@@ -54,19 +54,16 @@ watch(state, (newState, oldState) => {
 
 function connect() {
   client.connect()
-    .on('connect', () => state.value = AppState.Connected)
+    .on('ready', () => state.value = AppState.Connected)
     .on('disconnect', () => state.value = AppState.Disconnected)
-    .on('end', () => state.value = AppState.Disconnected)
-    .on('offline', () => state.value = AppState.Disconnected)
-    .on('close', () => state.value = AppState.Disconnected)
-    .on('deviceMessage', (message: HelloMessage) => {
+    .on('message', (message: HelloMessage) => {
       if (!isHelloMessage(message)) {
         return;
       }
 
       state.value = AppState.GettingPicc;
     })
-    .on('deviceMessage', (message: PiccMessage | PiccStateChangedMessage) => {
+    .on('message', (message: PiccMessage | PiccStateChangedMessage) => {
       if (!isPiccMessage(message) && !isPiccStateChangedMessage(message)) {
         return;
       }

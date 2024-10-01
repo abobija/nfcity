@@ -6,13 +6,9 @@ import GetPiccMessage, { getPiccMessageKind } from './messages/web/GetPiccMessag
 import ReadBlockMessage, { readBlockMessageKind } from './messages/web/ReadBlockMessage';
 
 type Events =
-  'connect' |
-  'deviceMessage' |
-  'reconnect' |
-  'close' |
-  'disconnect' |
-  'offline' |
-  'end';
+  'ready' |
+  'message' |
+  'disconnect';
 
 class Client {
   private _broker?: string;
@@ -20,7 +16,15 @@ class Client {
   private devTopic: string = 'dev';
   private webTopic: string = 'web';
   private mqttClient: MqttClient | null = null;
-  private deviceMessageListeners: Array<(message: DeviceMessage) => void> = [];
+  private eventListeners: {
+    ready: Array<() => void>,
+    message: Array<(message: DeviceMessage) => void>,
+    disconnect: Array<() => void>
+  } = {
+      ready: [],
+      message: [],
+      disconnect: []
+    };
 
   get broker(): string | undefined {
     return this._broker;
@@ -62,11 +66,7 @@ class Client {
       throw new Error('not connected');
     }
 
-    if (event === 'deviceMessage') {
-      this.deviceMessageListeners.push(listener);
-    } else {
-      this.mqttClient.on(event, listener);
-    }
+    this.eventListeners[event].push(listener);
 
     return this;
   }
@@ -76,17 +76,11 @@ class Client {
       throw new Error('not connected');
     }
 
-    if (event === 'deviceMessage') {
-      const index = this.deviceMessageListeners.indexOf(listener);
+    const index = this.eventListeners[event].indexOf(listener);
 
-      if (index !== -1) {
-        this.deviceMessageListeners.splice(index, 1);
-      }
-
-      return this;
+    if (index !== -1) {
+      this.eventListeners[event].splice(index, 1);
     }
-
-    this.mqttClient.off(event, listener);
 
     return this;
   }
@@ -107,7 +101,7 @@ class Client {
     this.mqttClient = mqtt.connect(this._broker);
 
     this.mqttClient.on('error', error => {
-      logger.debug('error', error);
+      logger.error('error', error);
     });
 
     this.mqttClient.on('connect', () => {
@@ -121,8 +115,8 @@ class Client {
           return;
         }
 
-        // TODO: fire subscribed event and use it in the App to send inital messages
         logger.debug('subscribed', topic);
+        this.eventListeners.ready.forEach(listener => listener());
       });
     });
 
@@ -132,18 +126,22 @@ class Client {
 
     this.mqttClient.on('close', () => {
       logger.debug('close');
+      this.eventListeners.disconnect.forEach(listener => listener());
     });
 
     this.mqttClient.on('disconnect', () => {
       logger.debug('disconnected');
+      this.eventListeners.disconnect.forEach(listener => listener());
     });
 
     this.mqttClient.on('offline', () => {
       logger.debug('offline');
+      this.eventListeners.disconnect.forEach(listener => listener());
     });
 
     this.mqttClient.on('end', () => {
       logger.debug('end');
+      this.eventListeners.disconnect.forEach(listener => listener());
     });
 
     this.mqttClient.on('message', (topic, encodedMessage) => {
@@ -152,7 +150,7 @@ class Client {
       logger.debug('message received', topic, decodedMessage);
       logger.verbose('encoded received message:', encodedMessage);
 
-      this.deviceMessageListeners.forEach(listener => listener(decodedMessage));
+      this.eventListeners.message.forEach(listener => listener(decodedMessage));
     });
 
     return this;

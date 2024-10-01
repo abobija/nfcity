@@ -7,6 +7,6 @@ export default function onDeviceMessage(hook: (message: DeviceMessage, client: C
 
   const listener = (message: DeviceMessage) => hook(message, client);
 
-  onMounted(() => client.on('deviceMessage', listener));
-  onUnmounted(() => client.off('deviceMessage', listener));
+  onMounted(() => client.on('message', listener));
+  onUnmounted(() => client.off('message', listener));
 };
