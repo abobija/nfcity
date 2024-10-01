@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { numberOfSectors, PiccMemory } from '../../models/Picc';
+import MifareClassic from '../../models/MifareClassic';
 import './PiccMemoryLayout.scss';
 import Sector from './PiccMemorySector.vue';
 
 defineProps<{
-  memory: PiccMemory;
+  picc: MifareClassic;
 }>();
 </script>
 
 <template>
   <div class="memory">
     <div class="layout">
-      <Sector v-for="(_, offset) in Array.from({ length: numberOfSectors })" :key="offset"
-        :sector="memory.sectors.get(offset)" :data-offset="offset" />
+      <Sector v-for="(_, sectorOffset) in Array.from({ length: picc.numberOfSectors })" :key="sectorOffset" :picc="picc"
+        :sectorOffset="sectorOffset" :data-offset="sectorOffset" />
     </div>
   </div>
 </template>

@@ -1,7 +1,3 @@
-export const numberOfSectors = 16;  // FIXME: for mifare 4k
-export const numberOfBlocks = 4; // FIXME: for mifare 4k
-export const blockSize = 16;
-
 export enum PiccState {
   PowerOff = -1,
   Idle = 0,

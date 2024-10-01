@@ -1,23 +1,18 @@
 <script setup lang="ts">
-import { inject, onMounted, onUnmounted, ref } from 'vue';
+import { inject, onMounted, onUnmounted } from 'vue';
 import Client from '../../communication/Client';
 import { isPiccBlock } from '../../communication/messages/dev/PiccBlockMessage';
 import { DeviceMessage } from '../../communication/messages/Message';
 import { hex } from '../../helpers';
 import { logger } from '../../Logger';
-import Picc, { numberOfSectors, PiccKeyType, PiccMemory, PiccType } from '../../models/Picc';
+import MifareClassic from '../../models/MifareClassic';
+import { PiccKeyType, PiccType } from '../../models/Picc';
 import './PiccDashboard.scss';
 import PiccMemoryLayout from './PiccMemoryLayout.vue';
 
 defineProps<{
-  picc: Picc;
+  picc: MifareClassic;
 }>();
-
-const memory = ref<PiccMemory>({
-  sectors: new Map(
-    Array.from({ length: numberOfSectors }).map((_, i) => [i, { blocks: new Map() }])
-  )
-});
 
 const client = inject('client') as Client;
 
@@ -63,6 +58,6 @@ onUnmounted(() => client.off('deviceMessage', deviceListener));
 
     <button class="btn primary" @click="readBlockDemo">read block demo</button>
 
-    <PiccMemoryLayout :memory="memory" />
+    <PiccMemoryLayout :picc="picc" />
   </div>
 </template>
