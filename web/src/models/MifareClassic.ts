@@ -52,6 +52,10 @@ class MifareClassicMemory implements PiccMemory {
     this.sectors.get(sectorOffset)!.blocks.set(blockOffset, block);
   }
 
+  public setBlockData(blockAddress: number, data: Uint8Array): void {
+    this.setBlock(blockAddress, { bytes: data });
+  }
+
   public static numberOfSectors(type: PiccType): number {
     switch (type) {
       case PiccType.Mifare1K:

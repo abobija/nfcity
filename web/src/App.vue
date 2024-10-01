@@ -117,7 +117,7 @@ onDeviceMessage(message => {
     return;
   }
 
-  piccRef.value.memory.setBlock(message.address, { bytes: message.data });
+  piccRef.value.memory.setBlockData(message.address, message.data);
 });
 </script>
 
