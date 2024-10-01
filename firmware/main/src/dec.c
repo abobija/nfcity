@@ -34,17 +34,17 @@ CborError dec_kind(const uint8_t *buffer, size_t buffer_size, char *kind, size_t
     return CborNoError;
 }
 
-CborError dec_picc_block_read(const uint8_t *buffer, size_t buffer_size, picc_block_read_msg_t *picc_block_read_msg)
+CborError dec_read_block(const uint8_t *buffer, size_t buffer_size, dec_read_block_msg_t *read_block_msg)
 {
     CborParser parser;
     CborValue it;
     cbor_parser_init(buffer, buffer_size, 0, &parser, &it);
 
-    picc_block_read_msg_t _picc_block_read_msg = { 0 };
+    dec_read_block_msg_t _read_block_msg = { 0 };
 
     CborValue value;
     cbor_value_map_find_value(&it, "address", &value);
-    cbor_value_get_uint8(&value, &_picc_block_read_msg.address);
+    cbor_value_get_uint8(&value, &_read_block_msg.address);
 
     cbor_value_map_find_value(&it, "key", &value);
 
@@ -55,12 +55,12 @@ CborError dec_picc_block_read(const uint8_t *buffer, size_t buffer_size, picc_bl
         return CborErrorUnknownLength;
     }
 
-    cbor_value_copy_byte_string(&value, _picc_block_read_msg.key, &len, NULL);
+    cbor_value_copy_byte_string(&value, _read_block_msg.key, &len, NULL);
 
     cbor_value_map_find_value(&it, "key_type", &value);
-    cbor_value_get_uint8(&value, &_picc_block_read_msg.key_type);
+    cbor_value_get_uint8(&value, &_read_block_msg.key_type);
 
-    memcpy(picc_block_read_msg, &_picc_block_read_msg, sizeof(picc_block_read_msg_t));
+    memcpy(read_block_msg, &_read_block_msg, sizeof(dec_read_block_msg_t));
 
     return CborNoError;
 }

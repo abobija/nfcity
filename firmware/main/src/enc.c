@@ -10,7 +10,7 @@ CborError enc_hello(uint8_t *buffer, size_t *encoded_len)
     CborEncoder map;
     cbor_encoder_create_map(&root, &map, 1);
     cbor_encode_text_stringz(&map, "kind");
-    cbor_encode_text_stringz(&map, "hello");
+    cbor_encode_text_stringz(&map, ENC_HELLO_MSG_KIND);
     cbor_encoder_close_container(&root, &map);
 
     *encoded_len = cbor_encoder_get_buffer_size(&root, buffer);
@@ -27,7 +27,7 @@ CborError enc_picc_state_changed(uint8_t *buffer, rc522_picc_t *picc, rc522_picc
     cbor_encoder_create_map(&root, &map, 3);
 
     cbor_encode_text_stringz(&map, "kind");
-    cbor_encode_text_stringz(&map, "picc_state_changed");
+    cbor_encode_text_stringz(&map, ENC_PICC_STATE_CHANGED_MSG_KIND);
 
     cbor_encode_text_stringz(&map, "old_state");
     cbor_encode_int(&map, old_state);
@@ -73,7 +73,7 @@ CborError enc_picc_block(uint8_t *buffer, uint8_t block_address, uint8_t *data, 
     CborEncoder map;
     cbor_encoder_create_map(&root, &map, 3);
     cbor_encode_text_stringz(&map, "kind");
-    cbor_encode_text_stringz(&map, "picc_block");
+    cbor_encode_text_stringz(&map, ENC_PICC_BLOCK_MSG_KIND);
     cbor_encode_text_stringz(&map, "address");
     cbor_encode_uint(&map, block_address);
     cbor_encode_text_stringz(&map, "data");

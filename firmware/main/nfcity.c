@@ -110,10 +110,10 @@ static void on_picc_state_changed(void *arg, esp_event_base_t base, int32_t even
     mqtt_pub(buffer, len, MQTT_QOS_0);
 }
 
-static esp_err_t mem_read(picc_block_read_msg_t *msg)
+static esp_err_t read_block(dec_read_block_msg_t *msg)
 {
     ESP_LOGW(TAG,
-        "mem_read (block_addr=%d, key_type=%d, key: %.*s)",
+        "read_block (block_addr=%d, key_type=%d, key: %.*s)",
         msg->address,
         msg->key_type,
         RC522_MIFARE_KEY_SIZE,
@@ -160,11 +160,11 @@ _exit:
 
 static esp_err_t handle_message_from_web(const char *kind, const uint8_t *data, size_t data_len)
 {
-    if (strcmp(kind, PICC_BLOCK_READ_MSG_KIND) == 0) {
-        picc_block_read_msg_t msg = { 0 };
-        dec_picc_block_read(data, data_len, &msg);
+    if (strcmp(kind, DEC_READ_BLOCK_MSG_KIND) == 0) {
+        dec_read_block_msg_t msg = { 0 };
+        dec_read_block(data, data_len, &msg);
 
-        return mem_read(&msg);
+        return read_block(&msg);
     }
 
     ESP_LOGW(TAG, "TODO: %s", kind);

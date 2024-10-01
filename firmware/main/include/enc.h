@@ -2,9 +2,12 @@
 #include "cbor.h"
 #include "picc/rc522_mifare.h"
 
-#define ENC_HELLO_BYTES              32
-#define ENC_PICC_STATE_CHANGED_BYTES 128
-#define ENC_PICC_BLOCK_BYTES         64
+#define ENC_HELLO_MSG_KIND              "hello"
+#define ENC_HELLO_BYTES                 32
+#define ENC_PICC_STATE_CHANGED_MSG_KIND "picc_state_changed"
+#define ENC_PICC_STATE_CHANGED_BYTES    128
+#define ENC_PICC_BLOCK_MSG_KIND         "picc_block"
+#define ENC_PICC_BLOCK_BYTES            64
 
 CborError enc_hello(uint8_t *buffer, size_t *encoded_len);
 
