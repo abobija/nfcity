@@ -33,6 +33,13 @@
       opacity: 0.5;
     }
   }
+
+  .picc-waiter {
+    .message {
+      font-size: 1.3rem;
+      color: $color-4;
+    }
+  }
 }
 
 .app a {

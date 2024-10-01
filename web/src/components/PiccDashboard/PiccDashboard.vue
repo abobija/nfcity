@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { inject, onMounted, onUnmounted } from 'vue';
+import { inject } from 'vue';
 import Client from '../../communication/Client';
 import { isPiccBlockMessage } from '../../communication/messages/dev/PiccBlockMessage';
-import { DeviceMessage } from '../../communication/messages/Message';
 import { hex } from '../../helpers';
+import onDeviceMessage from '../../hooks/onDeviceMessage';
 import { logger } from '../../Logger';
 import MifareClassic from '../../models/MifareClassic';
 import { PiccKeyType, PiccType } from '../../models/Picc';
@@ -24,16 +24,13 @@ function readBlockDemo() {
   });
 }
 
-const deviceListener = (message: DeviceMessage) => {
+onDeviceMessage(message => {
   if (!isPiccBlockMessage(message)) {
     return;
   }
 
   logger.info('Received block', message);
-};
-
-onMounted(() => client.on('deviceMessage', deviceListener));
-onUnmounted(() => client.off('deviceMessage', deviceListener));
+});
 </script>
 
 <template>
