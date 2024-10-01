@@ -3,6 +3,7 @@ import mqtt, { MqttClient } from 'mqtt';
 import { logger } from '../Logger';
 import { DeviceMessage, WebMessage } from './messages/Message';
 import ReadBlockMessage, { readBlockKind } from './messages/web/ReadBlockMessage';
+import GetPiccMessage, { getPiccKind } from './messages/web/GetPiccMessage';
 
 type Events =
   'connect' |
@@ -165,6 +166,15 @@ class Client {
     this.mqttClient = null;
 
     return this;
+  }
+
+  getPicc(message?: GetPiccMessage): void {
+    message ||= {};
+
+    message.kind = getPiccKind;
+    logger.debug('getPicc', message);
+
+    this.send(message);
   }
 
   readBlock(message: ReadBlockMessage): void {

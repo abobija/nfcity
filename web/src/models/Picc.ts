@@ -52,11 +52,3 @@ export default interface Picc {
   sak: number;
   uid: Uint8Array;
 }
-
-export class MifareClassic implements Picc {
-  type: PiccType = PiccType.Mifare1K;
-  state: PiccState = PiccState.Active;
-  atqa: number = 0x4;
-  sak: number = 0x8;
-  uid: Uint8Array = new Uint8Array([0xaa, 0xbb, 0xcc, 0xdd]);
-}
