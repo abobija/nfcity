@@ -24,15 +24,15 @@ enum AppState {
 }
 
 const client = inject('client') as Client;
-const state = ref<AppState>(AppState.Initialized);
-const picc = ref<MifareClassic | null>(null);
+const stateRef = ref<AppState>(AppState.Initialized);
+const piccRef = ref<MifareClassic | null>(null);
 
 function connect() {
-  state.value = AppState.Connecting;
+  stateRef.value = AppState.Connecting;
 
   client.connect()
-    .on('ready', () => state.value = AppState.Connected)
-    .on('disconnect', () => state.value = AppState.Disconnected);
+    .on('ready', () => stateRef.value = AppState.Connected)
+    .on('disconnect', () => stateRef.value = AppState.Disconnected);
 }
 
 onDeviceMessage(message => {
@@ -40,7 +40,7 @@ onDeviceMessage(message => {
     return;
   }
 
-  state.value = AppState.PiccFetching;
+  stateRef.value = AppState.PiccFetching;
 });
 
 onDeviceMessage(message => {
@@ -48,54 +48,54 @@ onDeviceMessage(message => {
     return;
   }
 
-  const _picc = message.picc;
+  const { picc } = message;
 
-  if (_picc.type === PiccType.Undefined) {
+  if (picc.type === PiccType.Undefined) {
     // ignore, device did not scanned a single picc yet
     return;
   }
 
-  let supported = MifareClassic.isMifareClassic(_picc);
+  let supported = MifareClassic.isMifareClassic(picc);
 
   // TODO: Remove once other mifare classic cards are supported
-  supported &&= _picc.type === PiccType.Mifare1K;
+  supported &&= picc.type === PiccType.Mifare1K;
 
   if (!supported) {
-    logger.error('Unsupported PICC type', PiccType[_picc.type]);
+    logger.error('Unsupported PICC type', PiccType[picc.type]);
     client.disconnect();
     return;
   }
 
-  picc.value = MifareClassic.from(_picc);
+  piccRef.value = MifareClassic.from(picc);
 
-  if ([PiccState.Active, PiccState.ActiveH].includes(_picc.state)) {
-    state.value = AppState.PiccPaired;
+  if ([PiccState.Active, PiccState.ActiveH].includes(picc.state)) {
+    stateRef.value = AppState.PiccPaired;
     return;
   }
 
-  if (_picc.state == PiccState.Idle) {
+  if (picc.state == PiccState.Idle) {
     if (isPiccStateChangedMessage(message)
       && [PiccState.Active, PiccState.ActiveH].includes(message.old_state)) {
-      state.value = AppState.PiccRemoved;
+      stateRef.value = AppState.PiccRemoved;
       return;
     }
 
-    state.value = AppState.PiccNotPresent;
+    stateRef.value = AppState.PiccNotPresent;
     return;
   }
 });
 
-watch(state, (newState, oldState) => {
+watch(stateRef, (newState, oldState) => {
   logger.verbose('app state changed from', AppState[oldState], 'to', AppState[newState]);
 
   switch (newState) {
     case AppState.Disconnected:
     case AppState.Initialized:
     case AppState.Connecting: {
-      picc.value = null;
+      piccRef.value = null;
     } break;
     case AppState.Connected: {
-      state.value = AppState.PiccFetching;
+      stateRef.value = AppState.PiccFetching;
     } break;
     case AppState.PiccFetching: {
       client.getPicc();
@@ -113,17 +113,17 @@ watch(state, (newState, oldState) => {
 });
 
 onDeviceMessage(message => {
-  if (!isPiccBlockMessage(message) || !picc.value) {
+  if (!isPiccBlockMessage(message) || !piccRef.value) {
     return;
   }
 
-  picc.value.memory.setBlock(message.address, { bytes: message.data });
+  piccRef.value.memory.setBlock(message.address, { bytes: message.data });
 });
 </script>
 
 <template>
   <div class="app">
-    <div class="enter center-screen" v-if="state < AppState.Connected">
+    <div class="enter center-screen" v-if="stateRef < AppState.Connected">
       <h1 class="title">nfcity</h1>
       <h2 class="subtitle">deep dive into NFC cards</h2>
       <button class="connect btn primary" @click="connect">connect</button>
@@ -131,17 +131,17 @@ onDeviceMessage(message => {
         made by <a href="https://github.com/abobija" target="_blank">ab</a>
       </div>
     </div>
-    <div class="picc-waiter center-screen" v-else-if="state < AppState.PiccPaired">
-      <div v-if="state == AppState.PiccFetching">
+    <div class="picc-waiter center-screen" v-else-if="stateRef < AppState.PiccPaired">
+      <div v-if="stateRef == AppState.PiccFetching">
         <p class="message">checking for a card...</p>
       </div>
-      <div v-else-if="state == AppState.PiccNotPresent">
+      <div v-else-if="stateRef == AppState.PiccNotPresent">
         <p class="message">put a card on the reader</p>
       </div>
-      <div v-else-if="state == AppState.PiccRemoved">
+      <div v-else-if="stateRef == AppState.PiccRemoved">
         <p class="message">card removed, put it back please</p>
       </div>
     </div>
-    <PiccDashboard :picc="picc!" v-else />
+    <PiccDashboard :picc="piccRef!" v-else />
   </div>
 </template>
