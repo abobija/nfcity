@@ -2,6 +2,7 @@
 import { inject, ref, watch } from 'vue';
 import './App.scss';
 import Client from './communication/Client';
+import HelloMessage, { isHelloMessage } from './communication/messages/dev/HelloMessage';
 import PiccMessage, { isPiccMessage } from './communication/messages/dev/PiccMessage';
 import PiccStateChangedMessage, { isPiccStateChangedMessage } from './communication/messages/dev/PiccStateChangedMessage';
 import PiccDashboard from './components/PiccDashboard/PiccDashboard.vue';
@@ -58,12 +59,25 @@ function connect() {
     .on('end', () => state.value = AppState.Disconnected)
     .on('offline', () => state.value = AppState.Disconnected)
     .on('close', () => state.value = AppState.Disconnected)
+    .on('deviceMessage', (message: HelloMessage) => {
+      if (!isHelloMessage(message)) {
+        return;
+      }
+
+      state.value = AppState.GettingPicc;
+    })
     .on('deviceMessage', (message: PiccMessage | PiccStateChangedMessage) => {
       if (!isPiccMessage(message) && !isPiccStateChangedMessage(message)) {
         return;
       }
 
       const _picc = message.picc;
+
+      if (_picc.type === PiccType.Undefined) {
+        // ignore, device did not scanned a single picc yet
+        return;
+      }
+
       let supported = MifareClassic.isMifareClassic(_picc);
 
       // TODO: Remove once other mifare classic cards are supported
