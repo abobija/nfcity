@@ -2,7 +2,7 @@ import { decode, encode } from 'cbor-x';
 import mqtt, { MqttClient } from 'mqtt';
 import { logger } from '../Logger';
 import { DeviceMessage, WebMessage } from './messages/Message';
-import PiccBlockReadMessage, { piccBlockReadKind } from './messages/web/PiccBlockReadMessage';
+import ReadBlockMessage, { readBlockKind } from './messages/web/ReadBlockMessage';
 
 type Events =
   'connect' |
@@ -167,8 +167,8 @@ class Client {
     return this;
   }
 
-  readBlock(message: PiccBlockReadMessage): void {
-    message.kind = piccBlockReadKind;
+  readBlock(message: ReadBlockMessage): void {
+    message.kind = readBlockKind;
     logger.debug('readBlock', message);
 
     this.send(message);
