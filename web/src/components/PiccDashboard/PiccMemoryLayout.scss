@@ -62,19 +62,21 @@ $transition: .3s ease-in-out;
           }
 
           &:not(.empty) {
-            color: $color-1;
+            color: $color-4;
 
             .bytes {
               .byte {
                 &:hover {
-                  box-shadow: 0 0 .4rem rgba($color-fg, .5);
                   font-weight: 600;
                 }
+              }
+
+              &:hover {
+                background-color: rgba($color-fg, .05);
               }
             }
           }
         }
-
       }
 
       &:not(.empty) {
@@ -98,7 +100,7 @@ $transition: .3s ease-in-out;
 
         .blocks {
           border-color: rgba($color-fg, .6) !important;
-          box-shadow: 0 0 1rem rgba($color-2, .3);
+          box-shadow: 0 0 1rem rgba($color-fg, .1);
         }
       }
     }
