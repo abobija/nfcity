@@ -21,4 +21,5 @@ CborError enc_picc_state_changed_message(CborEncoder *encoder, rc522_picc_t *pic
 
 CborError enc_picc_block_message(CborEncoder *encoder, uint8_t address, uint8_t offset, uint8_t *data);
 
-CborError enc_picc_sector_message(CborEncoder *encoder, uint8_t sector_offset, uint8_t *sector_data);
+CborError enc_picc_sector_message(
+    CborEncoder *encoder, uint8_t sector_offset, uint8_t sector_block_0_address, uint8_t *sector_data);

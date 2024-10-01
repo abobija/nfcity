@@ -103,7 +103,8 @@ CborError enc_picc_block_message(CborEncoder *root, uint8_t address, uint8_t off
     return CborNoError;
 }
 
-CborError enc_picc_sector_message(CborEncoder *root, uint8_t sector_offset, uint8_t *sector_data)
+CborError enc_picc_sector_message(
+    CborEncoder *root, uint8_t sector_offset, uint8_t sector_block_0_address, uint8_t *sector_data)
 {
     CborEncoder message_map;
     cbor_encoder_create_map(root, &message_map, ENC_KIND_LEN + 2);
@@ -116,7 +117,7 @@ CborError enc_picc_sector_message(CborEncoder *root, uint8_t sector_offset, uint
     for (uint8_t i = 0; i < 4; i++) {                          // FIXME: for mifare 4k
         CborEncoder block_map;
         cbor_encoder_create_map(&blocks_array, &block_map, ENC_PICC_BLOCK_LEN);
-        enc_picc_block(&block_map, sector_offset + i, i, sector_data + (i * RC522_MIFARE_BLOCK_SIZE));
+        enc_picc_block(&block_map, sector_block_0_address + i, i, sector_data + (i * RC522_MIFARE_BLOCK_SIZE));
         cbor_encoder_close_container(&blocks_array, &block_map);
     }
     cbor_encoder_close_container(&message_map, &blocks_array);

@@ -238,10 +238,12 @@ static esp_err_t handle_message_from_web(const char *kind, const uint8_t *data, 
         dec_read_sector(data, data_len, &msg);
         uint8_t sector_buffer[4 * RC522_MIFARE_BLOCK_SIZE] = { 0 }; // FIXME: for mifare 4k
         if (read_sector(&msg, sector_buffer) == ESP_OK) {
+            uint8_t sector_block_0_address = 0;
+            rc522_mifare_get_sector_block_0_address(msg.offset, &sector_block_0_address);
             CborEncoder root = { 0 };
             uint8_t buffer[ENC_PICC_SECTOR_BYTES] = { 0 };
             cbor_encoder_init(&root, buffer, sizeof(buffer), 0);
-            enc_picc_sector_message(&root, msg.offset, sector_buffer);
+            enc_picc_sector_message(&root, msg.offset, sector_block_0_address, sector_buffer);
             size_t len = cbor_encoder_get_buffer_size(&root, buffer);
             mqtt_pub(buffer, len, MQTT_QOS_0);
         }
