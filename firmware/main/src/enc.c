@@ -115,3 +115,28 @@ CborError enc_picc_block_message(CborEncoder *encoder, uint8_t block_address, ui
 
     return CborNoError;
 }
+
+CborError enc_picc_sector_message(CborEncoder *encoder, uint8_t sector_offset, uint8_t *sector_data)
+{
+    CborEncoder message_encoder;
+
+    enc_message(encoder, 3, ENC_PICC_SECTOR_MSG_KIND, &message_encoder);
+    cbor_encode_text_stringz(&message_encoder, "offset");
+    cbor_encode_uint(&message_encoder, sector_offset);
+    cbor_encode_text_stringz(&message_encoder, "blocks");
+
+    CborEncoder blocks_encoder;
+    cbor_encoder_create_array(&message_encoder, &blocks_encoder, 4); // FIXME: for mifare 4k
+    for (uint8_t i = 0; i < 4; i++) {                                // FIXME: for mifare 4k
+        // create new array element
+        cbor_encode_int(&blocks_encoder, i);
+
+        cbor_encode_uint(&blocks_encoder, i);
+        enc_picc_block(&blocks_encoder, sector_offset + i, sector_data + (i * RC522_MIFARE_BLOCK_SIZE), NULL);
+    }
+    cbor_encoder_close_container(&message_encoder, &blocks_encoder);
+
+    cbor_encoder_close_container(encoder, &message_encoder);
+
+    return CborNoError;
+}
