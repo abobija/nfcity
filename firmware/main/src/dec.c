@@ -1,5 +1,4 @@
 #include "dec.h"
-#include "esp_log.h"
 
 // TODO: Check for return values everywhere
 
@@ -73,6 +72,25 @@ CborError dec_read_block(const uint8_t *buffer, size_t buffer_size, dec_read_blo
     dec_key(&value, &read_block_msg.key);
 
     memcpy(out_read_block_msg, &read_block_msg, sizeof(dec_read_block_msg_t));
+
+    return CborNoError;
+}
+
+CborError dec_read_sector(const uint8_t *buffer, size_t buffer_size, dec_read_sector_msg_t *out_read_sector_msg)
+{
+    CborParser parser;
+    CborValue it;
+    cbor_parser_init(buffer, buffer_size, 0, &parser, &it);
+
+    dec_read_block_msg_t read_sector_msg = { 0 };
+
+    CborValue value;
+    cbor_value_map_find_value(&it, "offset", &value);
+    cbor_value_get_uint8(&value, &read_sector_msg.address);
+    cbor_value_map_find_value(&it, "key", &value);
+    dec_key(&value, &read_sector_msg.key);
+
+    memcpy(out_read_sector_msg, &read_sector_msg, sizeof(dec_read_sector_msg_t));
 
     return CborNoError;
 }

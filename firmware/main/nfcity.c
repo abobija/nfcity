@@ -181,6 +181,17 @@ static esp_err_t handle_message_from_web(const char *kind, const uint8_t *data, 
 
         return ESP_OK;
     }
+    else if (strcmp(kind, DEC_READ_SECTOR_MSG_KIND) == 0) {
+        dec_read_sector_msg_t msg = { 0 };
+        dec_read_sector(data, data_len, &msg);
+
+        ESP_LOGI(TAG,
+            "TODO: read_sector (offset=%d, key_type=%d, key: %.*s)",
+            msg.offset,
+            msg.key.type,
+            RC522_MIFARE_KEY_SIZE,
+            msg.key.value);
+    }
     else {
         ESP_LOGW(TAG, "Unsupported meessage kind: %s", kind);
     }
