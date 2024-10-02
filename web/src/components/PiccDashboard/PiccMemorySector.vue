@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue';
-import Client from '../../communication/Client';
+import Client from '../../comm/Client';
 import { logger } from '../../Logger';
 import MifareClassic, { defaultKey, MifareClassicMemory } from '../../models/MifareClassic';
 import PiccMemoryBlock from './PiccMemoryBlock.vue';

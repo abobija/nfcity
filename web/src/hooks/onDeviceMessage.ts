@@ -1,6 +1,6 @@
 import { inject, onMounted, onUnmounted } from "vue";
-import Client from "../communication/Client";
-import { DeviceMessage } from "../communication/messages/Message";
+import Client from "../comm/Client";
+import { DeviceMessage } from "../comm/messages/Message";
 
 export default function onDeviceMessage(hook: (message: DeviceMessage, client: Client) => void) {
   const client = inject('client') as Client;

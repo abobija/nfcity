@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { inject, ref, watch } from 'vue';
 import './App.scss';
-import Client from './communication/Client';
-import { isHelloMessage } from './communication/messages/dev/HelloMessage';
-import { isPiccBlockMessage } from './communication/messages/dev/PiccBlockMessage';
-import { isPiccMessage } from './communication/messages/dev/PiccMessage';
-import { isPiccSectorMessage } from './communication/messages/dev/PiccSectorMessage';
-import { isPiccStateChangedMessage } from './communication/messages/dev/PiccStateChangedMessage';
+import Client from './comm/Client';
+import { isHelloMessage } from './comm/messages/dev/HelloMessage';
+import { isPiccBlockMessage } from './comm/messages/dev/PiccBlockMessage';
+import { isPiccMessage } from './comm/messages/dev/PiccMessage';
+import { isPiccSectorMessage } from './comm/messages/dev/PiccSectorMessage';
+import { isPiccStateChangedMessage } from './comm/messages/dev/PiccStateChangedMessage';
 import PiccDashboard from './components/PiccDashboard/PiccDashboard.vue';
 import onDeviceMessage from './hooks/onDeviceMessage';
 import { logger } from './Logger';

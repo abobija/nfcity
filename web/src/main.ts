@@ -1,7 +1,7 @@
 import 'reset-css';
 import { createApp } from 'vue';
-import Client from './communication/Client';
 import App from './App.vue';
+import Client from './comm/Client';
 import './main.scss';
 
 const client = new Client();
