@@ -2,11 +2,11 @@
 import { inject, ref, watch } from 'vue';
 import './App.scss';
 import Client from './comm/Client';
-import { isHelloMessage } from './comm/messages/dev/HelloMessage';
-import { isPiccBlockMessage } from './comm/messages/dev/PiccBlockMessage';
-import { isPiccMessage } from './comm/messages/dev/PiccMessage';
-import { isPiccSectorMessage } from './comm/messages/dev/PiccSectorMessage';
-import { isPiccStateChangedMessage } from './comm/messages/dev/PiccStateChangedMessage';
+import { isHelloDevMessage } from './comm/msgs/dev/HelloDevMessage';
+import { isPiccBlockDevMessage } from './comm/msgs/dev/PiccBlockDevMessage';
+import { isPiccDevMessage } from './comm/msgs/dev/PiccDevMessage';
+import { isPiccSectorDevMessage } from './comm/msgs/dev/PiccSectorDevMessage';
+import { isPiccStateChangedDevMessage } from './comm/msgs/dev/PiccStateChangedDevMessage';
 import PiccDashboard from './components/PiccDashboard/PiccDashboard.vue';
 import onDeviceMessage from './hooks/onDeviceMessage';
 import { logger } from './Logger';
@@ -37,7 +37,7 @@ function connect() {
 }
 
 onDeviceMessage(message => {
-  if (!isHelloMessage(message)) {
+  if (!isHelloDevMessage(message)) {
     return;
   }
 
@@ -45,7 +45,7 @@ onDeviceMessage(message => {
 });
 
 onDeviceMessage(message => {
-  if (!isPiccMessage(message) && !isPiccStateChangedMessage(message)) {
+  if (!isPiccDevMessage(message) && !isPiccStateChangedDevMessage(message)) {
     return;
   }
 
@@ -75,7 +75,7 @@ onDeviceMessage(message => {
   }
 
   if (picc.state == PiccState.Idle) {
-    if (isPiccStateChangedMessage(message)
+    if (isPiccStateChangedDevMessage(message)
       && [PiccState.Active, PiccState.ActiveH].includes(message.old_state)) {
       stateRef.value = AppState.PiccRemoved;
       return;
@@ -114,7 +114,7 @@ watch(stateRef, (newState, oldState) => {
 });
 
 onDeviceMessage(message => {
-  if (!isPiccBlockMessage(message) || !piccRef.value) {
+  if (!isPiccBlockDevMessage(message) || !piccRef.value) {
     return;
   }
 
@@ -122,7 +122,7 @@ onDeviceMessage(message => {
 });
 
 onDeviceMessage(message => {
-  if (!isPiccSectorMessage(message) || !piccRef.value) {
+  if (!isPiccSectorDevMessage(message) || !piccRef.value) {
     return;
   }
 

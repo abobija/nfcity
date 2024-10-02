@@ -1,10 +1,10 @@
 import { decode, encode } from 'cbor-x';
 import mqtt, { MqttClient } from 'mqtt';
 import { logger } from '../Logger';
-import { DeviceMessage, WebMessage } from './messages/Message';
-import GetPiccMessage, { getPiccMessageKind } from './messages/web/GetPiccMessage';
-import ReadBlockMessage, { readBlockMessageKind } from './messages/web/ReadBlockMessage';
-import ReadSectorMessage, { readSectorMessageKind } from './messages/web/ReadSectorMessage';
+import { DeviceMessage, WebMessage } from './msgs/Message';
+import GetPiccWebMessage, { getPiccWebMessageKind } from './msgs/web/GetPiccWebMessage';
+import ReadBlockWebMessage, { readBlockWebMessageKind } from './msgs/web/ReadBlockWebMessage';
+import ReadSectorWebMessage, { readSectorWebMessageKind } from './msgs/web/ReadSectorWebMessage';
 
 type Events =
   'ready' |
@@ -160,19 +160,19 @@ class Client {
     return this;
   }
 
-  getPicc(message?: GetPiccMessage): void {
+  getPicc(message?: GetPiccWebMessage): void {
     message ||= {};
-    message.kind = getPiccMessageKind;
+    message.kind = getPiccWebMessageKind;
     this.send(message);
   }
 
-  readBlock(message: ReadBlockMessage): void {
-    message.kind = readBlockMessageKind;
+  readBlock(message: ReadBlockWebMessage): void {
+    message.kind = readBlockWebMessageKind;
     this.send(message);
   }
 
-  readSector(message: ReadSectorMessage): void {
-    message.kind = readSectorMessageKind;
+  readSector(message: ReadSectorWebMessage): void {
+    message.kind = readSectorWebMessageKind;
     this.send(message);
   }
 }
