@@ -2,7 +2,7 @@
 import '@/components/MemoryBlock/MemoryBlock.scss';
 import MemoryBlockClickEvent from '@/components/MemoryBlock/MemoryBlockClickEvent';
 import { hex } from '@/helpers';
-import MifareClassic, { MifareClassicMemory } from '@/models/MifareClassic';
+import MifareClassic, { MifareClassicDataBlock, MifareClassicManufacturerBlock, MifareClassicMemory, MifareClassicSectorTrailerBlock, MifareClassicValueBlock } from '@/models/MifareClassic';
 import { computed } from 'vue';
 
 defineEmits<{
@@ -22,10 +22,18 @@ const block = computed(() => props
 );
 
 const isEmpty = computed<Boolean>(() => block.value === undefined);
+
+const classes = computed(() => ({
+  empty: isEmpty.value,
+  trailer: block.value instanceof MifareClassicSectorTrailerBlock,
+  manufacturer: block.value instanceof MifareClassicManufacturerBlock,
+  data: block.value instanceof MifareClassicDataBlock,
+  value: block.value instanceof MifareClassicValueBlock,
+}));
 </script>
 
 <template>
-  <div class="block" :class="isEmpty && 'empty'">
+  <div class="block" :class="classes">
     <ul class="bytes">
       <ul class="group data">
         <li :data-index="i" class="byte" v-for="(_, i) in Array.from({ length: MifareClassicMemory.blockSize })"

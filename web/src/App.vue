@@ -118,7 +118,7 @@ onDeviceMessage(message => {
     return;
   }
 
-  piccRef.value.memory.updateBlock(message.block);
+  logger.warning('Unhandled reception of single block', message.block);
 });
 
 onDeviceMessage(message => {
@@ -126,7 +126,7 @@ onDeviceMessage(message => {
     return;
   }
 
-  piccRef.value.memory.updateBlocks(message.blocks);
+  piccRef.value.memory.updateSector(message.blocks);
 });
 </script>
 
@@ -153,6 +153,6 @@ onDeviceMessage(message => {
         <p class="message">card removed, put it back please</p>
       </div>
     </div>
-    <Dashboard :picc="piccRef!" v-else />
+    <Dashboard :picc="piccRef" v-else-if="piccRef instanceof MifareClassic" />
   </div>
 </template>

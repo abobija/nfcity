@@ -21,10 +21,14 @@ const isEmpty = computed<Boolean>(() => props.picc.memory
 );
 
 const onBlockClick = (e: MemoryBlockClickEvent) => emit('blockClick', e);
+
+const classes = computed(() => ({
+  empty: isEmpty.value,
+}));
 </script>
 
 <template>
-  <div class="sector" :class="isEmpty && 'empty'" @click="$emit('click', { sectorOffset, isEmpty })">
+  <div class="sector" :class="classes" @click="$emit('click', { sectorOffset, isEmpty })">
     <div class="meta">
       <span class="offset">{{ sectorOffset }}</span>
     </div>
