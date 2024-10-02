@@ -2,7 +2,7 @@
 import { computed, inject } from 'vue';
 import Client from '../../communication/Client';
 import { logger } from '../../Logger';
-import MifareClassic, { defaultKey } from '../../models/MifareClassic';
+import MifareClassic, { defaultKey, MifareClassicMemory } from '../../models/MifareClassic';
 import PiccMemoryBlock from './PiccMemoryBlock.vue';
 
 const props = defineProps<{
@@ -35,7 +35,8 @@ function onSectorClick(offset: number) {
       <span class="offset">{{ sectorOffset }}</span>
     </div>
     <div class="blocks">
-      <PiccMemoryBlock v-for="(_, blockOffset) in Array.from({ length: picc.memory.numberOfBlocks(sectorOffset) })"
+      <PiccMemoryBlock
+        v-for="(_, blockOffset) in Array.from({ length: MifareClassicMemory.numberOfBlocks(sectorOffset) })"
         :key="blockOffset" :picc="picc" :sector-offset="sectorOffset" :block-offset="blockOffset"
         :data-offset="blockOffset" />
     </div>

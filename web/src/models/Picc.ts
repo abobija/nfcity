@@ -41,6 +41,7 @@ export interface PiccBlock {
 }
 
 export interface PiccSector {
+  offset: number;
   blocks: Map<Offset, PiccBlock>;
 }
 

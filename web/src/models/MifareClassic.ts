@@ -5,24 +5,31 @@ export const defaultKey: PiccKey = {
   value: Uint8Array.from([0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]),
 };
 
-class MifareClassicMemory implements PiccMemory {
+export class MifareClassicMemory implements PiccMemory {
+  public static blockSize: number = 16;
   public readonly sectors: Map<number, PiccSector>;
   public readonly numberOfSectors: number;
 
-  constructor(piccType: PiccType) {
+  protected constructor(piccType: PiccType) {
     this.numberOfSectors = MifareClassicMemory.numberOfSectors(piccType);
 
     this.sectors = new Map(
-      Array.from({ length: this.numberOfSectors })
-        .map((_, i) => [i, { blocks: new Map() }])
+      Array.from({ length: this.numberOfSectors }).map((_, i) => [i, {
+        offset: i,
+        blocks: new Map(),
+      }])
     );
   }
 
-  get blockSize(): number {
-    return 16;
+  public static from(piccType: PiccType) {
+    return new MifareClassicMemory(piccType);
   }
 
-  public numberOfBlocks(sectorOffset: number): number {
+  public updateBlocks(blocks: PiccBlock[]): void {
+    blocks.forEach(block => this.updateBlock(block));
+  }
+
+  public static numberOfBlocks(sectorOffset: number): number {
     if (sectorOffset < 32) {
       return 4;
     }
@@ -30,7 +37,7 @@ class MifareClassicMemory implements PiccMemory {
     return 16;
   }
 
-  public sectorOffset(blockAddress: number): number {
+  public static sectorOffset(blockAddress: number): number {
     if (blockAddress < 128) {
       return Math.floor(blockAddress / 4);
     }
@@ -38,7 +45,7 @@ class MifareClassicMemory implements PiccMemory {
     return 32 + Math.floor((blockAddress - 128) / 16);
   }
 
-  public sectorBlock0Address(sectorOffset: number): number {
+  public static sectorBlock0Address(sectorOffset: number): number {
     if (sectorOffset < 32) {
       return sectorOffset * 4;
     }
@@ -46,19 +53,15 @@ class MifareClassicMemory implements PiccMemory {
     return 128 + (sectorOffset - 32) * 16;
   }
 
-  public blockOffset(blockAddress: number, sectorOffset: number): number {
-    return blockAddress - this.sectorBlock0Address(sectorOffset);
+  public static blockOffset(blockAddress: number, sectorOffset: number): number {
+    return blockAddress - MifareClassicMemory.sectorBlock0Address(sectorOffset);
   }
 
   public updateBlock(block: PiccBlock): void {
-    const sectorOffset = this.sectorOffset(block.address);
-    const blockOffset = this.blockOffset(block.address, sectorOffset);
+    const sectorOffset = MifareClassicMemory.sectorOffset(block.address);
+    const blockOffset = MifareClassicMemory.blockOffset(block.address, sectorOffset);
 
     this.sectors.get(sectorOffset)!.blocks.set(blockOffset, block);
-  }
-
-  public updateBlocks(blocks: PiccBlock[]): void {
-    blocks.forEach(block => this.updateBlock(block));
   }
 
   public static numberOfSectors(type: PiccType): number {
@@ -89,7 +92,7 @@ export default class MifareClassic implements Picc {
     this.atqa = picc.atqa;
     this.sak = picc.sak;
     this.uid = picc.uid;
-    this.memory = new MifareClassicMemory(picc.type);
+    this.memory = MifareClassicMemory.from(picc.type);
   }
 
   public static from(picc: Picc): MifareClassic {
