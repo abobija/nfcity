@@ -1,6 +1,6 @@
+import { MifareClassicBlock } from "@/models/MifareClassic";
+
 export default interface MemoryBlockClickEvent {
-  sectorOffset: number;
-  blockOffset: number;
+  block?: MifareClassicBlock;
   byteIndex: number;
-  isEmpty: Boolean;
 }

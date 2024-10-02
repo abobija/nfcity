@@ -13,7 +13,7 @@ interface AccessBits {
   c3: number;
 }
 
-abstract class MifareClassicBlock implements PiccBlock {
+export abstract class MifareClassicBlock implements PiccBlock {
   address: number;
   offset: number;
   data: Uint8Array;

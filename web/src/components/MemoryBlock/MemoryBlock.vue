@@ -36,9 +36,10 @@ const classes = computed(() => ({
   <div class="block" :class="classes">
     <ul class="bytes">
       <ul class="group data">
-        <li :data-index="i" class="byte" v-for="(_, i) in Array.from({ length: MifareClassicMemory.blockSize })"
-          :key="i" @click="$emit('click', { sectorOffset, blockOffset, byteIndex: i, isEmpty })">
-          {{ block ? hex(block.data[i]) : '..' }}
+        <li :data-index="byteIndex" class="byte"
+          v-for="(_, byteIndex) in Array.from({ length: MifareClassicMemory.blockSize })" :key="byteIndex"
+          @click="$emit('click', { block, byteIndex, })">
+          {{ block ? hex(block.data[byteIndex]) : '..' }}
         </li>
       </ul>
     </ul>
