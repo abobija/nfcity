@@ -6,7 +6,7 @@ import MemoryBlockClickEvent from '@/components/MemoryBlock/MemoryBlockClickEven
 import MemorySectorClickEvent from '@/components/MemorySector/MemorySectorClickEvent';
 import { hex } from '@/helpers';
 import { logger } from '@/Logger';
-import MifareClassic, { defaultKey } from '@/models/MifareClassic';
+import MifareClassic, { defaultKey, MifareClassicBlock } from '@/models/MifareClassic';
 import { PiccType } from '@/models/Picc';
 import { inject } from 'vue';
 
@@ -36,7 +36,7 @@ function onBlockClick(e: MemoryBlockClickEvent) {
 </script>
 
 <template>
-  <div class="dashboard">
+  <div class="dashboard component">
     <div class="header">
       <div class="picc">
         <h1 class="type">{{ PiccType[picc.type] }}</h1>
@@ -63,7 +63,20 @@ function onBlockClick(e: MemoryBlockClickEvent) {
       </div>
       <div class="section">
         <div class="info-panel">
-          Click on one of the sectors on the left to load its data.
+          <p class="memory">
+            {{ PiccType[picc.type] }} has
+            {{ picc.memory.blockDistribution.flatMap(d => `${d[0]} sectors with ${d[1]} blocks`).join(' and ') }}
+            which is a total of
+            {{ picc.memory.blockDistribution.reduce((acc, [blocks, count]) => acc + blocks * count, 0) }}
+            blocks.
+            Each block is {{ MifareClassicBlock.size }} bytes long, which results in a total of
+            {{ picc.memory.size }} bytes of memory.
+          </p>
+
+          <Transition appear>
+            <p class="hint" v-if="picc.memory.isEmpty">
+              Click on one of the sectors on the left to load its data. </p>
+          </Transition>
         </div>
       </div>
     </div>

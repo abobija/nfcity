@@ -65,12 +65,13 @@ function blockByteGroups(block?: MifareClassicBlock): MemoryBlockByteGroup[] | u
 </script>
 
 <template>
-  <div class="sector" :class="classes" @click="$emit('click', { sector })">
+  <div class="sector component" :class="classes" @click="$emit('click', { sector })">
     <div class="meta">
       <span class="offset">{{ sector.offset }}</span>
     </div>
     <div class="blocks">
-      <MemoryBlock v-for="(_, blockOffset) in Array.from({ length: MifareClassicMemory.numberOfBlocks(sector.offset) })"
+      <MemoryBlock
+        v-for="(_, blockOffset) in Array.from({ length: MifareClassicMemory.numberOfBlocksInSector(sector.offset) })"
         :key="blockOffset" :block="sector.blockAt(blockOffset)"
         :byte-groups="blockByteGroups(sector.blockAt(blockOffset))" @click="onBlockClick" />
     </div>

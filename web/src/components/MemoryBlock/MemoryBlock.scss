@@ -1,9 +1,9 @@
 @use 'sass:color';
 @import '@/theme.scss';
 
-.memory>.sector {
+.memory.component>.sector.component {
   >.blocks {
-    >.block {
+    >.block.component {
       color: color.adjust($color-bg, $lightness: +40%);
 
       >.bytes {
@@ -57,19 +57,19 @@
   }
 
   &:not(.empty) {
-    >.blocks>.block>.bytes>.group>.byte {
+    >.blocks>.block.component>.bytes>.group>.byte {
       border-style: solid;
     }
 
     &:hover {
-      >.blocks>.block>.bytes>.group>.byte {
+      >.blocks>.block.component>.bytes>.group>.byte {
         border-color: color.adjust($color-bg, $lightness: +12%);
       }
     }
   }
 }
 
-.memory>.sector .block.trailer {
+.memory.component>.sector.component .block.component.trailer {
   .key-a {
     color: color.adjust($color-3, $hue: -35deg);
   }
@@ -87,7 +87,7 @@
   }
 }
 
-.memory>.sector .block.value {
+.memory.component>.sector.component .block.component.value {
   .value {
     color: $color-1;
   }
@@ -105,11 +105,11 @@
   }
 }
 
-.memory>.sector .block.data {
+.memory.component>.sector.component .block.component.data {
   color: $color-4;
 }
 
-.memory>.sector .block.manufacturer {
+.memory.component>.sector.component .block.component.manufacturer {
   .uid {
     color: $color-5;
   }

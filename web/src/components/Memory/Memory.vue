@@ -19,7 +19,7 @@ const onBlockClick = (e: MemoryBlockClickEvent) => emit('blockClick', e);
 </script>
 
 <template>
-  <div class="memory">
+  <div class="memory component">
     <MemorySector v-for="(_, sectorOffset) in Array.from({ length: memory.numberOfSectors })" :key="sectorOffset"
       :sector="memory.sectorAt(sectorOffset)" @click="onSectorClick" @block-click="onBlockClick" />
   </div>

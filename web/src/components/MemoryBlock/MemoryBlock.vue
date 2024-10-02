@@ -37,7 +37,7 @@ function byteIndex(index: number, byteGroup: MemoryBlockByteGroup) {
 </script>
 
 <template>
-  <div class="block" :class="classes">
+  <div class="block component" :class="classes">
     <ul class="bytes">
       <ul class="group" :class="byteGroup.class || 'data'" v-for="byteGroup in (props.byteGroups || [{}])">
         <li class="byte"

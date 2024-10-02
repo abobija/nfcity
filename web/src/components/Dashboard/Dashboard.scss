@@ -1,19 +1,19 @@
 @import '@/theme.scss';
 
-.dashboard {
+.dashboard.component {
   margin: 1rem;
 
   >.header {
     >.picc {
       margin-bottom: 0.8rem;
 
-      >.type {
+      .type {
         font-size: 1.5rem;
-        color: $color-5;
+        color: $color-3;
         font-weight: 600;
       }
 
-      >.metas {
+      .metas {
         display: flex;
         margin-top: .5rem;
 
@@ -48,7 +48,15 @@
       >.info-panel {
         position: sticky;
         top: 1rem;
-        color: $color-1;
+        color: $color-4;
+
+        p.hint {
+          color: $color-2;
+        }
+
+        p:not(:last-child) {
+          margin-bottom: 1.5rem;
+        }
       }
     }
   }

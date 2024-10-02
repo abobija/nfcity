@@ -212,6 +212,10 @@ export class MifareClassicMemory implements PiccMemory {
   public readonly picc: MifareClassic;
   public readonly sectors: Map<number, MifareClassicSector>;
   public readonly numberOfSectors: number;
+  public readonly blockDistribution: Array<[number, number]>;
+  public readonly size: number;
+  private _updateBlockCounter: number = 0;
+  private _updateSectorCounter: number = 0;
 
   protected constructor(picc: MifareClassic, piccType: PiccType) {
     this.picc = picc;
@@ -221,10 +225,30 @@ export class MifareClassicMemory implements PiccMemory {
       Array.from({ length: this.numberOfSectors })
         .map((_, sectorOffset) => [sectorOffset, MifareClassicSector.from(this, sectorOffset)])
     );
+
+    if (this.numberOfSectors < 16) {
+      this.blockDistribution = [[5, 4]];
+    }
+    else if (this.numberOfSectors < 32) {
+      this.blockDistribution = [[16, 4]];
+    }
+    else {
+      this.blockDistribution = [[32, 4], [16, 8]];
+    }
+
+    this.size = this.blockDistribution.reduce((acc, [n, m]) => acc + n * m, 0) * MifareClassicBlock.size;
   }
 
   public static from(picc: MifareClassic, piccType: PiccType) {
     return new MifareClassicMemory(picc, piccType);
+  }
+
+  get isEmpty() {
+    return this._updateBlockCounter <= 0;
+  }
+
+  get updateSectorCounter() {
+    return this._updateSectorCounter;
   }
 
   public sectorAt(sectorOffset: number): MifareClassicSector {
@@ -234,7 +258,7 @@ export class MifareClassicMemory implements PiccMemory {
   private updateBlock(block: PiccBlockDto): void {
     const sectorOffset = MifareClassicMemory.sectorOffset(block.address);
     const sector = this.sectorAt(sectorOffset);
-    const numberOfBlocks = MifareClassicMemory.numberOfBlocks(sectorOffset);
+    const numberOfBlocks = MifareClassicMemory.numberOfBlocksInSector(sectorOffset);
 
     if (block.offset == numberOfBlocks - 1) {
       sector.blocks.set(block.offset, MifareClassicSectorTrailerBlock.from(sector, block));
@@ -261,6 +285,8 @@ export class MifareClassicMemory implements PiccMemory {
     }
 
     sector.blocks.set(block.offset, MifareClassicDataBlock.from(sector, block, accessBits));
+
+    this._updateBlockCounter++;
   }
 
   public updateSector(blocks: PiccBlockDto[]): void {
@@ -271,9 +297,11 @@ export class MifareClassicMemory implements PiccMemory {
     blocks
       .sort((a, b) => b.address - a.address) // Sort so that trailer block is first
       .forEach(block => this.updateBlock(block));
+
+    this._updateSectorCounter++;
   }
 
-  public static numberOfBlocks(sectorOffset: number): number {
+  public static numberOfBlocksInSector(sectorOffset: number): number {
     if (sectorOffset < 32) {
       return 4;
     }
