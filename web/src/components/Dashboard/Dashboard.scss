@@ -18,7 +18,9 @@
         margin-top: .5rem;
 
         .meta {
-          margin-right: 1rem;
+          &:not(:last-child) {
+            margin-right: 1rem;
+          }
 
           .name {
             margin-right: 1rem;
@@ -36,5 +38,12 @@
 
   .main {
     display: flex;
+    flex-direction: row;
+
+    >.section {
+      &:not(:last-child) {
+        margin-right: 1rem;
+      }
+    }
   }
 }
