@@ -29,10 +29,10 @@ const classes = computed(() => ({
 
 const byteGroupClassMap: Map<MifareClassicBlockByteGroupClass, string> = new Map([
   // Trailer
-  [MifareClassicBlockByteGroupClass.KeyA, 'key-a'],
+  [MifareClassicBlockByteGroupClass.KeyA, 'key key-a'],
   [MifareClassicBlockByteGroupClass.AccessBits, 'access-bits'],
   [MifareClassicBlockByteGroupClass.UserByte, 'user-byte'],
-  [MifareClassicBlockByteGroupClass.KeyB, 'key-b'],
+  [MifareClassicBlockByteGroupClass.KeyB, 'key key-b'],
 
   // Value
   [MifareClassicBlockByteGroupClass.Value, 'value'],

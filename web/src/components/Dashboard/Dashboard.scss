@@ -3,31 +3,31 @@
 .dashboard {
   margin: 1rem;
 
-  .header {
-    .picc {
+  >.header {
+    >.picc {
       margin-bottom: 0.8rem;
 
-      .type {
+      >.type {
         font-size: 1.5rem;
         color: $color-5;
         font-weight: 600;
       }
 
-      .metas {
+      >.metas {
         display: flex;
         margin-top: .5rem;
 
-        .meta {
+        >.meta {
           &:not(:last-child) {
             margin-right: 1rem;
           }
 
-          .name {
+          >.name {
             margin-right: 1rem;
             color: rgba($color-fg, 0.5);
           }
 
-          .value {
+          >.value {
             font-weight: 600;
             color: $color-5;
           }
@@ -36,7 +36,7 @@
     }
   }
 
-  .main {
+  >.main {
     display: flex;
     flex-direction: row;
 
@@ -44,12 +44,12 @@
       &:not(:last-child) {
         margin-right: 1rem;
       }
-    }
 
-    .info-panel {
-      position: sticky;
-      top: 1rem;
-      color: $color-1;
+      >.info-panel {
+        position: sticky;
+        top: 1rem;
+        color: $color-1;
+      }
     }
   }
 }

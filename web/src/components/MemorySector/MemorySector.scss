@@ -2,12 +2,12 @@
 
 $transition: .3s ease-in-out;
 
-.memory .sector {
+.memory>.sector {
   display: flex;
   flex-direction: row;
   justify-content: right;
 
-  .meta {
+  >.meta {
     display: flex;
     flex-direction: column;
     font-size: 0.8rem;
@@ -15,12 +15,12 @@ $transition: .3s ease-in-out;
     color: $color-4;
     transition: color $transition;
 
-    .offset {
+    >.offset {
       padding-right: 0.3rem;
     }
   }
 
-  .blocks {
+  >.blocks {
     display: flex;
     flex-direction: column-reverse;
     border-style: solid;
@@ -30,11 +30,11 @@ $transition: .3s ease-in-out;
   }
 
   &:hover {
-    .meta {
+    >.meta {
       color: $color-fg;
     }
 
-    .blocks {
+    >.blocks {
       border-color: rgba($color-fg, .6) !important;
       box-shadow: 0 0 1rem rgba($color-fg, .1);
     }

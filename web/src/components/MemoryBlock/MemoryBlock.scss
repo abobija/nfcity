@@ -1,63 +1,132 @@
+@use 'sass:color';
 @import '@/theme.scss';
 
-.memory .sector {
-  .block {
-    color: rgba($color-fg, 0.4);
+.memory>.sector {
+  >.blocks {
+    >.block {
+      color: color.adjust($color-bg, $lightness: +40%);
 
-    .bytes {
-      display: flex;
-      flex-direction: row;
-
-      .group {
+      >.bytes {
         display: flex;
         flex-direction: row;
-        justify-content: center;
 
-        .byte {
-          cursor: pointer;
-          font-size: 0.8rem;
-          border-style: dashed;
-          border-color: rgba($color-fg, .1);
-          border-width: 0 1px 1px 0;
-          padding: 0.3rem;
-        }
-      }
-    }
+        >.group {
+          display: flex;
+          flex-direction: row;
+          justify-content: center;
 
-    &.empty {
-      color: transparent;
-      user-select: none;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-    }
-
-    &:not(.empty) {
-      color: $color-4;
-
-      .bytes {
-        .byte {
-          &:hover {
-            font-weight: 600;
+          >.byte {
+            cursor: pointer;
+            font-size: 0.8rem;
+            border-style: dashed;
+            border-color: color.adjust($color-bg, $lightness: +6%);
+            border-width: 0 1px 1px 0;
+            padding: 0.3rem;
           }
         }
+      }
 
-        &:hover {
-          background-color: rgba($color-fg, .05);
+      &.empty {
+        color: transparent;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+      }
+
+      &:not(.empty) {
+        >.bytes {
+          >.group {
+            >.byte {
+              &:hover {
+                font-weight: 600;
+              }
+            }
+
+            &:hover {
+              background-color: color.adjust($color-bg, $lightness: +7%);
+            }
+          }
+
+          &:hover {
+            background-color: color.adjust($color-bg, $lightness: +3%);
+          }
         }
       }
     }
   }
 
   &:not(.empty) {
-    .block .bytes .byte {
+    >.blocks>.block>.bytes>.group>.byte {
       border-style: solid;
     }
 
     &:hover {
-      .block .bytes .byte {
-        border-color: rgba($color-fg, .15);
+      >.blocks>.block>.bytes>.group>.byte {
+        border-color: color.adjust($color-bg, $lightness: +12%);
       }
     }
+  }
+}
+
+.memory>.sector .block.trailer {
+  .key-a {
+    color: color.adjust($color-3, $hue: -35deg);
+  }
+
+  .access-bits {
+    color: color.adjust($color-3, $hue: 0deg);
+  }
+
+  .user-byte {
+    color: $color-4;
+  }
+
+  .key-b {
+    color: color.adjust($color-3, $hue: +35deg);
+  }
+}
+
+.memory>.sector .block.value {
+  .value {
+    color: $color-1;
+  }
+
+  .value-inverted {
+    color: color.adjust($color-1, $blackness: 30%);
+  }
+
+  .addr {
+    color: $color-2;
+  }
+
+  .addr-inverted {
+    color: color.adjust($color-2, $blackness: 30%);
+  }
+}
+
+.memory>.sector .block.data {
+  color: $color-4;
+}
+
+.memory>.sector .block.manufacturer {
+  .uid {
+    color: $color-5;
+  }
+
+  .bcc {
+    color: color.adjust($color-5, $hue: -40deg);
+  }
+
+  .sak {
+    color: color.adjust($color-5, $hue: -70deg);
+  }
+
+  .atqa {
+    color: color.adjust($color-5, $hue: -100deg);
+  }
+
+  .manufacturer {
+    color: color.adjust($color-5, $hue: -130deg);
   }
 }
