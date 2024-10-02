@@ -7,15 +7,20 @@
     .bytes {
       display: flex;
       flex-direction: row;
-      justify-content: center;
 
-      .byte {
-        cursor: pointer;
-        font-size: 0.8rem;
-        border-style: dashed;
-        border-color: rgba($color-fg, .1);
-        border-width: 0 1px 1px 0;
-        padding: 0.3rem;
+      .group {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+
+        .byte {
+          cursor: pointer;
+          font-size: 0.8rem;
+          border-style: dashed;
+          border-color: rgba($color-fg, .1);
+          border-width: 0 1px 1px 0;
+          padding: 0.3rem;
+        }
       }
     }
 

@@ -27,10 +27,12 @@ const isEmpty = computed<Boolean>(() => block.value === undefined);
 <template>
   <div class="block" :class="isEmpty && 'empty'">
     <ul class="bytes">
-      <li :data-index="i" class="byte" v-for="(_, i) in Array.from({ length: MifareClassicMemory.blockSize })" :key="i"
-        @click="$emit('click', { sectorOffset, blockOffset, byteIndex: i, isEmpty })">
-        {{ block ? hex(block.data[i]) : '..' }}
-      </li>
+      <ul class="group data">
+        <li :data-index="i" class="byte" v-for="(_, i) in Array.from({ length: MifareClassicMemory.blockSize })"
+          :key="i" @click="$emit('click', { sectorOffset, blockOffset, byteIndex: i, isEmpty })">
+          {{ block ? hex(block.data[i]) : '..' }}
+        </li>
+      </ul>
     </ul>
   </div>
 </template>
