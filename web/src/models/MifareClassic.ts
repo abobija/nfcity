@@ -14,12 +14,16 @@ interface AccessBits {
 }
 
 export abstract class MifareClassicBlock implements PiccBlock {
-  address: number;
-  offset: number;
-  data: Uint8Array;
-  accessBits: AccessBits;
+  public static size: number = 16;
 
-  protected constructor(block: PiccBlockDto, accessBits: AccessBits) {
+  public readonly sector: MifareClassicSector;
+  public readonly address: number;
+  public readonly offset: number;
+  public readonly data: Uint8Array;
+  public readonly accessBits: AccessBits;
+
+  protected constructor(sector: MifareClassicSector, block: PiccBlockDto, accessBits: AccessBits) {
+    this.sector = sector;
     this.address = block.address;
     this.offset = block.offset;
     this.data = block.data;
@@ -30,16 +34,16 @@ export abstract class MifareClassicBlock implements PiccBlock {
 export class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
   public readonly accessBitsPool: Array<AccessBits>;
 
-  constructor(block: PiccBlockDto, accessBitsPool: Array<AccessBits>) {
+  constructor(sector: MifareClassicSector, block: PiccBlockDto, accessBitsPool: Array<AccessBits>) {
     if (accessBitsPool.length != 4) {
       throw new Error('Invalid access bits pool');
     }
 
-    super(block, accessBitsPool[3]);
+    super(sector, block, accessBitsPool[3]);
     this.accessBitsPool = accessBitsPool;
   }
 
-  public static from(block: PiccBlockDto) {
+  public static from(sector: MifareClassicSector, block: PiccBlockDto) {
     const { data } = block;
 
     if (MifareClassicSectorTrailerBlock.checkAccessBitsIntegrityViolation(data)) {
@@ -55,7 +59,7 @@ export class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
       accessBitsPool[i] = this.nibblesToAccessBits(c1, c2, c3, i);
     }
 
-    return new MifareClassicSectorTrailerBlock(block, accessBitsPool);
+    return new MifareClassicSectorTrailerBlock(sector, block, accessBitsPool);
   }
 
   public static calculateBlockAccessBitsPoolIndex(blockOffset: number, numberOfBlocks: number): number {
@@ -84,8 +88,8 @@ export class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
 }
 
 export class MifareClassicDataBlock extends MifareClassicBlock {
-  public static from(block: PiccBlockDto, accessBits: AccessBits) {
-    return new MifareClassicDataBlock(block, accessBits);
+  public static from(sector: MifareClassicSector, block: PiccBlockDto, accessBits: AccessBits) {
+    return new MifareClassicDataBlock(sector, block, accessBits);
   }
 }
 
@@ -96,65 +100,77 @@ export class MifareClassicValueBlock extends MifareClassicBlock {
     return bits == 0b110 || bits == 0b001;
   }
 
-  public static from(block: PiccBlockDto, accessBits: AccessBits) {
+  public static from(sector: MifareClassicSector, block: PiccBlockDto, accessBits: AccessBits) {
     // TODO: Parse
 
-    return new MifareClassicValueBlock(block, accessBits);
+    return new MifareClassicValueBlock(sector, block, accessBits);
   }
 }
 
 export class MifareClassicManufacturerBlock extends MifareClassicBlock {
-  public static from(block: PiccBlockDto, accessBits: AccessBits) {
-    return new MifareClassicManufacturerBlock(block, accessBits);
+  public static from(sector: MifareClassicSector, block: PiccBlockDto, accessBits: AccessBits) {
+    return new MifareClassicManufacturerBlock(sector, block, accessBits);
   }
 }
 
 export class MifareClassicSector implements PiccSector {
-  offset: number;
-  blocks: Map<number, MifareClassicBlock>;
+  public readonly memory: MifareClassicMemory;
+  public readonly offset: number;
+  public readonly blocks: Map<number, MifareClassicBlock>;
 
-  protected constructor(offset: number) {
+  protected constructor(memory: MifareClassicMemory, offset: number) {
+    this.memory = memory;
     this.offset = offset;
     this.blocks = new Map();
   }
 
-  public static from(offset: number) {
-    return new MifareClassicSector(offset);
+  public static from(memory: MifareClassicMemory, offset: number) {
+    return new MifareClassicSector(memory, offset);
   }
 
   get isEmpty() {
     return this.blocks.size == 0;
   }
+
+  public blockAt(blockOffset: number): MifareClassicBlock | undefined {
+    return this.blocks.get(blockOffset);
+  }
 }
 
 export class MifareClassicMemory implements PiccMemory {
-  public static blockSize: number = 16;
+  public readonly picc: MifareClassic;
   public readonly sectors: Map<number, MifareClassicSector>;
   public readonly numberOfSectors: number;
 
-  protected constructor(piccType: PiccType) {
+  protected constructor(picc: MifareClassic, piccType: PiccType) {
+    this.picc = picc;
     this.numberOfSectors = MifareClassicMemory.numberOfSectors(piccType);
 
     this.sectors = new Map(
       Array.from({ length: this.numberOfSectors })
-        .map((_, sectorOffset) => [sectorOffset, MifareClassicSector.from(sectorOffset)])
+        .map((_, sectorOffset) => [sectorOffset, MifareClassicSector.from(this, sectorOffset)])
     );
   }
 
-  public static from(piccType: PiccType) {
-    return new MifareClassicMemory(piccType);
+  public static from(picc: MifareClassic, piccType: PiccType) {
+    return new MifareClassicMemory(picc, piccType);
+  }
+
+  public sectorAt(sectorOffset: number): MifareClassicSector {
+    return this.sectors.get(sectorOffset)!;
   }
 
   private updateBlock(block: PiccBlockDto): void {
     const sectorOffset = MifareClassicMemory.sectorOffset(block.address);
+    const sector = this.sectorAt(sectorOffset);
     const numberOfBlocks = MifareClassicMemory.numberOfBlocks(sectorOffset);
 
     if (block.offset == numberOfBlocks - 1) {
-      this.sectors.get(sectorOffset)!.blocks.set(block.offset, MifareClassicSectorTrailerBlock.from(block));
+      sector.blocks.set(block.offset, MifareClassicSectorTrailerBlock.from(sector, block));
       return;
     }
 
-    const trailer = this.sectors.get(sectorOffset)!.blocks.get(numberOfBlocks - 1);
+    const trailer = sector.blocks.get(numberOfBlocks - 1);
 
     if (trailer === undefined || !(trailer instanceof MifareClassicSectorTrailerBlock)) {
       throw new Error('Trailer block not found');
@@ -164,16 +180,16 @@ export class MifareClassicMemory implements PiccMemory {
     const accessBits = trailer.accessBitsPool[accessPoolIndex];
 
     if (block.address == 0) {
-      this.sectors.get(sectorOffset)!.blocks.set(block.offset, MifareClassicManufacturerBlock.from(block, accessBits));
+      sector.blocks.set(block.offset, MifareClassicManufacturerBlock.from(sector, block, accessBits));
       return;
     }
 
     if (MifareClassicValueBlock.isValueBlock(accessBits)) {
-      this.sectors.get(sectorOffset)!.blocks.set(block.offset, MifareClassicValueBlock.from(block, accessBits));
+      sector.blocks.set(block.offset, MifareClassicValueBlock.from(sector, block, accessBits));
       return
     }
 
-    this.sectors.get(sectorOffset)!.blocks.set(block.offset, MifareClassicDataBlock.from(block, accessBits));
+    sector.blocks.set(block.offset, MifareClassicDataBlock.from(sector, block, accessBits));
   }
 
   public updateSector(blocks: PiccBlockDto[]): void {
@@ -242,7 +258,7 @@ export default class MifareClassic implements Picc {
     this.atqa = picc.atqa;
     this.sak = picc.sak;
     this.uid = picc.uid;
-    this.memory = MifareClassicMemory.from(picc.type);
+    this.memory = MifareClassicMemory.from(this, picc.type);
   }
 
   public static from(picc: Picc): MifareClassic {

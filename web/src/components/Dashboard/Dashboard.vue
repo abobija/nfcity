@@ -59,7 +59,7 @@ function onBlockClick(e: MemoryBlockClickEvent) {
 
     <div class="main">
       <div class="section">
-        <Memory :picc="picc" @sector-click="onSectorClick" @block-click="onBlockClick" />
+        <Memory :memory="picc.memory" @sector-click="onSectorClick" @block-click="onBlockClick" />
       </div>
       <div class="section">
         <div class="info-panel">

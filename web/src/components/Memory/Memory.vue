@@ -3,10 +3,10 @@ import '@/components/Memory/Memory.scss';
 import MemoryBlockClickEvent from '@/components/MemoryBlock/MemoryBlockClickEvent';
 import MemorySector from '@/components/MemorySector/MemorySector.vue';
 import MemorySectorClickEvent from '@/components/MemorySector/MemorySectorClickEvent';
-import MifareClassic from '@/models/MifareClassic';
+import { MifareClassicMemory } from '@/models/MifareClassic';
 
 defineProps<{
-  picc: MifareClassic;
+  memory: MifareClassicMemory;
 }>();
 
 const emit = defineEmits<{
@@ -20,8 +20,7 @@ const onBlockClick = (e: MemoryBlockClickEvent) => emit('blockClick', e);
 
 <template>
   <div class="memory">
-    <MemorySector v-for="(_, sectorOffset) in Array.from({ length: picc.memory.numberOfSectors })" :key="sectorOffset"
-      :picc="picc" :sectorOffset="sectorOffset" :data-offset="sectorOffset" @click="onSectorClick"
-      @block-click="onBlockClick" />
+    <MemorySector v-for="(_, sectorOffset) in Array.from({ length: memory.numberOfSectors })" :key="sectorOffset"
+      :sector="memory.sectorAt(sectorOffset)" @click="onSectorClick" @block-click="onBlockClick" />
   </div>
 </template>
