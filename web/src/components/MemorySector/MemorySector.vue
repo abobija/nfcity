@@ -5,11 +5,9 @@ import '@/components/MemorySector/MemorySector.scss';
 import MemorySectorClickEvent from '@/components/MemorySector/MemorySectorClickEvent';
 import {
   MifareClassicBlock,
-  MifareClassicManufacturerBlock,
+  MifareClassicBlockByteGroupClass,
   MifareClassicMemory,
-  MifareClassicSector,
-  MifareClassicSectorTrailerBlock,
-  MifareClassicValueBlock
+  MifareClassicSector
 } from '@/models/MifareClassic';
 import { computed } from 'vue';
 import MemoryBlockByteGroup from '../MemoryBlock/MemoryBlockByteGroup';
@@ -29,38 +27,40 @@ const classes = computed(() => ({
   empty: props.sector.isEmpty,
 }));
 
+const byteGroupClassMap: Map<MifareClassicBlockByteGroupClass, string> = new Map([
+  // Trailer
+  [MifareClassicBlockByteGroupClass.KeyA, 'key-a'],
+  [MifareClassicBlockByteGroupClass.AccessBits, 'access-bits'],
+  [MifareClassicBlockByteGroupClass.UserByte, 'user-byte'],
+  [MifareClassicBlockByteGroupClass.KeyB, 'key-b'],
+
+  // Value
+  [MifareClassicBlockByteGroupClass.Value, 'value'],
+  [MifareClassicBlockByteGroupClass.ValueInverted, 'value-inverted'],
+  [MifareClassicBlockByteGroupClass.Address, 'addr'],
+  [MifareClassicBlockByteGroupClass.AddressInverted, 'addr-inverted'],
+
+  // Data
+  [MifareClassicBlockByteGroupClass.Data, 'data'],
+
+  // Manufacturer
+  [MifareClassicBlockByteGroupClass.UID, 'uid'],
+  [MifareClassicBlockByteGroupClass.BCC, 'bcc'],
+  [MifareClassicBlockByteGroupClass.SAK, 'sak'],
+  [MifareClassicBlockByteGroupClass.ATQA, 'atqa'],
+  [MifareClassicBlockByteGroupClass.ManufacturerData, 'manufacturer'],
+]);
+
 function blockByteGroups(block?: MifareClassicBlock): MemoryBlockByteGroup[] | undefined {
-  if (block instanceof MifareClassicSectorTrailerBlock) {
-    return [
-      { dataOffset: 0, length: 6, class: 'key-a' },
-      { dataOffset: 6, length: 4, class: 'access-bits' },
-      { dataOffset: 10, length: 6, class: 'key-b' },
-    ];
-  }
+  if (!block) return;
 
-  if (block instanceof MifareClassicManufacturerBlock) {
-    const { uid } = props.sector.memory.picc;
-
-    return [
-      { dataOffset: 0, length: uid.length, class: 'uid' },
-      { dataOffset: uid.length, length: 1, class: 'bcc' },
-      { dataOffset: uid.length + 1, length: 1, class: 'sak' },
-      { dataOffset: uid.length + 2, length: 2, class: 'atqa' },
-      { dataOffset: uid.length + 4, class: 'manufacturer' },
-    ];
-  }
-
-  if (block instanceof MifareClassicValueBlock) {
-    return [
-      { dataOffset: 0, length: 4, class: 'value' },
-      { dataOffset: 4, length: 4, class: 'value-inverted' },
-      { dataOffset: 8, length: 4, class: 'value' },
-      { dataOffset: 12, length: 1, class: 'addr' },
-      { dataOffset: 13, length: 1, class: 'addr-inverted' },
-      { dataOffset: 14, length: 1, class: 'addr' },
-      { dataOffset: 15, length: 1, class: 'addr-inverted' },
-    ];
-  }
+  return block.byteGroups.map<MemoryBlockByteGroup>(byteGroup => {
+    return {
+      offset: byteGroup.offset,
+      length: byteGroup.length,
+      class: byteGroupClassMap.get(byteGroup.class) ?? 'unknown',
+    };
+  });
 }
 </script>
 

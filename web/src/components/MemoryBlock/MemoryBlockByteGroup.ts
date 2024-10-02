@@ -1,5 +1,5 @@
 export default interface MemoryBlockByteGroup {
-  dataOffset?: number;
+  offset?: number;
   length?: number;
   class?: string;
 }

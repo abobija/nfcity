@@ -32,7 +32,7 @@ const classes = computed(() => ({
 }));
 
 function byteIndex(index: number, byteGroup: MemoryBlockByteGroup) {
-  return (byteGroup.dataOffset || 0) + index;
+  return (byteGroup.offset || 0) + index;
 }
 </script>
 
@@ -41,7 +41,7 @@ function byteIndex(index: number, byteGroup: MemoryBlockByteGroup) {
     <ul class="bytes">
       <ul class="group" :class="byteGroup.class || 'data'" v-for="byteGroup in (props.byteGroups || [{}])">
         <li class="byte"
-          v-for="(_, index) in Array.from({ length: byteGroup.length || (MifareClassicBlock.size - (byteGroup.dataOffset || 0)) })"
+          v-for="(_, index) in Array.from({ length: byteGroup.length || (MifareClassicBlock.size - (byteGroup.offset || 0)) })"
           :key="byteIndex(index, byteGroup)" :data-index="byteIndex(index, byteGroup)"
           @click="$emit('click', { block, byteIndex: byteIndex(index, byteGroup) })">
           {{ block ? hex(block.data[byteIndex(index, byteGroup)]) : '..' }}
