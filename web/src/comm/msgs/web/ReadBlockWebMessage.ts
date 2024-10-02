@@ -1,4 +1,4 @@
-import { AuthorizedWebMessage } from "../Message";
+import { AuthorizedWebMessage } from "@/comm/msgs/Message";
 
 export const readBlockWebMessageKind = 'read_block';
 

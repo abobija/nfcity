@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { hex } from '@/helpers';
+import MifareClassic, { MifareClassicMemory } from '@/models/MifareClassic';
 import { computed } from 'vue';
-import { hex } from '../../helpers';
-import MifareClassic, { MifareClassicMemory } from '../../models/MifareClassic';
 
 const props = defineProps<{
   picc: MifareClassic;

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { hex } from '../../helpers';
-import MifareClassic from '../../models/MifareClassic';
-import { PiccType } from '../../models/Picc';
-import './PiccDashboard.scss';
-import PiccMemoryLayout from './PiccMemoryLayout.vue';
+import '@/components/PiccDashboard/PiccDashboard.scss';
+import PiccMemoryLayout from '@/components/PiccDashboard/PiccMemoryLayout.vue';
+import { hex } from '@/helpers';
+import MifareClassic from '@/models/MifareClassic';
+import { PiccType } from '@/models/Picc';
 
 defineProps<{
   picc: MifareClassic;

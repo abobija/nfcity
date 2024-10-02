@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import Client from '@/comm/Client';
+import PiccMemoryBlock from '@/components/PiccDashboard/PiccMemoryBlock.vue';
+import { logger } from '@/Logger';
+import MifareClassic, { defaultKey, MifareClassicMemory } from '@/models/MifareClassic';
 import { computed, inject } from 'vue';
-import Client from '../../comm/Client';
-import { logger } from '../../Logger';
-import MifareClassic, { defaultKey, MifareClassicMemory } from '../../models/MifareClassic';
-import PiccMemoryBlock from './PiccMemoryBlock.vue';
 
 const props = defineProps<{
   picc: MifareClassic;

@@ -1,8 +1,8 @@
+import App from '@/App.vue';
+import Client from '@/comm/Client';
+import '@/main.scss';
 import 'reset-css';
 import { createApp } from 'vue';
-import App from './App.vue';
-import Client from './comm/Client';
-import './main.scss';
 
 const client = new Client();
 

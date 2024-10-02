@@ -1,4 +1,4 @@
-import { DeviceMessage } from "../Message";
+import { DeviceMessage } from "@/comm/msgs/Message";
 
 /**
  * Message sent by the device on connection with the broker.

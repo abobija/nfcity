@@ -1,5 +1,5 @@
-import PiccBlockDto from "../../dtos/PiccBlockDto";
-import { DeviceMessage } from "../Message";
+import PiccBlockDto from "@/comm/dtos/PiccBlockDto";
+import { DeviceMessage } from "@/comm/msgs/Message";
 
 export default interface PiccSectorDevMessage extends DeviceMessage {
   offset: number;

@@ -1,10 +1,10 @@
+import { logger } from '@/Logger';
+import { DeviceMessage, WebMessage } from '@/comm/msgs/Message';
+import GetPiccWebMessage, { getPiccWebMessageKind } from '@/comm/msgs/web/GetPiccWebMessage';
+import ReadBlockWebMessage, { readBlockWebMessageKind } from '@/comm/msgs/web/ReadBlockWebMessage';
+import ReadSectorWebMessage, { readSectorWebMessageKind } from '@/comm/msgs/web/ReadSectorWebMessage';
 import { decode, encode } from 'cbor-x';
 import mqtt, { MqttClient } from 'mqtt';
-import { logger } from '../Logger';
-import { DeviceMessage, WebMessage } from './msgs/Message';
-import GetPiccWebMessage, { getPiccWebMessageKind } from './msgs/web/GetPiccWebMessage';
-import ReadBlockWebMessage, { readBlockWebMessageKind } from './msgs/web/ReadBlockWebMessage';
-import ReadSectorWebMessage, { readSectorWebMessageKind } from './msgs/web/ReadSectorWebMessage';
 
 type Events =
   'ready' |

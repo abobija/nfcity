@@ -1,4 +1,4 @@
-import { PiccKey } from "../../models/Picc";
+import { PiccKey } from "@/models/Picc";
 
 interface Message { }
 

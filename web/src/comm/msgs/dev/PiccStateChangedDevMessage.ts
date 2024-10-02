@@ -1,5 +1,5 @@
-import PiccDto from "../../dtos/PiccDto";
-import { DeviceMessage } from "../Message";
+import PiccDto from "@/comm/dtos/PiccDto";
+import { DeviceMessage } from "@/comm/msgs/Message";
 
 export default interface PiccStateChangedDevMessage extends DeviceMessage {
   old_state: number;

@@ -1,4 +1,4 @@
-import { WebMessage } from "../Message";
+import { WebMessage } from "@/comm/msgs/Message";
 
 export const getPiccWebMessageKind = 'get_picc';
 

@@ -1,17 +1,17 @@
 <script setup lang="ts">
+import '@/App.scss';
+import Client from '@/comm/Client';
+import { isHelloDevMessage } from '@/comm/msgs/dev/HelloDevMessage';
+import { isPiccBlockDevMessage } from '@/comm/msgs/dev/PiccBlockDevMessage';
+import { isPiccDevMessage } from '@/comm/msgs/dev/PiccDevMessage';
+import { isPiccSectorDevMessage } from '@/comm/msgs/dev/PiccSectorDevMessage';
+import { isPiccStateChangedDevMessage } from '@/comm/msgs/dev/PiccStateChangedDevMessage';
+import PiccDashboard from '@/components/PiccDashboard/PiccDashboard.vue';
+import onDeviceMessage from '@/hooks/onDeviceMessage';
+import { logger } from '@/Logger';
+import MifareClassic from '@/models/MifareClassic';
+import { PiccState, PiccType } from '@/models/Picc';
 import { inject, ref, watch } from 'vue';
-import './App.scss';
-import Client from './comm/Client';
-import { isHelloDevMessage } from './comm/msgs/dev/HelloDevMessage';
-import { isPiccBlockDevMessage } from './comm/msgs/dev/PiccBlockDevMessage';
-import { isPiccDevMessage } from './comm/msgs/dev/PiccDevMessage';
-import { isPiccSectorDevMessage } from './comm/msgs/dev/PiccSectorDevMessage';
-import { isPiccStateChangedDevMessage } from './comm/msgs/dev/PiccStateChangedDevMessage';
-import PiccDashboard from './components/PiccDashboard/PiccDashboard.vue';
-import onDeviceMessage from './hooks/onDeviceMessage';
-import { logger } from './Logger';
-import MifareClassic from './models/MifareClassic';
-import { PiccState, PiccType } from './models/Picc';
 
 enum AppState {
   Disconnected = -1,

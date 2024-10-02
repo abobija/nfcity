@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import MifareClassic from '../../models/MifareClassic';
-import './PiccMemoryLayout.scss';
-import PiccMemorySector from './PiccMemorySector.vue';
+import '@/components/PiccDashboard/PiccMemoryLayout.scss';
+import PiccMemorySector from '@/components/PiccDashboard/PiccMemorySector.vue';
+import MifareClassic from '@/models/MifareClassic';
 
 defineProps<{
   picc: MifareClassic;

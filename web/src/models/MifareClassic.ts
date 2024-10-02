@@ -1,4 +1,4 @@
-import Picc, { PiccBlock, PiccKey, PiccKeyType, PiccMemory, PiccSector, PiccState, PiccType } from "./Picc";
+import Picc, { PiccBlock, PiccKey, PiccKeyType, PiccMemory, PiccSector, PiccState, PiccType } from "@/models/Picc";
 
 export const defaultKey: PiccKey = {
   type: PiccKeyType.A,
