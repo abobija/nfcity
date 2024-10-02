@@ -16,19 +16,17 @@ const emit = defineEmits<{
   (e: 'blockClick', data: MemoryBlockClickEvent): void;
 }>();
 
-const isEmpty = computed<Boolean>(() => props.picc.memory
-  .sectors.get(props.sectorOffset)!.blocks.size <= 0
-);
+const sector = computed(() => props.picc.memory.sectors.get(props.sectorOffset)!);
 
 const onBlockClick = (e: MemoryBlockClickEvent) => emit('blockClick', e);
 
 const classes = computed(() => ({
-  empty: isEmpty.value,
+  empty: sector.value.blocks.size <= 0,
 }));
 </script>
 
 <template>
-  <div class="sector" :class="classes" @click="$emit('click', { sectorOffset, isEmpty })">
+  <div class="sector" :class="classes" @click="$emit('click', { sector })">
     <div class="meta">
       <span class="offset">{{ sectorOffset }}</span>
     </div>

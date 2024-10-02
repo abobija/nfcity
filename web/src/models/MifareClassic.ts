@@ -109,7 +109,7 @@ export class MifareClassicManufacturerBlock extends MifareClassicBlock {
   }
 }
 
-class MifareClassicSector implements PiccSector {
+export class MifareClassicSector implements PiccSector {
   offset: number;
   blocks: Map<number, MifareClassicBlock>;
 
@@ -120,6 +120,10 @@ class MifareClassicSector implements PiccSector {
 
   public static from(offset: number) {
     return new MifareClassicSector(offset);
+  }
+
+  get isEmpty() {
+    return this.blocks.size == 0;
   }
 }
 
@@ -132,10 +136,8 @@ export class MifareClassicMemory implements PiccMemory {
     this.numberOfSectors = MifareClassicMemory.numberOfSectors(piccType);
 
     this.sectors = new Map(
-      Array.from({ length: this.numberOfSectors }).map((_, i) => [i, {
-        offset: i,
-        blocks: new Map(),
-      }])
+      Array.from({ length: this.numberOfSectors })
+        .map((_, sectorOffset) => [sectorOffset, MifareClassicSector.from(sectorOffset)])
     );
   }
 

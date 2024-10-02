@@ -1,4 +1,5 @@
+import { MifareClassicSector } from "@/models/MifareClassic";
+
 export default interface MemorySectorClickEvent {
-  sectorOffset: number;
-  isEmpty: Boolean;
+  sector: MifareClassicSector;
 }

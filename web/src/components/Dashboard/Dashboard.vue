@@ -17,13 +17,15 @@ defineProps<{
 const client = inject('client') as Client;
 
 function onSectorClick(e: MemorySectorClickEvent) {
-  if (!e.isEmpty) {
-    logger.verbose(`Sector ${e.sectorOffset} is not empty. Skipping load.`);
+  const { sector } = e;
+
+  if (!sector.isEmpty) {
+    logger.verbose(`Sector ${sector.offset} is not empty. Skipping load.`);
     return;
   }
 
   client.readSector({
-    offset: e.sectorOffset,
+    offset: sector.offset,
     key: defaultKey,
   });
 }
