@@ -1,0 +1,58 @@
+@import '@/theme.scss';
+
+.memory .sector {
+  .block {
+    color: rgba($color-fg, 0.4);
+
+    .bytes {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+
+      .byte {
+        cursor: pointer;
+        font-size: 0.8rem;
+        border-style: dashed;
+        border-color: rgba($color-fg, .1);
+        border-width: 0 1px 1px 0;
+        padding: 0.3rem;
+      }
+    }
+
+    &.empty {
+      color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+    }
+
+    &:not(.empty) {
+      color: $color-4;
+
+      .bytes {
+        .byte {
+          &:hover {
+            font-weight: 600;
+          }
+        }
+
+        &:hover {
+          background-color: rgba($color-fg, .05);
+        }
+      }
+    }
+  }
+
+  &:not(.empty) {
+    .block .bytes .byte {
+      border-style: solid;
+    }
+
+    &:hover {
+      .block .bytes .byte {
+        border-color: rgba($color-fg, .15);
+      }
+    }
+  }
+}

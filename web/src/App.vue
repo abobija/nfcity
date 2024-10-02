@@ -6,7 +6,7 @@ import { isPiccBlockDevMessage } from '@/comm/msgs/dev/PiccBlockDevMessage';
 import { isPiccDevMessage } from '@/comm/msgs/dev/PiccDevMessage';
 import { isPiccSectorDevMessage } from '@/comm/msgs/dev/PiccSectorDevMessage';
 import { isPiccStateChangedDevMessage } from '@/comm/msgs/dev/PiccStateChangedDevMessage';
-import PiccDashboard from '@/components/PiccDashboard/PiccDashboard.vue';
+import Dashboard from '@/components/Dashboard/Dashboard.vue';
 import onDeviceMessage from '@/hooks/onDeviceMessage';
 import { logger } from '@/Logger';
 import MifareClassic from '@/models/MifareClassic';
@@ -153,6 +153,6 @@ onDeviceMessage(message => {
         <p class="message">card removed, put it back please</p>
       </div>
     </div>
-    <PiccDashboard :picc="piccRef!" v-else />
+    <Dashboard :picc="piccRef!" v-else />
   </div>
 </template>

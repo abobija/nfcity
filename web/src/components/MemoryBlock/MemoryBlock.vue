@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import '@/components/MemoryBlock/MemoryBlock.scss';
 import { hex } from '@/helpers';
 import MifareClassic, { MifareClassicMemory } from '@/models/MifareClassic';
 import { computed } from 'vue';

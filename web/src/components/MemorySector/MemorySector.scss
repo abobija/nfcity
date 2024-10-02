@@ -1,0 +1,42 @@
+@import '@/theme.scss';
+
+$transition: .3s ease-in-out;
+
+.memory .sector {
+  display: flex;
+  flex-direction: row;
+  justify-content: right;
+
+  .meta {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: $color-4;
+    transition: color $transition;
+
+    .offset {
+      padding-right: 0.3rem;
+    }
+  }
+
+  .blocks {
+    display: flex;
+    flex-direction: column-reverse;
+    border-style: solid;
+    border-color: rgba($color-fg, .2);
+    border-width: 2px 1px 1px 1px;
+    transition: border $transition, box-shadow $transition;
+  }
+
+  &:hover {
+    .meta {
+      color: $color-fg;
+    }
+
+    .blocks {
+      border-color: rgba($color-fg, .6) !important;
+      box-shadow: 0 0 1rem rgba($color-fg, .1);
+    }
+  }
+}
