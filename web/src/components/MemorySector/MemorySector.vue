@@ -1,37 +1,26 @@
 <script setup lang="ts">
-import Client from '@/comm/Client';
 import MemoryBlock from '@/components/MemoryBlock/MemoryBlock.vue';
 import '@/components/MemorySector/MemorySector.scss';
-import { logger } from '@/Logger';
-import MifareClassic, { defaultKey, MifareClassicMemory } from '@/models/MifareClassic';
-import { computed, inject } from 'vue';
+import MemorySectorClickEvent from '@/components/MemorySector/MemorySectorClickEvent';
+import MifareClassic, { MifareClassicMemory } from '@/models/MifareClassic';
+import { computed } from 'vue';
 
 const props = defineProps<{
   picc: MifareClassic;
   sectorOffset: number;
 }>();
 
-const empty = computed<Boolean>(() => props.picc.memory
+defineEmits<{
+  (e: 'click', data: MemorySectorClickEvent): void;
+}>();
+
+const isEmpty = computed<Boolean>(() => props.picc.memory
   .sectors.get(props.sectorOffset)!.blocks.size <= 0
 );
-
-const client = inject('client') as Client;
-
-function onSectorClick(offset: number) {
-  if (!empty.value) {
-    logger.debug(`Sector ${offset} is not empty. Skipping load.`);
-    return;
-  }
-
-  client.readSector({
-    offset,
-    key: defaultKey,
-  });
-}
 </script>
 
 <template>
-  <div class="sector" :class="empty && 'empty'" @click="onSectorClick(sectorOffset)">
+  <div class="sector" :class="isEmpty && 'empty'" @click="$emit('click', { sectorOffset, isEmpty })">
     <div class="meta">
       <span class="offset">{{ sectorOffset }}</span>
     </div>

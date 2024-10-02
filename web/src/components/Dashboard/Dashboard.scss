@@ -45,5 +45,11 @@
         margin-right: 1rem;
       }
     }
+
+    .info-panel {
+      position: sticky;
+      top: 1rem;
+      color: $color-1;
+    }
   }
 }

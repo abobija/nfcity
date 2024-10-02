@@ -1,14 +1,31 @@
 <script setup lang="ts">
+import Client from '@/comm/Client';
 import '@/components/Dashboard/Dashboard.scss';
 import Memory from '@/components/Memory/Memory.vue';
+import MemorySectorClickEvent from '@/components/MemorySector/MemorySectorClickEvent';
 import { hex } from '@/helpers';
-import MifareClassic from '@/models/MifareClassic';
+import { logger } from '@/Logger';
+import MifareClassic, { defaultKey } from '@/models/MifareClassic';
 import { PiccType } from '@/models/Picc';
-import InfoPanel from '../InfoPanel/InfoPanel.vue';
+import { inject } from 'vue';
 
 defineProps<{
   picc: MifareClassic;
 }>();
+
+const client = inject('client') as Client;
+
+function onSectorClick(e: MemorySectorClickEvent) {
+  if (!e.isEmpty) {
+    logger.debug(`Sector ${e.sectorOffset} is not empty. Skipping load.`);
+    return;
+  }
+
+  client.readSector({
+    offset: e.sectorOffset,
+    key: defaultKey,
+  });
+}
 </script>
 
 <template>
@@ -35,10 +52,12 @@ defineProps<{
 
     <div class="main">
       <div class="section">
-        <Memory :picc="picc" />
+        <Memory :picc="picc" @sector-click="onSectorClick" />
       </div>
       <div class="section">
-        <InfoPanel />
+        <div class="info-panel">
+          Click on one of the sectors on the left to load its data.
+        </div>
       </div>
     </div>
   </div>
