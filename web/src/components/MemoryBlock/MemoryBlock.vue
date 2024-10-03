@@ -7,12 +7,14 @@ import {
   MifareClassicBlock,
   MifareClassicBlockType
 } from '@/models/MifareClassic';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps<{
   block: MifareClassicBlock;
   byteGroups: MemoryBlockByteGroup[];
 }>();
+
+const focusedByteIndex = ref<number | undefined>(undefined);
 
 const classes = computed(() => ({
   empty: !props.block.loaded,
@@ -31,6 +33,9 @@ const eventFrom = (byteGroup: MemoryBlockByteGroup, index: number): MemoryBlockB
   block: props.block,
   byteGroup: byteGroup.origin,
   byteIndex: byteIndex(index, byteGroup),
+  focus: (state?: boolean) => {
+    focusedByteIndex.value = (state ?? true) ? byteIndex(index, byteGroup) : undefined;
+  },
 });
 </script>
 
@@ -40,6 +45,7 @@ const eventFrom = (byteGroup: MemoryBlockByteGroup, index: number): MemoryBlockB
       <ul class="group" :class="byteGroup.class" v-for="byteGroup in props.byteGroups">
         <li class="byte" v-for="(_, index) in Array.from({ length: byteGroup.length })"
           :key="byteIndex(index, byteGroup)" :data-index="byteIndex(index, byteGroup)"
+          :class="{ focused: focusedByteIndex == byteIndex(index, byteGroup) }"
           @mouseenter="emits.emit('byteEnter', eventFrom(byteGroup, index))"
           @mouseleave="emits.emit('byteLeave', eventFrom(byteGroup, index))"
           @click="emits.emit('byteClick', eventFrom(byteGroup, index))">

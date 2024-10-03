@@ -46,10 +46,28 @@
   .byte {
     border-color: color.adjust($color-bg, $lightness: +5%);
 
+    &.focused {
+      animation: byte-glows .5s infinite alternate;
+      z-index: 1;
+    }
+
     &:hover {
       background-color: color.adjust($color-bg, $lightness: +5%);
       font-weight: 600;
     }
+  }
+}
+
+@keyframes byte-glows {
+  $color: color.adjust($color-4, $lightness: -60%);
+
+  0%,
+  100% {
+    box-shadow: none;
+  }
+
+  50% {
+    box-shadow: 0 0 .6rem color.adjust($color, $lightness: +10%);
   }
 }
 

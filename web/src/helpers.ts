@@ -15,16 +15,24 @@ export function hex(bytes: number | Uint8Array) {
   return bytes instanceof Uint8Array ? arr2hex(bytes) : num2hex(bytes);
 }
 
-function num2bin(num: number) {
-  return num.toString(2).padStart(8, '0');
+// convert number to binary, and join groups of for bits with a separator
+// without tailing separator
+function num2bin(num: number, groupSeparator: string = '') {
+  const binary = num.toString(2).padStart(8, '0');
+
+  if (groupSeparator.length <= 0) {
+    return binary;
+  }
+
+  return binary.slice(0, 4) + groupSeparator + binary.slice(4);
 }
 
-function arr2bin(arr: Uint8Array) {
-  return Array.from(arr).map(num2bin).join(' ');
+function arr2bin(arr: Uint8Array, groupSeparator: string = '') {
+  return Array.from(arr).map(el => num2bin(el, groupSeparator)).join(' ');
 }
 
-export function bin(bytes: number | Uint8Array) {
-  return bytes instanceof Uint8Array ? arr2bin(bytes) : num2bin(bytes);
+export function bin(bytes: number | Uint8Array, groupSeparator: string = '') {
+  return bytes instanceof Uint8Array ? arr2bin(bytes, groupSeparator) : num2bin(bytes, groupSeparator);
 }
 
 export function randomBytes(length: number) {
