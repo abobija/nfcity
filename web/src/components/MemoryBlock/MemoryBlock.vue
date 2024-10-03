@@ -7,6 +7,7 @@ import {
   MifareClassicBlock,
   MifareClassicDataBlock,
   MifareClassicManufacturerBlock,
+  MifareClassicSector,
   MifareClassicSectorTrailerBlock,
   MifareClassicValueBlock
 } from '@/models/MifareClassic';
@@ -17,8 +18,9 @@ defineEmits<{
 }>();
 
 const props = defineProps<{
+  sector: MifareClassicSector;
   block?: MifareClassicBlock;
-  byteGroups?: MemoryBlockByteGroup[];
+  byteGroups: MemoryBlockByteGroup[];
 }>();
 
 const isEmpty = computed<Boolean>(() => props.block === undefined);
@@ -39,11 +41,15 @@ function byteIndex(index: number, byteGroup: MemoryBlockByteGroup) {
 <template>
   <div class="block component" :class="classes">
     <ul class="bytes">
-      <ul class="group" :class="byteGroup.class || 'data'" v-for="byteGroup in (props.byteGroups || [{}])">
+      <ul class="group" :class="byteGroup.class || 'data'" v-for="byteGroup in props.byteGroups">
         <li class="byte"
           v-for="(_, index) in Array.from({ length: byteGroup.length || (MifareClassicBlock.size - (byteGroup.offset || 0)) })"
-          :key="byteIndex(index, byteGroup)" :data-index="byteIndex(index, byteGroup)"
-          @click="$emit('click', { block, byteIndex: byteIndex(index, byteGroup) })">
+          :key="byteIndex(index, byteGroup)" :data-index="byteIndex(index, byteGroup)" @click="$emit('click', {
+            sector,
+            block,
+            byteGroup: byteGroup.origin,
+            byteIndex: byteIndex(index, byteGroup),
+          })">
           {{ block ? hex(block.data[byteIndex(index, byteGroup)]) : '..' }}
         </li>
       </ul>

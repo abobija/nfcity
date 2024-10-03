@@ -3,7 +3,6 @@ import Client from '@/comm/Client';
 import '@/components/Dashboard/Dashboard.scss';
 import Memory from '@/components/Memory/Memory.vue';
 import MemoryBlockClickEvent from '@/components/MemoryBlock/MemoryBlockClickEvent';
-import MemorySectorClickEvent from '@/components/MemorySector/MemorySectorClickEvent';
 import { hex } from '@/helpers';
 import { logger } from '@/Logger';
 import MifareClassic, { defaultKey, MifareClassicBlock } from '@/models/MifareClassic';
@@ -16,8 +15,10 @@ defineProps<{
 
 const client = inject('client') as Client;
 
-function onSectorClick(e: MemorySectorClickEvent) {
-  const { sector } = e;
+function onBlockClick(e: MemoryBlockClickEvent) {
+  logger.debug('Block clicked', e);
+
+  const sector = e.sector;
 
   if (!sector.isEmpty) {
     logger.verbose(`Sector ${sector.offset} is not empty. Skipping load.`);
@@ -28,10 +29,6 @@ function onSectorClick(e: MemorySectorClickEvent) {
     offset: sector.offset,
     key: defaultKey,
   });
-}
-
-function onBlockClick(e: MemoryBlockClickEvent) {
-  logger.debug(`Block clicked.`, e);
 }
 </script>
 
@@ -59,7 +56,7 @@ function onBlockClick(e: MemoryBlockClickEvent) {
 
     <div class="main">
       <div class="section">
-        <Memory :memory="picc.memory" @sector-click="onSectorClick" @block-click="onBlockClick" />
+        <Memory :memory="picc.memory" @block-click="onBlockClick" />
       </div>
       <div class="section">
         <div class="info-panel">

@@ -14,6 +14,8 @@ interface AccessBits {
 }
 
 export enum MifareClassicBlockByteGroupClass {
+  Undefined,
+
   // Sector trailer
   KeyA,
   AccessBits,

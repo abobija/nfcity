@@ -2,7 +2,6 @@
 import MemoryBlock from '@/components/MemoryBlock/MemoryBlock.vue';
 import MemoryBlockClickEvent from '@/components/MemoryBlock/MemoryBlockClickEvent';
 import '@/components/MemorySector/MemorySector.scss';
-import MemorySectorClickEvent from '@/components/MemorySector/MemorySectorClickEvent';
 import {
   MifareClassicBlock,
   MifareClassicBlockByteGroupClass,
@@ -16,18 +15,17 @@ const props = defineProps<{
   sector: MifareClassicSector;
 }>();
 
-const emit = defineEmits<{
-  (e: 'click', data: MemorySectorClickEvent): void;
+defineEmits<{
   (e: 'blockClick', data: MemoryBlockClickEvent): void;
 }>();
-
-const onBlockClick = (e: MemoryBlockClickEvent) => emit('blockClick', e);
 
 const classes = computed(() => ({
   empty: props.sector.isEmpty,
 }));
 
 const byteGroupClassMap: Map<MifareClassicBlockByteGroupClass, string> = new Map([
+  [MifareClassicBlockByteGroupClass.Undefined, 'undefined'],
+
   // Trailer
   [MifareClassicBlockByteGroupClass.KeyA, 'key key-a'],
   [MifareClassicBlockByteGroupClass.AccessBits, 'access-bits'],
@@ -51,11 +49,16 @@ const byteGroupClassMap: Map<MifareClassicBlockByteGroupClass, string> = new Map
   [MifareClassicBlockByteGroupClass.ManufacturerData, 'manufacturer'],
 ]);
 
-function blockByteGroups(block?: MifareClassicBlock): MemoryBlockByteGroup[] | undefined {
-  if (!block) return;
+function blockByteGroups(block?: MifareClassicBlock): MemoryBlockByteGroup[] {
+  const byteGroups = block?.byteGroups ?? [{
+    offset: 0,
+    length: MifareClassicBlock.size,
+    class: MifareClassicBlockByteGroupClass.Undefined,
+  }];
 
-  return block.byteGroups.map<MemoryBlockByteGroup>(byteGroup => {
+  return byteGroups.map<MemoryBlockByteGroup>(byteGroup => {
     return {
+      origin: byteGroup,
       offset: byteGroup.offset,
       length: byteGroup.length,
       class: byteGroupClassMap.get(byteGroup.class) ?? 'unknown',
@@ -65,15 +68,15 @@ function blockByteGroups(block?: MifareClassicBlock): MemoryBlockByteGroup[] | u
 </script>
 
 <template>
-  <div class="sector component" :class="classes" @click="$emit('click', { sector })">
+  <div class="sector component" :class="classes">
     <div class="meta">
       <span class="offset">{{ sector.offset }}</span>
     </div>
     <div class="blocks">
       <MemoryBlock
         v-for="(_, blockOffset) in Array.from({ length: MifareClassicMemory.numberOfBlocksInSector(sector.offset) })"
-        :key="blockOffset" :block="sector.blockAt(blockOffset)"
-        :byte-groups="blockByteGroups(sector.blockAt(blockOffset))" @click="onBlockClick" />
+        :key="blockOffset" :sector="sector" :block="sector.blockAt(blockOffset)"
+        :byte-groups="blockByteGroups(sector.blockAt(blockOffset))" @click="e => $emit('blockClick', e)" />
     </div>
   </div>
 </template>
