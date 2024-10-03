@@ -19,17 +19,17 @@ const props = defineProps<{
 }>();
 
 const client = inject('client') as Client;
-const hByteRef = ref<MemoryBlockByteEvent | undefined>(undefined); // Hovered byte reference
+const hovByteRef = ref<MemoryBlockByteEvent | undefined>(undefined); // Hovered byte reference
 
 
 function onBlockByteEnter(e: MemoryBlockByteEvent) {
   logger.verbose('Block byte entered', e);
-  hByteRef.value = e;
+  hovByteRef.value = e;
 }
 
 function onBlockByteLeave(e: MemoryBlockByteEvent) {
   logger.verbose('Block byte left', e);
-  hByteRef.value = undefined;
+  hovByteRef.value = undefined;
 }
 
 function onBlockByteClick(e: MemoryBlockByteEvent) {
@@ -116,60 +116,60 @@ onDeviceMessage(message => {
               Click on one of the sectors on the left to load its data. </p>
           </Transition>
 
-          <div class="target" v-if="hByteRef">
+          <div class="target" v-if="hovByteRef">
             <ul>
               <li class="item">
                 <span class="name">sector</span>
-                <span class="value">{{ hByteRef.block.sector.offset }}</span>
+                <span class="value">{{ hovByteRef.block.sector.offset }}</span>
 
                 <ul>
                   <li class="item">
                     <span class="name">block</span>
-                    <span class="value">{{ hByteRef.block.address }}</span>
+                    <span class="value">{{ hovByteRef.block.address }}</span>
 
                     <ul>
                       <li class="item">
                         <span class="name">address</span>
-                        <span class="value">0x{{ hex(hByteRef.block.address) }}</span>
+                        <span class="value">0x{{ hex(hovByteRef.block.address) }}</span>
                       </li>
                       <li class="item">
                         <span class="name">offset</span>
-                        <span class="value">{{ hByteRef.block.offset }}</span>
+                        <span class="value">{{ hovByteRef.block.offset }}</span>
                       </li>
-                      <li class="item" v-if="hByteRef.block.type != MifareClassicBlockType.Undefined">
+                      <li class="item" v-if="hovByteRef.block.type != MifareClassicBlockType.Undefined">
                         <span class="name">type</span>
-                        <span class="value">{{ MifareClassicBlockType[hByteRef.block.type] }}</span>
+                        <span class="value">{{ MifareClassicBlockType[hovByteRef.block.type] }}</span>
                       </li>
                       <li class="item">
                         <span class="name">group</span>
-                        <span class="value">{{ MifareClassicBlockByteGroupType[hByteRef.byteGroup.type] }}</span>
+                        <span class="value">{{ MifareClassicBlockByteGroupType[hovByteRef.byteGroup.type] }}</span>
 
                         <ul>
                           <li class="item">
                             <span class="name">offset</span>
-                            <span class="value">{{ hByteRef.byteGroup.offset }}</span>
+                            <span class="value">{{ hovByteRef.byteGroup.offset }}</span>
                           </li>
                           <li class="item">
                             <span class="name">length</span>
-                            <span class="value">{{ hByteRef.byteGroup.length }}</span>
+                            <span class="value">{{ hovByteRef.byteGroup.length }}</span>
                           </li>
                           <li class="item">
                             <span class="name">byte</span>
-                            <span class="value">{{ hByteRef.byteIndex }}</span>
+                            <span class="value">{{ hovByteRef.byteIndex }}</span>
 
-                            <ul v-if="hByteRef.block.type != MifareClassicBlockType.Undefined">
+                            <ul v-if="hovByteRef.block.type != MifareClassicBlockType.Undefined">
                               <li class="item">
                                 <span class="name">value</span>
-                                <span class="value">{{ hByteRef.block.data[hByteRef.byteIndex] }}</span>
+                                <span class="value">{{ hovByteRef.block.data[hovByteRef.byteIndex] }}</span>
 
                                 <ul>
                                   <li class="item">
                                     <span class="name">hex</span>
-                                    <span class="value">{{ hex(hByteRef.block.data[hByteRef.byteIndex]) }}</span>
+                                    <span class="value">{{ hex(hovByteRef.block.data[hovByteRef.byteIndex]) }}</span>
                                   </li>
                                   <li class="item">
                                     <span class="name">bin</span>
-                                    <span class="value">{{ bin(hByteRef.block.data[hByteRef.byteIndex]) }}</span>
+                                    <span class="value">{{ bin(hovByteRef.block.data[hovByteRef.byteIndex]) }}</span>
                                   </li>
                                 </ul>
                               </li>
