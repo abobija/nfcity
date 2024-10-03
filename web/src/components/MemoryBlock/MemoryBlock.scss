@@ -55,7 +55,7 @@
 
 .block.component:not(.undefined) {
   $highlight-color: $color-2;
-  $lightness: +10%;
+  $lightness: -5%;
 
   .bytes>.group:hover .byte {
     border-bottom-color: color.adjust($highlight-color, $lightness: $lightness);
