@@ -7,10 +7,10 @@ import Memory from '@/components/Memory/Memory.vue';
 import memoryBlockEmits, {
   MemoryBlockByteEvent
 } from '@/components/MemoryBlock/MemoryBlockEvents';
-import { hex } from '@/helpers';
+import { bin, hex } from '@/helpers';
 import onDeviceMessage from '@/hooks/onDeviceMessage';
 import { logger } from '@/Logger';
-import MifareClassic, { defaultKey, MifareClassicBlock, MifareClassicBlockType } from '@/models/MifareClassic';
+import MifareClassic, { defaultKey, MifareClassicBlock, MifareClassicBlockByteGroupType, MifareClassicBlockType } from '@/models/MifareClassic';
 import { PiccType } from '@/models/Picc';
 import { inject, onMounted, onUnmounted, ref } from 'vue';
 
@@ -22,7 +22,7 @@ const client = inject('client') as Client;
 const hByteRef = ref<MemoryBlockByteEvent | undefined>(undefined); // Hovered byte reference
 
 function onBlockByteEnter(e: MemoryBlockByteEvent) {
-  logger.debug('Block byte entered', e);
+  logger.verbose('Block byte entered', e);
   hByteRef.value = e;
 }
 
@@ -80,21 +80,28 @@ onDeviceMessage(message => {
   <div class="dashboard component">
     <div class="header">
       <div class="picc">
-        <h1 class="type">{{ PiccType[picc.type] }}</h1>
-        <ul class="metas">
-          <li class="meta">
-            <span class="name">UID</span>
-            <span class="value">{{ hex(picc.uid) }}</span>
-          </li>
-          <li class="meta">
-            <span class="name">ATQA</span>
-            <span class="value">{{ hex(picc.atqa) }}</span>
-          </li>
-          <li class="meta">
-            <span class="name">SAK</span>
-            <span class="value">{{ hex(picc.sak) }}</span>
-          </li>
-        </ul>
+        <div class="general">
+          <h1 class="type">{{ PiccType[picc.type] }}</h1>
+          <ul class="metas">
+            <li class="meta">
+              <span class="name">UID</span>
+              <span class="value">{{ hex(picc.uid) }}</span>
+            </li>
+            <li class="meta">
+              <span class="name">ATQA</span>
+              <span class="value">{{ hex(picc.atqa) }}</span>
+            </li>
+            <li class="meta">
+              <span class="name">SAK</span>
+              <span class="value">{{ hex(picc.sak) }}</span>
+            </li>
+          </ul>
+        </div>
+        <div class="memory txt-nowrap">
+          {{ picc.memory.blockDistribution.flatMap(d => `${d[0]} sectors with ${d[1]} blocks`).join('; ') }}
+          >> {{ MifareClassicBlock.size }} bytes per block
+          >> {{ picc.memory.size }} bytes of memory
+        </div>
       </div>
     </div>
 
@@ -104,40 +111,64 @@ onDeviceMessage(message => {
       </div>
       <div class="section">
         <div class="info-panel">
-          <p class="memory">
-            {{ PiccType[picc.type] }} has
-            {{ picc.memory.blockDistribution.flatMap(d => `${d[0]} sectors with ${d[1]} blocks`).join(' and ') }}
-            which is a total of
-            {{ picc.memory.blockDistribution.reduce((acc, [blocks, count]) => acc + blocks * count, 0) }}
-            blocks.
-            Each block is {{ MifareClassicBlock.size }} bytes long, which results in a total of
-            {{ picc.memory.size }} bytes of memory.
-          </p>
-
           <Transition appear>
             <p class="hint" v-if="picc.memory.isEmpty">
               Click on one of the sectors on the left to load its data. </p>
           </Transition>
 
-          <div class="hovering" v-if="hByteRef">
+          <div class="target" v-if="hByteRef">
             <ul>
-              <li>
-                Hovering over byte {{ hByteRef.byteIndex }}
-              </li>
-              <li>
-                of
-                <span v-if="hByteRef.block.type != MifareClassicBlockType.Undefined">
-                  {{ MifareClassicBlockType[hByteRef.block.type] }}
-                </span>
-                block at address {{ hByteRef.block.address }} (0x{{ hex(hByteRef.block.address) }})
-                with offset {{ hByteRef.block.offset }}
-              </li>
-              <li>
-                which belongs to sector
-                {{ hByteRef.block.sector.offset }}
-                <span v-if="hByteRef.block.sector.isEmpty">
-                  (click to load)
-                </span>
+              <li class="item">
+                <span class="name">sector</span>
+                <span class="value">{{ hByteRef.block.sector.offset }}</span>
+
+                <ul>
+                  <li class="item">
+                    <span class="name">block</span>
+                    <span class="value">{{ hByteRef.block.address }}</span>
+
+                    <ul>
+                      <li class="item">
+                        <span class="name">address</span>
+                        <span class="value">0x{{ hex(hByteRef.block.address) }}</span>
+                      </li>
+                      <li class="item">
+                        <span class="name">offset</span>
+                        <span class="value">{{ hByteRef.block.offset }}</span>
+                      </li>
+                      <li class="item" v-if="hByteRef.block.type != MifareClassicBlockType.Undefined">
+                        <span class="name">type</span>
+                        <span class="value">{{ MifareClassicBlockType[hByteRef.block.type] }}</span>
+                      </li>
+                      <li class="item">
+                        <span class="name">byte</span>
+                        <span class="value">{{ hByteRef.byteIndex }}</span>
+
+                        <ul v-if="hByteRef.block.type != MifareClassicBlockType.Undefined">
+                          <li class="item">
+                            <span class="name">value</span>
+                            <span class="value">{{ hByteRef.block.data[hByteRef.byteIndex] }}</span>
+
+                            <ul>
+                              <li class="item">
+                                <span class="name">hex</span>
+                                <span class="value">{{ hex(hByteRef.block.data[hByteRef.byteIndex]) }}</span>
+                              </li>
+                              <li class="item">
+                                <span class="name">bin</span>
+                                <span class="value">{{ bin(hByteRef.block.data[hByteRef.byteIndex]) }}</span>
+                              </li>
+                            </ul>
+                          </li>
+                          <li class="item" v-if="hByteRef.block.type != MifareClassicBlockType.Data">
+                            <span class="name">group</span>
+                            <span class="value">{{ MifareClassicBlockByteGroupType[hByteRef.byteGroup.type] }}</span>
+                          </li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
               </li>
             </ul>
           </div>

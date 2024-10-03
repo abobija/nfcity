@@ -15,6 +15,18 @@ export function hex(bytes: number | Uint8Array) {
   return bytes instanceof Uint8Array ? arr2hex(bytes) : num2hex(bytes);
 }
 
+function num2bin(num: number) {
+  return num.toString(2).padStart(8, '0');
+}
+
+function arr2bin(arr: Uint8Array) {
+  return Array.from(arr).map(num2bin).join(' ');
+}
+
+export function bin(bytes: number | Uint8Array) {
+  return bytes instanceof Uint8Array ? arr2bin(bytes) : num2bin(bytes);
+}
+
 export function randomBytes(length: number) {
   return new Uint8Array(
     Array.from({ length }, () => Math.floor(Math.random() * 0xFF))

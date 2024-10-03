@@ -16,3 +16,9 @@ button {
   font-weight: 200;
   font-size: x-large;
 }
+
+.txt-nowrap {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

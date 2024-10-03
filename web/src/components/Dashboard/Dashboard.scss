@@ -1,3 +1,4 @@
+@use 'sass:color';
 @import '@/theme.scss';
 
 .dashboard.component {
@@ -16,32 +17,39 @@
     }
 
     .picc {
-      margin-bottom: 0.8rem;
+      .general {
+        .type {
+          font-size: 1.5rem;
+          color: $color-3;
+          font-weight: 600;
+        }
 
-      .type {
-        font-size: 1.5rem;
-        color: $color-3;
-        font-weight: 600;
-      }
+        .metas {
+          display: flex;
+          margin-top: .5rem;
 
-      .metas {
-        display: flex;
-        margin-top: .5rem;
+          .meta {
+            &:not(:last-child) {
+              margin-right: 1rem;
+            }
 
-        .meta {
-          &:not(:last-child) {
-            margin-right: 1rem;
-          }
-
-          .name {
-            margin-right: 1rem;
+            .name {
+              margin-right: 1rem;
+            }
           }
         }
+      }
+
+      .memory {
+        margin-top: 0.5rem;
+        color: rgba($color-fg, 0.5);
+        font-size: 0.8rem;
       }
     }
   }
 
   >.main {
+    margin-top: 1rem;
     display: flex;
     flex-direction: row;
 
@@ -62,6 +70,39 @@
 
         p:not(:last-child) {
           margin-bottom: 1.5rem;
+        }
+
+        >.target {
+          ul:not(:first-child) {
+            padding-left: 0.6rem;
+
+            &,
+            .item:not(:first-child) {
+              margin-top: 0.1rem;
+            }
+
+            .item:first-child {
+              >.name {
+                position: relative;
+
+                &::before {
+                  position: absolute;
+                  top: 0.3rem;
+                  left: -0.6rem;
+                  content: '└';
+                  font-size: 0.8rem;
+                  color: rgba($color-4, 0.5);
+                }
+              }
+            }
+          }
+
+          .item {
+            .value {
+              margin-left: 1rem;
+              color: $color-3;
+            }
+          }
         }
       }
     }
