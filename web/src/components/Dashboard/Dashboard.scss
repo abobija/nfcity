@@ -74,7 +74,7 @@
 
         >.target {
           ul:not(:first-child) {
-            padding-left: 0.6rem;
+            padding-left: 0.5rem;
 
             &,
             .item:not(:first-child) {
@@ -82,7 +82,7 @@
             }
 
             .item:first-child {
-              >.name {
+              >:first-child {
                 position: relative;
 
                 &::before {

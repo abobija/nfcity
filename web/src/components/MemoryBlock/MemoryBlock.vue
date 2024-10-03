@@ -24,7 +24,7 @@ const classes = computed(() => ({
 }));
 
 function byteIndex(index: number, byteGroup: MemoryBlockByteGroup) {
-  return (byteGroup.offset || 0) + index;
+  return byteGroup.offset + index;
 }
 
 const eventFrom = (byteGroup: MemoryBlockByteGroup, index: number): MemoryBlockByteEvent => ({
@@ -37,9 +37,8 @@ const eventFrom = (byteGroup: MemoryBlockByteGroup, index: number): MemoryBlockB
 <template>
   <div class="block component" :class="classes">
     <ul class="bytes">
-      <ul class="group" :class="byteGroup.class || 'data'" v-for="byteGroup in props.byteGroups">
-        <li class="byte"
-          v-for="(_, index) in Array.from({ length: byteGroup.length || (MifareClassicBlock.size - (byteGroup.offset || 0)) })"
+      <ul class="group" :class="byteGroup.class" v-for="byteGroup in props.byteGroups">
+        <li class="byte" v-for="(_, index) in Array.from({ length: byteGroup.length })"
           :key="byteIndex(index, byteGroup)" :data-index="byteIndex(index, byteGroup)"
           @mouseenter="emits.emit('byteEnter', eventFrom(byteGroup, index))"
           @mouseleave="emits.emit('byteLeave', eventFrom(byteGroup, index))"

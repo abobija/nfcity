@@ -160,9 +160,26 @@ onDeviceMessage(message => {
                               </li>
                             </ul>
                           </li>
-                          <li class="item" v-if="hByteRef.block.type != MifareClassicBlockType.Data">
+                          <li class="item">
                             <span class="name">group</span>
                             <span class="value">{{ MifareClassicBlockByteGroupType[hByteRef.byteGroup.type] }}</span>
+
+                            <ul>
+                              <li class="item">
+                                <span class="name">offset</span>
+                                <span class="value">{{ hByteRef.byteGroup.offset }}</span>
+                              </li>
+                              <li class="item">
+                                <span class="name">length</span>
+                                <span class="value">{{ hByteRef.byteGroup.length }}</span>
+                              </li>
+
+                              <li class="item">
+                                <div class="rendered">
+                                  TODO: render
+                                </div>
+                              </li>
+                            </ul>
                           </li>
                         </ul>
                       </li>

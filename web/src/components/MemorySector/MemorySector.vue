@@ -3,6 +3,7 @@ import MemoryBlock from '@/components/MemoryBlock/MemoryBlock.vue';
 import '@/components/MemorySector/MemorySector.scss';
 import {
   MifareClassicBlock,
+  MifareClassicBlockByteGroup,
   MifareClassicBlockByteGroupType,
   MifareClassicMemory,
   MifareClassicSector
@@ -45,10 +46,10 @@ const byteGroupClassMap: Map<MifareClassicBlockByteGroupType, string> = new Map(
 ]);
 
 function blockByteGroups(block?: MifareClassicBlock): MemoryBlockByteGroup[] {
-  const byteGroups = block?.byteGroups ?? [{
+  const byteGroups: MifareClassicBlockByteGroup[] = block?.byteGroups ?? [{
+    type: MifareClassicBlockByteGroupType.Undefined,
     offset: 0,
     length: MifareClassicBlock.size,
-    type: MifareClassicBlockByteGroupType.Undefined,
   }];
 
   return byteGroups.map<MemoryBlockByteGroup>(byteGroup => {

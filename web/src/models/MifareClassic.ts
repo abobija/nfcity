@@ -44,15 +44,15 @@ export enum MifareClassicBlockType {
 export class MifareClassicBlockByteGroup {
   readonly type: MifareClassicBlockByteGroupType;
   readonly offset: number;
-  readonly length?: number;
+  readonly length: number;
 
-  protected constructor(type: MifareClassicBlockByteGroupType, offset?: number, length?: number) {
+  protected constructor(type: MifareClassicBlockByteGroupType, offset: number, length: number) {
     this.type = type;
-    this.offset = offset || 0;
+    this.offset = offset;
     this.length = length;
   }
 
-  static from(type: MifareClassicBlockByteGroupType, offset?: number, length?: number) {
+  static from(type: MifareClassicBlockByteGroupType, offset: number, length: number) {
     return new MifareClassicBlockByteGroup(type, offset, length);
   }
 };
@@ -95,7 +95,7 @@ export class MifareClassicUndefinedBlock extends MifareClassicBlock {
       },
       { c1: 0, c2: 0, c3: 0 },
       [
-        MifareClassicBlockByteGroup.from(MifareClassicBlockByteGroupType.Undefined),
+        MifareClassicBlockByteGroup.from(MifareClassicBlockByteGroupType.Undefined, 0, MifareClassicBlock.size),
       ]);
   }
 }
@@ -165,7 +165,7 @@ export class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
 export class MifareClassicDataBlock extends MifareClassicBlock {
   static from(sector: MifareClassicSector, block: PiccBlockDto, accessBits: PiccBlockAccessBits) {
     return new MifareClassicDataBlock(MifareClassicBlockType.Data, sector, block, accessBits, [
-      MifareClassicBlockByteGroup.from(MifareClassicBlockByteGroupType.Data),
+      MifareClassicBlockByteGroup.from(MifareClassicBlockByteGroupType.Data, 0, MifareClassicBlock.size),
     ]);
   }
 }
@@ -201,7 +201,11 @@ export class MifareClassicManufacturerBlock extends MifareClassicBlock {
       MifareClassicBlockByteGroup.from(MifareClassicBlockByteGroupType.BCC, uid.length, 1),
       MifareClassicBlockByteGroup.from(MifareClassicBlockByteGroupType.SAK, uid.length + 1, 1),
       MifareClassicBlockByteGroup.from(MifareClassicBlockByteGroupType.ATQA, uid.length + 2, 2),
-      MifareClassicBlockByteGroup.from(MifareClassicBlockByteGroupType.ManufacturerData, uid.length + 4),
+      MifareClassicBlockByteGroup.from(
+        MifareClassicBlockByteGroupType.ManufacturerData,
+        uid.length + 4,
+        MifareClassicBlock.size - uid.length - 4
+      ),
     ]);
   }
 }
