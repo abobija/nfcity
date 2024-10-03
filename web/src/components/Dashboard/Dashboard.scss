@@ -4,7 +4,18 @@
   margin: 1rem;
 
   >.header {
-    >.picc {
+    .meta {
+      .name {
+        color: rgba($color-fg, 0.5);
+      }
+
+      .value {
+        font-weight: 600;
+        color: $color-5;
+      }
+    }
+
+    .picc {
       margin-bottom: 0.8rem;
 
       .type {
@@ -17,19 +28,13 @@
         display: flex;
         margin-top: .5rem;
 
-        >.meta {
+        .meta {
           &:not(:last-child) {
             margin-right: 1rem;
           }
 
-          >.name {
+          .name {
             margin-right: 1rem;
-            color: rgba($color-fg, 0.5);
-          }
-
-          >.value {
-            font-weight: 600;
-            color: $color-5;
           }
         }
       }
@@ -45,13 +50,14 @@
         margin-right: 1rem;
       }
 
-      >.info-panel {
+      .info-panel {
         position: sticky;
         top: 1rem;
         color: $color-4;
 
         p.hint {
-          color: $color-2;
+          color: $color-1;
+          font-size: .9rem;
         }
 
         p:not(:last-child) {

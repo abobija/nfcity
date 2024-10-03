@@ -1,67 +1,80 @@
 @use 'sass:color';
 @import '@/theme.scss';
 
-.memory.component>.sector.component {
-  >.blocks {
-    >.block.component {
-      color: color.adjust($color-bg, $lightness: +40%);
-
-      >.bytes {
-        display: flex;
-        flex-direction: row;
-
-        >.group {
-          display: flex;
-          flex-direction: row;
-          justify-content: center;
-
-          >.byte {
-            cursor: pointer;
-            font-size: 0.8rem;
-            border-style: dashed;
-            border-color: color.adjust($color-bg, $lightness: +6%);
-            border-width: 0 1px 1px 0;
-            padding: 0.3rem;
-
-            &:hover {
-              font-weight: 600;
-            }
-          }
-
-          &:hover {
-            background-color: color.adjust($color-bg, $lightness: +7%);
-          }
-        }
-
-        &:hover {
-          background-color: color.adjust($color-bg, $lightness: +3%);
-        }
-      }
-
-      &.empty {
-        color: transparent;
-        user-select: none;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-      }
-    }
+.block.component {
+  .bytes {
+    display: flex;
+    flex-direction: row;
   }
 
-  &:not(.empty) {
-    >.blocks>.block.component>.bytes>.group>.byte {
-      border-style: solid;
-    }
+  .bytes>.group {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    border-style: solid;
+  }
 
-    &:hover {
-      >.blocks>.block.component>.bytes>.group>.byte {
-        border-color: color.adjust($color-bg, $lightness: +12%);
-      }
+  .byte {
+    cursor: pointer;
+    font-size: 0.8rem;
+    border-style: dashed;
+    border-width: 0px 1px 1px 0px;
+    padding: 0.25rem;
+    transition: border-color .2s ease-in-out;
+  }
+}
+
+.sector.component:not(.empty) {
+  .block.component .byte {
+    border-style: solid;
+  }
+
+  &:hover {
+    .block.component .byte {
+      border-color: color.adjust($color-bg, $lightness: +12%);
     }
   }
 }
 
-.memory.component>.sector.component .block.component.trailer {
+.block.component {
+  color: color.adjust($color-bg, $lightness: +40%);
+
+  .bytes:hover {
+    background-color: color.adjust($color-bg, $lightness: +1%);
+  }
+
+  .byte {
+    border-color: color.adjust($color-bg, $lightness: +5%);
+
+    &:hover {
+      background-color: color.adjust($color-bg, $lightness: +5%);
+      font-weight: 600;
+    }
+  }
+}
+
+.block.component:not(.undefined) {
+  $highlight-color: $color-2;
+  $lightness: +10%;
+
+  .bytes>.group:hover .byte {
+    border-bottom-color: color.adjust($highlight-color, $lightness: $lightness);
+
+    &:not(:last-child) {
+      border-right-color: color.adjust($highlight-color, $lightness: $lightness);
+    }
+  }
+}
+
+.block.component.undefined {
+  color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.block.component.trailer {
   .key-a {
     color: color.adjust($color-3, $hue: -35deg);
   }
@@ -79,7 +92,7 @@
   }
 }
 
-.memory.component>.sector.component .block.component.value {
+.block.component.value {
   .value {
     color: $color-1;
   }
@@ -97,11 +110,11 @@
   }
 }
 
-.memory.component>.sector.component .block.component.data {
+.block.component.data {
   color: $color-4;
 }
 
-.memory.component>.sector.component .block.component.manufacturer {
+.block.component.manufacturer {
   .uid {
     color: $color-5;
   }

@@ -2,7 +2,7 @@
 
 $transition: .3s ease-in-out;
 
-.memory.component>.sector.component {
+.sector.component {
   display: flex;
   flex-direction: row;
   justify-content: right;
@@ -15,7 +15,7 @@ $transition: .3s ease-in-out;
     color: $color-4;
     transition: color $transition;
 
-    >.offset {
+    .offset {
       padding-right: 0.3rem;
     }
   }
