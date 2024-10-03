@@ -22,7 +22,7 @@ const client = inject('client') as Client;
 const hByteRef = ref<MemoryBlockByteEvent | undefined>(undefined); // Hovered byte reference
 
 function onBlockByteEnter(e: MemoryBlockByteEvent) {
-  logger.debug('Block byte entered', e);
+  logger.verbose('Block byte entered', e);
   hByteRef.value = e;
 }
 
@@ -126,7 +126,7 @@ onDeviceMessage(message => {
               <li>
                 Sector {{ hByteRef.block.sector.offset }}
                 <span v-if="hByteRef.block.sector.isEmpty">
-                  (click to load)
+                  is empty (click to load)
                 </span>
               </li>
               <li>
