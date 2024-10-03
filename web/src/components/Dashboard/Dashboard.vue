@@ -148,69 +148,60 @@ onDeviceMessage(message => {
           <div class="target" v-if="targetByte">
             <ul>
               <li class="item">
+                <span class="name">block</span>
+                <span class="value">{{ targetByte.block.address }}</span>
                 <span class="name">sector</span>
                 <span class="value">{{ targetByte.block.sector.offset }}</span>
 
                 <ul>
+                  <li class="item" v-if="targetByte.block.type != MifareClassicBlockType.Undefined">
+                    <span class="name">type</span>
+                    <span class="value">{{ MifareClassicBlockType[targetByte.block.type] }}</span>
+                  </li>
                   <li class="item">
-                    <span class="name">block</span>
-                    <span class="value">{{ targetByte.block.address }}</span>
+                    <span class="name">address</span>
+                    <span class="value">0x{{ hex(targetByte.block.address) }}</span>
+                    <span class="name">offset</span>
+                    <span class="value">{{ targetByte.block.offset }}</span>
+                  </li>
+                  <li class="item">
+                    <span class="name">byte</span>
+                    <span class="value">{{ targetByte.byteIndex }}</span>
 
-                    <ul>
+                    <ul v-if="targetByte.block.type != MifareClassicBlockType.Undefined">
                       <li class="item">
-                        <span class="name">address</span>
-                        <span class="value">0x{{ hex(targetByte.block.address) }}</span>
-                      </li>
-                      <li class="item">
-                        <span class="name">offset</span>
-                        <span class="value">{{ targetByte.block.offset }}</span>
-                      </li>
-                      <li class="item" v-if="targetByte.block.type != MifareClassicBlockType.Undefined">
-                        <span class="name">type</span>
-                        <span class="value">{{ MifareClassicBlockType[targetByte.block.type] }}</span>
-                      </li>
-                      <li class="item">
-                        <span class="name">group</span>
-                        <span class="value">{{ MifareClassicBlockByteGroupType[targetByte.byteGroup.type] }}</span>
+                        <span class="name">value</span>
+                        <span class="value">0x{{ hex(targetByte.block.data[targetByte.byteIndex]) }}</span>
 
                         <ul>
                           <li class="item">
-                            <span class="name">offset</span>
-                            <span class="value">{{ targetByte.byteGroup.offset }}</span>
+                            <span class="name">dec</span>
+                            <span class="value">{{ targetByte.block.data[targetByte.byteIndex] }}</span>
                           </li>
                           <li class="item">
-                            <span class="name">length</span>
-                            <span class="value">{{ targetByte.byteGroup.length }}</span>
-                          </li>
-                          <li class="item">
-                            <span class="name">byte</span>
-                            <span class="value">{{ targetByte.byteIndex }}</span>
-
-                            <ul v-if="targetByte.block.type != MifareClassicBlockType.Undefined">
-                              <li class="item">
-                                <span class="name">value</span>
-                                <span class="value">0x{{ hex(targetByte.block.data[targetByte.byteIndex]) }}</span>
-
-                                <ul>
-                                  <li class="item">
-                                    <span class="name">dec</span>
-                                    <span class="value">{{ targetByte.block.data[targetByte.byteIndex] }}</span>
-                                  </li>
-                                  <li class="item">
-                                    <span class="name">bin</span>
-                                    <span class="value">{{ bin(targetByte.block.data[targetByte.byteIndex], '_')
-                                      }}</span>
-                                  </li>
-                                </ul>
-                              </li>
-                            </ul>
-                          </li>
-                          <li class="item">
-                            <div class="rendered">
-                              TODO: render byte group
-                            </div>
+                            <span class="name">bin</span>
+                            <span class="value">{{ bin(targetByte.block.data[targetByte.byteIndex], '_')
+                              }}</span>
                           </li>
                         </ul>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="item">
+                    <span class="name">byte_group</span>
+                    <span class="value">{{ MifareClassicBlockByteGroupType[targetByte.byteGroup.type] }}</span>
+
+                    <ul>
+                      <li class="item">
+                        <span class="name">offset</span>
+                        <span class="value">{{ targetByte.byteGroup.offset }}</span>
+                        <span class="name">length</span>
+                        <span class="value">{{ targetByte.byteGroup.length }}</span>
+                      </li>
+                      <li class="item">
+                        <div class="rendered">
+                          TODO: render byte group
+                        </div>
                       </li>
                     </ul>
                   </li>

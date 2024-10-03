@@ -102,6 +102,10 @@
               margin-left: 1rem;
               color: $color-3;
             }
+
+            .name:not(:first-child) {
+              margin-left: 1rem;
+            }
           }
         }
       }
