@@ -70,7 +70,7 @@ function blockByteGroups(block?: MifareClassicBlock): MemoryBlockByteGroup[] {
     <div class="blocks">
       <MemoryBlock
         v-for="(_, blockOffset) in Array.from({ length: MifareClassicMemory.numberOfBlocksInSector(sector.offset) })"
-        :key="blockOffset" :sector="sector" :block="sector.blockAt(blockOffset)"
+        :key="blockOffset" :block="sector.blockAt(blockOffset)"
         :byte-groups="blockByteGroups(sector.blockAt(blockOffset))" />
     </div>
   </div>

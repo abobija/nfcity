@@ -7,22 +7,20 @@ import {
   MifareClassicBlock,
   MifareClassicDataBlock,
   MifareClassicManufacturerBlock,
-  MifareClassicSector,
   MifareClassicSectorTrailerBlock,
+  MifareClassicUndefinedBlock,
   MifareClassicValueBlock
 } from '@/models/MifareClassic';
 import { computed } from 'vue';
 
 const props = defineProps<{
-  sector: MifareClassicSector;
-  block?: MifareClassicBlock;
+  block: MifareClassicBlock;
   byteGroups: MemoryBlockByteGroup[];
 }>();
 
-const isEmpty = computed<Boolean>(() => props.block === undefined);
-
 const classes = computed(() => ({
-  empty: isEmpty.value,
+  empty: !props.block.loaded,
+  undefined: props.block instanceof MifareClassicUndefinedBlock,
   trailer: props.block instanceof MifareClassicSectorTrailerBlock,
   manufacturer: props.block instanceof MifareClassicManufacturerBlock,
   data: props.block instanceof MifareClassicDataBlock,
@@ -34,7 +32,6 @@ function byteIndex(index: number, byteGroup: MemoryBlockByteGroup) {
 }
 
 const eventFrom = (byteGroup: MemoryBlockByteGroup, index: number): MemoryBlockByteEvent => ({
-  sector: props.sector,
   block: props.block,
   byteGroup: byteGroup.origin,
   byteIndex: byteIndex(index, byteGroup),
@@ -51,7 +48,7 @@ const eventFrom = (byteGroup: MemoryBlockByteGroup, index: number): MemoryBlockB
           @mouseenter="emits.emit('byteEnter', eventFrom(byteGroup, index))"
           @mouseleave="emits.emit('byteLeave', eventFrom(byteGroup, index))"
           @click="emits.emit('byteClick', eventFrom(byteGroup, index))">
-          {{ block ? hex(block.data[byteIndex(index, byteGroup)]) : '..' }}
+          {{ block.loaded ? hex(block.data[byteIndex(index, byteGroup)]) : '..' }}
         </li>
       </ul>
     </ul>

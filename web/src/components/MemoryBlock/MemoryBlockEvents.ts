@@ -1,9 +1,8 @@
-import { MifareClassicBlock, MifareClassicBlockByteGroup, MifareClassicSector } from "@/models/MifareClassic";
+import { MifareClassicBlock, MifareClassicBlockByteGroup } from "@/models/MifareClassic";
 import mitt from "mitt";
 
 export interface MemoryBlockByteEvent {
-  sector: MifareClassicSector;
-  block?: MifareClassicBlock;
+  block: MifareClassicBlock;
   byteGroup: MifareClassicBlockByteGroup;
   byteIndex: number;
 }

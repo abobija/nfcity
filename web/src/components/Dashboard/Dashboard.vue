@@ -19,22 +19,24 @@ const props = defineProps<{
 }>();
 
 const client = inject('client') as Client;
-const hoveringByteRef = ref<MemoryBlockByteEvent | undefined>(undefined);
+const hByteRef = ref<MemoryBlockByteEvent | undefined>(undefined); // Hovered byte reference
 
 function onBlockByteEnter(e: MemoryBlockByteEvent) {
   logger.debug('Block byte entered', e);
-  hoveringByteRef.value = e;
+  hByteRef.value = e;
 }
 
 function onBlockByteLeave(e: MemoryBlockByteEvent) {
   logger.verbose('Block byte left', e);
-  hoveringByteRef.value = undefined;
+  hByteRef.value = undefined;
 }
 
 function onBlockByteClick(e: MemoryBlockByteEvent) {
   logger.verbose('Block byte clicked', e);
 
-  const sector = e.sector;
+  const sector = e.block.sector;
+
+  e.block.address = 4;
 
   if (!sector.isEmpty) {
     logger.verbose(`Sector ${sector.offset} is not empty. Skipping load.`);
@@ -119,14 +121,19 @@ onDeviceMessage(message => {
               Click on one of the sectors on the left to load its data. </p>
           </Transition>
 
-          <div class="hovering" v-if="hoveringByteRef">
+          <div class="hovering" v-if="hByteRef">
             <ul>
-              <li>Sector {{ hoveringByteRef.sector.offset }}</li>
-              <li v-if="hoveringByteRef.block">
-                Block offset {{ hoveringByteRef.block.offset }},
-                address {{ hoveringByteRef.block.address }} (0x{{ hex(hoveringByteRef.block.address) }})
+              <li>
+                Sector {{ hByteRef.block.sector.offset }}
+                <span v-if="hByteRef.block.sector.isEmpty">
+                  (click to load)
+                </span>
               </li>
-              <li>Byte {{ hoveringByteRef.byteIndex }}</li>
+              <li>
+                Block address {{ hByteRef.block.address }} (0x{{ hex(hByteRef.block.address) }}),
+                offset {{ hByteRef.block.offset }}
+              </li>
+              <li>Byte {{ hByteRef.byteIndex }}</li>
             </ul>
           </div>
         </div>
