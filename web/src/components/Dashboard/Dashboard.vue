@@ -36,8 +36,6 @@ function onBlockByteClick(e: MemoryBlockByteEvent) {
 
   const sector = e.block.sector;
 
-  e.block.address = 4;
-
   if (!sector.isEmpty) {
     logger.verbose(`Sector ${sector.offset} is not empty. Skipping load.`);
     return;
