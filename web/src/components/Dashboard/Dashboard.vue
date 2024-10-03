@@ -21,6 +21,7 @@ const props = defineProps<{
 const client = inject('client') as Client;
 const hByteRef = ref<MemoryBlockByteEvent | undefined>(undefined); // Hovered byte reference
 
+
 function onBlockByteEnter(e: MemoryBlockByteEvent) {
   logger.verbose('Block byte entered', e);
   hByteRef.value = e;
@@ -36,15 +37,14 @@ function onBlockByteClick(e: MemoryBlockByteEvent) {
 
   const sector = e.block.sector;
 
-  if (!sector.isEmpty) {
-    logger.verbose(`Sector ${sector.offset} is not empty. Skipping load.`);
+  if (sector.isEmpty) {
+    client.readSector({
+      offset: sector.offset,
+      key: defaultKey,
+    });
+
     return;
   }
-
-  client.readSector({
-    offset: sector.offset,
-    key: defaultKey,
-  });
 }
 
 onMounted(() => {
