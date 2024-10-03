@@ -22,7 +22,7 @@ const client = inject('client') as Client;
 const hByteRef = ref<MemoryBlockByteEvent | undefined>(undefined); // Hovered byte reference
 
 function onBlockByteEnter(e: MemoryBlockByteEvent) {
-  logger.verbose('Block byte entered', e);
+  logger.debug('Block byte entered', e);
   hByteRef.value = e;
 }
 

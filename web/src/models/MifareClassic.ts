@@ -7,7 +7,7 @@ export const defaultKey: PiccKey = {
   value: Uint8Array.from([0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]),
 };
 
-export enum MifareClassicBlockByteGroupClass {
+export enum MifareClassicBlockByteGroupType {
   Undefined,
 
   // Sector trailer
@@ -44,7 +44,7 @@ export enum MifareClassicBlockType {
 export interface MifareClassicBlockByteGroup {
   offset: number;
   length?: number;
-  class: MifareClassicBlockByteGroupClass;
+  type: MifareClassicBlockByteGroupType;
 };
 
 export abstract class MifareClassicBlock implements PiccBlock {
@@ -85,7 +85,7 @@ export class MifareClassicUndefinedBlock extends MifareClassicBlock {
       },
       { c1: 0, c2: 0, c3: 0 },
       [
-        { offset: 0, length: MifareClassicBlock.size, class: MifareClassicBlockByteGroupClass.Undefined },
+        { offset: 0, length: MifareClassicBlock.size, type: MifareClassicBlockByteGroupType.Undefined },
       ]);
   }
 }
@@ -99,10 +99,10 @@ export class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
     }
 
     super(MifareClassicBlockType.SectorTrailer, sector, block, accessBitsPool[3], [
-      { offset: 0, length: 6, class: MifareClassicBlockByteGroupClass.KeyA },
-      { offset: 6, length: 3, class: MifareClassicBlockByteGroupClass.AccessBits },
-      { offset: 9, length: 1, class: MifareClassicBlockByteGroupClass.UserByte },
-      { offset: 10, length: 6, class: MifareClassicBlockByteGroupClass.KeyB },
+      { offset: 0, length: 6, type: MifareClassicBlockByteGroupType.KeyA },
+      { offset: 6, length: 3, type: MifareClassicBlockByteGroupType.AccessBits },
+      { offset: 9, length: 1, type: MifareClassicBlockByteGroupType.UserByte },
+      { offset: 10, length: 6, type: MifareClassicBlockByteGroupType.KeyB },
     ]);
 
     this.accessBitsPool = accessBitsPool;
@@ -155,7 +155,7 @@ export class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
 export class MifareClassicDataBlock extends MifareClassicBlock {
   static from(sector: MifareClassicSector, block: PiccBlockDto, accessBits: PiccBlockAccessBits) {
     return new MifareClassicDataBlock(MifareClassicBlockType.Data, sector, block, accessBits, [
-      { offset: 0, length: MifareClassicBlock.size, class: MifareClassicBlockByteGroupClass.Data },
+      { offset: 0, length: MifareClassicBlock.size, type: MifareClassicBlockByteGroupType.Data },
     ]);
   }
 }
@@ -165,13 +165,13 @@ export class MifareClassicValueBlock extends MifareClassicBlock {
     // TODO: Parse
 
     return new MifareClassicValueBlock(MifareClassicBlockType.Value, sector, block, accessBits, [
-      { offset: 0, length: 4, class: MifareClassicBlockByteGroupClass.Value },
-      { offset: 4, length: 4, class: MifareClassicBlockByteGroupClass.ValueInverted },
-      { offset: 8, length: 4, class: MifareClassicBlockByteGroupClass.Value },
-      { offset: 12, length: 1, class: MifareClassicBlockByteGroupClass.Address },
-      { offset: 13, length: 1, class: MifareClassicBlockByteGroupClass.AddressInverted },
-      { offset: 14, length: 1, class: MifareClassicBlockByteGroupClass.Address },
-      { offset: 15, length: 1, class: MifareClassicBlockByteGroupClass.AddressInverted },
+      { offset: 0, length: 4, type: MifareClassicBlockByteGroupType.Value },
+      { offset: 4, length: 4, type: MifareClassicBlockByteGroupType.ValueInverted },
+      { offset: 8, length: 4, type: MifareClassicBlockByteGroupType.Value },
+      { offset: 12, length: 1, type: MifareClassicBlockByteGroupType.Address },
+      { offset: 13, length: 1, type: MifareClassicBlockByteGroupType.AddressInverted },
+      { offset: 14, length: 1, type: MifareClassicBlockByteGroupType.Address },
+      { offset: 15, length: 1, type: MifareClassicBlockByteGroupType.AddressInverted },
     ]);
   }
 
@@ -187,11 +187,11 @@ export class MifareClassicManufacturerBlock extends MifareClassicBlock {
     const { uid } = sector.memory.picc;
 
     return new MifareClassicManufacturerBlock(MifareClassicBlockType.Manufacturer, sector, block, accessBits, [
-      { offset: 0, length: uid.length, class: MifareClassicBlockByteGroupClass.UID },
-      { offset: uid.length, length: 1, class: MifareClassicBlockByteGroupClass.BCC },
-      { offset: uid.length + 1, length: 1, class: MifareClassicBlockByteGroupClass.SAK },
-      { offset: uid.length + 2, length: 2, class: MifareClassicBlockByteGroupClass.ATQA },
-      { offset: uid.length + 4, class: MifareClassicBlockByteGroupClass.ManufacturerData },
+      { offset: 0, length: uid.length, type: MifareClassicBlockByteGroupType.UID },
+      { offset: uid.length, length: 1, type: MifareClassicBlockByteGroupType.BCC },
+      { offset: uid.length + 1, length: 1, type: MifareClassicBlockByteGroupType.SAK },
+      { offset: uid.length + 2, length: 2, type: MifareClassicBlockByteGroupType.ATQA },
+      { offset: uid.length + 4, type: MifareClassicBlockByteGroupType.ManufacturerData },
     ]);
   }
 }

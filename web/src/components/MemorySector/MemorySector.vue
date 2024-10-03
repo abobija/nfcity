@@ -3,7 +3,7 @@ import MemoryBlock from '@/components/MemoryBlock/MemoryBlock.vue';
 import '@/components/MemorySector/MemorySector.scss';
 import {
   MifareClassicBlock,
-  MifareClassicBlockByteGroupClass,
+  MifareClassicBlockByteGroupType,
   MifareClassicMemory,
   MifareClassicSector
 } from '@/models/MifareClassic';
@@ -18,37 +18,37 @@ const classes = computed(() => ({
   empty: props.sector.isEmpty,
 }));
 
-const byteGroupClassMap: Map<MifareClassicBlockByteGroupClass, string> = new Map([
-  [MifareClassicBlockByteGroupClass.Undefined, 'undefined'],
+const byteGroupClassMap: Map<MifareClassicBlockByteGroupType, string> = new Map([
+  [MifareClassicBlockByteGroupType.Undefined, 'undefined'],
 
   // Trailer
-  [MifareClassicBlockByteGroupClass.KeyA, 'key key-a'],
-  [MifareClassicBlockByteGroupClass.AccessBits, 'access-bits'],
-  [MifareClassicBlockByteGroupClass.UserByte, 'user-byte'],
-  [MifareClassicBlockByteGroupClass.KeyB, 'key key-b'],
+  [MifareClassicBlockByteGroupType.KeyA, 'key key-a'],
+  [MifareClassicBlockByteGroupType.AccessBits, 'access-bits'],
+  [MifareClassicBlockByteGroupType.UserByte, 'user-byte'],
+  [MifareClassicBlockByteGroupType.KeyB, 'key key-b'],
 
   // Value
-  [MifareClassicBlockByteGroupClass.Value, 'value'],
-  [MifareClassicBlockByteGroupClass.ValueInverted, 'value-inverted'],
-  [MifareClassicBlockByteGroupClass.Address, 'addr'],
-  [MifareClassicBlockByteGroupClass.AddressInverted, 'addr-inverted'],
+  [MifareClassicBlockByteGroupType.Value, 'value'],
+  [MifareClassicBlockByteGroupType.ValueInverted, 'value-inverted'],
+  [MifareClassicBlockByteGroupType.Address, 'addr'],
+  [MifareClassicBlockByteGroupType.AddressInverted, 'addr-inverted'],
 
   // Data
-  [MifareClassicBlockByteGroupClass.Data, 'data'],
+  [MifareClassicBlockByteGroupType.Data, 'data'],
 
   // Manufacturer
-  [MifareClassicBlockByteGroupClass.UID, 'uid'],
-  [MifareClassicBlockByteGroupClass.BCC, 'bcc'],
-  [MifareClassicBlockByteGroupClass.SAK, 'sak'],
-  [MifareClassicBlockByteGroupClass.ATQA, 'atqa'],
-  [MifareClassicBlockByteGroupClass.ManufacturerData, 'manufacturer'],
+  [MifareClassicBlockByteGroupType.UID, 'uid'],
+  [MifareClassicBlockByteGroupType.BCC, 'bcc'],
+  [MifareClassicBlockByteGroupType.SAK, 'sak'],
+  [MifareClassicBlockByteGroupType.ATQA, 'atqa'],
+  [MifareClassicBlockByteGroupType.ManufacturerData, 'manufacturer'],
 ]);
 
 function blockByteGroups(block?: MifareClassicBlock): MemoryBlockByteGroup[] {
   const byteGroups = block?.byteGroups ?? [{
     offset: 0,
     length: MifareClassicBlock.size,
-    class: MifareClassicBlockByteGroupClass.Undefined,
+    type: MifareClassicBlockByteGroupType.Undefined,
   }];
 
   return byteGroups.map<MemoryBlockByteGroup>(byteGroup => {
@@ -56,7 +56,7 @@ function blockByteGroups(block?: MifareClassicBlock): MemoryBlockByteGroup[] {
       origin: byteGroup,
       offset: byteGroup.offset,
       length: byteGroup.length,
-      class: byteGroupClassMap.get(byteGroup.class) ?? 'unknown',
+      class: byteGroupClassMap.get(byteGroup.type) ?? 'unknown',
     };
   });
 }
