@@ -50,13 +50,13 @@ export interface MifareClassicBlockByteGroup {
 export abstract class MifareClassicBlock implements PiccBlock {
   static readonly size: number = 16;
 
-  type: MifareClassicBlockType;
-  sector: MifareClassicSector;
-  address: number;
-  offset: number;
-  data: Uint8Array;
-  accessBits: PiccBlockAccessBits;
-  byteGroups: MifareClassicBlockByteGroup[];
+  readonly type: MifareClassicBlockType;
+  readonly sector: MifareClassicSector;
+  readonly address: number;
+  readonly offset: number;
+  readonly data: Uint8Array;
+  readonly accessBits: PiccBlockAccessBits;
+  readonly byteGroups: MifareClassicBlockByteGroup[];
 
   protected constructor(type: MifareClassicBlockType, sector: MifareClassicSector, block: PiccBlockDto, accessBits: PiccBlockAccessBits, bytesGroups: MifareClassicBlockByteGroup[]) {
     this.type = type;
