@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import '@/components/MemoryBlock/MemoryBlock.scss';
 import MemoryBlockByteGroup from '@/components/MemoryBlock/MemoryBlockByteGroup';
-import { MemoryBlockClickEvent, MemoryBlockHoverEvent } from '@/components/MemoryBlock/MemoryBlockEvents';
+import { MemoryBlockByteClickEvent, MemoryBlockByteHoverEvent } from '@/components/MemoryBlock/MemoryBlockEvents';
 import { hex } from '@/helpers';
 import {
   MifareClassicBlock,
@@ -14,8 +14,8 @@ import {
 import { computed } from 'vue';
 
 defineEmits<{
-  (e: 'hover', data: MemoryBlockHoverEvent): void;
-  (e: 'click', data: MemoryBlockClickEvent): void;
+  (e: 'byteHover', data: MemoryBlockByteHoverEvent): void;
+  (e: 'byteClick', data: MemoryBlockByteClickEvent): void;
 }>();
 
 const props = defineProps<{
@@ -38,15 +38,15 @@ function byteIndex(index: number, byteGroup: MemoryBlockByteGroup) {
   return (byteGroup.offset || 0) + index;
 }
 
-const clickEventData = (byteGroup: MemoryBlockByteGroup, index: number): MemoryBlockClickEvent => ({
+const clickEventData = (byteGroup: MemoryBlockByteGroup, index: number): MemoryBlockByteClickEvent => ({
   sector: props.sector,
   block: props.block,
   byteGroup: byteGroup.origin,
   byteIndex: byteIndex(index, byteGroup),
 });
 
-const hoverEventData = (byteGroup: MemoryBlockByteGroup, index: number): MemoryBlockHoverEvent => {
-  return clickEventData(byteGroup, index) as MemoryBlockHoverEvent;
+const hoverEventData = (byteGroup: MemoryBlockByteGroup, index: number): MemoryBlockByteHoverEvent => {
+  return clickEventData(byteGroup, index) as MemoryBlockByteHoverEvent;
 };
 </script>
 
@@ -57,8 +57,8 @@ const hoverEventData = (byteGroup: MemoryBlockByteGroup, index: number): MemoryB
         <li class="byte"
           v-for="(_, index) in Array.from({ length: byteGroup.length || (MifareClassicBlock.size - (byteGroup.offset || 0)) })"
           :key="byteIndex(index, byteGroup)" :data-index="byteIndex(index, byteGroup)"
-          @mouseenter="$emit('hover', hoverEventData(byteGroup, index))"
-          @click="$emit('click', clickEventData(byteGroup, index))">
+          @mouseenter="$emit('byteHover', hoverEventData(byteGroup, index))"
+          @click="$emit('byteClick', clickEventData(byteGroup, index))">
           {{ block ? hex(block.data[byteIndex(index, byteGroup)]) : '..' }}
         </li>
       </ul>

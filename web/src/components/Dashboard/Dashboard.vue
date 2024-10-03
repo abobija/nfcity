@@ -4,7 +4,7 @@ import { isPiccBlockDevMessage } from '@/comm/msgs/dev/PiccBlockDevMessage';
 import { isPiccSectorDevMessage } from '@/comm/msgs/dev/PiccSectorDevMessage';
 import '@/components/Dashboard/Dashboard.scss';
 import Memory from '@/components/Memory/Memory.vue';
-import { MemoryBlockClickEvent, MemoryBlockHoverEvent } from '@/components/MemoryBlock/MemoryBlockEvents';
+import { MemoryBlockByteClickEvent, MemoryBlockByteHoverEvent } from '@/components/MemoryBlock/MemoryBlockEvents';
 import { hex } from '@/helpers';
 import onDeviceMessage from '@/hooks/onDeviceMessage';
 import { logger } from '@/Logger';
@@ -18,12 +18,12 @@ const props = defineProps<{
 
 const client = inject('client') as Client;
 
-function onBlockHover(e: MemoryBlockHoverEvent) {
-  logger.verbose('Block hovered', e);
+function onBlockByteHover(e: MemoryBlockByteHoverEvent) {
+  logger.verbose('Block byte hovered', e);
 }
 
-function onBlockClick(e: MemoryBlockClickEvent) {
-  logger.verbose('Block clicked', e);
+function onBlockByteClick(e: MemoryBlockByteClickEvent) {
+  logger.verbose('Block byte clicked', e);
 
   const sector = e.sector;
 
@@ -79,7 +79,7 @@ onDeviceMessage(message => {
 
     <div class="main">
       <div class="section">
-        <Memory :memory="picc.memory" @block-hover="onBlockHover" @block-click="onBlockClick" />
+        <Memory :memory="picc.memory" @block-byte-hover="onBlockByteHover" @block-byte-click="onBlockByteClick" />
       </div>
       <div class="section">
         <div class="info-panel">
