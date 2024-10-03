@@ -33,6 +33,14 @@ export enum MifareClassicBlockByteGroupClass {
   ManufacturerData,
 }
 
+export enum MifareClassicBlockType {
+  Undefined,
+  SectorTrailer,
+  Data,
+  Value,
+  Manufacturer,
+}
+
 export interface MifareClassicBlockByteGroup {
   offset: number;
   length?: number;
@@ -42,6 +50,7 @@ export interface MifareClassicBlockByteGroup {
 export abstract class MifareClassicBlock implements PiccBlock {
   static readonly size: number = 16;
 
+  type: MifareClassicBlockType;
   sector: MifareClassicSector;
   address: number;
   offset: number;
@@ -49,7 +58,8 @@ export abstract class MifareClassicBlock implements PiccBlock {
   accessBits: PiccBlockAccessBits;
   byteGroups: MifareClassicBlockByteGroup[];
 
-  protected constructor(sector: MifareClassicSector, block: PiccBlockDto, accessBits: PiccBlockAccessBits, bytesGroups: MifareClassicBlockByteGroup[]) {
+  protected constructor(type: MifareClassicBlockType, sector: MifareClassicSector, block: PiccBlockDto, accessBits: PiccBlockAccessBits, bytesGroups: MifareClassicBlockByteGroup[]) {
+    this.type = type;
     this.sector = sector;
     this.address = block.address;
     this.offset = block.offset;
@@ -66,6 +76,7 @@ export abstract class MifareClassicBlock implements PiccBlock {
 export class MifareClassicUndefinedBlock extends MifareClassicBlock {
   static from(sector: MifareClassicSector, offset: number) {
     return new MifareClassicUndefinedBlock(
+      MifareClassicBlockType.Undefined,
       sector,
       {
         offset,
@@ -87,7 +98,7 @@ export class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
       throw new Error('Invalid access bits pool');
     }
 
-    super(sector, block, accessBitsPool[3], [
+    super(MifareClassicBlockType.SectorTrailer, sector, block, accessBitsPool[3], [
       { offset: 0, length: 6, class: MifareClassicBlockByteGroupClass.KeyA },
       { offset: 6, length: 3, class: MifareClassicBlockByteGroupClass.AccessBits },
       { offset: 9, length: 1, class: MifareClassicBlockByteGroupClass.UserByte },
@@ -143,7 +154,7 @@ export class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
 
 export class MifareClassicDataBlock extends MifareClassicBlock {
   static from(sector: MifareClassicSector, block: PiccBlockDto, accessBits: PiccBlockAccessBits) {
-    return new MifareClassicDataBlock(sector, block, accessBits, [
+    return new MifareClassicDataBlock(MifareClassicBlockType.Data, sector, block, accessBits, [
       { offset: 0, length: MifareClassicBlock.size, class: MifareClassicBlockByteGroupClass.Data },
     ]);
   }
@@ -153,7 +164,7 @@ export class MifareClassicValueBlock extends MifareClassicBlock {
   static from(sector: MifareClassicSector, block: PiccBlockDto, accessBits: PiccBlockAccessBits) {
     // TODO: Parse
 
-    return new MifareClassicValueBlock(sector, block, accessBits, [
+    return new MifareClassicValueBlock(MifareClassicBlockType.Value, sector, block, accessBits, [
       { offset: 0, length: 4, class: MifareClassicBlockByteGroupClass.Value },
       { offset: 4, length: 4, class: MifareClassicBlockByteGroupClass.ValueInverted },
       { offset: 8, length: 4, class: MifareClassicBlockByteGroupClass.Value },
@@ -175,7 +186,7 @@ export class MifareClassicManufacturerBlock extends MifareClassicBlock {
   static from(sector: MifareClassicSector, block: PiccBlockDto, accessBits: PiccBlockAccessBits) {
     const { uid } = sector.memory.picc;
 
-    return new MifareClassicManufacturerBlock(sector, block, accessBits, [
+    return new MifareClassicManufacturerBlock(MifareClassicBlockType.Manufacturer, sector, block, accessBits, [
       { offset: 0, length: uid.length, class: MifareClassicBlockByteGroupClass.UID },
       { offset: uid.length, length: 1, class: MifareClassicBlockByteGroupClass.BCC },
       { offset: uid.length + 1, length: 1, class: MifareClassicBlockByteGroupClass.SAK },

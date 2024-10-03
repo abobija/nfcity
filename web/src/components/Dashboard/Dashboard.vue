@@ -10,7 +10,7 @@ import memoryBlockEmits, {
 import { hex } from '@/helpers';
 import onDeviceMessage from '@/hooks/onDeviceMessage';
 import { logger } from '@/Logger';
-import MifareClassic, { defaultKey, MifareClassicBlock } from '@/models/MifareClassic';
+import MifareClassic, { defaultKey, MifareClassicBlock, MifareClassicBlockType } from '@/models/MifareClassic';
 import { PiccType } from '@/models/Picc';
 import { inject, onMounted, onUnmounted, ref } from 'vue';
 
@@ -124,16 +124,23 @@ onDeviceMessage(message => {
           <div class="hovering" v-if="hByteRef">
             <ul>
               <li>
-                Sector {{ hByteRef.block.sector.offset }}
-                <span v-if="hByteRef.block.sector.isEmpty">
-                  is empty (click to load)
-                </span>
+                Hovering over byte {{ hByteRef.byteIndex }}
               </li>
               <li>
-                Block address {{ hByteRef.block.address }} (0x{{ hex(hByteRef.block.address) }}),
-                offset {{ hByteRef.block.offset }}
+                of
+                <span v-if="hByteRef.block.type != MifareClassicBlockType.Undefined">
+                  {{ MifareClassicBlockType[hByteRef.block.type] }}
+                </span>
+                block at address {{ hByteRef.block.address }} (0x{{ hex(hByteRef.block.address) }})
+                with offset {{ hByteRef.block.offset }}
               </li>
-              <li>Byte {{ hByteRef.byteIndex }}</li>
+              <li>
+                which belongs to sector
+                {{ hByteRef.block.sector.offset }}
+                <span v-if="hByteRef.block.sector.isEmpty">
+                  (click to load)
+                </span>
+              </li>
             </ul>
           </div>
         </div>

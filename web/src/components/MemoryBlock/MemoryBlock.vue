@@ -5,11 +5,7 @@ import emits, { MemoryBlockByteEvent } from '@/components/MemoryBlock/MemoryBloc
 import { hex } from '@/helpers';
 import {
   MifareClassicBlock,
-  MifareClassicDataBlock,
-  MifareClassicManufacturerBlock,
-  MifareClassicSectorTrailerBlock,
-  MifareClassicUndefinedBlock,
-  MifareClassicValueBlock
+  MifareClassicBlockType
 } from '@/models/MifareClassic';
 import { computed } from 'vue';
 
@@ -20,11 +16,11 @@ const props = defineProps<{
 
 const classes = computed(() => ({
   empty: !props.block.loaded,
-  undefined: props.block instanceof MifareClassicUndefinedBlock,
-  trailer: props.block instanceof MifareClassicSectorTrailerBlock,
-  manufacturer: props.block instanceof MifareClassicManufacturerBlock,
-  data: props.block instanceof MifareClassicDataBlock,
-  value: props.block instanceof MifareClassicValueBlock,
+  undefined: props.block.type == MifareClassicBlockType.Undefined,
+  trailer: props.block.type == MifareClassicBlockType.SectorTrailer,
+  manufacturer: props.block.type == MifareClassicBlockType.Manufacturer,
+  data: props.block.type == MifareClassicBlockType.Data,
+  value: props.block.type == MifareClassicBlockType.Value,
 }));
 
 function byteIndex(index: number, byteGroup: MemoryBlockByteGroup) {
