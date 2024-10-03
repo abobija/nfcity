@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import '@/components/MemoryBlock/MemoryBlock.scss';
 import MemoryBlockByteGroup from '@/components/MemoryBlock/MemoryBlockByteGroup';
-import emits, { MemoryBlockByteClickEvent, MemoryBlockByteHoverEvent } from '@/components/MemoryBlock/MemoryBlockEvents';
+import emits, { MemoryBlockByteEvent } from '@/components/MemoryBlock/MemoryBlockEvents';
 import { hex } from '@/helpers';
 import {
   MifareClassicBlock,
@@ -33,16 +33,12 @@ function byteIndex(index: number, byteGroup: MemoryBlockByteGroup) {
   return (byteGroup.offset || 0) + index;
 }
 
-const clickEventData = (byteGroup: MemoryBlockByteGroup, index: number): MemoryBlockByteClickEvent => ({
+const eventFrom = (byteGroup: MemoryBlockByteGroup, index: number): MemoryBlockByteEvent => ({
   sector: props.sector,
   block: props.block,
   byteGroup: byteGroup.origin,
   byteIndex: byteIndex(index, byteGroup),
 });
-
-const hoverEventData = (byteGroup: MemoryBlockByteGroup, index: number): MemoryBlockByteHoverEvent => {
-  return clickEventData(byteGroup, index) as MemoryBlockByteHoverEvent;
-};
 </script>
 
 <template>
@@ -52,8 +48,9 @@ const hoverEventData = (byteGroup: MemoryBlockByteGroup, index: number): MemoryB
         <li class="byte"
           v-for="(_, index) in Array.from({ length: byteGroup.length || (MifareClassicBlock.size - (byteGroup.offset || 0)) })"
           :key="byteIndex(index, byteGroup)" :data-index="byteIndex(index, byteGroup)"
-          @mouseenter="emits.emit('byteHover', hoverEventData(byteGroup, index))"
-          @click="emits.emit('byteClick', clickEventData(byteGroup, index))">
+          @mouseenter="emits.emit('byteEnter', eventFrom(byteGroup, index))"
+          @mouseleave="emits.emit('byteLeave', eventFrom(byteGroup, index))"
+          @click="emits.emit('byteClick', eventFrom(byteGroup, index))">
           {{ block ? hex(block.data[byteIndex(index, byteGroup)]) : '..' }}
         </li>
       </ul>

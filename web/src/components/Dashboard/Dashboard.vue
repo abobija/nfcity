@@ -5,27 +5,33 @@ import { isPiccSectorDevMessage } from '@/comm/msgs/dev/PiccSectorDevMessage';
 import '@/components/Dashboard/Dashboard.scss';
 import Memory from '@/components/Memory/Memory.vue';
 import memoryBlockEmits, {
-  MemoryBlockByteClickEvent,
-  MemoryBlockByteHoverEvent
+  MemoryBlockByteEvent
 } from '@/components/MemoryBlock/MemoryBlockEvents';
 import { hex } from '@/helpers';
 import onDeviceMessage from '@/hooks/onDeviceMessage';
 import { logger } from '@/Logger';
 import MifareClassic, { defaultKey, MifareClassicBlock } from '@/models/MifareClassic';
 import { PiccType } from '@/models/Picc';
-import { inject, onMounted, onUnmounted } from 'vue';
+import { inject, onMounted, onUnmounted, ref } from 'vue';
 
 const props = defineProps<{
   picc: MifareClassic;
 }>();
 
 const client = inject('client') as Client;
+const hoveringByteRef = ref<MemoryBlockByteEvent | undefined>(undefined);
 
-function onBlockByteHover(e: MemoryBlockByteHoverEvent) {
-  logger.verbose('Block byte hovered', e);
+function onBlockByteEnter(e: MemoryBlockByteEvent) {
+  logger.debug('Block byte entered', e);
+  hoveringByteRef.value = e;
 }
 
-function onBlockByteClick(e: MemoryBlockByteClickEvent) {
+function onBlockByteLeave(e: MemoryBlockByteEvent) {
+  logger.verbose('Block byte left', e);
+  hoveringByteRef.value = undefined;
+}
+
+function onBlockByteClick(e: MemoryBlockByteEvent) {
   logger.verbose('Block byte clicked', e);
 
   const sector = e.sector;
@@ -42,12 +48,14 @@ function onBlockByteClick(e: MemoryBlockByteClickEvent) {
 }
 
 onMounted(() => {
-  memoryBlockEmits.on('byteHover', onBlockByteHover);
+  memoryBlockEmits.on('byteEnter', onBlockByteEnter);
+  memoryBlockEmits.on('byteLeave', onBlockByteLeave);
   memoryBlockEmits.on('byteClick', onBlockByteClick);
 });
 
 onUnmounted(() => {
-  memoryBlockEmits.off('byteHover', onBlockByteHover);
+  memoryBlockEmits.off('byteEnter', onBlockByteEnter);
+  memoryBlockEmits.off('byteLeave', onBlockByteLeave);
   memoryBlockEmits.off('byteClick', onBlockByteClick);
 });
 
@@ -110,6 +118,17 @@ onDeviceMessage(message => {
             <p class="hint" v-if="picc.memory.isEmpty">
               Click on one of the sectors on the left to load its data. </p>
           </Transition>
+
+          <div class="hovering" v-if="hoveringByteRef">
+            <ul>
+              <li>Sector {{ hoveringByteRef.sector.offset }}</li>
+              <li v-if="hoveringByteRef.block">
+                Block offset {{ hoveringByteRef.block.offset }},
+                address {{ hoveringByteRef.block.address }} (0x{{ hex(hoveringByteRef.block.address) }})
+              </li>
+              <li>Byte {{ hoveringByteRef.byteIndex }}</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
