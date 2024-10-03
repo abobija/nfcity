@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import '@/components/MemoryBlock/MemoryBlock.scss';
 import MemoryBlockByteGroup from '@/components/MemoryBlock/MemoryBlockByteGroup';
-import MemoryBlockClickEvent from '@/components/MemoryBlock/MemoryBlockClickEvent';
+import { MemoryBlockClickEvent, MemoryBlockHoverEvent } from '@/components/MemoryBlock/MemoryBlockEvents';
 import { hex } from '@/helpers';
 import {
   MifareClassicBlock,
@@ -14,6 +14,7 @@ import {
 import { computed } from 'vue';
 
 defineEmits<{
+  (e: 'hover', data: MemoryBlockHoverEvent): void;
   (e: 'click', data: MemoryBlockClickEvent): void;
 }>();
 
@@ -36,6 +37,17 @@ const classes = computed(() => ({
 function byteIndex(index: number, byteGroup: MemoryBlockByteGroup) {
   return (byteGroup.offset || 0) + index;
 }
+
+const clickEventData = (byteGroup: MemoryBlockByteGroup, index: number): MemoryBlockClickEvent => ({
+  sector: props.sector,
+  block: props.block,
+  byteGroup: byteGroup.origin,
+  byteIndex: byteIndex(index, byteGroup),
+});
+
+const hoverEventData = (byteGroup: MemoryBlockByteGroup, index: number): MemoryBlockHoverEvent => {
+  return clickEventData(byteGroup, index) as MemoryBlockHoverEvent;
+};
 </script>
 
 <template>
@@ -44,12 +56,9 @@ function byteIndex(index: number, byteGroup: MemoryBlockByteGroup) {
       <ul class="group" :class="byteGroup.class || 'data'" v-for="byteGroup in props.byteGroups">
         <li class="byte"
           v-for="(_, index) in Array.from({ length: byteGroup.length || (MifareClassicBlock.size - (byteGroup.offset || 0)) })"
-          :key="byteIndex(index, byteGroup)" :data-index="byteIndex(index, byteGroup)" @click="$emit('click', {
-            sector,
-            block,
-            byteGroup: byteGroup.origin,
-            byteIndex: byteIndex(index, byteGroup),
-          })">
+          :key="byteIndex(index, byteGroup)" :data-index="byteIndex(index, byteGroup)"
+          @mouseenter="$emit('hover', hoverEventData(byteGroup, index))"
+          @click="$emit('click', clickEventData(byteGroup, index))">
           {{ block ? hex(block.data[byteIndex(index, byteGroup)]) : '..' }}
         </li>
       </ul>

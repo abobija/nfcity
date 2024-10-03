@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import MemoryBlock from '@/components/MemoryBlock/MemoryBlock.vue';
-import MemoryBlockClickEvent from '@/components/MemoryBlock/MemoryBlockClickEvent';
+import { MemoryBlockClickEvent, MemoryBlockHoverEvent } from '@/components/MemoryBlock/MemoryBlockEvents';
 import '@/components/MemorySector/MemorySector.scss';
 import {
   MifareClassicBlock,
@@ -16,6 +16,7 @@ const props = defineProps<{
 }>();
 
 defineEmits<{
+  (e: 'blockHover', data: MemoryBlockHoverEvent): void;
   (e: 'blockClick', data: MemoryBlockClickEvent): void;
 }>();
 
@@ -76,7 +77,8 @@ function blockByteGroups(block?: MifareClassicBlock): MemoryBlockByteGroup[] {
       <MemoryBlock
         v-for="(_, blockOffset) in Array.from({ length: MifareClassicMemory.numberOfBlocksInSector(sector.offset) })"
         :key="blockOffset" :sector="sector" :block="sector.blockAt(blockOffset)"
-        :byte-groups="blockByteGroups(sector.blockAt(blockOffset))" @click="e => $emit('blockClick', e)" />
+        :byte-groups="blockByteGroups(sector.blockAt(blockOffset))" @hover="e => $emit('blockHover', e)"
+        @click="e => $emit('blockClick', e)" />
     </div>
   </div>
 </template>
