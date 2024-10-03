@@ -49,7 +49,7 @@ export class MifareClassicBlockByteGroup {
   protected constructor(type: MifareClassicBlockByteGroupType, offset?: number, length?: number) {
     this.type = type;
     this.offset = offset || 0;
-    this.length = length || MifareClassicBlock.size;
+    this.length = length;
   }
 
   static from(type: MifareClassicBlockByteGroupType, offset?: number, length?: number) {
