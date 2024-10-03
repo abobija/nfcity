@@ -27,26 +27,37 @@ export enum PiccKeyType {
   B = 1,
 }
 
-export type Offset = number;
+type SectorOffset = number;
+type BlockOffset = number;
+type Bit = number;
+type BlockAddress = number;
 
 export interface PiccKey {
   value: Uint8Array;
   type: PiccKeyType;
 }
 
+export interface PiccBlockAccessBits {
+  c1: Bit;
+  c2: Bit;
+  c3: Bit;
+}
+
 export interface PiccBlock {
-  address: number;
-  offset: number;
+  address: BlockAddress;
+  offset: BlockOffset;
   data: Uint8Array;
+  accessBits: PiccBlockAccessBits;
 }
 
 export interface PiccSector {
-  offset: number;
-  blocks: Map<Offset, PiccBlock>;
+  offset: SectorOffset;
+  blocks: Map<BlockOffset, PiccBlock>;
+  block0Address: BlockAddress;
 }
 
 export interface PiccMemory {
-  sectors: Map<Offset, PiccSector>;
+  sectors: Map<SectorOffset, PiccSector>;
 }
 
 export default interface Picc {
@@ -55,4 +66,5 @@ export default interface Picc {
   atqa: number;
   sak: number;
   uid: Uint8Array;
+  memory: PiccMemory;
 }

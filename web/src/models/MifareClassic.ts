@@ -1,17 +1,11 @@
 import PiccBlockDto from "@/comm/dtos/PiccBlockDto";
 import { nibbles } from "@/helpers";
-import Picc, { PiccBlock, PiccKey, PiccKeyType, PiccMemory, PiccSector, PiccState, PiccType } from "@/models/Picc";
+import Picc, { PiccBlock, PiccBlockAccessBits, PiccKey, PiccKeyType, PiccMemory, PiccSector, PiccState, PiccType } from "@/models/Picc";
 
 export const defaultKey: PiccKey = {
   type: PiccKeyType.A,
   value: Uint8Array.from([0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]),
 };
-
-interface AccessBits {
-  c1: number;
-  c2: number;
-  c3: number;
-}
 
 export enum MifareClassicBlockByteGroupClass {
   Undefined,
@@ -39,11 +33,11 @@ export enum MifareClassicBlockByteGroupClass {
   ManufacturerData,
 }
 
-export type MifareClassicBlockByteGroup = Readonly<{
+export interface MifareClassicBlockByteGroup {
   offset: number;
   length?: number;
   class: MifareClassicBlockByteGroupClass;
-}>;
+};
 
 export abstract class MifareClassicBlock implements PiccBlock {
   public static readonly size: number = 16;
@@ -52,9 +46,9 @@ export abstract class MifareClassicBlock implements PiccBlock {
   address: number;
   offset: number;
   data: Uint8Array;
-  accessBits: AccessBits;
+  accessBits: PiccBlockAccessBits;
 
-  protected constructor(sector: MifareClassicSector, block: PiccBlockDto, accessBits: AccessBits) {
+  protected constructor(sector: MifareClassicSector, block: PiccBlockDto, accessBits: PiccBlockAccessBits) {
     this.sector = sector;
     this.address = block.address;
     this.offset = block.offset;
@@ -86,9 +80,9 @@ export class MifareClassicUndefinedBlock extends MifareClassicBlock {
 }
 
 export class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
-  public readonly accessBitsPool: Array<AccessBits>;
+  public readonly accessBitsPool: Array<PiccBlockAccessBits>;
 
-  constructor(sector: MifareClassicSector, block: PiccBlockDto, accessBitsPool: Array<AccessBits>) {
+  constructor(sector: MifareClassicSector, block: PiccBlockDto, accessBitsPool: Array<PiccBlockAccessBits>) {
     if (accessBitsPool.length != 4) {
       throw new Error('Invalid access bits pool');
     }
@@ -107,7 +101,7 @@ export class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
     const [c1] = nibbles(data[7]);
     const [c3, c2] = nibbles(data[8])
 
-    const accessBitsPool = Array<AccessBits>(4);
+    const accessBitsPool = Array<PiccBlockAccessBits>(4);
 
     for (let i = 0; i < 4; i++) {
       accessBitsPool[i] = this.nibblesToAccessBits(c1, c2, c3, i);
@@ -133,7 +127,7 @@ export class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
     return blockOffset;
   }
 
-  private static nibblesToAccessBits(c1: number, c2: number, c3: number, offset: number): AccessBits {
+  private static nibblesToAccessBits(c1: number, c2: number, c3: number, offset: number): PiccBlockAccessBits {
     return {
       c1: (c1 & (1 << offset)) >> offset,
       c2: (c2 & (1 << offset)) >> offset,
@@ -151,7 +145,7 @@ export class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
 }
 
 export class MifareClassicDataBlock extends MifareClassicBlock {
-  public static from(sector: MifareClassicSector, block: PiccBlockDto, accessBits: AccessBits) {
+  public static from(sector: MifareClassicSector, block: PiccBlockDto, accessBits: PiccBlockAccessBits) {
     return new MifareClassicDataBlock(sector, block, accessBits);
   }
 
@@ -163,7 +157,7 @@ export class MifareClassicDataBlock extends MifareClassicBlock {
 }
 
 export class MifareClassicValueBlock extends MifareClassicBlock {
-  public static from(sector: MifareClassicSector, block: PiccBlockDto, accessBits: AccessBits) {
+  public static from(sector: MifareClassicSector, block: PiccBlockDto, accessBits: PiccBlockAccessBits) {
     // TODO: Parse
 
     return new MifareClassicValueBlock(sector, block, accessBits);
@@ -181,7 +175,7 @@ export class MifareClassicValueBlock extends MifareClassicBlock {
     ];
   }
 
-  public static isValueBlock(accessBits: AccessBits): Boolean {
+  public static isValueBlock(accessBits: PiccBlockAccessBits): Boolean {
     const bits = (accessBits.c1 << 2) | (accessBits.c2 << 1) | (accessBits.c3 << 0);
 
     return bits == 0b110 || bits == 0b001;
@@ -189,7 +183,7 @@ export class MifareClassicValueBlock extends MifareClassicBlock {
 }
 
 export class MifareClassicManufacturerBlock extends MifareClassicBlock {
-  public static from(sector: MifareClassicSector, block: PiccBlockDto, accessBits: AccessBits) {
+  public static from(sector: MifareClassicSector, block: PiccBlockDto, accessBits: PiccBlockAccessBits) {
     return new MifareClassicManufacturerBlock(sector, block, accessBits);
   }
 
