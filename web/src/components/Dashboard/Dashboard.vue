@@ -4,13 +4,16 @@ import { isPiccBlockDevMessage } from '@/comm/msgs/dev/PiccBlockDevMessage';
 import { isPiccSectorDevMessage } from '@/comm/msgs/dev/PiccSectorDevMessage';
 import '@/components/Dashboard/Dashboard.scss';
 import Memory from '@/components/Memory/Memory.vue';
-import { MemoryBlockByteClickEvent, MemoryBlockByteHoverEvent } from '@/components/MemoryBlock/MemoryBlockEvents';
+import memoryBlockEmits, {
+  MemoryBlockByteClickEvent,
+  MemoryBlockByteHoverEvent
+} from '@/components/MemoryBlock/MemoryBlockEvents';
 import { hex } from '@/helpers';
 import onDeviceMessage from '@/hooks/onDeviceMessage';
 import { logger } from '@/Logger';
 import MifareClassic, { defaultKey, MifareClassicBlock } from '@/models/MifareClassic';
 import { PiccType } from '@/models/Picc';
-import { inject } from 'vue';
+import { inject, onMounted, onUnmounted } from 'vue';
 
 const props = defineProps<{
   picc: MifareClassic;
@@ -37,6 +40,16 @@ function onBlockByteClick(e: MemoryBlockByteClickEvent) {
     key: defaultKey,
   });
 }
+
+onMounted(() => {
+  memoryBlockEmits.on('byteHover', onBlockByteHover);
+  memoryBlockEmits.on('byteClick', onBlockByteClick);
+});
+
+onUnmounted(() => {
+  memoryBlockEmits.off('byteHover', onBlockByteHover);
+  memoryBlockEmits.off('byteClick', onBlockByteClick);
+});
 
 onDeviceMessage(message => {
   if (!isPiccBlockDevMessage(message)) {
@@ -79,7 +92,7 @@ onDeviceMessage(message => {
 
     <div class="main">
       <div class="section">
-        <Memory :memory="picc.memory" @block-byte-hover="onBlockByteHover" @block-byte-click="onBlockByteClick" />
+        <Memory :memory="picc.memory" />
       </div>
       <div class="section">
         <div class="info-panel">
