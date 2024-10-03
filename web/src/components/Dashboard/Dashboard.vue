@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import Client from '@/comm/Client';
+import { isPiccBlockDevMessage } from '@/comm/msgs/dev/PiccBlockDevMessage';
+import { isPiccSectorDevMessage } from '@/comm/msgs/dev/PiccSectorDevMessage';
 import '@/components/Dashboard/Dashboard.scss';
 import Memory from '@/components/Memory/Memory.vue';
 import MemoryBlockClickEvent from '@/components/MemoryBlock/MemoryBlockClickEvent';
 import { hex } from '@/helpers';
+import onDeviceMessage from '@/hooks/onDeviceMessage';
 import { logger } from '@/Logger';
 import MifareClassic, { defaultKey, MifareClassicBlock } from '@/models/MifareClassic';
 import { PiccType } from '@/models/Picc';
 import { inject } from 'vue';
 
-defineProps<{
+const props = defineProps<{
   picc: MifareClassic;
 }>();
 
@@ -30,6 +33,22 @@ function onBlockClick(e: MemoryBlockClickEvent) {
     key: defaultKey,
   });
 }
+
+onDeviceMessage(message => {
+  if (!isPiccBlockDevMessage(message)) {
+    return;
+  }
+
+  logger.warning('Unhandled reception of single block', message.block);
+});
+
+onDeviceMessage(message => {
+  if (!isPiccSectorDevMessage(message)) {
+    return;
+  }
+
+  props.picc.memory.updateSector(message.blocks);
+});
 </script>
 
 <template>

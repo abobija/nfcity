@@ -2,9 +2,7 @@
 import '@/App.scss';
 import Client from '@/comm/Client';
 import { isHelloDevMessage } from '@/comm/msgs/dev/HelloDevMessage';
-import { isPiccBlockDevMessage } from '@/comm/msgs/dev/PiccBlockDevMessage';
 import { isPiccDevMessage } from '@/comm/msgs/dev/PiccDevMessage';
-import { isPiccSectorDevMessage } from '@/comm/msgs/dev/PiccSectorDevMessage';
 import { isPiccStateChangedDevMessage } from '@/comm/msgs/dev/PiccStateChangedDevMessage';
 import Dashboard from '@/components/Dashboard/Dashboard.vue';
 import onDeviceMessage from '@/hooks/onDeviceMessage';
@@ -27,6 +25,33 @@ enum AppState {
 const client = inject('client') as Client;
 const stateRef = ref<AppState>(AppState.Initialized);
 const piccRef = ref<MifareClassic | null>(null);
+
+watch(stateRef, (newState, oldState) => {
+  logger.verbose('app state changed from', AppState[oldState], 'to', AppState[newState]);
+
+  switch (newState) {
+    case AppState.Disconnected:
+    case AppState.Initialized:
+    case AppState.Connecting: {
+      piccRef.value = null;
+    } break;
+    case AppState.Connected: {
+      stateRef.value = AppState.PiccFetching;
+    } break;
+    case AppState.PiccFetching: {
+      client.getPicc();
+    } break;
+    case AppState.PiccNotPresent: {
+      // do nothing, wait for user to put a card
+    } break;
+    case AppState.PiccRemoved: {
+      // do nothing, wait for user to put the card back
+    } break;
+    case AppState.PiccPaired: {
+      // do nothing, user is in dashboard
+    } break;
+  }
+});
 
 function connect() {
   stateRef.value = AppState.Connecting;
@@ -84,49 +109,6 @@ onDeviceMessage(message => {
     stateRef.value = AppState.PiccNotPresent;
     return;
   }
-});
-
-watch(stateRef, (newState, oldState) => {
-  logger.verbose('app state changed from', AppState[oldState], 'to', AppState[newState]);
-
-  switch (newState) {
-    case AppState.Disconnected:
-    case AppState.Initialized:
-    case AppState.Connecting: {
-      piccRef.value = null;
-    } break;
-    case AppState.Connected: {
-      stateRef.value = AppState.PiccFetching;
-    } break;
-    case AppState.PiccFetching: {
-      client.getPicc();
-    } break;
-    case AppState.PiccNotPresent: {
-      // do nothing, wait for user to put a card
-    } break;
-    case AppState.PiccRemoved: {
-      // do nothing, wait for user to put the card back
-    } break;
-    case AppState.PiccPaired: {
-      // do nothing, user is in dashboard
-    } break;
-  }
-});
-
-onDeviceMessage(message => {
-  if (!isPiccBlockDevMessage(message) || !piccRef.value) {
-    return;
-  }
-
-  logger.warning('Unhandled reception of single block', message.block);
-});
-
-onDeviceMessage(message => {
-  if (!isPiccSectorDevMessage(message) || !piccRef.value) {
-    return;
-  }
-
-  piccRef.value.memory.updateSector(message.blocks);
 });
 </script>
 
