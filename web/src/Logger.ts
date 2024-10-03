@@ -22,7 +22,7 @@ const levelColor = {
 };
 
 class Logger {
-  public readonly level: LogLevel;
+  readonly level: LogLevel;
 
   constructor(level: LogLevel) {
     this.level = level;
@@ -48,13 +48,21 @@ class Logger {
     this.log(LogLevel.VERBOSE, message, ...optionalParams);
   }
 
-  private log(level: LogLevel, message: string, ...optionalParams: any[]): void {
+  private log(level: LogLevel, message?: any, ...optionalParams: any[]): void {
     if (level > this.level) {
       return;
     }
 
+    let format = `${levelColor[level]}[nfcity][${LogLevel[level].at(0)}]${resetColor}`;
+
+    if (typeof (message) === 'string') {
+      format += ` ${message}`;
+    } else {
+      optionalParams = [message, ...optionalParams];
+    }
+
     console.log(
-      `${levelColor[level]}[nfcity][${LogLevel[level].at(0)}]${resetColor} ${message}`,
+      format,
       ...optionalParams
     );
   }
