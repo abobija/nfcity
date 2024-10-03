@@ -141,45 +141,44 @@ onDeviceMessage(message => {
                         <span class="value">{{ MifareClassicBlockType[hByteRef.block.type] }}</span>
                       </li>
                       <li class="item">
-                        <span class="name">byte</span>
-                        <span class="value">{{ hByteRef.byteIndex }}</span>
+                        <span class="name">group</span>
+                        <span class="value">{{ MifareClassicBlockByteGroupType[hByteRef.byteGroup.type] }}</span>
 
-                        <ul v-if="hByteRef.block.type != MifareClassicBlockType.Undefined">
+                        <ul>
                           <li class="item">
-                            <span class="name">value</span>
-                            <span class="value">{{ hByteRef.block.data[hByteRef.byteIndex] }}</span>
+                            <span class="name">offset</span>
+                            <span class="value">{{ hByteRef.byteGroup.offset }}</span>
+                          </li>
+                          <li class="item">
+                            <span class="name">length</span>
+                            <span class="value">{{ hByteRef.byteGroup.length }}</span>
+                          </li>
+                          <li class="item">
+                            <span class="name">byte</span>
+                            <span class="value">{{ hByteRef.byteIndex }}</span>
 
-                            <ul>
+                            <ul v-if="hByteRef.block.type != MifareClassicBlockType.Undefined">
                               <li class="item">
-                                <span class="name">hex</span>
-                                <span class="value">{{ hex(hByteRef.block.data[hByteRef.byteIndex]) }}</span>
-                              </li>
-                              <li class="item">
-                                <span class="name">bin</span>
-                                <span class="value">{{ bin(hByteRef.block.data[hByteRef.byteIndex]) }}</span>
+                                <span class="name">value</span>
+                                <span class="value">{{ hByteRef.block.data[hByteRef.byteIndex] }}</span>
+
+                                <ul>
+                                  <li class="item">
+                                    <span class="name">hex</span>
+                                    <span class="value">{{ hex(hByteRef.block.data[hByteRef.byteIndex]) }}</span>
+                                  </li>
+                                  <li class="item">
+                                    <span class="name">bin</span>
+                                    <span class="value">{{ bin(hByteRef.block.data[hByteRef.byteIndex]) }}</span>
+                                  </li>
+                                </ul>
                               </li>
                             </ul>
                           </li>
                           <li class="item">
-                            <span class="name">group</span>
-                            <span class="value">{{ MifareClassicBlockByteGroupType[hByteRef.byteGroup.type] }}</span>
-
-                            <ul>
-                              <li class="item">
-                                <span class="name">offset</span>
-                                <span class="value">{{ hByteRef.byteGroup.offset }}</span>
-                              </li>
-                              <li class="item">
-                                <span class="name">length</span>
-                                <span class="value">{{ hByteRef.byteGroup.length }}</span>
-                              </li>
-
-                              <li class="item">
-                                <div class="rendered">
-                                  TODO: render
-                                </div>
-                              </li>
-                            </ul>
+                            <div class="rendered">
+                              TODO: render
+                            </div>
                           </li>
                         </ul>
                       </li>
