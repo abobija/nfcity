@@ -77,11 +77,16 @@ class Client {
     this.pingInterval = setInterval(() => {
       const pingHasBeenSent = this.lastPingTimestamp !== undefined;
       const pongHasBeenReceived = this.lastPongTimestamp !== undefined;
-      const pongIsOutdated = pongHasBeenReceived && (Date.now() - this.lastPongTimestamp!) > this.pingIntervalMs;
+      const timeSinceLastPongMs = pongHasBeenReceived ? (Date.now() - this.lastPongTimestamp!) : undefined;
+      const pongIsOutdated = timeSinceLastPongMs && timeSinceLastPongMs > this.pingIntervalMs;
 
       if (pingHasBeenSent && (!pongHasBeenReceived || pongIsOutdated)) {
-        logger.warning('no pong received in', this.pingIntervalMs, 'ms');
-        emits.emit('pongMissed', ClientPongMissedEvent.from(this));
+        logger.warning('no pong received in', timeSinceLastPongMs, 'ms');
+        emits.emit('pongMissed', ClientPongMissedEvent.from(
+          this,
+          this.lastPingTimestamp!,
+          this.lastPongTimestamp
+        ));
         return;
       }
 
