@@ -1,15 +1,32 @@
 import { PiccKey } from "@/models/Picc";
 
-interface Message { }
-
-export interface DeviceMessage extends Message {
-  kind: string;
+interface Message {
+  $kind: string;
 }
 
-export interface WebMessage extends Message {
-  kind?: string;
+export abstract class DeviceMessage implements Message {
+  readonly $kind: string;
+
+  protected constructor(kind: string) {
+    this.$kind = kind;
+  }
 }
 
-export interface AuthorizedWebMessage extends WebMessage {
-  key: PiccKey;
+export abstract class WebMessage implements Message {
+  readonly $kind: string;
+  readonly $id: string;
+
+  protected constructor(kind: string) {
+    this.$kind = kind;
+    this.$id = "randoooooom";
+  }
+}
+
+export abstract class AuthorizedWebMessage extends WebMessage {
+  readonly key: PiccKey;
+
+  protected constructor(kind: string, key: PiccKey) {
+    super(kind);
+    this.key = key;
+  }
 }

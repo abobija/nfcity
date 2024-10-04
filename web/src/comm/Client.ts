@@ -1,8 +1,5 @@
 import { logger } from '@/Logger';
 import { DeviceMessage, WebMessage } from '@/comm/msgs/Message';
-import GetPiccWebMessage, { getPiccWebMessageKind } from '@/comm/msgs/web/GetPiccWebMessage';
-import ReadBlockWebMessage, { readBlockWebMessageKind } from '@/comm/msgs/web/ReadBlockWebMessage';
-import ReadSectorWebMessage, { readSectorWebMessageKind } from '@/comm/msgs/web/ReadSectorWebMessage';
 import { decode, encode } from 'cbor-x';
 import mqtt, { MqttClient } from 'mqtt';
 
@@ -43,7 +40,7 @@ class Client {
     this._rootTopic = value;
   }
 
-  private send(message: WebMessage): void {
+  send(message: WebMessage): void {
     if (this.mqttClient == null) {
       throw new Error('not connected');
     }
@@ -158,22 +155,6 @@ class Client {
     this.mqttClient = null;
 
     return this;
-  }
-
-  getPicc(message?: GetPiccWebMessage): void {
-    message ||= {};
-    message.kind = getPiccWebMessageKind;
-    this.send(message);
-  }
-
-  readBlock(message: ReadBlockWebMessage): void {
-    message.kind = readBlockWebMessageKind;
-    this.send(message);
-  }
-
-  readSector(message: ReadSectorWebMessage): void {
-    message.kind = readSectorWebMessageKind;
-    this.send(message);
   }
 }
 

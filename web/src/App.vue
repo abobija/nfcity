@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import '@/App.scss';
 import Client from '@/comm/Client';
-import { isHelloDevMessage } from '@/comm/msgs/dev/HelloDevMessage';
-import { isPiccDevMessage } from '@/comm/msgs/dev/PiccDevMessage';
-import { isPiccStateChangedDevMessage } from '@/comm/msgs/dev/PiccStateChangedDevMessage';
 import Dashboard from '@/components/Dashboard/Dashboard.vue';
 import onDeviceMessage from '@/hooks/onDeviceMessage';
 import { logger } from '@/Logger';
 import MifareClassic from '@/models/MifareClassic';
 import { PiccState, PiccType } from '@/models/Picc';
 import { inject, ref, watch } from 'vue';
+import HelloDevMessage from './comm/msgs/dev/HelloDevMessage';
+import PiccDevMessage from './comm/msgs/dev/PiccDevMessage';
+import PiccStateChangedDevMessage from './comm/msgs/dev/PiccStateChangedDevMessage';
+import GetPiccWebMessage from './comm/msgs/web/GetPiccWebMessage';
 
 enum AppState {
   Disconnected = -1,
@@ -39,7 +40,7 @@ watch(stateRef, (newState, oldState) => {
       stateRef.value = AppState.PiccFetching;
     } break;
     case AppState.PiccFetching: {
-      client.getPicc();
+      client.send(GetPiccWebMessage.create());
     } break;
     case AppState.PiccNotPresent: {
       // do nothing, wait for user to put a card
@@ -62,7 +63,7 @@ function connect() {
 }
 
 onDeviceMessage(message => {
-  if (!isHelloDevMessage(message)) {
+  if (!HelloDevMessage.is(message)) {
     return;
   }
 
@@ -70,7 +71,7 @@ onDeviceMessage(message => {
 });
 
 onDeviceMessage(message => {
-  if (!isPiccDevMessage(message) && !isPiccStateChangedDevMessage(message)) {
+  if (!PiccDevMessage.is(message) && !PiccStateChangedDevMessage.is(message)) {
     return;
   }
 
@@ -81,7 +82,7 @@ onDeviceMessage(message => {
     return;
   }
 
-  let supported = MifareClassic.isMifareClassic(picc);
+  let supported = MifareClassic.dtoIsMifareClassic(picc);
 
   // TODO: Remove once other mifare classic cards are supported
   supported &&= picc.type === PiccType.Mifare1K;
@@ -92,7 +93,7 @@ onDeviceMessage(message => {
     return;
   }
 
-  piccRef.value = MifareClassic.from(picc);
+  piccRef.value = MifareClassic.fromDto(picc);
 
   if ([PiccState.Active, PiccState.ActiveH].includes(picc.state)) {
     stateRef.value = AppState.PiccPaired;
@@ -100,7 +101,7 @@ onDeviceMessage(message => {
   }
 
   if (picc.state == PiccState.Idle) {
-    if (isPiccStateChangedDevMessage(message)
+    if (PiccStateChangedDevMessage.is(message)
       && [PiccState.Active, PiccState.ActiveH].includes(message.old_state)) {
       stateRef.value = AppState.PiccRemoved;
       return;

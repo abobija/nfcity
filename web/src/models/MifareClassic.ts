@@ -1,4 +1,5 @@
 import PiccBlockDto from "@/comm/dtos/PiccBlockDto";
+import PiccDto from "@/comm/dtos/PiccDto";
 import { nibbles } from "@/helpers";
 import Picc, { PiccBlock, PiccBlockAccessBits, PiccKey, PiccKeyType, PiccMemory, PiccSector, PiccState, PiccType } from "@/models/Picc";
 
@@ -399,12 +400,19 @@ export default class MifareClassic implements Picc {
     this.memory = MifareClassicMemory.from(this, picc.type);
   }
 
-  static from(picc: Picc): MifareClassic {
-    return new MifareClassic(picc);
+  static fromDto(piccDto: PiccDto): MifareClassic {
+    return new MifareClassic({
+      type: piccDto.type,
+      state: piccDto.state,
+      atqa: piccDto.atqa,
+      sak: piccDto.sak,
+      uid: piccDto.uid,
+      memory: {} as PiccMemory
+    });
   }
 
-  static isMifareClassic(picc: Picc): picc is MifareClassic {
-    return picc.type === PiccType.Mifare1K || picc.type === PiccType.Mifare4K
-      || picc.type === PiccType.MifareMini;
+  static dtoIsMifareClassic(piccDto: PiccDto): boolean {
+    return piccDto.type === PiccType.Mifare1K || piccDto.type === PiccType.Mifare4K
+      || piccDto.type === PiccType.MifareMini;
   }
 }

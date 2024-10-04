@@ -1,7 +1,19 @@
 import { AuthorizedWebMessage } from "@/comm/msgs/Message";
+import { PiccKey } from "@/models/Picc";
 
-export const readSectorWebMessageKind = 'read_sector';
+export default class ReadSectorWebMessage extends AuthorizedWebMessage {
+  readonly offset: number;
 
-export default interface ReadSectorWebMessage extends AuthorizedWebMessage {
-  offset: number;
+  protected constructor(offset: number, key: PiccKey) {
+    super('read_sector', key);
+    this.offset = offset;
+  }
+
+  static from(offset: number, key: PiccKey): ReadSectorWebMessage {
+    return new ReadSectorWebMessage(offset, key);
+  }
+
+  static is(message: AuthorizedWebMessage): message is ReadSectorWebMessage {
+    return message.$kind === 'read_sector';
+  }
 }

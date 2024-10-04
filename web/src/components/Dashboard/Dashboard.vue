@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Client from '@/comm/Client';
-import { isPiccBlockDevMessage } from '@/comm/msgs/dev/PiccBlockDevMessage';
-import { isPiccSectorDevMessage } from '@/comm/msgs/dev/PiccSectorDevMessage';
+import PiccSectorDevMessage from '@/comm/msgs/dev/PiccSectorDevMessage';
+import ReadSectorWebMessage from '@/comm/msgs/web/ReadSectorWebMessage';
 import '@/components/Dashboard/Dashboard.scss';
 import Memory from '@/components/Memory/Memory.vue';
 import memoryBlockEmits, {
@@ -48,11 +48,7 @@ function onBlockByteClick(e: MemoryBlockByteEvent) {
   const sector = e.block.sector;
 
   if (sector.isEmpty) {
-    client.readSector({
-      offset: sector.offset,
-      key: defaultKey,
-    });
-
+    client.send(ReadSectorWebMessage.from(sector.offset, defaultKey));
     return;
   }
 
@@ -89,15 +85,7 @@ onUnmounted(() => {
 });
 
 onDeviceMessage(message => {
-  if (!isPiccBlockDevMessage(message)) {
-    return;
-  }
-
-  logger.warning('Unhandled reception of single block', message.block);
-});
-
-onDeviceMessage(message => {
-  if (!isPiccSectorDevMessage(message)) {
+  if (!PiccSectorDevMessage.is(message)) {
     return;
   }
 

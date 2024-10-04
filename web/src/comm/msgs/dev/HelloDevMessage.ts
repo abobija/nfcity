@@ -3,8 +3,16 @@ import { DeviceMessage } from "@/comm/msgs/Message";
 /**
  * Message sent by the device on connection with the broker.
  */
-export default interface HelloDevMessage extends DeviceMessage { }
+export default class HelloDevMessage extends DeviceMessage {
+  protected constructor() {
+    super('hello');
+  }
 
-export function isHelloDevMessage(message: DeviceMessage): message is HelloDevMessage {
-  return message.kind === 'hello';
+  static create() {
+    return new HelloDevMessage();
+  }
+
+  static is(message: DeviceMessage): message is HelloDevMessage {
+    return message.$kind === 'hello';
+  }
 }
