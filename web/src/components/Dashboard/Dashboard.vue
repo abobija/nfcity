@@ -179,7 +179,7 @@ onClientPongMissed(() => {
             <ul>
               <li class="item">
                 <span class="name">byte</span>
-                <span class="value">{{ targetByte.byteIndex }}</span>
+                <span class="value">[{{ targetByte.byteIndex }}]</span>
 
                 <ul v-if="targetByte.block.type != MifareClassicBlockType.Undefined">
                   <li class="item">
