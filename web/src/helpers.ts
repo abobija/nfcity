@@ -44,3 +44,31 @@ export function randomBytes(length: number) {
 export function nibbles(byte: number): [MSB, LSB] {
   return [byte >> 4, byte & 0x0F];
 }
+
+export function trimStart(str: string, chr: string) {
+  while (str.startsWith(chr)) {
+    str = str.slice(1);
+  }
+
+  return str;
+}
+
+export function trimEnd(str: string, chr: string) {
+  while (str.endsWith(chr)) {
+    str = str.slice(0, -1);
+  }
+
+  return str;
+}
+
+export function trimLeft(str: string, chr: string) {
+  return trimStart(str, chr);
+}
+
+export function trimRight(str: string, chr: string) {
+  return trimEnd(str, chr);
+}
+
+export function trim(str: string, chr: string) {
+  return trimEnd(trimStart(str, chr), chr);
+}

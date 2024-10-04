@@ -1,7 +1,10 @@
-import { logger } from '@/Logger';
+import { logger, LogLevel } from '@/Logger';
 import { DeviceMessage, WebMessage } from '@/comm/msgs/Message';
+import { trim, trimRight } from '@/helpers';
 import { decode, encode } from 'cbor-x';
 import mqtt, { MqttClient } from 'mqtt';
+import PongDevMessage from './msgs/dev/PongDevMessage';
+import PingWebMessage from './msgs/web/PingWebMessage';
 
 type Events =
   'ready' |
@@ -9,54 +12,107 @@ type Events =
   'disconnect';
 
 class Client {
-  private _broker?: string;
-  private _rootTopic?: string;
-  private devTopic: string = 'dev';
-  private webTopic: string = 'web';
-  private mqttClient: MqttClient | null = null;
-  private eventListeners: {
+  readonly brokerUrl: string;
+  readonly rootTopic: string;
+  private readonly devTopic: string;
+  private readonly webTopic: string;
+  private readonly eventListeners: {
     ready: Array<() => void>,
     message: Array<(message: DeviceMessage) => void>,
-    disconnect: Array<() => void>
+    pong: Array<(ts: number) => void>,
+    disconnect: Array<() => void>,
   } = {
       ready: [],
       message: [],
+      pong: [],
       disconnect: []
     };
+  private mqttClient: MqttClient | null = null;
+  private pingIntervalMs: number;
+  private pingInterval?: NodeJS.Timeout;
+  private lastPingTimestamp?: number;
+  private lastPongTimestamp?: number;
 
-  get broker(): string | undefined {
-    return this._broker;
+  protected constructor(brokerUrl: string, rootTopic: string) {
+    this.brokerUrl = trimRight(brokerUrl, '/');
+    this.rootTopic = `/${trim(rootTopic, '/')}`;
+    this.webTopic = '/web';
+    this.devTopic = '/dev';
+    this.pingIntervalMs = 5000;
   }
 
-  set broker(value: string) {
-    this._broker = value;
+  static from(brokerUrl: string, rootTopic: string): Client {
+    return new Client(brokerUrl, rootTopic);
   }
 
-  get rootTopic(): string | undefined {
-    return this._rootTopic;
+  get connected(): boolean {
+    return this.mqttClient?.connected === true;
   }
 
-  set rootTopic(value: string) {
-    this._rootTopic = value;
+  get devTopicAbs(): string {
+    return this.rootTopic + this.devTopic;
+  }
+
+  get webTopicAbs(): string {
+    return this.rootTopic + this.webTopic;
   }
 
   send(message: WebMessage): void {
-    if (this.mqttClient == null) {
+    if (!this.connected) {
       throw new Error('not connected');
     }
 
-    const topic = this.rootTopic + this.webTopic;
     const encodedMessage = encode(message);
 
-    this.mqttClient.publish(topic, encodedMessage, { qos: 0 }, err => {
+    this.mqttClient!.publish(this.webTopicAbs, encodedMessage, { qos: 0 }, err => {
       if (err) {
         logger.error('publish error', err);
         return;
       }
 
-      logger.debug('message sent', topic, message);
+      const logLevel = message instanceof PingWebMessage ? LogLevel.VERBOSE : LogLevel.DEBUG;
+
+      logger.log(logLevel, 'message sent', this.webTopicAbs, message);
       logger.verbose('encoded sent message:', encodedMessage);
     });
+  }
+
+  private pingingStart(): void {
+    if (this.pingInterval) {
+      logger.warning('pingingStart skipped: already started');
+      return;
+    }
+
+    this.pingInterval = setInterval(() => {
+      const pingHasBeenSent = this.lastPingTimestamp !== undefined;
+      const pongHasBeenReceived = this.lastPongTimestamp !== undefined;
+      const pongIsOutdated = pongHasBeenReceived && (Date.now() - this.lastPongTimestamp!) > this.pingIntervalMs;
+
+      if (pingHasBeenSent && (!pongHasBeenReceived || pongIsOutdated)) {
+        logger.warning('warning: no pong received in', this.pingIntervalMs, 'ms');
+        this.disconnect();
+        return;
+      }
+
+      this.send(PingWebMessage.create());
+      this.lastPingTimestamp = Date.now();
+    }, this.pingIntervalMs);
+
+    logger.debug('pinging started');
+  }
+
+  private pingingStop(): void {
+    if (!this.pingInterval) {
+      logger.warning('pingingStop skipped: already stopped');
+      return;
+    }
+
+    clearInterval(this.pingInterval);
+    this.pingInterval = undefined;
+    this.lastPingTimestamp = undefined;
+    this.lastPongTimestamp = undefined;
+
+    logger.debug('pinging stopped');
   }
 
   on(event: Events, listener: (...args: any[]) => void): Client {
@@ -76,19 +132,12 @@ class Client {
   }
 
   connect(): Client {
-    if (this.mqttClient != null) {
-      throw new Error('already connected');
+    if (this.connected) {
+      logger.warning('connect skipped: already connected');
+      return this;
     }
 
-    if (this._broker == undefined) {
-      throw new Error('broker is not set');
-    }
-
-    if (this._rootTopic == undefined) {
-      throw new Error('rootTopic is not set');
-    }
-
-    this.mqttClient = mqtt.connect(this._broker);
+    this.mqttClient = mqtt.connect(this.brokerUrl);
 
     this.mqttClient.on('error', error => {
       logger.error('error', error);
@@ -97,45 +146,29 @@ class Client {
     this.mqttClient.on('connect', () => {
       logger.debug('connected');
 
-      const topic = this.rootTopic + this.devTopic;
-
-      this.mqttClient!.subscribe(topic, { qos: 0 }, err => {
+      this.mqttClient!.subscribe(this.devTopicAbs, { qos: 0 }, err => {
         if (err) {
           logger.error('subscribe error', err);
           return;
         }
 
-        logger.debug('subscribed', topic);
+        logger.debug('subscribed to', this.devTopicAbs);
+        this.pingingStart();
         this.eventListeners.ready.forEach(listener => listener());
       });
     });
 
-    this.mqttClient.on('reconnect', () => {
-      logger.debug('reconnect');
-    });
-
-    this.mqttClient.on('close', () => {
-      logger.debug('close');
-      this.eventListeners.disconnect.forEach(listener => listener());
-    });
-
-    this.mqttClient.on('disconnect', () => {
-      logger.debug('disconnected');
-      this.eventListeners.disconnect.forEach(listener => listener());
-    });
-
-    this.mqttClient.on('offline', () => {
-      logger.debug('offline');
-      this.eventListeners.disconnect.forEach(listener => listener());
-    });
-
-    this.mqttClient.on('end', () => {
-      logger.debug('end');
-      this.eventListeners.disconnect.forEach(listener => listener());
-    });
-
     this.mqttClient.on('message', (topic, encodedMessage) => {
-      const decodedMessage = decode(encodedMessage);
+      const decodedMessage = decode(encodedMessage) as DeviceMessage;
+
+      if (PongDevMessage.is(decodedMessage)) {
+        logger.verbose('pong message received');
+
+        const ts = Date.now();
+        this.lastPongTimestamp = ts;
+        this.eventListeners.pong.forEach(listener => listener(ts));
+        return;
+      }
 
       logger.debug('message received', topic, decodedMessage);
       logger.verbose('encoded received message:', encodedMessage);
@@ -143,18 +176,45 @@ class Client {
       this.eventListeners.message.forEach(listener => listener(decodedMessage));
     });
 
+    this.mqttClient.on('reconnect', () => {
+      logger.debug('reconnect');
+      this.pingingStop();
+    });
+
+    this.mqttClient.on('close', () => {
+      logger.debug('close');
+      this.pingingStop();
+      this.eventListeners.disconnect.forEach(listener => listener());
+    });
+
+    this.mqttClient.on('disconnect', () => {
+      logger.debug('disconnected');
+      this.pingingStop();
+      this.eventListeners.disconnect.forEach(listener => listener());
+    });
+
+    this.mqttClient.on('offline', () => {
+      logger.debug('offline');
+      this.pingingStop();
+      this.eventListeners.disconnect.forEach(listener => listener());
+    });
+
+    this.mqttClient.on('end', () => {
+      logger.debug('end');
+      this.pingingStop();
+      this.eventListeners.disconnect.forEach(listener => listener());
+    });
+
     return this;
   }
 
-  disconnect(): Client {
-    if (this.mqttClient == null) {
+  disconnect(): void {
+    if (this.mqttClient?.connected !== true) {
       throw new Error('not connected');
     }
 
+    this.pingingStop();
     this.mqttClient.end(true);
-    this.mqttClient = null;
-
-    return this;
   }
 }
 

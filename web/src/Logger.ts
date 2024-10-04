@@ -5,7 +5,7 @@ const pink = "\x1b[95m";
 const cyan = "\x1b[36m";
 const resetColor = "\x1b[0m";
 
-enum LogLevel {
+export enum LogLevel {
   ERROR,
   WARNING,
   INFO,
@@ -48,7 +48,7 @@ class Logger {
     this.log(LogLevel.VERBOSE, message, ...optionalParams);
   }
 
-  private log(level: LogLevel, message?: any, ...optionalParams: any[]): void {
+  log(level: LogLevel, message?: any, ...optionalParams: any[]): void {
     if (level > this.level) {
       return;
     }
