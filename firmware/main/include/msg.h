@@ -24,6 +24,9 @@ extern const char *MSG_LOG_TAG;
     }                                                                                                                  \
     while (0)
 
+#define MSG_DESC_ID   "$id"
+#define MSG_DESC_KIND "$kind"
+
 // {{ encoding
 
 #define ENC_HELLO_MSG_KIND              "hello"
@@ -41,16 +44,14 @@ extern const char *MSG_LOG_TAG;
 
 // {{ decoding
 
-#define DEC_MSG_ID_SIZE          36 // uuid
-#define DEC_MSG_KIND_SIZE        32
 #define DEC_GET_PICC_MSG_KIND    "get_picc"
 #define DEC_READ_BLOCK_MSG_KIND  "read_block"
 #define DEC_READ_SECTOR_MSG_KIND "read_sector"
 
 typedef struct
 {
-    char id[DEC_MSG_ID_SIZE + 1];
-    char kind[DEC_MSG_KIND_SIZE + 1];
+    char id[36 + 1]; // uuid
+    char kind[32 + 1];
 } dec_msg_desc_t;
 
 typedef struct

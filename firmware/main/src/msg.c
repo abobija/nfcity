@@ -7,7 +7,7 @@
 #define ENC_KIND_LEN 1
 static CborError enc_kind(CborEncoder *encoder, const char *kind)
 {
-    cbor_encode_text_stringz(encoder, "$kind");
+    cbor_encode_text_stringz(encoder, MSG_DESC_KIND);
     cbor_encode_text_stringz(encoder, kind);
 
     return CborNoError;
@@ -160,13 +160,13 @@ CborError dec_msg_desc(const uint8_t *buffer, size_t buffer_size, dec_msg_desc_t
     CborValue it;
     CBOR_ERRCHECK(cbor_parser_init(buffer, buffer_size, 0, &parser, &it));
     CborValue value;
-    CBOR_ERRCHECK(cbor_value_map_find_value(&it, "$id", &value));
+    CBOR_ERRCHECK(cbor_value_map_find_value(&it, MSG_DESC_ID, &value));
     CBOR_RETCHECK(cbor_value_is_text_string(&value), CborErrorIllegalType);
     size_t len = 0;
     CBOR_ERRCHECK(cbor_value_get_string_length(&value, &len));
     CBOR_RETCHECK(len <= sizeof(msg.id) - 1, CborErrorOverlongEncoding);
     CBOR_ERRCHECK(cbor_value_copy_text_string(&value, msg.id, &len, NULL));
-    CBOR_ERRCHECK(cbor_value_map_find_value(&it, "$kind", &value));
+    CBOR_ERRCHECK(cbor_value_map_find_value(&it, MSG_DESC_KIND, &value));
     CBOR_RETCHECK(cbor_value_is_text_string(&value), CborErrorIllegalType);
     CBOR_ERRCHECK(cbor_value_get_string_length(&value, &len));
     CBOR_RETCHECK(len <= sizeof(msg.kind) - 1, CborErrorOverlongEncoding);
