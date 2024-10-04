@@ -1,12 +1,7 @@
-import Client from "../Client";
+import Client from "@/comm/Client";
+import { ClientEvent } from "@/comm/events/ClientEvent";
 
-export default class ClientDisconnectEvent {
-  readonly client: Client;
-
-  protected constructor(client: Client) {
-    this.client = client;
-  }
-
+export default class ClientDisconnectEvent extends ClientEvent {
   static from(client: Client) {
     return new ClientDisconnectEvent(client);
   }

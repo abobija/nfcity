@@ -8,6 +8,7 @@ import ClientDisconnectEvent from './events/ClientDisconnectEvent';
 import ClientMessageEvent from './events/ClientMessageEvent';
 import ClientPingEvent from './events/ClientPingEvent';
 import ClientPongEvent from './events/ClientPongEvent';
+import ClientPongMissedEvent from './events/ClientPongMissedEvent';
 import ClientReadyEvent from './events/ClientReadyEvent';
 import PongDevMessage from './msgs/dev/PongDevMessage';
 import PingWebMessage from './msgs/web/PingWebMessage';
@@ -79,14 +80,14 @@ class Client {
       const pongIsOutdated = pongHasBeenReceived && (Date.now() - this.lastPongTimestamp!) > this.pingIntervalMs;
 
       if (pingHasBeenSent && (!pongHasBeenReceived || pongIsOutdated)) {
-        logger.warning('warning: no pong received in', this.pingIntervalMs, 'ms');
-        this.disconnect();
+        logger.warning('no pong received in', this.pingIntervalMs, 'ms');
+        emits.emit('pongMissed', ClientPongMissedEvent.from(this));
         return;
       }
 
       this.send(PingWebMessage.create());
       this.lastPingTimestamp = Date.now();
-      emits.emit('ping', ClientPingEvent.from(this.lastPingTimestamp));
+      emits.emit('ping', ClientPingEvent.from(this, this.lastPingTimestamp));
     }, this.pingIntervalMs);
 
     logger.debug('pinging started');
@@ -140,14 +141,14 @@ class Client {
         logger.verbose('pong message received');
 
         this.lastPongTimestamp = Date.now();
-        emits.emit('pong', ClientPongEvent.from(this.lastPongTimestamp));
+        emits.emit('pong', ClientPongEvent.from(this, this.lastPongTimestamp));
         return;
       }
 
       logger.debug('message received', topic, decodedMessage);
       logger.verbose('encoded received message:', encodedMessage);
 
-      emits.emit('message', ClientMessageEvent.from(decodedMessage));
+      emits.emit('message', ClientMessageEvent.from(this, decodedMessage));
     });
 
     this.mqttClient.on('reconnect', () => {
