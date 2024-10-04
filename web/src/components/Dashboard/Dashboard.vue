@@ -5,14 +5,22 @@ import PiccSectorDevMessage from '@/comm/msgs/dev/PiccSectorDevMessage';
 import ReadSectorWebMessage from '@/comm/msgs/web/ReadSectorWebMessage';
 import '@/components/Dashboard/Dashboard.scss';
 import Memory from '@/components/Memory/Memory.vue';
-import memoryBlockEmits, {
-  MemoryBlockByteEvent
+import {
+  onMemoryBlockByteClick,
+  onMemoryBlockByteEnter,
+  onMemoryBlockByteLeave
 } from '@/components/MemoryBlock/events/MemoryBlockEvents';
 import { bin, hex } from '@/helpers';
 import { logger } from '@/Logger';
-import MifareClassic, { defaultKey, MifareClassicBlock, MifareClassicBlockByteGroupType, MifareClassicBlockType } from '@/models/MifareClassic';
+import MifareClassic, {
+  defaultKey,
+  MifareClassicBlock,
+  MifareClassicBlockByteGroupType,
+  MifareClassicBlockType
+} from '@/models/MifareClassic';
 import { PiccType } from '@/models/Picc';
-import { inject, onMounted, onUnmounted, ref } from 'vue';
+import { inject, ref } from 'vue';
+import MemoryBlockByteEvent from '../MemoryBlock/events/MemoryBlockByteEvent';
 
 const props = defineProps<{
   picc: MifareClassic;
@@ -22,7 +30,7 @@ const client = inject('client') as Client;
 const targetByte = ref<MemoryBlockByteEvent | undefined>(undefined); // Hovered byte reference
 const isTargetByteLocked = ref<boolean>(false);
 
-function onBlockByteEnter(e: MemoryBlockByteEvent) {
+onMemoryBlockByteEnter(e => {
   logger.verbose('Block byte entered', e);
 
   if (isTargetByteLocked.value) {
@@ -30,9 +38,9 @@ function onBlockByteEnter(e: MemoryBlockByteEvent) {
   }
 
   targetByte.value = e;
-}
+});
 
-function onBlockByteLeave(e: MemoryBlockByteEvent) {
+onMemoryBlockByteLeave(e => {
   logger.verbose('Block byte left', e);
 
   if (isTargetByteLocked.value) {
@@ -40,9 +48,9 @@ function onBlockByteLeave(e: MemoryBlockByteEvent) {
   }
 
   targetByte.value = undefined;
-}
+});
 
-function onBlockByteClick(e: MemoryBlockByteEvent) {
+onMemoryBlockByteClick(e => {
   logger.verbose('Block byte clicked', e);
 
   const sector = e.block.sector;
@@ -70,18 +78,6 @@ function onBlockByteClick(e: MemoryBlockByteEvent) {
   targetByte.value = e;
   isTargetByteLocked.value = true;
   targetByte.value?.focus();
-}
-
-onMounted(() => {
-  memoryBlockEmits.on('byteEnter', onBlockByteEnter);
-  memoryBlockEmits.on('byteLeave', onBlockByteLeave);
-  memoryBlockEmits.on('byteClick', onBlockByteClick);
-});
-
-onUnmounted(() => {
-  memoryBlockEmits.off('byteEnter', onBlockByteEnter);
-  memoryBlockEmits.off('byteLeave', onBlockByteLeave);
-  memoryBlockEmits.off('byteClick', onBlockByteClick);
 });
 
 onClientMessage(e => {

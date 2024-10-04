@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import '@/components/MemoryBlock/MemoryBlock.scss';
 import MemoryBlockByteGroup from '@/components/MemoryBlock/MemoryBlockByteGroup';
-import emits, { MemoryBlockByteEvent } from '@/components/MemoryBlock/events/MemoryBlockEvents';
+import emits from '@/components/MemoryBlock/events/MemoryBlockEvents';
 import { hex } from '@/helpers';
 import {
   MifareClassicBlock,
   MifareClassicBlockType
 } from '@/models/MifareClassic';
 import { computed, ref } from 'vue';
+import MemoryBlockByteEvent from './events/MemoryBlockByteEvent';
 
 const props = defineProps<{
   block: MifareClassicBlock;
@@ -29,14 +30,16 @@ function byteIndex(index: number, byteGroup: MemoryBlockByteGroup) {
   return byteGroup.offset + index;
 }
 
-const eventFrom = (byteGroup: MemoryBlockByteGroup, index: number): MemoryBlockByteEvent => ({
-  block: props.block,
-  byteGroup: byteGroup.origin,
-  byteIndex: byteIndex(index, byteGroup),
-  focus: (state?: boolean) => {
-    focusedByteIndex.value = (state ?? true) ? byteIndex(index, byteGroup) : undefined;
-  },
-});
+function makeEvent(byteGroup: MemoryBlockByteGroup, index: number): MemoryBlockByteEvent {
+  return MemoryBlockByteEvent.from(
+    props.block,
+    byteGroup.origin,
+    byteIndex(index, byteGroup),
+    (state?: boolean) => {
+      focusedByteIndex.value = (state ?? true) ? byteIndex(index, byteGroup) : undefined;
+    }
+  );
+};
 </script>
 
 <template>
@@ -46,9 +49,9 @@ const eventFrom = (byteGroup: MemoryBlockByteGroup, index: number): MemoryBlockB
         <li class="byte" v-for="(_, index) in Array.from({ length: byteGroup.length })"
           :key="byteIndex(index, byteGroup)" :data-index="byteIndex(index, byteGroup)"
           :class="{ focused: focusedByteIndex == byteIndex(index, byteGroup) }"
-          @mouseenter="emits.emit('byteEnter', eventFrom(byteGroup, index))"
-          @mouseleave="emits.emit('byteLeave', eventFrom(byteGroup, index))"
-          @click="emits.emit('byteClick', eventFrom(byteGroup, index))">
+          @mouseenter="emits.emit('byteEnter', makeEvent(byteGroup, index))"
+          @mouseleave="emits.emit('byteLeave', makeEvent(byteGroup, index))"
+          @click="emits.emit('byteClick', makeEvent(byteGroup, index))">
           {{ block.loaded ? hex(block.data[byteIndex(index, byteGroup)]) : '..' }}
         </li>
       </ul>
