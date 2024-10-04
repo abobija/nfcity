@@ -1,6 +1,28 @@
 #include <inttypes.h>
+#include "esp_log.h"
 #include "cbor.h"
 #include "picc/rc522_mifare.h"
+
+extern const char *MSG_LOG_TAG;
+
+#define CBOR_ERRCHECK(expression)                                                                                      \
+    do {                                                                                                               \
+        CborError err_rc_ = (expression);                                                                              \
+        if (unlikely(err_rc_ != CborNoError)) {                                                                        \
+            ESP_LOGE(MSG_LOG_TAG, "%s(%d): => %d", __FUNCTION__, __LINE__, err_rc_);                                   \
+            return err_rc_;                                                                                            \
+        }                                                                                                              \
+    }                                                                                                                  \
+    while (0)
+
+#define CBOR_RETCHECK(condition, err_code)                                                                             \
+    {                                                                                                                  \
+        if (unlikely(!(condition))) {                                                                                  \
+            ESP_LOGE(MSG_LOG_TAG, "%s(%d): %s => %d", __FUNCTION__, __LINE__, #condition, err_code);                   \
+            return err_code;                                                                                           \
+        }                                                                                                              \
+    }                                                                                                                  \
+    while (0)
 
 // {{ encoding
 

@@ -156,54 +156,21 @@ CborError dec_msg_desc(const uint8_t *buffer, size_t buffer_size, dec_msg_desc_t
 {
     dec_msg_desc_t msg = { 0 };
 
-    CborError err = CborNoError;
     CborParser parser;
     CborValue it;
-    if ((err = cbor_parser_init(buffer, buffer_size, 0, &parser, &it)) != CborNoError) {
-        return err;
-    }
-
+    CBOR_ERRCHECK(cbor_parser_init(buffer, buffer_size, 0, &parser, &it));
     CborValue value;
-    if ((err = cbor_value_map_find_value(&it, "$id", &value)) != CborNoError) {
-        return err;
-    }
-
-    if (!cbor_value_is_text_string(&value)) {
-        return CborErrorIllegalType;
-    }
-
+    CBOR_ERRCHECK(cbor_value_map_find_value(&it, "$id", &value));
+    CBOR_RETCHECK(cbor_value_is_text_string(&value), CborErrorIllegalType);
     size_t len = 0;
-    if ((err = cbor_value_get_string_length(&value, &len)) != CborNoError) {
-        return err;
-    }
-
-    if (len > sizeof(msg.id) - 1) {
-        return CborErrorOverlongEncoding;
-    }
-
-    if ((err = cbor_value_copy_text_string(&value, msg.id, &len, NULL)) != CborNoError) {
-        return err;
-    }
-
-    if ((err = cbor_value_map_find_value(&it, "$kind", &value)) != CborNoError) {
-        return err;
-    }
-
-    if (!cbor_value_is_text_string(&value)) {
-        return CborErrorIllegalType;
-    }
-
-    if ((err = cbor_value_get_string_length(&value, &len)) != CborNoError) {
-        return err;
-    }
-
-    if (len > sizeof(msg.kind) - 1) {
-        return CborErrorOverlongEncoding;
-    }
-
-    if ((err = cbor_value_copy_text_string(&value, msg.kind, &len, NULL)) != CborNoError) {
-        return err;
-    }
+    CBOR_ERRCHECK(cbor_value_get_string_length(&value, &len));
+    CBOR_RETCHECK(len <= sizeof(msg.id) - 1, CborErrorOverlongEncoding);
+    CBOR_ERRCHECK(cbor_value_copy_text_string(&value, msg.id, &len, NULL));
+    CBOR_ERRCHECK(cbor_value_map_find_value(&it, "$kind", &value));
+    CBOR_RETCHECK(cbor_value_is_text_string(&value), CborErrorIllegalType);
+    CBOR_ERRCHECK(cbor_value_get_string_length(&value, &len));
+    CBOR_RETCHECK(len <= sizeof(msg.kind) - 1, CborErrorOverlongEncoding);
+    CBOR_ERRCHECK(cbor_value_copy_text_string(&value, msg.kind, &len, NULL));
 
     memcpy(out_msg_desc, &msg, sizeof(msg));
 

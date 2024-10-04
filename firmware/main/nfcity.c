@@ -34,7 +34,8 @@
 #define RC522_SPI_SCANNER_GPIO_SDA 22
 #define RC522_SCANNER_GPIO_RST     18
 
-static const char *TAG = "nfcity";
+const char *TAG = "nfcity";
+const char *MSG_LOG_TAG = "nfcity";
 
 extern const uint8_t mqtt_emqx_cert_start[] asm("_binary_mqtt_emqx_io_pem_start");
 extern const uint8_t mqtt_emqx_cert_end[] asm("_binary_mqtt_emqx_io_pem_end");
