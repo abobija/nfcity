@@ -23,6 +23,16 @@ CborError enc_hello_message(CborEncoder *root)
     return CborNoError;
 }
 
+CborError enc_pong_message(CborEncoder *encoder)
+{
+    CborEncoder message_map;
+    cbor_encoder_create_map(encoder, &message_map, ENC_KIND_LEN);
+    enc_kind(&message_map, ENC_PONG_MSG_KIND);
+    cbor_encoder_close_container(encoder, &message_map);
+
+    return CborNoError;
+}
+
 #define ENC_PICC_LEN 5
 static CborError enc_picc(CborEncoder *encoder, rc522_picc_t *picc)
 {
@@ -86,21 +96,6 @@ static CborError enc_picc_block(CborEncoder *encoder, uint8_t address, uint8_t o
     cbor_encode_uint(encoder, offset);
     cbor_encode_text_stringz(encoder, "data");
     cbor_encode_byte_string(encoder, data, RC522_MIFARE_BLOCK_SIZE);
-
-    return CborNoError;
-}
-
-CborError enc_picc_block_message(CborEncoder *root, uint8_t address, uint8_t offset, uint8_t *data)
-{
-    CborEncoder message_map;
-    cbor_encoder_create_map(root, &message_map, ENC_KIND_LEN + 1);
-    enc_kind(&message_map, ENC_PICC_BLOCK_MSG_KIND);
-    cbor_encode_text_stringz(&message_map, "block");
-    CborEncoder block_map;
-    cbor_encoder_create_map(&message_map, &block_map, ENC_PICC_BLOCK_LEN);
-    enc_picc_block(&block_map, address, offset, data);
-    cbor_encoder_close_container(&message_map, &block_map);
-    cbor_encoder_close_container(root, &message_map);
 
     return CborNoError;
 }

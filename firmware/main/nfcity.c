@@ -164,7 +164,18 @@ _exit:
 
 static esp_err_t handle_message_from_web(const char *kind, const uint8_t *data, size_t data_len)
 {
-    if (strcmp(kind, WEB_GET_PICC_MSG_KIND) == 0) {
+    if (strcmp(kind, WEB_PING_MSG_KIND) == 0) {
+        uint8_t buffer[ENC_PONG_BYTES] = { 0 };
+        CborEncoder root = { 0 };
+        cbor_encoder_init(&root, buffer, ENC_PONG_BYTES, 0);
+        enc_pong_message(&root);
+        size_t len = cbor_encoder_get_buffer_size(&root, buffer);
+
+        mqtt_pub(buffer, len, MQTT_QOS_0);
+
+        return ESP_OK;
+    }
+    else if (strcmp(kind, WEB_GET_PICC_MSG_KIND) == 0) {
         uint8_t buffer[ENC_PICC_BYTES] = { 0 };
         CborEncoder root = { 0 };
         cbor_encoder_init(&root, buffer, ENC_PICC_BYTES, 0);
