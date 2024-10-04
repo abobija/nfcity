@@ -1,15 +1,10 @@
 <script setup lang="ts">
 import Client from '@/comm/Client';
-import { onClientMessage } from '@/comm/events/ClientEvents';
+import { onClientMessage } from '@/comm/hooks/ClientEventHooks';
 import PiccSectorDevMessage from '@/comm/msgs/dev/PiccSectorDevMessage';
 import ReadSectorWebMessage from '@/comm/msgs/web/ReadSectorWebMessage';
 import '@/components/Dashboard/Dashboard.scss';
 import Memory from '@/components/Memory/Memory.vue';
-import {
-  onMemoryByteMouseClick,
-  onMemoryByteMouseEnter,
-  onMemoryByteMouseLeave
-} from '@/components/MemoryBlock/events/MemoryBlockEvents';
 import { bin, hex } from '@/helpers';
 import { logger } from '@/Logger';
 import MifareClassic, {
@@ -21,6 +16,11 @@ import MifareClassic, {
 import { PiccType } from '@/models/Picc';
 import { inject, ref } from 'vue';
 import MemoryByteEvent from '../MemoryBlock/events/MemoryByteEvent';
+import {
+  onMemoryByteMouseClick,
+  onMemoryByteMouseEnter,
+  onMemoryByteMouseLeave
+} from '../MemoryBlock/hooks/MemoryByteEventHooks';
 
 const props = defineProps<{
   picc: MifareClassic;

@@ -6,7 +6,7 @@ import { logger } from '@/Logger';
 import MifareClassic from '@/models/MifareClassic';
 import { PiccState, PiccType } from '@/models/Picc';
 import { inject, ref, watch } from 'vue';
-import { onClientDisconnect, onClientMessage, onClientReady } from './comm/events/ClientEvents';
+import { onClientDisconnect, onClientMessage, onClientReady } from './comm/hooks/ClientEventHooks';
 import HelloDevMessage from './comm/msgs/dev/HelloDevMessage';
 import PiccDevMessage from './comm/msgs/dev/PiccDevMessage';
 import PiccStateChangedDevMessage from './comm/msgs/dev/PiccStateChangedDevMessage';
