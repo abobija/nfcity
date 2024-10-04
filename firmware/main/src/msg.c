@@ -132,16 +132,14 @@ CborError enc_picc_sector_message(
 
 // {{ decoding
 
-// TODO: Check for return values everywhere
-
-static CborError cbor_value_get_uint8(CborValue *value, uint8_t *result)
+static CborError cbor_value_get_uint8(CborValue *value, uint8_t *out_result)
 {
-    uint64_t _result;
+    uint64_t result;
 
-    CBOR_ERRCHECK(cbor_value_get_uint64(value, &_result));
-    CBOR_RETCHECK(_result <= UINT8_MAX, CborErrorDataTooLarge);
+    CBOR_ERRCHECK(cbor_value_get_uint64(value, &result));
+    CBOR_RETCHECK(result <= UINT8_MAX, CborErrorDataTooLarge);
 
-    *result = (uint8_t)_result;
+    *out_result = (uint8_t)result;
     return CborNoError;
 }
 
@@ -190,20 +188,20 @@ static CborError dec_picc_key(const CborValue *key_map, msg_picc_key_t *out_key)
 
 CborError dec_read_sector_msg(const uint8_t *buffer, size_t buffer_size, web_read_sector_msg_t *out_read_sector_msg)
 {
-    CborParser parser;
-    CborValue it;
-    cbor_parser_init(buffer, buffer_size, 0, &parser, &it);
-
     web_read_sector_msg_t msg = { 0 };
 
+    CborParser parser;
+    CborValue it;
+    CBOR_ERRCHECK(cbor_parser_init(buffer, buffer_size, 0, &parser, &it));
     CborValue value;
-    cbor_value_map_find_value(&it, "offset", &value);
-    cbor_value_get_uint8(&value, &msg.offset);
-    cbor_value_map_find_value(&it, "key", &value);
-    dec_picc_key(&value, &msg.key);
+    CBOR_ERRCHECK(cbor_value_map_find_value(&it, "offset", &value));
+    CBOR_RETCHECK(cbor_value_is_unsigned_integer(&value), CborErrorIllegalType);
+    CBOR_ERRCHECK(cbor_value_get_uint8(&value, &msg.offset));
+    CBOR_ERRCHECK(cbor_value_map_find_value(&it, "key", &value));
+    CBOR_RETCHECK(cbor_value_is_map(&value), CborErrorIllegalType);
+    CBOR_ERRCHECK(dec_picc_key(&value, &msg.key));
 
     memcpy(out_read_sector_msg, &msg, sizeof(msg));
-
     return CborNoError;
 }
 

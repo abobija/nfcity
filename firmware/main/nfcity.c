@@ -164,7 +164,7 @@ _exit:
 
 static esp_err_t handle_message_from_web(const char *kind, const uint8_t *data, size_t data_len)
 {
-    if (strcmp(kind, DEC_GET_PICC_MSG_KIND) == 0) {
+    if (strcmp(kind, WEB_GET_PICC_MSG_KIND) == 0) {
         uint8_t buffer[ENC_PICC_BYTES] = { 0 };
         CborEncoder root = { 0 };
         cbor_encoder_init(&root, buffer, ENC_PICC_BYTES, 0);
@@ -175,7 +175,7 @@ static esp_err_t handle_message_from_web(const char *kind, const uint8_t *data, 
 
         return ESP_OK;
     }
-    else if (strcmp(kind, DEC_READ_SECTOR_MSG_KIND) == 0) {
+    else if (strcmp(kind, WEB_READ_SECTOR_MSG_KIND) == 0) {
         web_read_sector_msg_t msg = { 0 };
         dec_read_sector_msg(data, data_len, &msg);
         uint8_t sector_buffer[4 * RC522_MIFARE_BLOCK_SIZE] = { 0 }; // FIXME: for mifare 4k

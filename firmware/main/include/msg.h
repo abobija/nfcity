@@ -50,9 +50,8 @@ typedef struct
 
 // {{ decoding
 
-#define DEC_GET_PICC_MSG_KIND    "get_picc"
-#define DEC_READ_BLOCK_MSG_KIND  "read_block"
-#define DEC_READ_SECTOR_MSG_KIND "read_sector"
+#define WEB_GET_PICC_MSG_KIND    "get_picc"
+#define WEB_READ_SECTOR_MSG_KIND "read_sector"
 
 typedef struct
 {
