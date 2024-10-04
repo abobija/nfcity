@@ -19,11 +19,13 @@ class Client {
   private readonly eventListeners: {
     ready: Array<() => void>,
     message: Array<(message: DeviceMessage) => void>,
+    ping: Array<(ts: number) => void>,
     pong: Array<(ts: number) => void>,
     disconnect: Array<() => void>,
   } = {
       ready: [],
       message: [],
+      ping: [],
       pong: [],
       disconnect: []
     };
@@ -96,6 +98,7 @@ class Client {
 
       this.send(PingWebMessage.create());
       this.lastPingTimestamp = Date.now();
+      this.eventListeners.ping.forEach(listener => listener(this.lastPingTimestamp!));
     }, this.pingIntervalMs);
 
     logger.debug('pinging started');
