@@ -262,11 +262,16 @@ static void on_mqtt_data(void *arg, esp_event_base_t base, int32_t eid, void *da
     ESP_LOGW(TAG, "mqtt data (topic=%.*s):", event->topic_len, event->topic);
     ESP_LOG_BUFFER_HEXDUMP(TAG, event->data, event->data_len, ESP_LOG_WARN);
 
-    char kind[DEC_KIND_BYTES];
-    size_t len;
-    dec_kind((uint8_t *)event->data, event->data_len, kind, &len);
+    CborError err = CborNoError;
+    dec_msg_desc_t msg = { 0 };
+    if ((err = dec_msg_desc((uint8_t *)event->data, event->data_len, &msg)) != CborNoError) {
+        ESP_LOGE(TAG, "Failed to decode message description: %d", err);
+        return;
+    }
 
-    handle_message_from_web(kind, (uint8_t *)event->data, event->data_len);
+    ESP_LOGW(TAG, "msg id: %s, kind: %s", msg.id, msg.kind);
+
+    handle_message_from_web(msg.kind, (uint8_t *)event->data, event->data_len);
 }
 
 void app_main()

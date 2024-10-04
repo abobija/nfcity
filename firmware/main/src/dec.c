@@ -20,16 +20,60 @@ static CborError cbor_value_get_uint8(CborValue *value, uint8_t *result)
     return CborNoError;
 }
 
-CborError dec_kind(const uint8_t *buffer, size_t buffer_size, char *kind, size_t *decoded_len)
+CborError dec_msg_desc(const uint8_t *buffer, size_t buffer_size, dec_msg_desc_t *out_msg_desc)
 {
+    dec_msg_desc_t msg = { 0 };
+
+    CborError err = CborNoError;
     CborParser parser;
     CborValue it;
-    cbor_parser_init(buffer, buffer_size, 0, &parser, &it);
+    if ((err = cbor_parser_init(buffer, buffer_size, 0, &parser, &it)) != CborNoError) {
+        return err;
+    }
 
     CborValue value;
-    cbor_value_map_find_value(&it, "kind", &value);
+    if ((err = cbor_value_map_find_value(&it, "$id", &value)) != CborNoError) {
+        return err;
+    }
 
-    cbor_value_copy_text_string(&value, kind, decoded_len, NULL);
+    if (!cbor_value_is_text_string(&value)) {
+        return CborErrorIllegalType;
+    }
+
+    size_t len = 0;
+    if ((err = cbor_value_get_string_length(&value, &len)) != CborNoError) {
+        return err;
+    }
+
+    if (len > sizeof(msg.id) - 1) {
+        return CborErrorOverlongEncoding;
+    }
+
+    if ((err = cbor_value_copy_text_string(&value, msg.id, &len, NULL)) != CborNoError) {
+        return err;
+    }
+
+    if ((err = cbor_value_map_find_value(&it, "$kind", &value)) != CborNoError) {
+        return err;
+    }
+
+    if (!cbor_value_is_text_string(&value)) {
+        return CborErrorIllegalType;
+    }
+
+    if ((err = cbor_value_get_string_length(&value, &len)) != CborNoError) {
+        return err;
+    }
+
+    if (len > sizeof(msg.kind) - 1) {
+        return CborErrorOverlongEncoding;
+    }
+
+    if ((err = cbor_value_copy_text_string(&value, msg.kind, &len, NULL)) != CborNoError) {
+        return err;
+    }
+
+    memcpy(out_msg_desc, &msg, sizeof(msg));
 
     return CborNoError;
 }

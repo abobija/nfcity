@@ -5,7 +5,7 @@
 #define ENC_KIND_LEN 1
 static CborError enc_kind(CborEncoder *encoder, const char *kind)
 {
-    cbor_encode_text_stringz(encoder, "kind");
+    cbor_encode_text_stringz(encoder, "$kind");
     cbor_encode_text_stringz(encoder, kind);
 
     return CborNoError;
