@@ -8,7 +8,7 @@ import {
   MifareClassicBlockType
 } from '@/models/MifareClassic';
 import { computed, ref } from 'vue';
-import MemoryBlockByteEvent from './events/MemoryBlockByteEvent';
+import MemoryByteEvent from './events/MemoryByteEvent';
 
 const props = defineProps<{
   block: MifareClassicBlock;
@@ -30,8 +30,8 @@ function byteIndex(index: number, byteGroup: MemoryBlockByteGroup) {
   return byteGroup.offset + index;
 }
 
-function makeEvent(byteGroup: MemoryBlockByteGroup, index: number): MemoryBlockByteEvent {
-  return MemoryBlockByteEvent.from(
+function makeEvent(byteGroup: MemoryBlockByteGroup, index: number): MemoryByteEvent {
+  return MemoryByteEvent.from(
     props.block,
     byteGroup.origin,
     byteIndex(index, byteGroup),
@@ -49,9 +49,9 @@ function makeEvent(byteGroup: MemoryBlockByteGroup, index: number): MemoryBlockB
         <li class="byte" v-for="(_, index) in Array.from({ length: byteGroup.length })"
           :key="byteIndex(index, byteGroup)" :data-index="byteIndex(index, byteGroup)"
           :class="{ focused: focusedByteIndex == byteIndex(index, byteGroup) }"
-          @mouseenter="emits.emit('byteEnter', makeEvent(byteGroup, index))"
-          @mouseleave="emits.emit('byteLeave', makeEvent(byteGroup, index))"
-          @click="emits.emit('byteClick', makeEvent(byteGroup, index))">
+          @mouseenter="emits.emit('byteMouseEnter', makeEvent(byteGroup, index))"
+          @mouseleave="emits.emit('byteMouseLeave', makeEvent(byteGroup, index))"
+          @click="emits.emit('byteMouseClick', makeEvent(byteGroup, index))">
           {{ block.loaded ? hex(block.data[byteIndex(index, byteGroup)]) : '..' }}
         </li>
       </ul>

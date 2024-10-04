@@ -6,9 +6,9 @@ import ReadSectorWebMessage from '@/comm/msgs/web/ReadSectorWebMessage';
 import '@/components/Dashboard/Dashboard.scss';
 import Memory from '@/components/Memory/Memory.vue';
 import {
-  onMemoryBlockByteClick,
-  onMemoryBlockByteEnter,
-  onMemoryBlockByteLeave
+  onMemoryByteMouseClick,
+  onMemoryByteMouseEnter,
+  onMemoryByteMouseLeave
 } from '@/components/MemoryBlock/events/MemoryBlockEvents';
 import { bin, hex } from '@/helpers';
 import { logger } from '@/Logger';
@@ -20,17 +20,17 @@ import MifareClassic, {
 } from '@/models/MifareClassic';
 import { PiccType } from '@/models/Picc';
 import { inject, ref } from 'vue';
-import MemoryBlockByteEvent from '../MemoryBlock/events/MemoryBlockByteEvent';
+import MemoryByteEvent from '../MemoryBlock/events/MemoryByteEvent';
 
 const props = defineProps<{
   picc: MifareClassic;
 }>();
 
 const client = inject('client') as Client;
-const targetByte = ref<MemoryBlockByteEvent | undefined>(undefined); // Hovered byte reference
+const targetByte = ref<MemoryByteEvent | undefined>(undefined); // Hovered byte reference
 const isTargetByteLocked = ref<boolean>(false);
 
-onMemoryBlockByteEnter(e => {
+onMemoryByteMouseEnter(e => {
   logger.verbose('Block byte entered', e);
 
   if (isTargetByteLocked.value) {
@@ -40,7 +40,7 @@ onMemoryBlockByteEnter(e => {
   targetByte.value = e;
 });
 
-onMemoryBlockByteLeave(e => {
+onMemoryByteMouseLeave(e => {
   logger.verbose('Block byte left', e);
 
   if (isTargetByteLocked.value) {
@@ -50,7 +50,7 @@ onMemoryBlockByteLeave(e => {
   targetByte.value = undefined;
 });
 
-onMemoryBlockByteClick(e => {
+onMemoryByteMouseClick(e => {
   logger.verbose('Block byte clicked', e);
 
   const sector = e.block.sector;

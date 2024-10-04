@@ -1,26 +1,26 @@
 import mitt from "mitt";
 import { onMounted, onUnmounted } from "vue";
-import MemoryBlockByteEvent from "./MemoryBlockByteEvent";
+import MemoryByteEvent from "./MemoryByteEvent";
 
 const emits = mitt<{
-  byteEnter: MemoryBlockByteEvent;
-  byteLeave: MemoryBlockByteEvent;
-  byteClick: MemoryBlockByteEvent;
+  byteMouseEnter: MemoryByteEvent;
+  byteMouseLeave: MemoryByteEvent;
+  byteMouseClick: MemoryByteEvent;
 }>();
 
-export function onMemoryBlockByteEnter(hook: (e: MemoryBlockByteEvent) => void) {
-  onMounted(() => emits.on('byteEnter', hook));
-  onUnmounted(() => emits.off('byteEnter', hook));
+export function onMemoryByteMouseEnter(hook: (e: MemoryByteEvent) => void) {
+  onMounted(() => emits.on('byteMouseEnter', hook));
+  onUnmounted(() => emits.off('byteMouseEnter', hook));
 }
 
-export function onMemoryBlockByteLeave(hook: (e: MemoryBlockByteEvent) => void) {
-  onMounted(() => emits.on('byteLeave', hook));
-  onUnmounted(() => emits.off('byteLeave', hook));
+export function onMemoryByteMouseLeave(hook: (e: MemoryByteEvent) => void) {
+  onMounted(() => emits.on('byteMouseLeave', hook));
+  onUnmounted(() => emits.off('byteMouseLeave', hook));
 }
 
-export function onMemoryBlockByteClick(hook: (e: MemoryBlockByteEvent) => void) {
-  onMounted(() => emits.on('byteClick', hook));
-  onUnmounted(() => emits.off('byteClick', hook));
+export function onMemoryByteMouseClick(hook: (e: MemoryByteEvent) => void) {
+  onMounted(() => emits.on('byteMouseClick', hook));
+  onUnmounted(() => emits.off('byteMouseClick', hook));
 }
 
 export default emits;

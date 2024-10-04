@@ -1,6 +1,6 @@
 import { MifareClassicBlock, MifareClassicBlockByteGroup } from "@/models/MifareClassic";
 
-export default class MemoryBlockByteEvent {
+export default class MemoryByteEvent {
   readonly block: MifareClassicBlock;
   readonly byteGroup: MifareClassicBlockByteGroup;
   readonly byteIndex: number;
@@ -23,7 +23,7 @@ export default class MemoryBlockByteEvent {
     byteGroup: MifareClassicBlockByteGroup,
     byteIndex: number,
     focus: (state?: boolean) => void
-  ): MemoryBlockByteEvent {
-    return new MemoryBlockByteEvent(block, byteGroup, byteIndex, focus);
+  ): MemoryByteEvent {
+    return new MemoryByteEvent(block, byteGroup, byteIndex, focus);
   }
 }
