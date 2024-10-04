@@ -27,6 +27,12 @@ extern const char *MSG_LOG_TAG;
 #define MSG_DESC_ID   "$id"
 #define MSG_DESC_KIND "$kind"
 
+typedef struct
+{
+    uint8_t value[RC522_MIFARE_KEY_SIZE];
+    rc522_mifare_key_type_t type;
+} msg_picc_key_t;
+
 // {{ encoding
 
 #define ENC_HELLO_MSG_KIND              "hello"
@@ -52,25 +58,13 @@ typedef struct
 {
     char id[36 + 1]; // uuid
     char kind[32 + 1];
-} dec_msg_desc_t;
-
-typedef struct
-{
-    uint8_t value[RC522_MIFARE_BLOCK_SIZE];
-    rc522_mifare_key_type_t type;
-} dec_picc_key_t;
-
-typedef struct
-{
-    uint8_t address; // Block address
-    dec_picc_key_t key;
-} dec_read_block_msg_t;
+} web_msg_t;
 
 typedef struct
 {
     uint8_t offset;
-    dec_picc_key_t key;
-} dec_read_sector_msg_t;
+    msg_picc_key_t key;
+} web_read_sector_msg_t;
 
 // }} decoding
 
@@ -91,10 +85,8 @@ CborError enc_picc_sector_message(
 
 // {{ decoding
 
-CborError dec_msg_desc(const uint8_t *buffer, size_t buffer_size, dec_msg_desc_t *out_msg_desc);
+CborError dec_msg(const uint8_t *buffer, size_t buffer_size, web_msg_t *out_msg);
 
-CborError dec_read_block(const uint8_t *buffer, size_t buffer_size, dec_read_block_msg_t *out_read_block_msg);
-
-CborError dec_read_sector(const uint8_t *buffer, size_t buffer_size, dec_read_sector_msg_t *out_read_sector_msg);
+CborError dec_read_sector_msg(const uint8_t *buffer, size_t buffer_size, web_read_sector_msg_t *out_read_sector_msg);
 
 // }} decoding

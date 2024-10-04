@@ -152,9 +152,9 @@ static CborError cbor_value_get_uint8(CborValue *value, uint8_t *result)
     return CborNoError;
 }
 
-CborError dec_msg_desc(const uint8_t *buffer, size_t buffer_size, dec_msg_desc_t *out_msg_desc)
+CborError dec_msg(const uint8_t *buffer, size_t buffer_size, web_msg_t *out_msg)
 {
-    dec_msg_desc_t msg = { 0 };
+    web_msg_t msg = { 0 };
 
     CborParser parser;
     CborValue it;
@@ -172,12 +172,12 @@ CborError dec_msg_desc(const uint8_t *buffer, size_t buffer_size, dec_msg_desc_t
     CBOR_RETCHECK(len <= sizeof(msg.kind) - 1, CborErrorOverlongEncoding);
     CBOR_ERRCHECK(cbor_value_copy_text_string(&value, msg.kind, &len, NULL));
 
-    memcpy(out_msg_desc, &msg, sizeof(msg));
+    memcpy(out_msg, &msg, sizeof(msg));
 
     return CborNoError;
 }
 
-static CborError dec_key(const CborValue *key_map, dec_picc_key_t *out_key)
+static CborError dec_key(const CborValue *key_map, msg_picc_key_t *out_key)
 {
     CborValue value;
     cbor_value_map_find_value(key_map, "value", &value);
@@ -189,51 +189,32 @@ static CborError dec_key(const CborValue *key_map, dec_picc_key_t *out_key)
         return CborErrorUnknownLength;
     }
 
-    dec_picc_key_t key = { 0 };
+    msg_picc_key_t key = { 0 };
 
     cbor_value_copy_byte_string(&value, key.value, &len, NULL);
     cbor_value_map_find_value(key_map, "type", &value);
     cbor_value_get_uint8(&value, (uint8_t *)&key.type);
 
-    memcpy(out_key, &key, sizeof(dec_picc_key_t));
+    memcpy(out_key, &key, sizeof(key));
 
     return CborNoError;
 }
 
-CborError dec_read_block(const uint8_t *buffer, size_t buffer_size, dec_read_block_msg_t *out_read_block_msg)
+CborError dec_read_sector_msg(const uint8_t *buffer, size_t buffer_size, web_read_sector_msg_t *out_read_sector_msg)
 {
     CborParser parser;
     CborValue it;
     cbor_parser_init(buffer, buffer_size, 0, &parser, &it);
 
-    dec_read_block_msg_t read_block_msg = { 0 };
-
-    CborValue value;
-    cbor_value_map_find_value(&it, "address", &value);
-    cbor_value_get_uint8(&value, &read_block_msg.address);
-    cbor_value_map_find_value(&it, "key", &value);
-    dec_key(&value, &read_block_msg.key);
-
-    memcpy(out_read_block_msg, &read_block_msg, sizeof(dec_read_block_msg_t));
-
-    return CborNoError;
-}
-
-CborError dec_read_sector(const uint8_t *buffer, size_t buffer_size, dec_read_sector_msg_t *out_read_sector_msg)
-{
-    CborParser parser;
-    CborValue it;
-    cbor_parser_init(buffer, buffer_size, 0, &parser, &it);
-
-    dec_read_block_msg_t read_sector_msg = { 0 };
+    web_read_sector_msg_t msg = { 0 };
 
     CborValue value;
     cbor_value_map_find_value(&it, "offset", &value);
-    cbor_value_get_uint8(&value, &read_sector_msg.address);
+    cbor_value_get_uint8(&value, &msg.offset);
     cbor_value_map_find_value(&it, "key", &value);
-    dec_key(&value, &read_sector_msg.key);
+    dec_key(&value, &msg.key);
 
-    memcpy(out_read_sector_msg, &read_sector_msg, sizeof(dec_read_sector_msg_t));
+    memcpy(out_read_sector_msg, &msg, sizeof(msg));
 
     return CborNoError;
 }
