@@ -56,7 +56,6 @@
 
       .ping {
         display: flex;
-        font-size: 0.6rem;
 
         .latency {
           color: color.adjust($color-fg, $lightness: -40%);
@@ -64,6 +63,24 @@
 
         .status {
           margin-left: 0.3rem;
+          display: inline-block;
+          line-height: 0.5rem;
+
+          &.undefined {
+            color: color.adjust($color-fg, $lightness: -40%);
+          }
+
+          &.pinged {
+            color: color.adjust($color-4, $lightness: -40%);
+          }
+
+          &.ponged {
+            color: $color-3;
+          }
+
+          &.miss {
+            color: color.adjust($color-5, $lightness: -20%);
+          }
         }
       }
     }

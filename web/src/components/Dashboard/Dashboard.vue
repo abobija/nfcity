@@ -147,17 +147,17 @@ onClientPongMissed(() => {
             miss
           </span>
           <Transition mode="out-in" :duration="100">
-            <span class="status" v-if="pingPongState == PingPongState.Undefined" title="Ping pong">
-              ⚪️
+            <span class="status undefined" v-if="pingPongState == PingPongState.Undefined" title="Ping pong">
+              &squf;
             </span>
-            <span class="status" v-else-if="pingPongState == PingPongState.Pinged" title="Ping sent">
-              🟡
+            <span class="status pinged" v-else-if="pingPongState == PingPongState.Pinged" title="Ping sent">
+              &squf;
             </span>
-            <span class="status" v-else-if="pingPongState == PingPongState.Ponged" title="Pong received">
-              🟢
+            <span class="status ponged" v-else-if="pingPongState == PingPongState.Ponged" title="Pong received">
+              &squf;
             </span>
-            <span class="status" v-else-if="pingPongState == PingPongState.PongMissed" title="Pong missed">
-              🔴
+            <span class="status miss" v-else-if="pingPongState == PingPongState.PongMissed" title="Pong missed">
+              &squf;
             </span>
           </Transition>
         </div>
