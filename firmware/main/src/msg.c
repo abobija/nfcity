@@ -137,18 +137,11 @@ CborError enc_picc_sector_message(
 static CborError cbor_value_get_uint8(CborValue *value, uint8_t *result)
 {
     uint64_t _result;
-    CborError err = cbor_value_get_uint64(value, &_result);
 
-    if (err != CborNoError) {
-        return err;
-    }
-
-    if (_result > UINT8_MAX) {
-        return CborErrorDataTooLarge;
-    }
+    CBOR_ERRCHECK(cbor_value_get_uint64(value, &_result));
+    CBOR_RETCHECK(_result <= UINT8_MAX, CborErrorDataTooLarge);
 
     *result = (uint8_t)_result;
-
     return CborNoError;
 }
 
@@ -173,30 +166,25 @@ CborError dec_msg(const uint8_t *buffer, size_t buffer_size, web_msg_t *out_msg)
     CBOR_ERRCHECK(cbor_value_copy_text_string(&value, msg.kind, &len, NULL));
 
     memcpy(out_msg, &msg, sizeof(msg));
-
     return CborNoError;
 }
 
-static CborError dec_key(const CborValue *key_map, msg_picc_key_t *out_key)
+static CborError dec_picc_key(const CborValue *key_map, msg_picc_key_t *out_key)
 {
-    CborValue value;
-    cbor_value_map_find_value(key_map, "value", &value);
-
-    size_t len = 0;
-    cbor_value_get_string_length(&value, &len);
-
-    if (len != RC522_MIFARE_KEY_SIZE) {
-        return CborErrorUnknownLength;
-    }
-
     msg_picc_key_t key = { 0 };
 
-    cbor_value_copy_byte_string(&value, key.value, &len, NULL);
-    cbor_value_map_find_value(key_map, "type", &value);
-    cbor_value_get_uint8(&value, (uint8_t *)&key.type);
+    CborValue value;
+    CBOR_ERRCHECK(cbor_value_map_find_value(key_map, "value", &value));
+    CBOR_RETCHECK(cbor_value_is_byte_string(&value), CborErrorIllegalType);
+    size_t len = 0;
+    CBOR_ERRCHECK(cbor_value_get_string_length(&value, &len));
+    CBOR_RETCHECK(len == RC522_MIFARE_KEY_SIZE, CborErrorUnknownLength);
+    CBOR_ERRCHECK(cbor_value_copy_byte_string(&value, key.value, &len, NULL));
+    CBOR_ERRCHECK(cbor_value_map_find_value(key_map, "type", &value));
+    CBOR_RETCHECK(cbor_value_is_unsigned_integer(&value), CborErrorIllegalType);
+    CBOR_ERRCHECK(cbor_value_get_uint8(&value, (uint8_t *)&key.type));
 
     memcpy(out_key, &key, sizeof(key));
-
     return CborNoError;
 }
 
@@ -212,7 +200,7 @@ CborError dec_read_sector_msg(const uint8_t *buffer, size_t buffer_size, web_rea
     cbor_value_map_find_value(&it, "offset", &value);
     cbor_value_get_uint8(&value, &msg.offset);
     cbor_value_map_find_value(&it, "key", &value);
-    dec_key(&value, &msg.key);
+    dec_picc_key(&value, &msg.key);
 
     memcpy(out_read_sector_msg, &msg, sizeof(msg));
 
