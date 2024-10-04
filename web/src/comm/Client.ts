@@ -1,34 +1,22 @@
 import { logger, LogLevel } from '@/Logger';
+import emits from '@/comm/events/ClientEvents';
 import { DeviceMessage, WebMessage } from '@/comm/msgs/Message';
 import { trim, trimRight } from '@/helpers';
 import { decode, encode } from 'cbor-x';
 import mqtt, { MqttClient } from 'mqtt';
+import ClientDisconnectEvent from './events/ClientDisconnectEvent';
+import ClientMessageEvent from './events/ClientMessageEvent';
+import ClientPingEvent from './events/ClientPingEvent';
+import ClientPongEvent from './events/ClientPongEvent';
+import ClientReadyEvent from './events/ClientReadyEvent';
 import PongDevMessage from './msgs/dev/PongDevMessage';
 import PingWebMessage from './msgs/web/PingWebMessage';
-
-type Events =
-  'ready' |
-  'message' |
-  'disconnect';
 
 class Client {
   readonly brokerUrl: string;
   readonly rootTopic: string;
   private readonly devTopic: string;
   private readonly webTopic: string;
-  private readonly eventListeners: {
-    ready: Array<() => void>,
-    message: Array<(message: DeviceMessage) => void>,
-    ping: Array<(ts: number) => void>,
-    pong: Array<(ts: number) => void>,
-    disconnect: Array<() => void>,
-  } = {
-      ready: [],
-      message: [],
-      ping: [],
-      pong: [],
-      disconnect: []
-    };
   private mqttClient: MqttClient | null = null;
   private pingIntervalMs: number;
   private pingInterval?: NodeJS.Timeout;
@@ -98,7 +86,7 @@ class Client {
 
       this.send(PingWebMessage.create());
       this.lastPingTimestamp = Date.now();
-      this.eventListeners.ping.forEach(listener => listener(this.lastPingTimestamp!));
+      emits.emit('ping', ClientPingEvent.from(this.lastPingTimestamp));
     }, this.pingIntervalMs);
 
     logger.debug('pinging started');
@@ -116,22 +104,6 @@ class Client {
     this.lastPongTimestamp = undefined;
 
     logger.debug('pinging stopped');
-  }
-
-  on(event: Events, listener: (...args: any[]) => void): Client {
-    this.eventListeners[event].push(listener);
-
-    return this;
-  }
-
-  off(event: Events, listener: (...args: any[]) => void): Client {
-    const index = this.eventListeners[event].indexOf(listener);
-
-    if (index !== -1) {
-      this.eventListeners[event].splice(index, 1);
-    }
-
-    return this;
   }
 
   connect(): Client {
@@ -157,7 +129,7 @@ class Client {
 
         logger.debug('subscribed to', this.devTopicAbs);
         this.pingingStart();
-        this.eventListeners.ready.forEach(listener => listener());
+        emits.emit('ready', ClientReadyEvent.from(this));
       });
     });
 
@@ -167,16 +139,15 @@ class Client {
       if (PongDevMessage.is(decodedMessage)) {
         logger.verbose('pong message received');
 
-        const ts = Date.now();
-        this.lastPongTimestamp = ts;
-        this.eventListeners.pong.forEach(listener => listener(ts));
+        this.lastPongTimestamp = Date.now();
+        emits.emit('pong', ClientPongEvent.from(this.lastPongTimestamp));
         return;
       }
 
       logger.debug('message received', topic, decodedMessage);
       logger.verbose('encoded received message:', encodedMessage);
 
-      this.eventListeners.message.forEach(listener => listener(decodedMessage));
+      emits.emit('message', ClientMessageEvent.from(decodedMessage));
     });
 
     this.mqttClient.on('reconnect', () => {
@@ -187,25 +158,25 @@ class Client {
     this.mqttClient.on('close', () => {
       logger.debug('close');
       this.pingingStop();
-      this.eventListeners.disconnect.forEach(listener => listener());
+      emits.emit('disconnect', ClientDisconnectEvent.from(this));
     });
 
     this.mqttClient.on('disconnect', () => {
       logger.debug('disconnected');
       this.pingingStop();
-      this.eventListeners.disconnect.forEach(listener => listener());
+      emits.emit('disconnect', ClientDisconnectEvent.from(this));
     });
 
     this.mqttClient.on('offline', () => {
       logger.debug('offline');
       this.pingingStop();
-      this.eventListeners.disconnect.forEach(listener => listener());
+      emits.emit('disconnect', ClientDisconnectEvent.from(this));
     });
 
     this.mqttClient.on('end', () => {
       logger.debug('end');
       this.pingingStop();
-      this.eventListeners.disconnect.forEach(listener => listener());
+      emits.emit('disconnect', ClientDisconnectEvent.from(this));
     });
 
     return this;

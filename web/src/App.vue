@@ -2,11 +2,11 @@
 import '@/App.scss';
 import Client from '@/comm/Client';
 import Dashboard from '@/components/Dashboard/Dashboard.vue';
-import onDeviceMessage from '@/hooks/onDeviceMessage';
 import { logger } from '@/Logger';
 import MifareClassic from '@/models/MifareClassic';
 import { PiccState, PiccType } from '@/models/Picc';
 import { inject, ref, watch } from 'vue';
+import { onClientDisconnect, onClientMessage, onClientReady } from './comm/events/ClientEvents';
 import HelloDevMessage from './comm/msgs/dev/HelloDevMessage';
 import PiccDevMessage from './comm/msgs/dev/PiccDevMessage';
 import PiccStateChangedDevMessage from './comm/msgs/dev/PiccStateChangedDevMessage';
@@ -56,21 +56,24 @@ watch(stateRef, (newState, oldState) => {
 
 function connect() {
   stateRef.value = AppState.Connecting;
-
-  client.connect()
-    .on('ready', () => stateRef.value = AppState.Connected)
-    .on('disconnect', () => stateRef.value = AppState.Disconnected);
+  client.connect();
 }
 
-onDeviceMessage(message => {
-  if (!HelloDevMessage.is(message)) {
+onClientReady(() => stateRef.value = AppState.Connected);
+
+onClientDisconnect(() => stateRef.value = AppState.Disconnected);
+
+onClientMessage(e => {
+  if (!HelloDevMessage.is(e.message)) {
     return;
   }
 
   stateRef.value = AppState.PiccFetching;
 });
 
-onDeviceMessage(message => {
+onClientMessage(e => {
+  const { message } = e;
+
   if (!PiccDevMessage.is(message) && !PiccStateChangedDevMessage.is(message)) {
     return;
   }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Client from '@/comm/Client';
+import { onClientMessage } from '@/comm/events/ClientEvents';
 import PiccSectorDevMessage from '@/comm/msgs/dev/PiccSectorDevMessage';
 import ReadSectorWebMessage from '@/comm/msgs/web/ReadSectorWebMessage';
 import '@/components/Dashboard/Dashboard.scss';
@@ -8,7 +9,6 @@ import memoryBlockEmits, {
   MemoryBlockByteEvent
 } from '@/components/MemoryBlock/events/MemoryBlockEvents';
 import { bin, hex } from '@/helpers';
-import onDeviceMessage from '@/hooks/onDeviceMessage';
 import { logger } from '@/Logger';
 import MifareClassic, { defaultKey, MifareClassicBlock, MifareClassicBlockByteGroupType, MifareClassicBlockType } from '@/models/MifareClassic';
 import { PiccType } from '@/models/Picc';
@@ -84,7 +84,9 @@ onUnmounted(() => {
   memoryBlockEmits.off('byteClick', onBlockByteClick);
 });
 
-onDeviceMessage(message => {
+onClientMessage(e => {
+  const { message } = e;
+
   if (!PiccSectorDevMessage.is(message)) {
     return;
   }
