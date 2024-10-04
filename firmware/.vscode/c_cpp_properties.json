@@ -2,6 +2,7 @@
     "configurations": [
         {
             "name": "ESP-IDF",
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json",
             "includePath": [
                 "${env:IDF_PATH}/components/**",
                 "${env:IDF_PATH}/examples/common_components/protocol_examples_common/**",
