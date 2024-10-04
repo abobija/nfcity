@@ -141,6 +141,26 @@ CborError enc_hello_message(CborEncoder *root)
     return CborNoError;
 }
 
+CborError enc_error_message(web_msg_t *ctx, CborEncoder *encoder, int64_t error_code)
+{
+    CborEncoder message_map;
+
+    size_t message_map_len = ENC_KIND_LEN + 1;
+    if (ctx != NULL) {
+        message_map_len += ENC_CTX_LEN;
+    }
+    CBOR_ERRCHECK(cbor_encoder_create_map(encoder, &message_map, message_map_len));
+    CBOR_ERRCHECK(enc_kind(&message_map, ENC_ERROR_MSG_KIND));
+    if (ctx != NULL) {
+        CBOR_ERRCHECK(enc_ctx(&message_map, ctx));
+    }
+    CBOR_ERRCHECK(cbor_encode_text_stringz(&message_map, "code"));
+    CBOR_ERRCHECK(cbor_encode_int(&message_map, error_code));
+    CBOR_ERRCHECK(cbor_encoder_close_container(encoder, &message_map));
+
+    return CborNoError;
+}
+
 CborError enc_pong_message(web_msg_t *ctx, CborEncoder *encoder)
 {
     CborEncoder message_map;

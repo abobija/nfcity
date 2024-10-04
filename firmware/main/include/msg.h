@@ -70,6 +70,7 @@ CborError dec_read_sector_msg(const uint8_t *buffer, size_t buffer_size, web_rea
 // {{ encoding
 
 #define ENC_HELLO_MSG_KIND              "hello"
+#define ENC_ERROR_MSG_KIND              "error"
 #define ENC_PONG_MSG_KIND               "pong"
 #define ENC_PICC_MSG_KIND               "picc"
 #define ENC_PICC_STATE_CHANGED_MSG_KIND "picc_state_changed"
@@ -77,12 +78,15 @@ CborError dec_read_sector_msg(const uint8_t *buffer, size_t buffer_size, web_rea
 
 #define ENC_CTX_BYTES                (64)
 #define ENC_HELLO_BYTES              (32)
+#define ENC_ERROR_BYTES              (ENC_CTX_BYTES + 16)
 #define ENC_PONG_BYTES               (ENC_CTX_BYTES + 32)
 #define ENC_PICC_BYTES               (ENC_CTX_BYTES + 128)
 #define ENC_PICC_STATE_CHANGED_BYTES (32 + ENC_PICC_BYTES)
 #define ENC_PICC_SECTOR_BYTES        (ENC_CTX_BYTES + (4 * 64)) // FIXME: for mifare 4k
 
 CborError enc_hello_message(CborEncoder *encoder);
+
+CborError enc_error_message(web_msg_t *ctx, CborEncoder *encoder, int64_t error_code);
 
 CborError enc_pong_message(web_msg_t *ctx, CborEncoder *encoder);
 
