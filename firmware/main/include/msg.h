@@ -3,6 +3,8 @@
 #include "cbor.h"
 #include "picc/rc522_mifare.h"
 
+// {{ common
+
 extern const char *MSG_LOG_TAG;
 
 #define CBOR_ERRCHECK(expression)                                                                                      \
@@ -33,21 +35,7 @@ typedef struct
     rc522_mifare_key_type_t type;
 } msg_picc_key_t;
 
-// {{ encoding
-
-#define ENC_HELLO_MSG_KIND              "hello"
-#define ENC_PONG_MSG_KIND               "pong"
-#define ENC_PICC_MSG_KIND               "picc"
-#define ENC_PICC_STATE_CHANGED_MSG_KIND "picc_state_changed"
-#define ENC_PICC_SECTOR_MSG_KIND        "picc_sector"
-
-#define ENC_HELLO_BYTES              32
-#define ENC_PONG_BYTES               32
-#define ENC_PICC_BYTES               128
-#define ENC_PICC_STATE_CHANGED_BYTES 32 + ENC_PICC_BYTES
-#define ENC_PICC_SECTOR_BYTES        4 * 64 // FIXME: for mifare 4k
-
-// }} encoding
+// }} common
 
 // {{ decoding
 
@@ -72,9 +60,25 @@ typedef struct
     msg_picc_key_t key;
 } web_read_sector_msg_t;
 
+CborError dec_msg(const uint8_t *buffer, size_t buffer_size, web_msg_t *out_msg);
+
+CborError dec_read_sector_msg(const uint8_t *buffer, size_t buffer_size, web_read_sector_msg_t *out_read_sector_msg);
+
 // }} decoding
 
 // {{ encoding
+
+#define ENC_HELLO_MSG_KIND              "hello"
+#define ENC_PONG_MSG_KIND               "pong"
+#define ENC_PICC_MSG_KIND               "picc"
+#define ENC_PICC_STATE_CHANGED_MSG_KIND "picc_state_changed"
+#define ENC_PICC_SECTOR_MSG_KIND        "picc_sector"
+
+#define ENC_HELLO_BYTES              32
+#define ENC_PONG_BYTES               32
+#define ENC_PICC_BYTES               128
+#define ENC_PICC_STATE_CHANGED_BYTES 32 + ENC_PICC_BYTES
+#define ENC_PICC_SECTOR_BYTES        4 * 64 // FIXME: for mifare 4k
 
 CborError enc_hello_message(CborEncoder *encoder);
 
@@ -88,11 +92,3 @@ CborError enc_picc_sector_message(
     CborEncoder *encoder, uint8_t sector_offset, uint8_t sector_block_0_address, uint8_t *sector_data);
 
 // }} encoding
-
-// {{ decoding
-
-CborError dec_msg(const uint8_t *buffer, size_t buffer_size, web_msg_t *out_msg);
-
-CborError dec_read_sector_msg(const uint8_t *buffer, size_t buffer_size, web_read_sector_msg_t *out_read_sector_msg);
-
-// }} decoding

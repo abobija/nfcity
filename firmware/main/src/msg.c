@@ -1,5 +1,108 @@
 #include "msg.h"
 
+// {{ decoding
+
+struct
+{
+    const char *kind_str;
+    web_msg_kind_t kind;
+} static web_msg_kind_map[] = {
+    { "ping", WEB_MSG_PING },
+    { "get_picc", WEB_MSG_GET_PICC },
+    { "read_sector", WEB_MSG_READ_SECTOR },
+};
+
+static void dec_map_kind(const char *kind_str, web_msg_kind_t *out_kind)
+{
+    uint8_t entry_count = sizeof(web_msg_kind_map) / sizeof(web_msg_kind_map[0]);
+
+    for (uint8_t i = 0; i < entry_count; i++) {
+        if (strcmp(kind_str, web_msg_kind_map[i].kind_str) == 0) {
+            *out_kind = web_msg_kind_map[i].kind;
+            return;
+        }
+    }
+
+    *out_kind = WEB_MSG_UNKNOWN;
+}
+
+static CborError cbor_value_get_uint8(CborValue *value, uint8_t *out_result)
+{
+    uint64_t result;
+
+    CBOR_ERRCHECK(cbor_value_get_uint64(value, &result));
+    CBOR_RETCHECK(result <= UINT8_MAX, CborErrorDataTooLarge);
+
+    *out_result = (uint8_t)result;
+    return CborNoError;
+}
+
+CborError dec_msg(const uint8_t *buffer, size_t buffer_size, web_msg_t *out_msg)
+{
+    web_msg_t msg = { 0 };
+
+    CborParser parser;
+    CborValue it;
+    CBOR_ERRCHECK(cbor_parser_init(buffer, buffer_size, 0, &parser, &it));
+    CborValue value;
+    CBOR_ERRCHECK(cbor_value_map_find_value(&it, MSG_DESC_ID, &value));
+    CBOR_RETCHECK(cbor_value_is_text_string(&value), CborErrorIllegalType);
+    size_t len = 0;
+    CBOR_ERRCHECK(cbor_value_get_string_length(&value, &len));
+    CBOR_RETCHECK(len <= sizeof(msg.id) - 1, CborErrorOverlongEncoding);
+    CBOR_ERRCHECK(cbor_value_copy_text_string(&value, msg.id, &len, NULL));
+    char kind_str[32] = { 0 };
+    CBOR_ERRCHECK(cbor_value_map_find_value(&it, MSG_DESC_KIND, &value));
+    CBOR_RETCHECK(cbor_value_is_text_string(&value), CborErrorIllegalType);
+    CBOR_ERRCHECK(cbor_value_get_string_length(&value, &len));
+    CBOR_RETCHECK(len <= sizeof(kind_str) - 1, CborErrorOverlongEncoding);
+    CBOR_ERRCHECK(cbor_value_copy_text_string(&value, kind_str, &len, NULL));
+    dec_map_kind(kind_str, &msg.kind);
+
+    memcpy(out_msg, &msg, sizeof(msg));
+    return CborNoError;
+}
+
+static CborError dec_picc_key(const CborValue *key_map, msg_picc_key_t *out_key)
+{
+    msg_picc_key_t key = { 0 };
+
+    CborValue value;
+    CBOR_ERRCHECK(cbor_value_map_find_value(key_map, "value", &value));
+    CBOR_RETCHECK(cbor_value_is_byte_string(&value), CborErrorIllegalType);
+    size_t len = 0;
+    CBOR_ERRCHECK(cbor_value_get_string_length(&value, &len));
+    CBOR_RETCHECK(len == RC522_MIFARE_KEY_SIZE, CborErrorUnknownLength);
+    CBOR_ERRCHECK(cbor_value_copy_byte_string(&value, key.value, &len, NULL));
+    CBOR_ERRCHECK(cbor_value_map_find_value(key_map, "type", &value));
+    CBOR_RETCHECK(cbor_value_is_unsigned_integer(&value), CborErrorIllegalType);
+    CBOR_ERRCHECK(cbor_value_get_uint8(&value, (uint8_t *)&key.type));
+
+    memcpy(out_key, &key, sizeof(key));
+    return CborNoError;
+}
+
+CborError dec_read_sector_msg(const uint8_t *buffer, size_t buffer_size, web_read_sector_msg_t *out_read_sector_msg)
+{
+    web_read_sector_msg_t msg = { 0 };
+
+    CborParser parser;
+    CborValue it;
+    CBOR_ERRCHECK(cbor_parser_init(buffer, buffer_size, 0, &parser, &it));
+    CborValue value;
+    CBOR_ERRCHECK(cbor_value_map_find_value(&it, "offset", &value));
+    CBOR_RETCHECK(cbor_value_is_unsigned_integer(&value), CborErrorIllegalType);
+    CBOR_ERRCHECK(cbor_value_get_uint8(&value, &msg.offset));
+    CBOR_ERRCHECK(cbor_value_map_find_value(&it, "key", &value));
+    CBOR_RETCHECK(cbor_value_is_map(&value), CborErrorIllegalType);
+    CBOR_ERRCHECK(dec_picc_key(&value, &msg.key));
+
+    memcpy(out_read_sector_msg, &msg, sizeof(msg));
+    return CborNoError;
+}
+
+// }} decoding
+
 // {{ encoding
 
 #define ENC_KIND_LEN 1
@@ -128,106 +231,3 @@ CborError enc_picc_sector_message(
 }
 
 // }} encoding
-
-// {{ decoding
-
-struct
-{
-    const char *kind_str;
-    web_msg_kind_t kind;
-} static web_msg_kind_map[] = {
-    { "ping", WEB_MSG_PING },
-    { "get_picc", WEB_MSG_GET_PICC },
-    { "read_sector", WEB_MSG_READ_SECTOR },
-};
-
-static void dec_map_kind(const char *kind_str, web_msg_kind_t *out_kind)
-{
-    uint8_t entry_count = sizeof(web_msg_kind_map) / sizeof(web_msg_kind_map[0]);
-
-    for (uint8_t i = 0; i < entry_count; i++) {
-        if (strcmp(kind_str, web_msg_kind_map[i].kind_str) == 0) {
-            *out_kind = web_msg_kind_map[i].kind;
-            return;
-        }
-    }
-
-    *out_kind = WEB_MSG_UNKNOWN;
-}
-
-static CborError cbor_value_get_uint8(CborValue *value, uint8_t *out_result)
-{
-    uint64_t result;
-
-    CBOR_ERRCHECK(cbor_value_get_uint64(value, &result));
-    CBOR_RETCHECK(result <= UINT8_MAX, CborErrorDataTooLarge);
-
-    *out_result = (uint8_t)result;
-    return CborNoError;
-}
-
-CborError dec_msg(const uint8_t *buffer, size_t buffer_size, web_msg_t *out_msg)
-{
-    web_msg_t msg = { 0 };
-
-    CborParser parser;
-    CborValue it;
-    CBOR_ERRCHECK(cbor_parser_init(buffer, buffer_size, 0, &parser, &it));
-    CborValue value;
-    CBOR_ERRCHECK(cbor_value_map_find_value(&it, MSG_DESC_ID, &value));
-    CBOR_RETCHECK(cbor_value_is_text_string(&value), CborErrorIllegalType);
-    size_t len = 0;
-    CBOR_ERRCHECK(cbor_value_get_string_length(&value, &len));
-    CBOR_RETCHECK(len <= sizeof(msg.id) - 1, CborErrorOverlongEncoding);
-    CBOR_ERRCHECK(cbor_value_copy_text_string(&value, msg.id, &len, NULL));
-    char kind_str[32] = { 0 };
-    CBOR_ERRCHECK(cbor_value_map_find_value(&it, MSG_DESC_KIND, &value));
-    CBOR_RETCHECK(cbor_value_is_text_string(&value), CborErrorIllegalType);
-    CBOR_ERRCHECK(cbor_value_get_string_length(&value, &len));
-    CBOR_RETCHECK(len <= sizeof(kind_str) - 1, CborErrorOverlongEncoding);
-    CBOR_ERRCHECK(cbor_value_copy_text_string(&value, kind_str, &len, NULL));
-    dec_map_kind(kind_str, &msg.kind);
-
-    memcpy(out_msg, &msg, sizeof(msg));
-    return CborNoError;
-}
-
-static CborError dec_picc_key(const CborValue *key_map, msg_picc_key_t *out_key)
-{
-    msg_picc_key_t key = { 0 };
-
-    CborValue value;
-    CBOR_ERRCHECK(cbor_value_map_find_value(key_map, "value", &value));
-    CBOR_RETCHECK(cbor_value_is_byte_string(&value), CborErrorIllegalType);
-    size_t len = 0;
-    CBOR_ERRCHECK(cbor_value_get_string_length(&value, &len));
-    CBOR_RETCHECK(len == RC522_MIFARE_KEY_SIZE, CborErrorUnknownLength);
-    CBOR_ERRCHECK(cbor_value_copy_byte_string(&value, key.value, &len, NULL));
-    CBOR_ERRCHECK(cbor_value_map_find_value(key_map, "type", &value));
-    CBOR_RETCHECK(cbor_value_is_unsigned_integer(&value), CborErrorIllegalType);
-    CBOR_ERRCHECK(cbor_value_get_uint8(&value, (uint8_t *)&key.type));
-
-    memcpy(out_key, &key, sizeof(key));
-    return CborNoError;
-}
-
-CborError dec_read_sector_msg(const uint8_t *buffer, size_t buffer_size, web_read_sector_msg_t *out_read_sector_msg)
-{
-    web_read_sector_msg_t msg = { 0 };
-
-    CborParser parser;
-    CborValue it;
-    CBOR_ERRCHECK(cbor_parser_init(buffer, buffer_size, 0, &parser, &it));
-    CborValue value;
-    CBOR_ERRCHECK(cbor_value_map_find_value(&it, "offset", &value));
-    CBOR_RETCHECK(cbor_value_is_unsigned_integer(&value), CborErrorIllegalType);
-    CBOR_ERRCHECK(cbor_value_get_uint8(&value, &msg.offset));
-    CBOR_ERRCHECK(cbor_value_map_find_value(&it, "key", &value));
-    CBOR_RETCHECK(cbor_value_is_map(&value), CborErrorIllegalType);
-    CBOR_ERRCHECK(dec_picc_key(&value, &msg.key));
-
-    memcpy(out_read_sector_msg, &msg, sizeof(msg));
-    return CborNoError;
-}
-
-// }} decoding
