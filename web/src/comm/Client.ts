@@ -19,7 +19,7 @@ class Client {
   private readonly devTopic: string;
   private readonly webTopic: string;
   private mqttClient: MqttClient | null = null;
-  private pingIntervalMs: number;
+  readonly pingIntervalMs: number;
   private pingInterval?: NodeJS.Timeout;
   private lastPingTimestamp?: number;
   private lastPongTimestamp?: number;

@@ -5,6 +5,9 @@
   margin: 1rem;
 
   >.header {
+    display: flex;
+    justify-content: space-between;
+
     .meta {
       .name {
         color: rgba($color-fg, 0.5);
@@ -44,6 +47,15 @@
         margin-top: 0.5rem;
         color: rgba($color-fg, 0.5);
         font-size: 0.8rem;
+      }
+    }
+
+    .system {
+      flex-shrink: 0;
+      display: inline-block;
+
+      .ping-pong {
+        font-size: 0.6rem;
       }
     }
   }

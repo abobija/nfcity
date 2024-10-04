@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Client from '@/comm/Client';
-import { onClientMessage } from '@/comm/hooks/ClientEventHooks';
+import { onClientMessage, onClientPing, onClientPong, onClientPongMissed } from '@/comm/hooks/ClientEventHooks';
 import PiccSectorDevMessage from '@/comm/msgs/dev/PiccSectorDevMessage';
 import ReadSectorWebMessage from '@/comm/msgs/web/ReadSectorWebMessage';
 import '@/components/Dashboard/Dashboard.scss';
@@ -89,6 +89,19 @@ onClientMessage(e => {
 
   props.picc.memory.updateSector(message.blocks);
 });
+
+enum PingPongState {
+  Undefined,
+  Pinged,
+  Ponged,
+  PongMissed,
+}
+
+const pingPongState = ref<PingPongState>(PingPongState.Undefined);
+
+onClientPing(() => pingPongState.value = PingPongState.Pinged);
+onClientPong(() => pingPongState.value = PingPongState.Ponged);
+onClientPongMissed(() => pingPongState.value = PingPongState.PongMissed);
 </script>
 
 <template>
@@ -117,6 +130,22 @@ onClientMessage(e => {
           >> {{ MifareClassicBlock.size }} bytes per block
           >> {{ picc.memory.size }} bytes of memory
         </div>
+      </div>
+      <div class="system">
+        <Transition mode="out-in" :duration="100">
+          <span class="ping-pong" v-if="pingPongState == PingPongState.Undefined" title="Ping pong">
+            ⚪️
+          </span>
+          <span class="ping-pong" v-else-if="pingPongState == PingPongState.Pinged" title="Ping sent">
+            🟡
+          </span>
+          <span class="ping-pong" v-else-if="pingPongState == PingPongState.Ponged" title="Pong received">
+            🟢
+          </span>
+          <span class="ping-pong" v-else-if="pingPongState == PingPongState.PongMissed" title="Pong missed">
+            🔴
+          </span>
+        </Transition>
       </div>
     </div>
 

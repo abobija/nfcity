@@ -4,6 +4,7 @@ import ClientDisconnectEvent from "../events/ClientDisconnectEvent";
 import ClientMessageEvent from "../events/ClientMessageEvent";
 import ClientPingEvent from "../events/ClientPingEvent";
 import ClientPongEvent from "../events/ClientPongEvent";
+import ClientPongMissedEvent from "../events/ClientPongMissedEvent";
 import ClientReadyEvent from "../events/ClientReadyEvent";
 
 export function onClientReady(hook: (e: ClientReadyEvent) => void) {
@@ -24,6 +25,11 @@ export function onClientPing(hook: (e: ClientPingEvent) => void) {
 export function onClientPong(hook: (e: ClientPongEvent) => void) {
   onMounted(() => emits.on('pong', hook));
   onUnmounted(() => emits.off('pong', hook));
+}
+
+export function onClientPongMissed(hook: (e: ClientPongMissedEvent) => void) {
+  onMounted(() => emits.on('pongMissed', hook));
+  onUnmounted(() => emits.off('pongMissed', hook));
 }
 
 export function onClientDisconnect(hook: (e: ClientDisconnectEvent) => void) {
