@@ -52,10 +52,19 @@
 
     .system {
       flex-shrink: 0;
-      display: inline-block;
+      font-size: 0.7rem;
 
-      .ping-pong {
+      .ping {
+        display: flex;
         font-size: 0.6rem;
+
+        .latency {
+          color: color.adjust($color-fg, $lightness: -40%);
+        }
+
+        .status {
+          margin-left: 0.3rem;
+        }
       }
     }
   }

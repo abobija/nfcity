@@ -98,10 +98,17 @@ enum PingPongState {
 }
 
 const pingPongState = ref<PingPongState>(PingPongState.Undefined);
+const pingPongLatency = ref<number | undefined>(undefined);
 
 onClientPing(() => pingPongState.value = PingPongState.Pinged);
-onClientPong(() => pingPongState.value = PingPongState.Ponged);
-onClientPongMissed(() => pingPongState.value = PingPongState.PongMissed);
+onClientPong((e) => {
+  pingPongState.value = PingPongState.Ponged;
+  pingPongLatency.value = e.latency;
+});
+onClientPongMissed(() => {
+  pingPongState.value = PingPongState.PongMissed;
+  pingPongLatency.value = undefined;
+});
 </script>
 
 <template>
@@ -132,20 +139,28 @@ onClientPongMissed(() => pingPongState.value = PingPongState.PongMissed);
         </div>
       </div>
       <div class="system">
-        <Transition mode="out-in" :duration="100">
-          <span class="ping-pong" v-if="pingPongState == PingPongState.Undefined" title="Ping pong">
-            ⚪️
+        <div class="ping">
+          <span class="latency" v-if="pingPongLatency" title="Latency [ms]">
+            {{ pingPongLatency }}
           </span>
-          <span class="ping-pong" v-else-if="pingPongState == PingPongState.Pinged" title="Ping sent">
-            🟡
+          <span class="miss" v-if="pingPongState == PingPongState.PongMissed">
+            miss
           </span>
-          <span class="ping-pong" v-else-if="pingPongState == PingPongState.Ponged" title="Pong received">
-            🟢
-          </span>
-          <span class="ping-pong" v-else-if="pingPongState == PingPongState.PongMissed" title="Pong missed">
-            🔴
-          </span>
-        </Transition>
+          <Transition mode="out-in" :duration="100">
+            <span class="status" v-if="pingPongState == PingPongState.Undefined" title="Ping pong">
+              ⚪️
+            </span>
+            <span class="status" v-else-if="pingPongState == PingPongState.Pinged" title="Ping sent">
+              🟡
+            </span>
+            <span class="status" v-else-if="pingPongState == PingPongState.Ponged" title="Pong received">
+              🟢
+            </span>
+            <span class="status" v-else-if="pingPongState == PingPongState.PongMissed" title="Pong missed">
+              🔴
+            </span>
+          </Transition>
+        </div>
       </div>
     </div>
 

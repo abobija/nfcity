@@ -87,11 +87,10 @@ class Client {
           this.lastPingTimestamp!,
           this.lastPongTimestamp
         ));
-        return;
       }
 
-      this.send(PingWebMessage.create());
       this.lastPingTimestamp = Date.now();
+      this.send(PingWebMessage.create());
       emits.emit('ping', ClientPingEvent.from(this, this.lastPingTimestamp));
     }, this.pingIntervalMs);
 
@@ -146,7 +145,11 @@ class Client {
         logger.verbose('pong message received');
 
         this.lastPongTimestamp = Date.now();
-        emits.emit('pong', ClientPongEvent.from(this, this.lastPongTimestamp));
+        emits.emit('pong', ClientPongEvent.from(
+          this,
+          this.lastPingTimestamp!,
+          this.lastPongTimestamp
+        ));
         return;
       }
 

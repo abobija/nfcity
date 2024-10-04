@@ -2,14 +2,28 @@ import Client from "@/comm/Client";
 import { ClientEvent } from "@/comm/events/ClientEvent";
 
 export default class ClientPongEvent extends ClientEvent {
-  readonly timestamp: number;
+  readonly pingTimestamp: number;
+  readonly pongTimestamp: number;
 
-  protected constructor(client: Client, timestamp: number) {
-    super(client);
-    this.timestamp = timestamp;
+  get latency(): number {
+    return this.pongTimestamp - this.pingTimestamp;
   }
 
-  static from(client: Client, timestamp: number) {
-    return new ClientPongEvent(client, timestamp);
+  protected constructor(
+    client: Client,
+    pingTimestamp: number,
+    pongTimestamp: number
+  ) {
+    super(client);
+    this.pingTimestamp = pingTimestamp;
+    this.pongTimestamp = pongTimestamp;
+  }
+
+  static from(
+    client: Client,
+    pingTimestamp: number,
+    pongTimestamp: number
+  ): ClientPongEvent {
+    return new ClientPongEvent(client, pingTimestamp, pongTimestamp);
   }
 }

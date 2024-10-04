@@ -68,7 +68,9 @@ onClientMessage(e => {
     return;
   }
 
-  stateRef.value = AppState.PiccFetching;
+  if (stateRef.value < AppState.PiccFetching) {
+    stateRef.value = AppState.PiccFetching;
+  }
 });
 
 onClientMessage(e => {
