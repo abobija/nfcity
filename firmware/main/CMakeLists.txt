@@ -3,6 +3,5 @@ idf_component_register(
         include
     SRCS
         nfcity.c
-        src/enc.c
-        src/dec.c
+        src/msg.c
 )
