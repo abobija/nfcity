@@ -18,7 +18,7 @@ export abstract class WebMessage implements Message {
 
   protected constructor(kind: string) {
     this.$kind = kind;
-    this.$id = "randoooooom";
+    this.$id = crypto.randomUUID();
   }
 }
 
