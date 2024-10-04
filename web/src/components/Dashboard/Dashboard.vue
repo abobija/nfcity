@@ -6,7 +6,7 @@ import '@/components/Dashboard/Dashboard.scss';
 import Memory from '@/components/Memory/Memory.vue';
 import memoryBlockEmits, {
   MemoryBlockByteEvent
-} from '@/components/MemoryBlock/MemoryBlockEvents';
+} from '@/components/MemoryBlock/events/MemoryBlockEvents';
 import { bin, hex } from '@/helpers';
 import onDeviceMessage from '@/hooks/onDeviceMessage';
 import { logger } from '@/Logger';

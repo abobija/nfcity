@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import '@/components/MemoryBlock/MemoryBlock.scss';
 import MemoryBlockByteGroup from '@/components/MemoryBlock/MemoryBlockByteGroup';
-import emits, { MemoryBlockByteEvent } from '@/components/MemoryBlock/MemoryBlockEvents';
+import emits, { MemoryBlockByteEvent } from '@/components/MemoryBlock/events/MemoryBlockEvents';
 import { hex } from '@/helpers';
 import {
   MifareClassicBlock,
