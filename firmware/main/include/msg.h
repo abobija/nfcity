@@ -51,14 +51,19 @@ typedef struct
 
 // {{ decoding
 
-#define WEB_PING_MSG_KIND        "ping"
-#define WEB_GET_PICC_MSG_KIND    "get_picc"
-#define WEB_READ_SECTOR_MSG_KIND "read_sector"
+typedef enum
+{
+    WEB_MSG_UNKNOWN = -1,
+    WEB_MSG_UNDEFINED = 0,
+    WEB_MSG_PING,
+    WEB_MSG_GET_PICC,
+    WEB_MSG_READ_SECTOR,
+} web_msg_kind_t;
 
 typedef struct
 {
     char id[36 + 1]; // uuid
-    char kind[32 + 1];
+    web_msg_kind_t kind;
 } web_msg_t;
 
 typedef struct

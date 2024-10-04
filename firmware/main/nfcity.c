@@ -162,47 +162,45 @@ _exit:
     return ret;
 }
 
-static esp_err_t handle_message_from_web(const char *kind, const uint8_t *data, size_t data_len)
+static esp_err_t handle_message_from_web(web_msg_t *msg, const uint8_t *data, size_t data_len)
 {
-    if (strcmp(kind, WEB_PING_MSG_KIND) == 0) {
-        uint8_t buffer[ENC_PONG_BYTES] = { 0 };
-        CborEncoder root = { 0 };
-        cbor_encoder_init(&root, buffer, ENC_PONG_BYTES, 0);
-        enc_pong_message(&root);
-        size_t len = cbor_encoder_get_buffer_size(&root, buffer);
-
-        mqtt_pub(buffer, len, MQTT_QOS_0);
-
-        return ESP_OK;
-    }
-    else if (strcmp(kind, WEB_GET_PICC_MSG_KIND) == 0) {
-        uint8_t buffer[ENC_PICC_BYTES] = { 0 };
-        CborEncoder root = { 0 };
-        cbor_encoder_init(&root, buffer, ENC_PICC_BYTES, 0);
-        enc_picc_message(&root, &picc);
-        size_t len = cbor_encoder_get_buffer_size(&root, buffer);
-
-        mqtt_pub(buffer, len, MQTT_QOS_0);
-
-        return ESP_OK;
-    }
-    else if (strcmp(kind, WEB_READ_SECTOR_MSG_KIND) == 0) {
-        web_read_sector_msg_t msg = { 0 };
-        dec_read_sector_msg(data, data_len, &msg);
-        uint8_t sector_buffer[4 * RC522_MIFARE_BLOCK_SIZE] = { 0 }; // FIXME: for mifare 4k
-        if (read_sector(&msg, sector_buffer) == ESP_OK) {
-            uint8_t sector_block_0_address = 0;
-            rc522_mifare_get_sector_block_0_address(msg.offset, &sector_block_0_address);
+    switch (msg->kind) {
+        case WEB_MSG_PING: {
+            uint8_t buffer[ENC_PONG_BYTES] = { 0 };
             CborEncoder root = { 0 };
-            uint8_t buffer[ENC_PICC_SECTOR_BYTES] = { 0 };
-            cbor_encoder_init(&root, buffer, sizeof(buffer), 0);
-            enc_picc_sector_message(&root, msg.offset, sector_block_0_address, sector_buffer);
+            cbor_encoder_init(&root, buffer, ENC_PONG_BYTES, 0);
+            enc_pong_message(&root);
             size_t len = cbor_encoder_get_buffer_size(&root, buffer);
+
             mqtt_pub(buffer, len, MQTT_QOS_0);
-        }
-    }
-    else {
-        ESP_LOGW(TAG, "Unsupported meessage kind: %s", kind);
+        } break;
+        case WEB_MSG_GET_PICC: {
+            uint8_t buffer[ENC_PICC_BYTES] = { 0 };
+            CborEncoder root = { 0 };
+            cbor_encoder_init(&root, buffer, ENC_PICC_BYTES, 0);
+            enc_picc_message(&root, &picc);
+            size_t len = cbor_encoder_get_buffer_size(&root, buffer);
+
+            mqtt_pub(buffer, len, MQTT_QOS_0);
+        } break;
+        case WEB_MSG_READ_SECTOR: {
+            web_read_sector_msg_t msg = { 0 };
+            dec_read_sector_msg(data, data_len, &msg);
+            uint8_t sector_buffer[4 * RC522_MIFARE_BLOCK_SIZE] = { 0 }; // FIXME: for mifare 4k
+            if (read_sector(&msg, sector_buffer) == ESP_OK) {
+                uint8_t sector_block_0_address = 0;
+                rc522_mifare_get_sector_block_0_address(msg.offset, &sector_block_0_address);
+                CborEncoder root = { 0 };
+                uint8_t buffer[ENC_PICC_SECTOR_BYTES] = { 0 };
+                cbor_encoder_init(&root, buffer, sizeof(buffer), 0);
+                enc_picc_sector_message(&root, msg.offset, sector_block_0_address, sector_buffer);
+                size_t len = cbor_encoder_get_buffer_size(&root, buffer);
+                mqtt_pub(buffer, len, MQTT_QOS_0);
+            }
+        } break;
+        default: {
+            ESP_LOGW(TAG, "Unsupported meessage kind: %d", msg->kind);
+        } break;
     }
 
     return ESP_OK;
@@ -222,9 +220,9 @@ static void on_mqtt_data(void *arg, esp_event_base_t base, int32_t eid, void *da
         return;
     }
 
-    ESP_LOGW(TAG, "msg id: %s, kind: %s", msg.id, msg.kind);
+    ESP_LOGW(TAG, "msg id: %s, kind: %d", msg.id, msg.kind);
 
-    handle_message_from_web(msg.kind, (uint8_t *)event->data, event->data_len);
+    handle_message_from_web(&msg, (uint8_t *)event->data, event->data_len);
 }
 
 void app_main()
