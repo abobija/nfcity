@@ -45,14 +45,14 @@ CborError dec_msg(const uint8_t *buffer, size_t buffer_size, web_msg_t *out_msg)
     CborValue it;
     CBOR_ERRCHECK(cbor_parser_init(buffer, buffer_size, 0, &parser, &it));
     CborValue value;
-    CBOR_ERRCHECK(cbor_value_map_find_value(&it, MSG_DESC_ID, &value));
+    CBOR_ERRCHECK(cbor_value_map_find_value(&it, MSG_ID_FIELD, &value));
     CBOR_RETCHECK(cbor_value_is_text_string(&value), CborErrorIllegalType);
     size_t len = 0;
     CBOR_ERRCHECK(cbor_value_get_string_length(&value, &len));
     CBOR_RETCHECK(len <= sizeof(msg.id) - 1, CborErrorOverlongEncoding);
     CBOR_ERRCHECK(cbor_value_copy_text_string(&value, msg.id, &len, NULL));
     char kind_str[32] = { 0 };
-    CBOR_ERRCHECK(cbor_value_map_find_value(&it, MSG_DESC_KIND, &value));
+    CBOR_ERRCHECK(cbor_value_map_find_value(&it, MSG_KIND_FIELD, &value));
     CBOR_RETCHECK(cbor_value_is_text_string(&value), CborErrorIllegalType);
     CBOR_ERRCHECK(cbor_value_get_string_length(&value, &len));
     CBOR_RETCHECK(len <= sizeof(kind_str) - 1, CborErrorOverlongEncoding);
@@ -108,8 +108,24 @@ CborError dec_read_sector_msg(const uint8_t *buffer, size_t buffer_size, web_rea
 #define ENC_KIND_LEN 1
 static CborError enc_kind(CborEncoder *encoder, const char *kind)
 {
-    CBOR_ERRCHECK(cbor_encode_text_stringz(encoder, MSG_DESC_KIND));
+    CBOR_ERRCHECK(cbor_encode_text_stringz(encoder, MSG_KIND_FIELD));
     CBOR_ERRCHECK(cbor_encode_text_stringz(encoder, kind));
+
+    return CborNoError;
+}
+
+#define ENC_CTX_LEN     1
+#define ENC_CTX_MAP_LEN 1
+static CborError enc_ctx(CborEncoder *encoder, web_msg_t *ctx)
+{
+    CBOR_ERRCHECK(cbor_encode_text_stringz(encoder, MSG_CTX_FIELD));
+
+    CborEncoder ctx_map;
+
+    CBOR_ERRCHECK(cbor_encoder_create_map(encoder, &ctx_map, ENC_CTX_MAP_LEN));
+    CBOR_ERRCHECK(cbor_encode_text_stringz(&ctx_map, MSG_ID_FIELD));
+    CBOR_ERRCHECK(cbor_encode_text_stringz(&ctx_map, ctx->id));
+    CBOR_ERRCHECK(cbor_encoder_close_container(encoder, &ctx_map));
 
     return CborNoError;
 }
@@ -125,12 +141,13 @@ CborError enc_hello_message(CborEncoder *root)
     return CborNoError;
 }
 
-CborError enc_pong_message(CborEncoder *encoder)
+CborError enc_pong_message(web_msg_t *ctx, CborEncoder *encoder)
 {
     CborEncoder message_map;
 
-    CBOR_ERRCHECK(cbor_encoder_create_map(encoder, &message_map, ENC_KIND_LEN));
+    CBOR_ERRCHECK(cbor_encoder_create_map(encoder, &message_map, ENC_KIND_LEN + ENC_CTX_LEN));
     CBOR_ERRCHECK(enc_kind(&message_map, ENC_PONG_MSG_KIND));
+    CBOR_ERRCHECK(enc_ctx(&message_map, ctx));
     CBOR_ERRCHECK(cbor_encoder_close_container(encoder, &message_map));
 
     return CborNoError;
@@ -158,12 +175,13 @@ static CborError enc_picc(CborEncoder *encoder, rc522_picc_t *picc)
     return CborNoError;
 }
 
-CborError enc_picc_message(CborEncoder *root, rc522_picc_t *picc)
+CborError enc_picc_message(web_msg_t *ctx, CborEncoder *root, rc522_picc_t *picc)
 {
     CborEncoder message_map;
 
-    CBOR_ERRCHECK(cbor_encoder_create_map(root, &message_map, ENC_KIND_LEN + 1));
+    CBOR_ERRCHECK(cbor_encoder_create_map(root, &message_map, ENC_KIND_LEN + ENC_CTX_LEN + 1));
     CBOR_ERRCHECK(enc_kind(&message_map, ENC_PICC_MSG_KIND));
+    CBOR_ERRCHECK(enc_ctx(&message_map, ctx));
     CBOR_ERRCHECK(cbor_encode_text_stringz(&message_map, "picc"));
     CborEncoder picc_map;
     CBOR_ERRCHECK(cbor_encoder_create_map(&message_map, &picc_map, ENC_PICC_LEN));
@@ -206,12 +224,13 @@ static CborError enc_picc_block(CborEncoder *encoder, uint8_t address, uint8_t o
 }
 
 CborError enc_picc_sector_message(
-    CborEncoder *root, uint8_t sector_offset, uint8_t sector_block_0_address, uint8_t *sector_data)
+    web_msg_t *ctx, CborEncoder *root, uint8_t sector_offset, uint8_t sector_block_0_address, uint8_t *sector_data)
 {
     CborEncoder message_map;
 
-    CBOR_ERRCHECK(cbor_encoder_create_map(root, &message_map, ENC_KIND_LEN + 2));
+    CBOR_ERRCHECK(cbor_encoder_create_map(root, &message_map, ENC_KIND_LEN + ENC_CTX_LEN + 2));
     CBOR_ERRCHECK(enc_kind(&message_map, ENC_PICC_SECTOR_MSG_KIND));
+    CBOR_ERRCHECK(enc_ctx(&message_map, ctx));
     CBOR_ERRCHECK(cbor_encode_text_stringz(&message_map, "offset"));
     CBOR_ERRCHECK(cbor_encode_uint(&message_map, sector_offset));
     CBOR_ERRCHECK(cbor_encode_text_stringz(&message_map, "blocks"));

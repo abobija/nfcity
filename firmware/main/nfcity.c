@@ -162,14 +162,14 @@ _exit:
     return ret;
 }
 
-static esp_err_t handle_message_from_web(web_msg_t *msg, const uint8_t *data, size_t data_len)
+static esp_err_t handle_message_from_web(web_msg_t *web_msg, const uint8_t *data, size_t data_len)
 {
-    switch (msg->kind) {
+    switch (web_msg->kind) {
         case WEB_MSG_PING: {
             uint8_t buffer[ENC_PONG_BYTES] = { 0 };
             CborEncoder root = { 0 };
             cbor_encoder_init(&root, buffer, ENC_PONG_BYTES, 0);
-            enc_pong_message(&root);
+            enc_pong_message(web_msg, &root);
             size_t len = cbor_encoder_get_buffer_size(&root, buffer);
 
             mqtt_pub(buffer, len, MQTT_QOS_0);
@@ -178,7 +178,7 @@ static esp_err_t handle_message_from_web(web_msg_t *msg, const uint8_t *data, si
             uint8_t buffer[ENC_PICC_BYTES] = { 0 };
             CborEncoder root = { 0 };
             cbor_encoder_init(&root, buffer, ENC_PICC_BYTES, 0);
-            enc_picc_message(&root, &picc);
+            enc_picc_message(web_msg, &root, &picc);
             size_t len = cbor_encoder_get_buffer_size(&root, buffer);
 
             mqtt_pub(buffer, len, MQTT_QOS_0);
@@ -193,13 +193,13 @@ static esp_err_t handle_message_from_web(web_msg_t *msg, const uint8_t *data, si
                 CborEncoder root = { 0 };
                 uint8_t buffer[ENC_PICC_SECTOR_BYTES] = { 0 };
                 cbor_encoder_init(&root, buffer, sizeof(buffer), 0);
-                enc_picc_sector_message(&root, msg.offset, sector_block_0_address, sector_buffer);
+                enc_picc_sector_message(web_msg, &root, msg.offset, sector_block_0_address, sector_buffer);
                 size_t len = cbor_encoder_get_buffer_size(&root, buffer);
                 mqtt_pub(buffer, len, MQTT_QOS_0);
             }
         } break;
         default: {
-            ESP_LOGW(TAG, "Unsupported meessage kind: %d", msg->kind);
+            ESP_LOGW(TAG, "Unsupported meessage kind: %d", web_msg->kind);
         } break;
     }
 

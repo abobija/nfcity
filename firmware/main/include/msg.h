@@ -26,8 +26,9 @@ extern const char *MSG_LOG_TAG;
     }                                                                                                                  \
     while (0)
 
-#define MSG_DESC_ID   "$id"
-#define MSG_DESC_KIND "$kind"
+#define MSG_ID_FIELD   "$id"
+#define MSG_KIND_FIELD "$kind"
+#define MSG_CTX_FIELD  "$ctx"
 
 typedef struct
 {
@@ -74,21 +75,22 @@ CborError dec_read_sector_msg(const uint8_t *buffer, size_t buffer_size, web_rea
 #define ENC_PICC_STATE_CHANGED_MSG_KIND "picc_state_changed"
 #define ENC_PICC_SECTOR_MSG_KIND        "picc_sector"
 
-#define ENC_HELLO_BYTES              32
-#define ENC_PONG_BYTES               32
-#define ENC_PICC_BYTES               128
-#define ENC_PICC_STATE_CHANGED_BYTES 32 + ENC_PICC_BYTES
-#define ENC_PICC_SECTOR_BYTES        4 * 64 // FIXME: for mifare 4k
+#define ENC_CTX_BYTES                (64)
+#define ENC_HELLO_BYTES              (32)
+#define ENC_PONG_BYTES               (ENC_CTX_BYTES + 32)
+#define ENC_PICC_BYTES               (ENC_CTX_BYTES + 128)
+#define ENC_PICC_STATE_CHANGED_BYTES (32 + ENC_PICC_BYTES)
+#define ENC_PICC_SECTOR_BYTES        (ENC_CTX_BYTES + (4 * 64)) // FIXME: for mifare 4k
 
 CborError enc_hello_message(CborEncoder *encoder);
 
-CborError enc_pong_message(CborEncoder *encoder);
+CborError enc_pong_message(web_msg_t *ctx, CborEncoder *encoder);
 
-CborError enc_picc_message(CborEncoder *encoder, rc522_picc_t *picc);
+CborError enc_picc_message(web_msg_t *ctx, CborEncoder *encoder, rc522_picc_t *picc);
 
 CborError enc_picc_state_changed_message(CborEncoder *encoder, rc522_picc_t *picc, rc522_picc_state_t old_state);
 
 CborError enc_picc_sector_message(
-    CborEncoder *encoder, uint8_t sector_offset, uint8_t sector_block_0_address, uint8_t *sector_data);
+    web_msg_t *ctx, CborEncoder *encoder, uint8_t sector_offset, uint8_t sector_block_0_address, uint8_t *sector_data);
 
 // }} encoding
