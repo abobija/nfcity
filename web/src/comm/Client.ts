@@ -70,7 +70,7 @@ class Client {
 
   private pingingStart(): void {
     if (this.pingInterval) {
-      logger.warning('pingingStart skipped: already started');
+      logger.debug('pingingStart skipped: already started');
       return;
     }
 
@@ -99,7 +99,7 @@ class Client {
 
   private pingingStop(): void {
     if (!this.pingInterval) {
-      logger.warning('pingingStop skipped: already stopped');
+      logger.debug('pingingStop skipped: already stopped');
       return;
     }
 
@@ -113,7 +113,7 @@ class Client {
 
   connect(): Client {
     if (this.connected) {
-      logger.warning('connect skipped: already connected');
+      logger.debug('connect skipped: already connected');
       return this;
     }
 
