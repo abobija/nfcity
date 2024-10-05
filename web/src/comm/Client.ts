@@ -16,20 +16,17 @@ import PingWebMessage from './msgs/web/PingWebMessage';
 class Client {
   readonly brokerUrl: string;
   readonly rootTopic: string;
-  private readonly devTopic: string;
-  private readonly webTopic: string;
+  readonly devTopic: string;
+  readonly webTopic: string;
   private mqttClient: MqttClient | null = null;
-  readonly pingIntervalMs: number;
-  private pingInterval?: NodeJS.Timeout;
-  private lastPingTimestamp?: number;
-  private lastPongTimestamp?: number;
+  private readonly pinger: ClientPinger;
 
   protected constructor(brokerUrl: string, rootTopic: string) {
     this.brokerUrl = trimRight(brokerUrl, '/');
     this.rootTopic = `/${trim(rootTopic, '/')}`;
     this.webTopic = '/web';
     this.devTopic = '/dev';
-    this.pingIntervalMs = 5000;
+    this.pinger = ClientPinger.from(this);
   }
 
   static from(brokerUrl: string, rootTopic: string): Client {
@@ -68,53 +65,6 @@ class Client {
     });
   }
 
-  private ping(): void {
-    this.lastPingTimestamp = Date.now();
-    this.send(PingWebMessage.create());
-    emits.emit('ping', ClientPingEvent.from(this, this.lastPingTimestamp));
-  }
-
-  private pingingStart(): void {
-    if (this.pingInterval) {
-      logger.debug('pingingStart skipped: already started');
-      return;
-    }
-
-    this.pingInterval = setInterval(() => {
-      const pingHasBeenSent = this.lastPingTimestamp !== undefined;
-      const pongHasBeenReceived = this.lastPongTimestamp !== undefined;
-      const timeSinceLastPongMs = pongHasBeenReceived ? (Date.now() - this.lastPongTimestamp!) : undefined;
-      const pongIsOutdated = timeSinceLastPongMs && timeSinceLastPongMs > this.pingIntervalMs;
-
-      if (pingHasBeenSent && (!pongHasBeenReceived || pongIsOutdated)) {
-        logger.warning('no pong received in', timeSinceLastPongMs, 'ms');
-        emits.emit('pongMissed', ClientPongMissedEvent.from(
-          this,
-          this.lastPingTimestamp!,
-          this.lastPongTimestamp
-        ));
-      }
-
-      this.ping();
-    }, this.pingIntervalMs);
-
-    logger.debug('pinging started');
-  }
-
-  private pingingStop(): void {
-    if (!this.pingInterval) {
-      logger.debug('pingingStop skipped: already stopped');
-      return;
-    }
-
-    clearInterval(this.pingInterval);
-    this.pingInterval = undefined;
-    this.lastPingTimestamp = undefined;
-    this.lastPongTimestamp = undefined;
-
-    logger.debug('pinging stopped');
-  }
-
   connect(): Client {
     if (this.connected) {
       logger.debug('connect skipped: already connected');
@@ -137,7 +87,10 @@ class Client {
         }
 
         logger.debug('subscribed to', this.devTopicAbs);
-        this.pingingStart();
+        this.pinger.ping({
+          repeat: true,
+          interval: 5000,
+        });
         emits.emit('ready', ClientReadyEvent.from(this));
       });
     });
@@ -146,14 +99,7 @@ class Client {
       const decodedMessage = decode(encodedMessage) as DeviceMessage;
 
       if (PongDevMessage.is(decodedMessage)) {
-        logger.verbose('pong message received');
-
-        this.lastPongTimestamp = Date.now();
-        emits.emit('pong', ClientPongEvent.from(
-          this,
-          this.lastPingTimestamp!,
-          this.lastPongTimestamp
-        ));
+        this.pinger.pong();
         return;
       }
 
@@ -165,30 +111,30 @@ class Client {
 
     this.mqttClient.on('reconnect', () => {
       logger.debug('reconnect');
-      this.pingingStop();
+      this.pinger.stop();
     });
 
     this.mqttClient.on('close', () => {
       logger.debug('close');
-      this.pingingStop();
+      this.pinger.stop();
       emits.emit('disconnect', ClientDisconnectEvent.from(this));
     });
 
     this.mqttClient.on('disconnect', () => {
       logger.debug('disconnected');
-      this.pingingStop();
+      this.pinger.stop();
       emits.emit('disconnect', ClientDisconnectEvent.from(this));
     });
 
     this.mqttClient.on('offline', () => {
       logger.debug('offline');
-      this.pingingStop();
+      this.pinger.stop();
       emits.emit('disconnect', ClientDisconnectEvent.from(this));
     });
 
     this.mqttClient.on('end', () => {
       logger.debug('end');
-      this.pingingStop();
+      this.pinger.stop();
       emits.emit('disconnect', ClientDisconnectEvent.from(this));
     });
 
@@ -200,8 +146,97 @@ class Client {
       throw new Error('not connected');
     }
 
-    this.pingingStop();
+    this.pinger.stop();
     this.mqttClient.end(true);
+  }
+}
+
+interface ClientPingerStartProps {
+  repeat: boolean;
+  interval: number;
+}
+
+class ClientPinger {
+  readonly client: Client;
+  private timeout?: NodeJS.Timeout;
+  private lastPing?: number;
+  private lastPong?: number;
+
+  protected constructor(client: Client) {
+    this.client = client;
+  }
+
+  static from(client: Client): ClientPinger {
+    return new ClientPinger(client);
+  }
+
+  private get pingHasBeenSent(): boolean {
+    return this.lastPing !== undefined;
+  }
+
+  private get isPongReceived(): boolean {
+    return this.lastPong !== undefined;
+  }
+
+  private pongIsMissing(interval: number): boolean {
+    return this.pingHasBeenSent
+      && this.isPongReceived
+      && ((Date.now() - this.lastPong!) > interval);
+  }
+
+  ping(props: ClientPingerStartProps): void {
+    if (this.pongIsMissing(props.interval)) {
+      this.pongMiss();
+    }
+
+    if (this.timeout) {
+      clearTimeout(this.timeout);
+      this.timeout = undefined;
+    }
+
+    this.lastPing = Date.now();
+    this.client.send(PingWebMessage.create());
+    logger.verbose('ping');
+
+    emits.emit('ping', ClientPingEvent.from(this.client, this.lastPing));
+
+    if (props.repeat) {
+      this.timeout = setTimeout(() => this.ping(props), props.interval);
+    }
+  }
+
+  pong(): void {
+    logger.verbose('pong');
+
+    this.lastPong = Date.now();
+
+    emits.emit('pong', ClientPongEvent.from(
+      this.client,
+      this.lastPing!,
+      this.lastPong
+    ));
+  }
+
+  private pongMiss(): void {
+    logger.debug('pong miss');
+
+    emits.emit('pongMissed', ClientPongMissedEvent.from(
+      this.client,
+      this.lastPing!,
+      this.lastPong
+    ));
+  }
+
+  stop(): void {
+    if (this.timeout) {
+      clearTimeout(this.timeout);
+    }
+
+    this.timeout = undefined;
+    this.lastPing = undefined;
+    this.lastPong = undefined;
+
+    logger.debug('ping stopped');
   }
 }
 
