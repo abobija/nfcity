@@ -48,7 +48,7 @@ onClientPongMissed(() => {
         <span class="status ponged" v-else-if="pingState == PingState.Ponged" title="Pong received">
           &squf;
         </span>
-        <span class="status miss" v-else-if="pingState == PingState.PongMissed" title="Pong missed">
+        <span class="status miss" v-else-if="pingState == PingState.PongMissed" title="Pong miss">
           &squf;
         </span>
       </Transition>
