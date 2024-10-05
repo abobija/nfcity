@@ -68,6 +68,12 @@ class Client {
     });
   }
 
+  private ping(): void {
+    this.lastPingTimestamp = Date.now();
+    this.send(PingWebMessage.create());
+    emits.emit('ping', ClientPingEvent.from(this, this.lastPingTimestamp));
+  }
+
   private pingingStart(): void {
     if (this.pingInterval) {
       logger.debug('pingingStart skipped: already started');
@@ -89,9 +95,7 @@ class Client {
         ));
       }
 
-      this.lastPingTimestamp = Date.now();
-      this.send(PingWebMessage.create());
-      emits.emit('ping', ClientPingEvent.from(this, this.lastPingTimestamp));
+      this.ping();
     }, this.pingIntervalMs);
 
     logger.debug('pinging started');
