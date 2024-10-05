@@ -151,16 +151,16 @@ onMemoryByteMouseLeave(e => {
 onMemoryByteMouseClick(clickedByte => {
   logger.verbose('Block byte clicked', clickedByte);
 
+  if (clickedByte.group.block.sector.isEmpty) {
+    client.send(ReadSectorWebMessage.from(clickedByte.group.block.sector.offset, defaultKey));
+    return;
+  }
+
   if (!tByte.value) {
     return;
   }
 
   let targetedByte = tByte.value;
-
-  if (targetedByte.group.block.sector.isEmpty) {
-    client.send(ReadSectorWebMessage.from(clickedByte.group.block.sector.offset, defaultKey));
-    return;
-  }
 
   if (
     targetedByte.locked
