@@ -176,7 +176,7 @@ onMemoryByteMouseClick(e => {
 </script>
 
 <template>
-  <div class="dashboard component" :class="{ 'target-byte-locked': isTargetByteLocked }">
+  <div class="dashboard component">
     <div class="scene picc-waiter center-screen" v-if="state < DashboardState.PiccPaired">
 
       <div v-if="state == DashboardState.PiccFetching">
