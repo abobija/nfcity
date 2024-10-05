@@ -9,26 +9,25 @@ import GetPiccWebMessage from '@/comm/msgs/web/GetPiccWebMessage';
 import ReadSectorWebMessage from '@/comm/msgs/web/ReadSectorWebMessage';
 import '@/components/Dashboard/Dashboard.scss';
 import Memory from '@/components/Memory/Memory.vue';
-import MemoryByteEvent from '@/components/MemoryByte/events/MemoryByteEvent';
+import MemoryFocus from '@/components/Memory/MemoryFocus';
 import {
   onMemoryByteMouseClick,
   onMemoryByteMouseEnter,
   onMemoryByteMouseLeave
 } from '@/components/MemoryByte/hooks/MemoryByteEventHooks';
 import SystemInfo from '@/components/SystemInfo/SystemInfo.vue';
-import { bin, hex } from '@/helpers';
+import { hex } from '@/helpers';
 import { logger } from '@/Logger';
 import MifareClassic, {
   defaultKey,
   MifareClassicBlock,
   MifareClassicBlockGroup,
-  MifareClassicBlockGroupType,
-  MifareClassicBlockType,
   MifareClassicMemory
 } from '@/models/MifareClassic';
 import { PiccState, PiccType } from '@/models/Picc';
 import { inject, onMounted, ref, watch } from 'vue';
-import MemoryFocus from '@/components/Memory/MemoryFocus';
+import TargetByte from './TargetByte';
+import TargetByteRenderer from './TargetByteRenderer.vue';
 
 enum DashboardState {
   Undefined = 0,
@@ -43,8 +42,7 @@ const client = inject('client') as Client;
 const state = ref<DashboardState>(DashboardState.Undefined);
 const picc = ref<MifareClassic | undefined>(undefined);
 const memoryFocus = ref<MemoryFocus | undefined>(undefined);
-const targetByte = ref<MemoryByteEvent | undefined>(undefined); // Hovered byte reference
-const isTargetByteLocked = ref<boolean>(false);
+const tByte = ref<TargetByte | undefined>(undefined);
 
 watch(state, (newState, oldState) => {
   logger.verbose(
@@ -129,48 +127,61 @@ onClientMessage(e => {
 onMemoryByteMouseEnter(e => {
   logger.verbose('Block byte entered', e);
 
-  if (isTargetByteLocked.value) {
+  if (tByte.value?.locked) {
     return;
   }
 
-  targetByte.value = e;
+  tByte.value = {
+    index: e.index,
+    group: e.group,
+    locked: false,
+  };
 });
 
 onMemoryByteMouseLeave(e => {
   logger.verbose('Block byte left', e);
 
-  if (isTargetByteLocked.value) {
+  if (tByte.value?.locked) {
     return;
   }
 
-  targetByte.value = undefined;
+  tByte.value = undefined;
 });
 
-onMemoryByteMouseClick(e => {
-  logger.verbose('Block byte clicked', e);
+onMemoryByteMouseClick(clickedByte => {
+  logger.verbose('Block byte clicked', clickedByte);
 
-  if (e.group.block.sector.isEmpty) {
-    client.send(ReadSectorWebMessage.from(e.group.block.sector.offset, defaultKey));
+  if (!tByte.value) {
     return;
   }
 
-  if (isTargetByteLocked.value
-    && targetByte.value != undefined
-    && e.group.block.hasSameAddressAs(targetByte.value.group.block as MifareClassicBlock)
-    && e.index === targetByte.value.index) {
+  let targetedByte = tByte.value;
+
+  if (targetedByte.group.block.sector.isEmpty) {
+    client.send(ReadSectorWebMessage.from(clickedByte.group.block.sector.offset, defaultKey));
+    return;
+  }
+
+  if (
+    targetedByte.locked
+    && targetedByte.index === clickedByte.index
+    && targetedByte.group.block.hasSameAddressAs(clickedByte.group.block)) {
     // unlock previous byte
-    isTargetByteLocked.value = false;
+    targetedByte.locked = false;
     memoryFocus.value = undefined;
     return;
   }
 
   // lock new byte
-  targetByte.value = e;
-  isTargetByteLocked.value = true;
+  targetedByte = tByte.value = {
+    index: clickedByte.index,
+    group: clickedByte.group,
+    locked: true,
+  };
 
   memoryFocus.value = MemoryFocus.byte(
-    targetByte.value!.group as MifareClassicBlockGroup,
-    targetByte.value!.index
+    targetedByte.group as MifareClassicBlockGroup,
+    targetedByte.index
   );
 });
 </script>
@@ -233,73 +244,7 @@ onMemoryByteMouseClick(e => {
               </p>
             </Transition>
 
-            <div class="target" v-if="targetByte">
-              <ul>
-                <li class="item">
-                  <span class="name">byte</span>
-                  <span class="value" title="index">[{{ targetByte.index }}]</span>
-
-                  <ul v-if="targetByte.group.block.type != MifareClassicBlockType.Undefined">
-                    <li class="item">
-                      <span class="name">value</span>
-                      <span class="value">0x{{ hex(targetByte.group.block.data[targetByte.index]) }}</span>
-
-                      <ul>
-                        <li class="item">
-                          <span class="name">dec</span>
-                          <span class="value">{{ targetByte.group.block.data[targetByte.index] }}</span>
-                        </li>
-                        <li class="item">
-                          <span class="name">bin</span>
-                          <span class="value">{{ bin(targetByte.group.block.data[targetByte.index], '_')
-                            }}</span>
-                        </li>
-                      </ul>
-                    </li>
-                  </ul>
-                </li>
-                <li class="item">
-                  <span class="name">block</span>
-                  <span class="value">{{ targetByte.group.block.address }}</span>
-                  <span class="name">sector</span>
-                  <span class="value">{{ targetByte.group.block.sector.offset }}</span>
-
-                  <ul>
-                    <li class="item" v-if="targetByte.group.block.type != MifareClassicBlockType.Undefined">
-                      <span class="name">type</span>
-                      <span class="value">{{ MifareClassicBlockType[targetByte.group.block.type] }}</span>
-                    </li>
-                    <li class="item">
-                      <span class="name">address</span>
-                      <span class="value">0x{{ hex(targetByte.group.block.address) }}</span>
-                      <span class="name">offset</span>
-                      <span class="value">{{ targetByte.group.block.offset }}</span>
-                    </li>
-                    <li class="item">
-                      <span class="name">access bits</span>
-                      <span class="value" title="c1 c2 c3">
-                        {{ targetByte.group.block.accessBits.c1 }}
-                        {{ targetByte.group.block.accessBits.c2 }}
-                        {{ targetByte.group.block.accessBits.c3 }}
-                      </span>
-                    </li>
-                  </ul>
-                </li>
-                <li class="item">
-                  <span class="name">byte group</span>
-                  <span class="value">{{ MifareClassicBlockGroupType[targetByte.group.type] }}</span>
-
-                  <ul>
-                    <li class="item">
-                      <span class="name">offset</span>
-                      <span class="value">{{ targetByte.group.offset }}</span>
-                      <span class="name">length</span>
-                      <span class="value">{{ targetByte.group.length }}</span>
-                    </li>
-                  </ul>
-                </li>
-              </ul>
-            </div>
+            <TargetByteRenderer :byte="tByte as TargetByte" v-if="tByte" />
           </div>
         </div>
       </div>
