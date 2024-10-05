@@ -7,6 +7,7 @@ import {
 } from '@/models/MifareClassic';
 import { computed } from 'vue';
 import MemoryBlockGroupFocus from './MemoryBlockGroupFocus';
+import '@/components/MemoryBlockGroup/MemoryBlockGroup.scss';
 
 const props = defineProps<{
   group: MifareClassicBlockGroup;

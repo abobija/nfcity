@@ -1,0 +1,50 @@
+@use 'sass:color';
+@import '@/theme.scss';
+
+.memory-byte.component {
+  cursor: pointer;
+  font-size: 0.8rem;
+  border-style: dashed;
+  border-width: 0px 1px 1px 0px;
+  padding: 0.25rem;
+  transition: border-color .2s ease-in-out;
+}
+
+.memory-sector.component:not(.empty) {
+  .memory-byte.component {
+    border-style: solid;
+  }
+
+  &:hover {
+    .memory-byte.component {
+      border-color: color.adjust($color-bg, $lightness: +12%);
+    }
+  }
+}
+
+.memory-byte.component {
+  border-color: color.adjust($color-bg, $lightness: +5%);
+
+  &.focused {
+    animation: byte-glows .5s infinite alternate;
+    z-index: 1;
+  }
+
+  &:hover {
+    background-color: color.adjust($color-bg, $lightness: +5%);
+    font-weight: 600;
+  }
+}
+
+@keyframes byte-glows {
+  $color: color.adjust($color-4, $lightness: -60%);
+
+  0%,
+  100% {
+    box-shadow: none;
+  }
+
+  50% {
+    box-shadow: 0 0 .6rem color.adjust($color, $lightness: +10%);
+  }
+}

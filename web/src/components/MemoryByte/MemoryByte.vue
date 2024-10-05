@@ -5,6 +5,7 @@ import { hex } from '@/helpers';
 import { MifareClassicBlockGroup } from '@/models/MifareClassic';
 import { computed } from 'vue';
 import MemoryByteFocus from './MemoryByteFocus';
+import '@/components/MemoryByte/MemoryByte.scss';
 
 const props = defineProps<{
   group: MifareClassicBlockGroup;
