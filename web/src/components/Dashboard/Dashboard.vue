@@ -237,7 +237,7 @@ onMemoryByteMouseClick(e => {
               <ul>
                 <li class="item">
                   <span class="name">byte</span>
-                  <span class="value">[{{ targetByte.byteIndex }}]</span>
+                  <span class="value" title="index">[{{ targetByte.byteIndex }}]</span>
 
                   <ul v-if="targetByte.block.type != MifareClassicBlockType.Undefined">
                     <li class="item">
@@ -277,12 +277,11 @@ onMemoryByteMouseClick(e => {
                     </li>
                     <li class="item">
                       <span class="name">access bits</span>
-                      <span class="value">
+                      <span class="value" title="c1 c2 c3">
                         {{ targetByte.block.accessBits.c1 }}
                         {{ targetByte.block.accessBits.c2 }}
                         {{ targetByte.block.accessBits.c3 }}
                       </span>
-                      <span class="name">(c1 c2 c3)</span>
                     </li>
                   </ul>
                 </li>
