@@ -27,14 +27,19 @@
   }
 
   .item {
-    .value {
-      margin-left: 1rem;
-      color: $color-5;
-      font-weight: 600;
+    >.name:not(:first-child) {
+      margin-left: 0.5rem;
     }
 
-    .name:not(:first-child) {
-      margin-left: 1rem;
+    >.value {
+      color: $color-5;
+      font-weight: 600;
+
+      margin-left: 0.5rem;
+    }
+
+    >:first-child.value {
+      margin-left: 0;
     }
   }
 }

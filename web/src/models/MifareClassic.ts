@@ -86,6 +86,10 @@ export class MifareClassicBlockGroup {
   ) {
     return new MifareClassicBlockGroup(type, offset, length);
   }
+
+  data(): Uint8Array {
+    return this.block.data.slice(this.offset, this.offset + this.length);
+  }
 };
 
 export abstract class MifareClassicBlock implements PiccBlock {
