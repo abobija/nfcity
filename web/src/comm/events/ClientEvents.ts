@@ -1,10 +1,10 @@
+import ClientDisconnectEvent from '@/comm/events/ClientDisconnectEvent';
+import ClientMessageEvent from '@/comm/events/ClientMessageEvent';
+import ClientPingEvent from '@/comm/events/ClientPingEvent';
+import ClientPongEvent from '@/comm/events/ClientPongEvent';
+import ClientPongMissedEvent from '@/comm/events/ClientPongMissedEvent';
+import ClientReadyEvent from '@/comm/events/ClientReadyEvent';
 import mitt from 'mitt';
-import ClientDisconnectEvent from './ClientDisconnectEvent';
-import ClientMessageEvent from './ClientMessageEvent';
-import ClientPingEvent from './ClientPingEvent';
-import ClientPongEvent from './ClientPongEvent';
-import ClientPongMissedEvent from './ClientPongMissedEvent';
-import ClientReadyEvent from './ClientReadyEvent';
 
 const emits = mitt<{
   'ready': ClientReadyEvent;

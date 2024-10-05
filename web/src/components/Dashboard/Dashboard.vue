@@ -15,6 +15,7 @@ import {
   onMemoryByteMouseEnter,
   onMemoryByteMouseLeave
 } from '@/components/MemoryBlock/hooks/MemoryByteEventHooks';
+import SystemInfo from '@/components/SystemInfo/SystemInfo.vue';
 import { bin, hex } from '@/helpers';
 import { logger } from '@/Logger';
 import MifareClassic, {
@@ -26,7 +27,6 @@ import MifareClassic, {
 } from '@/models/MifareClassic';
 import { PiccState, PiccType } from '@/models/Picc';
 import { inject, onMounted, ref, watch } from 'vue';
-import SystemInfo from '../SystemInfo/SystemInfo.vue';
 
 enum DashboardState {
   Undefined = 0,

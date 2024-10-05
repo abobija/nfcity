@@ -2,13 +2,13 @@
 import '@/components/MemoryBlock/MemoryBlock.scss';
 import MemoryBlockByteGroup from '@/components/MemoryBlock/MemoryBlockByteGroup';
 import emits from '@/components/MemoryBlock/events/MemoryBlockEvents';
+import MemoryByteEvent from '@/components/MemoryBlock/events/MemoryByteEvent';
 import { hex } from '@/helpers';
 import {
   MifareClassicBlock,
   MifareClassicBlockType
 } from '@/models/MifareClassic';
 import { computed, ref } from 'vue';
-import MemoryByteEvent from './events/MemoryByteEvent';
 
 const props = defineProps<{
   block: MifareClassicBlock;

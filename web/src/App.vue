@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import '@/App.scss';
 import Client from '@/comm/Client';
+import { onClientReady } from '@/comm/hooks/ClientEventHooks';
 import Dashboard from '@/components/Dashboard/Dashboard.vue';
 import { logger } from '@/Logger';
 import { inject, onMounted, ref, watch } from 'vue';
-import { onClientReady } from './comm/hooks/ClientEventHooks';
 
 enum AppState {
   Undefined = 0,
