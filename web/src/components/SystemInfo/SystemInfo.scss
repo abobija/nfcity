@@ -2,14 +2,21 @@
 @import '@/theme.scss';
 
 .component.system-info {
-  flex-shrink: 0;
-  font-size: 0.7rem;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.6rem;
+  color: color.adjust($color-fg, $lightness: -40%);
+
+  >*:not(:first-child) {
+    margin-top: 0.2rem;
+  }
 
   .ping {
     display: flex;
+    justify-content: flex-end;
 
-    .latency {
-      color: color.adjust($color-fg, $lightness: -40%);
+    >*:not(:first-child):not(:last-child) {
+      margin: 0 0.3rem;
     }
 
     .status {
