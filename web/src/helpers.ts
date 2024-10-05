@@ -72,3 +72,11 @@ export function trimRight(str: string, chr: string) {
 export function trim(str: string, chr: string) {
   return trimEnd(trimStart(str, chr), chr);
 }
+
+export function arrEquals(arr1: Uint8Array, arr2: Uint8Array): boolean {
+  if (arr1.length !== arr2.length) {
+    return false;
+  }
+
+  return arr1.every((el, i) => el === arr2[i]);
+}

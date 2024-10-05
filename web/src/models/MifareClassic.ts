@@ -1,6 +1,6 @@
 import PiccBlockDto from "@/comm/dtos/PiccBlockDto";
 import PiccDto from "@/comm/dtos/PiccDto";
-import { nibbles } from "@/helpers";
+import { arrEquals, nibbles } from "@/helpers";
 import Picc, { PiccBlock, PiccBlockAccessBits, PiccKey, PiccKeyType, PiccMemory, PiccSector, PiccState, PiccType } from "@/models/Picc";
 
 export const defaultKey: PiccKey = {
@@ -385,7 +385,7 @@ export class MifareClassicMemory implements PiccMemory {
 
 export default class MifareClassic implements Picc {
   readonly type: PiccType;
-  readonly state: PiccState;
+  state: PiccState;
   readonly atqa: number;
   readonly sak: number;
   readonly uid: Uint8Array;
@@ -409,6 +409,10 @@ export default class MifareClassic implements Picc {
       uid: piccDto.uid,
       memory: {} as PiccMemory
     });
+  }
+
+  hasUidOf(picc: Picc | PiccDto): boolean {
+    return arrEquals(this.uid, picc.uid);
   }
 
   static dtoIsMifareClassic(piccDto: PiccDto): boolean {

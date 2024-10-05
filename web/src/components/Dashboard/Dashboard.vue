@@ -92,7 +92,11 @@ onClientMessage(e => {
     return;
   }
 
-  picc.value = MifareClassic.fromDto(piccDto);
+  if (picc.value === undefined || !picc.value.hasUidOf(piccDto)) {
+    picc.value = MifareClassic.fromDto(piccDto);
+  } else { // Same card
+    picc.value.state = piccDto.state;
+  }
 
   if ([PiccState.Active, PiccState.ActiveH].includes(picc.value.state)) {
     state.value = DashboardState.PiccPaired;
