@@ -3,17 +3,18 @@ import '@/App.scss';
 import Client from '@/comm/Client';
 import Dashboard from '@/components/Dashboard/Dashboard.vue';
 import { logger } from '@/Logger';
-import { inject, ref, watch } from 'vue';
+import { inject, onMounted, ref, watch } from 'vue';
 import { onClientReady } from './comm/hooks/ClientEventHooks';
 
 enum AppState {
-  Initialized = 0,
+  Undefined = 0,
+  Initialized,
   Connecting,
   Connected,
 }
 
 const client = inject('client') as Client;
-const state = ref<AppState>(AppState.Initialized);
+const state = ref<AppState>(AppState.Undefined);
 
 watch(state, (newState, oldState) => {
   logger.verbose(
@@ -27,6 +28,8 @@ function connect() {
   state.value = AppState.Connecting;
   client.connect();
 }
+
+onMounted(() => state.value = AppState.Initialized);
 
 onClientReady(() => state.value = AppState.Connected);
 </script>
