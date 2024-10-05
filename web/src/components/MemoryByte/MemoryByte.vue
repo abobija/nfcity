@@ -18,8 +18,9 @@ const classes = computed(() => ({
 </script>
 
 <template>
-  <li class="memory-byte" :class="classes" :data-index="index" @mouseenter="emits.emit('mouseEnter', { index, group })"
-    @mouseleave="emits.emit('mouseLeave', { index, group })" @click="emits.emit('mouseClick', { index, group })">
+  <li class="memory-byte component" :class="classes" :data-index="index"
+    @mouseenter="emits.emit('mouseEnter', { index, group })" @mouseleave="emits.emit('mouseLeave', { index, group })"
+    @click="emits.emit('mouseClick', { index, group })">
     {{ group.block.loaded ? hex(group.block.data[index]) : '..' }}
   </li>
 </template>

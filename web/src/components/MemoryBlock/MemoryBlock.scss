@@ -9,7 +9,7 @@
     flex-direction: row;
   }
 
-  .memory-byte {
+  .memory-byte.component {
     cursor: pointer;
     font-size: 0.8rem;
     border-style: dashed;
@@ -20,12 +20,12 @@
 }
 
 .memory-sector.component:not(.empty) {
-  .memory-block.component .memory-byte {
+  .memory-block.component .memory-byte.component {
     border-style: solid;
   }
 
   &:hover {
-    .memory-block.component .memory-byte {
+    .memory-block.component .memory-byte.component {
       border-color: color.adjust($color-bg, $lightness: +12%);
     }
   }
@@ -70,7 +70,7 @@
   $highlight-color: $color-1;
   $lightness: -30%;
 
-  >.memory-block-group:hover .memory-byte {
+  >.memory-block-group:hover .memory-byte.component {
     border-bottom-color: color.adjust($highlight-color, $lightness: $lightness) !important;
 
     &:not(:last-child) {
