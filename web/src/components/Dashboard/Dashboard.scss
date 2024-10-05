@@ -112,7 +112,8 @@
           .item {
             .value {
               margin-left: 1rem;
-              color: $color-3;
+              color: $color-5;
+              font-weight: 600;
             }
 
             .name:not(:first-child) {
