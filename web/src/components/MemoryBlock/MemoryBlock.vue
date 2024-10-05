@@ -43,7 +43,7 @@ function makeEvent(byteGroup: MemoryBlockByteGroup, index: number): MemoryByteEv
 </script>
 
 <template>
-  <div class="block component" :class="classes">
+  <div class="memory-block component" :class="classes">
     <ul class="bytes">
       <ul class="group" :class="byteGroup.class" v-for="byteGroup in props.byteGroups">
         <li class="byte" v-for="(_, index) in Array.from({ length: byteGroup.length })"

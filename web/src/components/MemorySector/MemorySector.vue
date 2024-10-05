@@ -64,7 +64,7 @@ function blockByteGroups(block?: MifareClassicBlock): MemoryBlockByteGroup[] {
 </script>
 
 <template>
-  <div class="sector component" :class="classes">
+  <div class="memory-sector component" :class="classes">
     <div class="meta">
       <span class="offset">{{ sector.offset }}</span>
     </div>

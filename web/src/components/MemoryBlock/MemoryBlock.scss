@@ -1,7 +1,7 @@
 @use 'sass:color';
 @import '@/theme.scss';
 
-.block.component {
+.memory-block.component {
   .bytes {
     display: flex;
     flex-direction: row;
@@ -24,19 +24,19 @@
   }
 }
 
-.sector.component:not(.empty) {
-  .block.component .byte {
+.memory-sector.component:not(.empty) {
+  .memory-block.component .byte {
     border-style: solid;
   }
 
   &:hover {
-    .block.component .byte {
+    .memory-block.component .byte {
       border-color: color.adjust($color-bg, $lightness: +12%);
     }
   }
 }
 
-.block.component {
+.memory-block.component {
   color: color.adjust($color-bg, $lightness: +40%);
 
   .bytes:hover {
@@ -71,7 +71,7 @@
   }
 }
 
-.block.component:not(.undefined) {
+.memory-block.component:not(.undefined) {
   $highlight-color: $color-1;
   $lightness: -30%;
 
@@ -84,7 +84,7 @@
   }
 }
 
-.block.component.undefined {
+.memory-block.component.undefined {
   color: transparent;
   user-select: none;
   -webkit-user-select: none;
@@ -92,7 +92,7 @@
   -ms-user-select: none;
 }
 
-.block.component.trailer {
+.memory-block.component.trailer {
   .key-a {
     color: color.adjust($color-3, $hue: -35deg);
   }
@@ -110,7 +110,7 @@
   }
 }
 
-.block.component.value {
+.memory-block.component.value {
   .value {
     color: $color-1;
   }
@@ -128,11 +128,11 @@
   }
 }
 
-.block.component.data {
+.memory-block.component.data {
   color: $color-4;
 }
 
-.block.component.manufacturer {
+.memory-block.component.manufacturer {
   .uid {
     color: $color-5;
   }
