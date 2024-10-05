@@ -23,9 +23,9 @@ class Client {
 
   protected constructor(brokerUrl: string, rootTopic: string) {
     this.brokerUrl = trimRight(brokerUrl, '/');
-    this.rootTopic = `/${trim(rootTopic, '/')}`;
-    this.webTopic = '/web';
-    this.devTopic = '/dev';
+    this.rootTopic = trim(rootTopic, '/');
+    this.webTopic = 'web';
+    this.devTopic = 'dev';
     this.pinger = ClientPinger.from(this);
   }
 
@@ -38,11 +38,11 @@ class Client {
   }
 
   get devTopicAbs(): string {
-    return this.rootTopic + this.devTopic;
+    return `${this.rootTopic}/${this.devTopic}`;
   }
 
   get webTopicAbs(): string {
-    return this.rootTopic + this.webTopic;
+    return `${this.rootTopic}/${this.webTopic}`;
   }
 
   send(message: WebMessage): void {
@@ -50,9 +50,10 @@ class Client {
       throw new Error('not connected');
     }
 
+    const topic = `/${this.webTopicAbs}`;
     const encodedMessage = encode(message);
 
-    this.mqttClient!.publish(this.webTopicAbs, encodedMessage, { qos: 0 }, err => {
+    this.mqttClient!.publish(topic, encodedMessage, { qos: 0 }, err => {
       if (err) {
         logger.error('publish error', err);
         return;
@@ -60,7 +61,7 @@ class Client {
 
       const logLevel = message instanceof PingWebMessage ? LogLevel.VERBOSE : LogLevel.DEBUG;
 
-      logger.log(logLevel, 'message sent', this.webTopicAbs, message);
+      logger.log(logLevel, 'message sent', topic, message);
       logger.verbose('encoded sent message:', encodedMessage);
     });
   }
@@ -79,14 +80,15 @@ class Client {
 
     this.mqttClient.on('connect', () => {
       logger.debug('connected');
+      const topic = `/${this.devTopicAbs}`;
 
-      this.mqttClient!.subscribe(this.devTopicAbs, { qos: 0 }, err => {
+      this.mqttClient!.subscribe(topic, { qos: 0 }, err => {
         if (err) {
           logger.error('subscribe error', err);
           return;
         }
 
-        logger.debug('subscribed to', this.devTopicAbs);
+        logger.debug('subscribed to', topic);
         this.pinger.ping({
           repeat: true,
           interval: 5000,
