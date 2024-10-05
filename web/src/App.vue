@@ -16,7 +16,11 @@ const client = inject('client') as Client;
 const state = ref<AppState>(AppState.Initialized);
 
 watch(state, (newState, oldState) => {
-  logger.verbose('app state changed from', AppState[oldState], 'to', AppState[newState]);
+  logger.verbose(
+    'app state changed',
+    'from', AppState[oldState],
+    'to', AppState[newState]
+  );
 });
 
 function connect() {

@@ -29,7 +29,8 @@ import { inject, onMounted, ref, watch } from 'vue';
 import SystemInfo from '../SystemInfo/SystemInfo.vue';
 
 enum DashboardState {
-  Initialized = 0,
+  Undefined = 0,
+  Initialized,
   PiccFetching,
   PiccNotPresent,
   PiccRemoved,
@@ -37,26 +38,31 @@ enum DashboardState {
 }
 
 const client = inject('client') as Client;
-const state = ref<DashboardState>(DashboardState.Initialized);
+const state = ref<DashboardState>(DashboardState.Undefined);
 const picc = ref<MifareClassic | undefined>(undefined);
 
 const targetByte = ref<MemoryByteEvent | undefined>(undefined); // Hovered byte reference
 const isTargetByteLocked = ref<boolean>(false);
 
 watch(state, (newState, oldState) => {
-  logger.debug(
+  logger.verbose(
     'dashboard state changed',
     'from', DashboardState[oldState],
     'to', DashboardState[newState]
   );
 
-  if (newState == DashboardState.PiccFetching) {
-    client.send(GetPiccWebMessage.create());
+  switch (newState) {
+    case DashboardState.Initialized: {
+      state.value = DashboardState.PiccFetching;
+    } break;
+    case DashboardState.PiccFetching: {
+      client.send(GetPiccWebMessage.create());
+    } break;
   }
 });
 
 onMounted(() => {
-  state.value = DashboardState.PiccFetching;
+  state.value = DashboardState.Initialized;
 });
 
 onClientMessage(e => {
@@ -64,7 +70,7 @@ onClientMessage(e => {
     return;
   }
 
-  state.value = DashboardState.PiccFetching;
+  state.value = DashboardState.Initialized;
 });
 
 onClientMessage(e => {
@@ -81,12 +87,7 @@ onClientMessage(e => {
     return;
   }
 
-  let supported = MifareClassic.dtoIsMifareClassic(piccDto);
-
-  // TODO: Remove once other mifare classic cards are supported
-  supported &&= piccDto.type === PiccType.Mifare1K;
-
-  if (!supported) {
+  if (!MifareClassic.isMifareClassic(piccDto)) {
     logger.error('Unsupported PICC type', PiccType[piccDto.type]);
     client.disconnect();
     return;

@@ -415,8 +415,8 @@ export default class MifareClassic implements Picc {
     return arrEquals(this.uid, picc.uid);
   }
 
-  static dtoIsMifareClassic(piccDto: PiccDto): boolean {
-    return piccDto.type === PiccType.Mifare1K || piccDto.type === PiccType.Mifare4K
-      || piccDto.type === PiccType.MifareMini;
+  static isMifareClassic(picc: Picc | PiccDto): boolean {
+    return picc.type === PiccType.Mifare1K || picc.type === PiccType.Mifare4K
+      || picc.type === PiccType.MifareMini;
   }
 }
