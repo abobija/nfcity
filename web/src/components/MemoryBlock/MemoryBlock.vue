@@ -1,21 +1,16 @@
 <script setup lang="ts">
 import '@/components/MemoryBlock/MemoryBlock.scss';
-import MemoryBlockGroup from '@/components/MemoryBlock/MemoryBlockGroup';
-import emits from '@/components/MemoryBlock/events/MemoryBlockEvents';
-import MemoryByteEvent from '@/components/MemoryBlock/events/MemoryByteEvent';
-import { hex } from '@/helpers';
+import MemoryByte from '@/components/MemoryByte/MemoryByte.vue';
 import {
   MifareClassicBlock,
+  MifareClassicBlockGroupType,
   MifareClassicBlockType
 } from '@/models/MifareClassic';
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 
 const props = defineProps<{
   block: MifareClassicBlock;
-  blockGroups: MemoryBlockGroup[];
 }>();
-
-const focusedByteIndex = ref<number | undefined>(undefined);
 
 const classes = computed(() => ({
   empty: !props.block.loaded,
@@ -26,33 +21,37 @@ const classes = computed(() => ({
   value: props.block.type == MifareClassicBlockType.Value,
 }));
 
-function byteIndex(index: number, blockGroup: MemoryBlockGroup) {
-  return blockGroup.offset + index;
-}
+const groupClass: Map<MifareClassicBlockGroupType, string> = new Map([
+  [MifareClassicBlockGroupType.Undefined, 'undefined'],
 
-function makeEvent(blockGroup: MemoryBlockGroup, index: number): MemoryByteEvent {
-  return MemoryByteEvent.from(
-    props.block,
-    blockGroup.origin,
-    byteIndex(index, blockGroup),
-    (state?: boolean) => {
-      focusedByteIndex.value = (state ?? true) ? byteIndex(index, blockGroup) : undefined;
-    }
-  );
-};
+  // Trailer
+  [MifareClassicBlockGroupType.KeyA, 'key key-a'],
+  [MifareClassicBlockGroupType.AccessBits, 'access-bits'],
+  [MifareClassicBlockGroupType.UserByte, 'user-byte'],
+  [MifareClassicBlockGroupType.KeyB, 'key key-b'],
+
+  // Value
+  [MifareClassicBlockGroupType.Value, 'value'],
+  [MifareClassicBlockGroupType.ValueInverted, 'value-inverted'],
+  [MifareClassicBlockGroupType.Address, 'addr'],
+  [MifareClassicBlockGroupType.AddressInverted, 'addr-inverted'],
+
+  // Data
+  [MifareClassicBlockGroupType.Data, 'data'],
+
+  // Manufacturer
+  [MifareClassicBlockGroupType.UID, 'uid'],
+  [MifareClassicBlockGroupType.BCC, 'bcc'],
+  [MifareClassicBlockGroupType.SAK, 'sak'],
+  [MifareClassicBlockGroupType.ATQA, 'atqa'],
+  [MifareClassicBlockGroupType.ManufacturerData, 'manufacturer'],
+]);
 </script>
 
 <template>
   <div class="memory-block component" :class="classes">
-    <ul class="memory-block-group" :class="blockGroup.class" v-for="blockGroup in props.blockGroups">
-      <li class="memory-byte" v-for="(_, index) in Array.from({ length: blockGroup.length })"
-        :key="byteIndex(index, blockGroup)" :data-index="byteIndex(index, blockGroup)"
-        :class="{ focused: focusedByteIndex == byteIndex(index, blockGroup) }"
-        @mouseenter="emits.emit('byteMouseEnter', makeEvent(blockGroup, index))"
-        @mouseleave="emits.emit('byteMouseLeave', makeEvent(blockGroup, index))"
-        @click="emits.emit('byteMouseClick', makeEvent(blockGroup, index))">
-        {{ block.loaded ? hex(block.data[byteIndex(index, blockGroup)]) : '..' }}
-      </li>
+    <ul class="memory-block-group" :class="groupClass.get(group.type)" v-for="group in block.blockGroups">
+      <MemoryByte :group="group" :index="index" v-for="(_, index) in Array.from({ length: group.length })" />
     </ul>
   </div>
 </template>

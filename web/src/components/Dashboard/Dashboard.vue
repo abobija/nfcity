@@ -9,12 +9,12 @@ import GetPiccWebMessage from '@/comm/msgs/web/GetPiccWebMessage';
 import ReadSectorWebMessage from '@/comm/msgs/web/ReadSectorWebMessage';
 import '@/components/Dashboard/Dashboard.scss';
 import Memory from '@/components/Memory/Memory.vue';
-import MemoryByteEvent from '@/components/MemoryBlock/events/MemoryByteEvent';
+import MemoryByteEvent from '@/components/MemoryByte/events/MemoryByteEvent';
 import {
   onMemoryByteMouseClick,
   onMemoryByteMouseEnter,
   onMemoryByteMouseLeave
-} from '@/components/MemoryBlock/hooks/MemoryByteEventHooks';
+} from '@/components/MemoryByte/hooks/MemoryByteEventHooks';
 import SystemInfo from '@/components/SystemInfo/SystemInfo.vue';
 import { bin, hex } from '@/helpers';
 import { logger } from '@/Logger';
@@ -147,31 +147,29 @@ onMemoryByteMouseLeave(e => {
 onMemoryByteMouseClick(e => {
   logger.verbose('Block byte clicked', e);
 
-  const sector = e.block.sector;
-
-  if (sector.isEmpty) {
-    client.send(ReadSectorWebMessage.from(sector.offset, defaultKey));
+  if (e.group.block.sector.isEmpty) {
+    client.send(ReadSectorWebMessage.from(e.group.block.sector.offset, defaultKey));
     return;
   }
 
   if (isTargetByteLocked.value) {
     // Unlockable only by clicking on locked byte
     const isUnlockable =
-      e.block.address == targetByte.value?.block.address
-      && e.byteIndex === targetByte.value?.byteIndex;
+      e.group.block.address == targetByte.value?.group.block.address
+      && e.index === targetByte.value?.index;
 
     if (isUnlockable) {
-      targetByte.value?.focus(false);
+      //targetByte.value?.focus(false); // FIXME:
       isTargetByteLocked.value = false;
       return;
     }
   }
 
   // lock new byte
-  targetByte.value?.focus(false);
+  // targetByte.value?.focus(false); // FIXME:
   targetByte.value = e;
   isTargetByteLocked.value = true;
-  targetByte.value?.focus();
+  // targetByte.value?.focus(); // FIXME:
 });
 </script>
 
@@ -237,21 +235,21 @@ onMemoryByteMouseClick(e => {
               <ul>
                 <li class="item">
                   <span class="name">byte</span>
-                  <span class="value" title="index">[{{ targetByte.byteIndex }}]</span>
+                  <span class="value" title="index">[{{ targetByte.index }}]</span>
 
-                  <ul v-if="targetByte.block.type != MifareClassicBlockType.Undefined">
+                  <ul v-if="targetByte.group.block.type != MifareClassicBlockType.Undefined">
                     <li class="item">
                       <span class="name">value</span>
-                      <span class="value">0x{{ hex(targetByte.block.data[targetByte.byteIndex]) }}</span>
+                      <span class="value">0x{{ hex(targetByte.group.block.data[targetByte.index]) }}</span>
 
                       <ul>
                         <li class="item">
                           <span class="name">dec</span>
-                          <span class="value">{{ targetByte.block.data[targetByte.byteIndex] }}</span>
+                          <span class="value">{{ targetByte.group.block.data[targetByte.index] }}</span>
                         </li>
                         <li class="item">
                           <span class="name">bin</span>
-                          <span class="value">{{ bin(targetByte.block.data[targetByte.byteIndex], '_')
+                          <span class="value">{{ bin(targetByte.group.block.data[targetByte.index], '_')
                             }}</span>
                         </li>
                       </ul>
@@ -260,41 +258,41 @@ onMemoryByteMouseClick(e => {
                 </li>
                 <li class="item">
                   <span class="name">block</span>
-                  <span class="value">{{ targetByte.block.address }}</span>
+                  <span class="value">{{ targetByte.group.block.address }}</span>
                   <span class="name">sector</span>
-                  <span class="value">{{ targetByte.block.sector.offset }}</span>
+                  <span class="value">{{ targetByte.group.block.sector.offset }}</span>
 
                   <ul>
-                    <li class="item" v-if="targetByte.block.type != MifareClassicBlockType.Undefined">
+                    <li class="item" v-if="targetByte.group.block.type != MifareClassicBlockType.Undefined">
                       <span class="name">type</span>
-                      <span class="value">{{ MifareClassicBlockType[targetByte.block.type] }}</span>
+                      <span class="value">{{ MifareClassicBlockType[targetByte.group.block.type] }}</span>
                     </li>
                     <li class="item">
                       <span class="name">address</span>
-                      <span class="value">0x{{ hex(targetByte.block.address) }}</span>
+                      <span class="value">0x{{ hex(targetByte.group.block.address) }}</span>
                       <span class="name">offset</span>
-                      <span class="value">{{ targetByte.block.offset }}</span>
+                      <span class="value">{{ targetByte.group.block.offset }}</span>
                     </li>
                     <li class="item">
                       <span class="name">access bits</span>
                       <span class="value" title="c1 c2 c3">
-                        {{ targetByte.block.accessBits.c1 }}
-                        {{ targetByte.block.accessBits.c2 }}
-                        {{ targetByte.block.accessBits.c3 }}
+                        {{ targetByte.group.block.accessBits.c1 }}
+                        {{ targetByte.group.block.accessBits.c2 }}
+                        {{ targetByte.group.block.accessBits.c3 }}
                       </span>
                     </li>
                   </ul>
                 </li>
                 <li class="item">
                   <span class="name">byte group</span>
-                  <span class="value">{{ MifareClassicBlockGroupType[targetByte.blockGroup.type] }}</span>
+                  <span class="value">{{ MifareClassicBlockGroupType[targetByte.group.type] }}</span>
 
                   <ul>
                     <li class="item">
                       <span class="name">offset</span>
-                      <span class="value">{{ targetByte.blockGroup.offset }}</span>
+                      <span class="value">{{ targetByte.group.offset }}</span>
                       <span class="name">length</span>
-                      <span class="value">{{ targetByte.blockGroup.length }}</span>
+                      <span class="value">{{ targetByte.group.length }}</span>
                     </li>
                   </ul>
                 </li>

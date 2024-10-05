@@ -2,9 +2,9 @@ import mitt from "mitt";
 import MemoryByteEvent from "./MemoryByteEvent";
 
 const emits = mitt<{
-  byteMouseEnter: MemoryByteEvent;
-  byteMouseLeave: MemoryByteEvent;
-  byteMouseClick: MemoryByteEvent;
+  mouseEnter: MemoryByteEvent;
+  mouseLeave: MemoryByteEvent;
+  mouseClick: MemoryByteEvent;
 }>();
 
 export default emits;
