@@ -6,12 +6,15 @@ import {
 } from '@/models/MifareClassic';
 import { computed } from 'vue';
 import MemoryBlockGroup from '../MemoryBlockGroup/MemoryBlockGroup.vue';
+import MemoryBlockFocus from './MemoryBlockFocus';
 
 const props = defineProps<{
   block: MifareClassicBlock;
+  focus?: MemoryBlockFocus;
 }>();
 
 const classes = computed(() => ({
+  focused: props.focus?.block.hasSameAddressAs(props.block),
   empty: !props.block.loaded,
   undefined: props.block.type == MifareClassicBlockType.Undefined,
   trailer: props.block.type == MifareClassicBlockType.SectorTrailer,
@@ -23,6 +26,6 @@ const classes = computed(() => ({
 
 <template>
   <div class="memory-block component" :class="classes">
-    <MemoryBlockGroup :group="group" v-for="group in block.blockGroups" />
+    <MemoryBlockGroup :group="group" v-for="group in block.blockGroups" :focus="focus?.groupFocus" />
   </div>
 </template>

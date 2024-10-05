@@ -21,12 +21,14 @@ import { logger } from '@/Logger';
 import MifareClassic, {
   defaultKey,
   MifareClassicBlock,
+  MifareClassicBlockGroup,
   MifareClassicBlockGroupType,
   MifareClassicBlockType,
   MifareClassicMemory
 } from '@/models/MifareClassic';
 import { PiccState, PiccType } from '@/models/Picc';
 import { inject, onMounted, ref, watch } from 'vue';
+import MemoryFocus from '../Memory/MemoryFocus';
 
 enum DashboardState {
   Undefined = 0,
@@ -40,7 +42,7 @@ enum DashboardState {
 const client = inject('client') as Client;
 const state = ref<DashboardState>(DashboardState.Undefined);
 const picc = ref<MifareClassic | undefined>(undefined);
-
+const memoryFocus = ref<MemoryFocus | undefined>(undefined);
 const targetByte = ref<MemoryByteEvent | undefined>(undefined); // Hovered byte reference
 const isTargetByteLocked = ref<boolean>(false);
 
@@ -152,24 +154,24 @@ onMemoryByteMouseClick(e => {
     return;
   }
 
-  if (isTargetByteLocked.value) {
-    // Unlockable only by clicking on locked byte
-    const isUnlockable =
-      e.group.block.address == targetByte.value?.group.block.address
-      && e.index === targetByte.value?.index;
-
-    if (isUnlockable) {
-      //targetByte.value?.focus(false); // FIXME:
-      isTargetByteLocked.value = false;
-      return;
-    }
+  if (isTargetByteLocked.value
+    && targetByte.value != undefined
+    && e.group.block.hasSameAddressAs(targetByte.value.group.block as MifareClassicBlock)
+    && e.index === targetByte.value.index) {
+    // unlock previous byte
+    isTargetByteLocked.value = false;
+    memoryFocus.value = undefined;
+    return;
   }
 
   // lock new byte
-  // targetByte.value?.focus(false); // FIXME:
   targetByte.value = e;
   isTargetByteLocked.value = true;
-  // targetByte.value?.focus(); // FIXME:
+
+  memoryFocus.value = MemoryFocus.byte(
+    targetByte.value!.group as MifareClassicBlockGroup,
+    targetByte.value!.index
+  );
 });
 </script>
 
@@ -221,7 +223,7 @@ onMemoryByteMouseClick(e => {
 
       <div class="main">
         <div class="section">
-          <Memory :memory="picc.memory as MifareClassicMemory" />
+          <Memory :memory="picc.memory as MifareClassicMemory" :focus="memoryFocus as MemoryFocus | undefined" />
         </div>
         <div class="section">
           <div class="info-panel">

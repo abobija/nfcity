@@ -13,7 +13,8 @@ const props = defineProps<{
 }>();
 
 const classes = computed(() => ({
-  focused: props.focus?.index === props.index,
+  focused: props.focus?.index === props.index
+    && props.focus?.group.block.hasSameAddressAs(props.group.block),
 }));
 </script>
 

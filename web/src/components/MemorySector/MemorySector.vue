@@ -6,12 +6,15 @@ import {
   MifareClassicSector
 } from '@/models/MifareClassic';
 import { computed } from 'vue';
+import MemorySectorFocus from './MemorySectorFocus';
 
 const props = defineProps<{
   sector: MifareClassicSector;
+  focus?: MemorySectorFocus;
 }>();
 
 const classes = computed(() => ({
+  focused: props.focus?.sector.hasSameOffsetAs(props.sector),
   empty: props.sector.isEmpty,
 }));
 </script>
@@ -24,7 +27,7 @@ const classes = computed(() => ({
     <div class="blocks">
       <MemoryBlock :block="sector.blockAt(blockOffset)"
         v-for="(_, blockOffset) in Array.from({ length: MifareClassicMemory.numberOfBlocksInSector(sector.offset) })"
-        :key="blockOffset" />
+        :key="blockOffset" :focus="focus?.blockFocus" />
     </div>
   </div>
 </template>

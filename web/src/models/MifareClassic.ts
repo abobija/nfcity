@@ -75,6 +75,10 @@ export class MifareClassicBlockGroup {
     this._block = block;
   }
 
+  public hasSameTypeAs(that: MifareClassicBlockGroup): boolean {
+    return this.type === that.type;
+  }
+
   static from(
     type: MifareClassicBlockGroupType,
     offset: number,
@@ -114,6 +118,10 @@ export abstract class MifareClassicBlock implements PiccBlock {
 
   get loaded(): Boolean {
     return this.data.length == MifareClassicBlock.size;
+  }
+
+  hasSameAddressAs(that: MifareClassicBlock): boolean {
+    return this.address == that.address;
   }
 }
 
@@ -264,6 +272,10 @@ export class MifareClassicSector implements PiccSector {
   // returns true if none of the blocks in the sector are loaded
   get isEmpty() {
     return Array.from(this.blocks.values()).every(block => !block.loaded);
+  }
+
+  hasSameOffsetAs(that: MifareClassicSector): boolean {
+    return this.offset == that.offset;
   }
 
   blockAt(blockOffset: number): MifareClassicBlock {

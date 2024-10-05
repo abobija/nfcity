@@ -6,7 +6,7 @@ import {
   MifareClassicBlockGroupType
 } from '@/models/MifareClassic';
 import { computed } from 'vue';
-import { MemoryBlockGroupFocus } from './MemoryBlockGroupFocus';
+import MemoryBlockGroupFocus from './MemoryBlockGroupFocus';
 
 const props = defineProps<{
   group: MifareClassicBlockGroup;
@@ -42,7 +42,7 @@ const groupClass: Map<MifareClassicBlockGroupType, string> = new Map([
 const classes = computed(() => {
   const arr: string[] = [groupClass.get(props.group.type)!];
 
-  if (props.focus?.type == props.group.type) {
+  if (props.focus?.group.hasSameTypeAs(props.group)) {
     arr.push('focused');
   }
 
@@ -52,7 +52,7 @@ const classes = computed(() => {
 
 <template>
   <ul class="memory-block-group component" :class="classes">
-    <MemoryByte :group="group" :index="index" v-for="(_, index) in Array.from({ length: group.length })"
+    <MemoryByte :group="group" :index="group.offset + index" v-for="(_, index) in Array.from({ length: group.length })"
       :focus="focus?.byteFocus" />
   </ul>
 </template>
