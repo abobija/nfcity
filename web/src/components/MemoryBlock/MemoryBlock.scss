@@ -2,16 +2,11 @@
 @import '@/theme.scss';
 
 .memory-block.component {
-  .bytes {
-    display: flex;
-    flex-direction: row;
-  }
+  display: flex;
 
-  .bytes>.group {
+  >.group {
     display: flex;
     flex-direction: row;
-    justify-content: center;
-    border-style: solid;
   }
 
   .byte {
@@ -39,7 +34,7 @@
 .memory-block.component {
   color: color.adjust($color-bg, $lightness: +40%);
 
-  .bytes:hover {
+  >.group:hover {
     background-color: color.adjust($color-bg, $lightness: +1%);
   }
 
@@ -75,8 +70,8 @@
   $highlight-color: $color-1;
   $lightness: -30%;
 
-  .bytes>.group:hover .byte {
-    border-bottom-color: color.adjust($highlight-color, $lightness: $lightness);
+  >.group:hover .byte {
+    border-bottom-color: color.adjust($highlight-color, $lightness: $lightness) !important;
 
     &:not(:last-child) {
       border-right-color: color.adjust($highlight-color, $lightness: $lightness);
