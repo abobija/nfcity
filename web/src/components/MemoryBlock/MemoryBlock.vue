@@ -44,7 +44,7 @@ function makeEvent(blockGroup: MemoryBlockGroup, index: number): MemoryByteEvent
 
 <template>
   <div class="memory-block component" :class="classes">
-    <ul class="memory-group" :class="blockGroup.class" v-for="blockGroup in props.blockGroups">
+    <ul class="memory-block-group" :class="blockGroup.class" v-for="blockGroup in props.blockGroups">
       <li class="memory-byte" v-for="(_, index) in Array.from({ length: blockGroup.length })"
         :key="byteIndex(index, blockGroup)" :data-index="byteIndex(index, blockGroup)"
         :class="{ focused: focusedByteIndex == byteIndex(index, blockGroup) }"
