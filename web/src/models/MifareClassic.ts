@@ -43,17 +43,43 @@ export enum MifareClassicBlockType {
 }
 
 export class MifareClassicBlockGroup {
+  private _block?: MifareClassicBlock;
   readonly type: MifareClassicBlockGroupType;
   readonly offset: number;
   readonly length: number;
 
-  protected constructor(type: MifareClassicBlockGroupType, offset: number, length: number) {
+  protected constructor(
+    type: MifareClassicBlockGroupType,
+    offset: number,
+    length: number
+  ) {
     this.type = type;
     this.offset = offset;
     this.length = length;
+    this._block = undefined;
   }
 
-  static from(type: MifareClassicBlockGroupType, offset: number, length: number) {
+  get block(): MifareClassicBlock {
+    if (this._block === undefined) {
+      throw new Error('Block not set');
+    }
+
+    return this._block;
+  }
+
+  set block(block: MifareClassicBlock) {
+    if (this._block !== undefined) {
+      throw new Error('Block already set');
+    }
+
+    this._block = block;
+  }
+
+  static from(
+    type: MifareClassicBlockGroupType,
+    offset: number,
+    length: number
+  ) {
     return new MifareClassicBlockGroup(type, offset, length);
   }
 };
@@ -69,13 +95,20 @@ export abstract class MifareClassicBlock implements PiccBlock {
   readonly accessBits: PiccBlockAccessBits;
   readonly blockGroups: MifareClassicBlockGroup[];
 
-  protected constructor(type: MifareClassicBlockType, sector: MifareClassicSector, block: PiccBlockDto, accessBits: PiccBlockAccessBits, bytesGroups: MifareClassicBlockGroup[]) {
+  protected constructor(
+    type: MifareClassicBlockType,
+    sector: MifareClassicSector,
+    block: PiccBlockDto,
+    accessBits: PiccBlockAccessBits,
+    bytesGroups: MifareClassicBlockGroup[]
+  ) {
     this.type = type;
     this.sector = sector;
     this.address = block.address;
     this.offset = block.offset;
     this.data = block.data;
     this.accessBits = accessBits;
+    bytesGroups.forEach(group => group.block = this);
     this.blockGroups = bytesGroups;
   }
 

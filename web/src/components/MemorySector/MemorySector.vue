@@ -46,11 +46,9 @@ const blockGroupClassMap: Map<MifareClassicBlockGroupType, string> = new Map([
 ]);
 
 function blockGroups(block?: MifareClassicBlock): MemoryBlockGroup[] {
-  const blockGroups: MifareClassicBlockGroup[] = block?.blockGroups ?? [{
-    type: MifareClassicBlockGroupType.Undefined,
-    offset: 0,
-    length: MifareClassicBlock.size,
-  }];
+  const blockGroups: MifareClassicBlockGroup[] = block?.blockGroups ?? [
+    MifareClassicBlockGroup.from(MifareClassicBlockGroupType.Undefined, 0, MifareClassicBlock.size),
+  ];
 
   return blockGroups.map<MemoryBlockGroup>(blockGroup => {
     return {
