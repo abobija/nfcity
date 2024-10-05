@@ -1,10 +1,16 @@
 <script setup lang="ts">
 import Client from '@/comm/Client';
-import { onClientMessage, onClientPing, onClientPong, onClientPongMissed } from '@/comm/hooks/ClientEventHooks';
+import { onClientMessage } from '@/comm/hooks/ClientEventHooks';
 import PiccSectorDevMessage from '@/comm/msgs/dev/PiccSectorDevMessage';
 import ReadSectorWebMessage from '@/comm/msgs/web/ReadSectorWebMessage';
 import '@/components/Dashboard/Dashboard.scss';
 import Memory from '@/components/Memory/Memory.vue';
+import MemoryByteEvent from '@/components/MemoryBlock/events/MemoryByteEvent';
+import {
+  onMemoryByteMouseClick,
+  onMemoryByteMouseEnter,
+  onMemoryByteMouseLeave
+} from '@/components/MemoryBlock/hooks/MemoryByteEventHooks';
 import { bin, hex } from '@/helpers';
 import { logger } from '@/Logger';
 import MifareClassic, {
@@ -15,12 +21,7 @@ import MifareClassic, {
 } from '@/models/MifareClassic';
 import { PiccType } from '@/models/Picc';
 import { inject, ref } from 'vue';
-import MemoryByteEvent from '../MemoryBlock/events/MemoryByteEvent';
-import {
-  onMemoryByteMouseClick,
-  onMemoryByteMouseEnter,
-  onMemoryByteMouseLeave
-} from '../MemoryBlock/hooks/MemoryByteEventHooks';
+import SystemInfo from '../SystemInfo/SystemInfo.vue';
 
 const props = defineProps<{
   picc: MifareClassic;
@@ -81,33 +82,11 @@ onMemoryByteMouseClick(e => {
 });
 
 onClientMessage(e => {
-  const { message } = e;
-
-  if (!PiccSectorDevMessage.is(message)) {
+  if (!PiccSectorDevMessage.is(e.message)) {
     return;
   }
 
-  props.picc.memory.updateSector(message.blocks);
-});
-
-enum PingPongState {
-  Undefined,
-  Pinged,
-  Ponged,
-  PongMissed,
-}
-
-const pingPongState = ref<PingPongState>(PingPongState.Undefined);
-const pingPongLatency = ref<number | undefined>(undefined);
-
-onClientPing(() => pingPongState.value = PingPongState.Pinged);
-onClientPong((e) => {
-  pingPongState.value = PingPongState.Ponged;
-  pingPongLatency.value = e.latency;
-});
-onClientPongMissed(() => {
-  pingPongState.value = PingPongState.PongMissed;
-  pingPongLatency.value = undefined;
+  props.picc.memory.updateSector(e.message.blocks);
 });
 </script>
 
@@ -138,30 +117,8 @@ onClientPongMissed(() => {
           >> {{ picc.memory.size }} bytes of memory
         </div>
       </div>
-      <div class="system">
-        <div class="ping">
-          <span class="latency" v-if="pingPongLatency" title="Latency [ms]">
-            {{ pingPongLatency }}
-          </span>
-          <span class="miss" v-if="pingPongState == PingPongState.PongMissed">
-            miss
-          </span>
-          <Transition mode="out-in" :duration="100">
-            <span class="status undefined" v-if="pingPongState == PingPongState.Undefined" title="Ping pong">
-              &squf;
-            </span>
-            <span class="status pinged" v-else-if="pingPongState == PingPongState.Pinged" title="Ping sent">
-              &squf;
-            </span>
-            <span class="status ponged" v-else-if="pingPongState == PingPongState.Ponged" title="Pong received">
-              &squf;
-            </span>
-            <span class="status miss" v-else-if="pingPongState == PingPongState.PongMissed" title="Pong missed">
-              &squf;
-            </span>
-          </Transition>
-        </div>
-      </div>
+
+      <SystemInfo />
     </div>
 
     <div class="main">
@@ -172,7 +129,8 @@ onClientPongMissed(() => {
         <div class="info-panel">
           <Transition appear>
             <p class="hint" v-if="picc.memory.isEmpty">
-              Click on one of the sectors on the left to load its data. </p>
+              Click on one of the sectors on the left to load its data.
+            </p>
           </Transition>
 
           <div class="target" v-if="targetByte">
@@ -238,11 +196,6 @@ onClientPongMissed(() => {
                     <span class="value">{{ targetByte.byteGroup.offset }}</span>
                     <span class="name">length</span>
                     <span class="value">{{ targetByte.byteGroup.length }}</span>
-                  </li>
-                  <li class="item">
-                    <div class="rendered">
-                      TODO: render byte group
-                    </div>
                   </li>
                 </ul>
               </li>
