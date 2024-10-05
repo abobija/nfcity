@@ -3,7 +3,16 @@
 
 .dashboard.component {
   margin: 1rem;
+}
 
+.dashboard.component .scene.picc-waiter {
+  .message {
+    font-size: 1.3rem;
+    color: $color-4;
+  }
+}
+
+.dashboard.component .scene.main {
   >.header {
     display: flex;
     justify-content: space-between;

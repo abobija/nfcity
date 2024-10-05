@@ -1,14 +1,6 @@
 @import '@/theme.scss';
 
 .app {
-  .center-screen {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
-
   .enter {
     .title {
       font-size: 3rem;
@@ -33,29 +25,6 @@
       opacity: 0.5;
     }
   }
-
-  .picc-waiter {
-    .message {
-      font-size: 1.3rem;
-      color: $color-4;
-    }
-  }
-}
-
-.app {
-
-  // {{ default vue transition
-  .v-enter-active,
-  .v-leave-active {
-    transition: opacity 0.5s ease;
-  }
-
-  .v-enter-from,
-  .v-leave-to {
-    opacity: 0;
-  }
-
-  // }}
 }
 
 .app a {
