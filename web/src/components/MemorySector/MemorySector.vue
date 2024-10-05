@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import MemoryBlock from '@/components/MemoryBlock/MemoryBlock.vue';
 import '@/components/MemorySector/MemorySector.scss';
+import MemorySectorFocus from '@/components/MemorySector/MemorySectorFocus';
 import {
   MifareClassicMemory,
   MifareClassicSector
 } from '@/models/MifareClassic';
 import { computed } from 'vue';
-import MemorySectorFocus from './MemorySectorFocus';
 
 const props = defineProps<{
   sector: MifareClassicSector;

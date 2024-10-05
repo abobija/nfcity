@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import '@/components/MemoryBlock/MemoryBlock.scss';
+import MemoryBlockFocus from '@/components/MemoryBlock/MemoryBlockFocus';
+import MemoryBlockGroup from '@/components/MemoryBlockGroup/MemoryBlockGroup.vue';
 import {
   MifareClassicBlock,
   MifareClassicBlockType
 } from '@/models/MifareClassic';
 import { computed } from 'vue';
-import MemoryBlockGroup from '../MemoryBlockGroup/MemoryBlockGroup.vue';
-import MemoryBlockFocus from './MemoryBlockFocus';
 
 const props = defineProps<{
   block: MifareClassicBlock;

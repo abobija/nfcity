@@ -28,7 +28,7 @@ import MifareClassic, {
 } from '@/models/MifareClassic';
 import { PiccState, PiccType } from '@/models/Picc';
 import { inject, onMounted, ref, watch } from 'vue';
-import MemoryFocus from '../Memory/MemoryFocus';
+import MemoryFocus from '@/components/Memory/MemoryFocus';
 
 enum DashboardState {
   Undefined = 0,

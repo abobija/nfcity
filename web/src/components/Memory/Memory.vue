@@ -3,7 +3,7 @@ import '@/components/Memory/Memory.scss';
 import MemorySector from '@/components/MemorySector/MemorySector.vue';
 import { MifareClassicMemory } from '@/models/MifareClassic';
 import { computed } from 'vue';
-import MemoryFocus from './MemoryFocus';
+import MemoryFocus from '@/components/Memory/MemoryFocus';
 
 defineProps<{
   memory: MifareClassicMemory;
