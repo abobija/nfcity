@@ -21,7 +21,7 @@ import { logger } from '@/Logger';
 import MifareClassic, {
   defaultKey,
   MifareClassicBlock,
-  MifareClassicBlockByteGroupType,
+  MifareClassicBlockGroupType,
   MifareClassicBlockType,
   MifareClassicMemory
 } from '@/models/MifareClassic';
@@ -287,14 +287,14 @@ onMemoryByteMouseClick(e => {
                 </li>
                 <li class="item">
                   <span class="name">byte group</span>
-                  <span class="value">{{ MifareClassicBlockByteGroupType[targetByte.byteGroup.type] }}</span>
+                  <span class="value">{{ MifareClassicBlockGroupType[targetByte.blockGroup.type] }}</span>
 
                   <ul>
                     <li class="item">
                       <span class="name">offset</span>
-                      <span class="value">{{ targetByte.byteGroup.offset }}</span>
+                      <span class="value">{{ targetByte.blockGroup.offset }}</span>
                       <span class="name">length</span>
-                      <span class="value">{{ targetByte.byteGroup.length }}</span>
+                      <span class="value">{{ targetByte.blockGroup.length }}</span>
                     </li>
                   </ul>
                 </li>

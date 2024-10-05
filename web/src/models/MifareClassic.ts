@@ -8,7 +8,7 @@ export const defaultKey: PiccKey = {
   value: Uint8Array.from([0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]),
 };
 
-export enum MifareClassicBlockByteGroupType {
+export enum MifareClassicBlockGroupType {
   Undefined,
 
   // Sector trailer
@@ -42,19 +42,19 @@ export enum MifareClassicBlockType {
   Manufacturer,
 }
 
-export class MifareClassicBlockByteGroup {
-  readonly type: MifareClassicBlockByteGroupType;
+export class MifareClassicBlockGroup {
+  readonly type: MifareClassicBlockGroupType;
   readonly offset: number;
   readonly length: number;
 
-  protected constructor(type: MifareClassicBlockByteGroupType, offset: number, length: number) {
+  protected constructor(type: MifareClassicBlockGroupType, offset: number, length: number) {
     this.type = type;
     this.offset = offset;
     this.length = length;
   }
 
-  static from(type: MifareClassicBlockByteGroupType, offset: number, length: number) {
-    return new MifareClassicBlockByteGroup(type, offset, length);
+  static from(type: MifareClassicBlockGroupType, offset: number, length: number) {
+    return new MifareClassicBlockGroup(type, offset, length);
   }
 };
 
@@ -67,16 +67,16 @@ export abstract class MifareClassicBlock implements PiccBlock {
   readonly offset: number;
   readonly data: Uint8Array;
   readonly accessBits: PiccBlockAccessBits;
-  readonly byteGroups: MifareClassicBlockByteGroup[];
+  readonly blockGroups: MifareClassicBlockGroup[];
 
-  protected constructor(type: MifareClassicBlockType, sector: MifareClassicSector, block: PiccBlockDto, accessBits: PiccBlockAccessBits, bytesGroups: MifareClassicBlockByteGroup[]) {
+  protected constructor(type: MifareClassicBlockType, sector: MifareClassicSector, block: PiccBlockDto, accessBits: PiccBlockAccessBits, bytesGroups: MifareClassicBlockGroup[]) {
     this.type = type;
     this.sector = sector;
     this.address = block.address;
     this.offset = block.offset;
     this.data = block.data;
     this.accessBits = accessBits;
-    this.byteGroups = bytesGroups;
+    this.blockGroups = bytesGroups;
   }
 
   get loaded(): Boolean {
@@ -96,7 +96,7 @@ export class MifareClassicUndefinedBlock extends MifareClassicBlock {
       },
       { c1: 0, c2: 0, c3: 0 },
       [
-        MifareClassicBlockByteGroup.from(MifareClassicBlockByteGroupType.Undefined, 0, MifareClassicBlock.size),
+        MifareClassicBlockGroup.from(MifareClassicBlockGroupType.Undefined, 0, MifareClassicBlock.size),
       ]);
   }
 }
@@ -110,10 +110,10 @@ export class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
     }
 
     super(MifareClassicBlockType.SectorTrailer, sector, block, accessBitsPool[3], [
-      MifareClassicBlockByteGroup.from(MifareClassicBlockByteGroupType.KeyA, 0, 6),
-      MifareClassicBlockByteGroup.from(MifareClassicBlockByteGroupType.AccessBits, 6, 3),
-      MifareClassicBlockByteGroup.from(MifareClassicBlockByteGroupType.UserByte, 9, 1),
-      MifareClassicBlockByteGroup.from(MifareClassicBlockByteGroupType.KeyB, 10, 6),
+      MifareClassicBlockGroup.from(MifareClassicBlockGroupType.KeyA, 0, 6),
+      MifareClassicBlockGroup.from(MifareClassicBlockGroupType.AccessBits, 6, 3),
+      MifareClassicBlockGroup.from(MifareClassicBlockGroupType.UserByte, 9, 1),
+      MifareClassicBlockGroup.from(MifareClassicBlockGroupType.KeyB, 10, 6),
     ]);
 
     this.accessBitsPool = accessBitsPool;
@@ -166,7 +166,7 @@ export class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
 export class MifareClassicDataBlock extends MifareClassicBlock {
   static from(sector: MifareClassicSector, block: PiccBlockDto, accessBits: PiccBlockAccessBits) {
     return new MifareClassicDataBlock(MifareClassicBlockType.Data, sector, block, accessBits, [
-      MifareClassicBlockByteGroup.from(MifareClassicBlockByteGroupType.Data, 0, MifareClassicBlock.size),
+      MifareClassicBlockGroup.from(MifareClassicBlockGroupType.Data, 0, MifareClassicBlock.size),
     ]);
   }
 }
@@ -176,13 +176,13 @@ export class MifareClassicValueBlock extends MifareClassicBlock {
     // TODO: Parse
 
     return new MifareClassicValueBlock(MifareClassicBlockType.Value, sector, block, accessBits, [
-      MifareClassicBlockByteGroup.from(MifareClassicBlockByteGroupType.Value, 0, 4),
-      MifareClassicBlockByteGroup.from(MifareClassicBlockByteGroupType.ValueInverted, 4, 4),
-      MifareClassicBlockByteGroup.from(MifareClassicBlockByteGroupType.Value, 8, 4),
-      MifareClassicBlockByteGroup.from(MifareClassicBlockByteGroupType.Address, 12, 1),
-      MifareClassicBlockByteGroup.from(MifareClassicBlockByteGroupType.AddressInverted, 13, 1),
-      MifareClassicBlockByteGroup.from(MifareClassicBlockByteGroupType.Address, 14, 1),
-      MifareClassicBlockByteGroup.from(MifareClassicBlockByteGroupType.AddressInverted, 15, 1),
+      MifareClassicBlockGroup.from(MifareClassicBlockGroupType.Value, 0, 4),
+      MifareClassicBlockGroup.from(MifareClassicBlockGroupType.ValueInverted, 4, 4),
+      MifareClassicBlockGroup.from(MifareClassicBlockGroupType.Value, 8, 4),
+      MifareClassicBlockGroup.from(MifareClassicBlockGroupType.Address, 12, 1),
+      MifareClassicBlockGroup.from(MifareClassicBlockGroupType.AddressInverted, 13, 1),
+      MifareClassicBlockGroup.from(MifareClassicBlockGroupType.Address, 14, 1),
+      MifareClassicBlockGroup.from(MifareClassicBlockGroupType.AddressInverted, 15, 1),
     ]);
   }
 
@@ -198,12 +198,12 @@ export class MifareClassicManufacturerBlock extends MifareClassicBlock {
     const { uid } = sector.memory.picc;
 
     return new MifareClassicManufacturerBlock(MifareClassicBlockType.Manufacturer, sector, block, accessBits, [
-      MifareClassicBlockByteGroup.from(MifareClassicBlockByteGroupType.UID, 0, uid.length),
-      MifareClassicBlockByteGroup.from(MifareClassicBlockByteGroupType.BCC, uid.length, 1),
-      MifareClassicBlockByteGroup.from(MifareClassicBlockByteGroupType.SAK, uid.length + 1, 1),
-      MifareClassicBlockByteGroup.from(MifareClassicBlockByteGroupType.ATQA, uid.length + 2, 2),
-      MifareClassicBlockByteGroup.from(
-        MifareClassicBlockByteGroupType.ManufacturerData,
+      MifareClassicBlockGroup.from(MifareClassicBlockGroupType.UID, 0, uid.length),
+      MifareClassicBlockGroup.from(MifareClassicBlockGroupType.BCC, uid.length, 1),
+      MifareClassicBlockGroup.from(MifareClassicBlockGroupType.SAK, uid.length + 1, 1),
+      MifareClassicBlockGroup.from(MifareClassicBlockGroupType.ATQA, uid.length + 2, 2),
+      MifareClassicBlockGroup.from(
+        MifareClassicBlockGroupType.ManufacturerData,
         uid.length + 4,
         MifareClassicBlock.size - uid.length - 4
       ),

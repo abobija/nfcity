@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import MemoryBlock from '@/components/MemoryBlock/MemoryBlock.vue';
-import MemoryBlockByteGroup from '@/components/MemoryBlock/MemoryBlockByteGroup';
+import MemoryBlockGroup from '@/components/MemoryBlock/MemoryBlockGroup';
 import '@/components/MemorySector/MemorySector.scss';
 import {
   MifareClassicBlock,
-  MifareClassicBlockByteGroup,
-  MifareClassicBlockByteGroupType,
+  MifareClassicBlockGroup,
+  MifareClassicBlockGroupType,
   MifareClassicMemory,
   MifareClassicSector
 } from '@/models/MifareClassic';
@@ -19,45 +19,45 @@ const classes = computed(() => ({
   empty: props.sector.isEmpty,
 }));
 
-const byteGroupClassMap: Map<MifareClassicBlockByteGroupType, string> = new Map([
-  [MifareClassicBlockByteGroupType.Undefined, 'undefined'],
+const blockGroupClassMap: Map<MifareClassicBlockGroupType, string> = new Map([
+  [MifareClassicBlockGroupType.Undefined, 'undefined'],
 
   // Trailer
-  [MifareClassicBlockByteGroupType.KeyA, 'key key-a'],
-  [MifareClassicBlockByteGroupType.AccessBits, 'access-bits'],
-  [MifareClassicBlockByteGroupType.UserByte, 'user-byte'],
-  [MifareClassicBlockByteGroupType.KeyB, 'key key-b'],
+  [MifareClassicBlockGroupType.KeyA, 'key key-a'],
+  [MifareClassicBlockGroupType.AccessBits, 'access-bits'],
+  [MifareClassicBlockGroupType.UserByte, 'user-byte'],
+  [MifareClassicBlockGroupType.KeyB, 'key key-b'],
 
   // Value
-  [MifareClassicBlockByteGroupType.Value, 'value'],
-  [MifareClassicBlockByteGroupType.ValueInverted, 'value-inverted'],
-  [MifareClassicBlockByteGroupType.Address, 'addr'],
-  [MifareClassicBlockByteGroupType.AddressInverted, 'addr-inverted'],
+  [MifareClassicBlockGroupType.Value, 'value'],
+  [MifareClassicBlockGroupType.ValueInverted, 'value-inverted'],
+  [MifareClassicBlockGroupType.Address, 'addr'],
+  [MifareClassicBlockGroupType.AddressInverted, 'addr-inverted'],
 
   // Data
-  [MifareClassicBlockByteGroupType.Data, 'data'],
+  [MifareClassicBlockGroupType.Data, 'data'],
 
   // Manufacturer
-  [MifareClassicBlockByteGroupType.UID, 'uid'],
-  [MifareClassicBlockByteGroupType.BCC, 'bcc'],
-  [MifareClassicBlockByteGroupType.SAK, 'sak'],
-  [MifareClassicBlockByteGroupType.ATQA, 'atqa'],
-  [MifareClassicBlockByteGroupType.ManufacturerData, 'manufacturer'],
+  [MifareClassicBlockGroupType.UID, 'uid'],
+  [MifareClassicBlockGroupType.BCC, 'bcc'],
+  [MifareClassicBlockGroupType.SAK, 'sak'],
+  [MifareClassicBlockGroupType.ATQA, 'atqa'],
+  [MifareClassicBlockGroupType.ManufacturerData, 'manufacturer'],
 ]);
 
-function blockByteGroups(block?: MifareClassicBlock): MemoryBlockByteGroup[] {
-  const byteGroups: MifareClassicBlockByteGroup[] = block?.byteGroups ?? [{
-    type: MifareClassicBlockByteGroupType.Undefined,
+function blockGroups(block?: MifareClassicBlock): MemoryBlockGroup[] {
+  const blockGroups: MifareClassicBlockGroup[] = block?.blockGroups ?? [{
+    type: MifareClassicBlockGroupType.Undefined,
     offset: 0,
     length: MifareClassicBlock.size,
   }];
 
-  return byteGroups.map<MemoryBlockByteGroup>(byteGroup => {
+  return blockGroups.map<MemoryBlockGroup>(blockGroup => {
     return {
-      origin: byteGroup,
-      offset: byteGroup.offset,
-      length: byteGroup.length,
-      class: byteGroupClassMap.get(byteGroup.type) ?? 'unknown',
+      origin: blockGroup,
+      offset: blockGroup.offset,
+      length: blockGroup.length,
+      class: blockGroupClassMap.get(blockGroup.type) ?? 'unknown',
     };
   });
 }
@@ -72,7 +72,7 @@ function blockByteGroups(block?: MifareClassicBlock): MemoryBlockByteGroup[] {
       <MemoryBlock
         v-for="(_, blockOffset) in Array.from({ length: MifareClassicMemory.numberOfBlocksInSector(sector.offset) })"
         :key="blockOffset" :block="sector.blockAt(blockOffset)"
-        :byte-groups="blockByteGroups(sector.blockAt(blockOffset))" />
+        :blockGroups="blockGroups(sector.blockAt(blockOffset))" />
     </div>
   </div>
 </template>

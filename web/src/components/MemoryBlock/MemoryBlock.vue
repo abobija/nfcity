@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import '@/components/MemoryBlock/MemoryBlock.scss';
-import MemoryBlockByteGroup from '@/components/MemoryBlock/MemoryBlockByteGroup';
+import MemoryBlockGroup from '@/components/MemoryBlock/MemoryBlockGroup';
 import emits from '@/components/MemoryBlock/events/MemoryBlockEvents';
 import MemoryByteEvent from '@/components/MemoryBlock/events/MemoryByteEvent';
 import { hex } from '@/helpers';
@@ -12,7 +12,7 @@ import { computed, ref } from 'vue';
 
 const props = defineProps<{
   block: MifareClassicBlock;
-  byteGroups: MemoryBlockByteGroup[];
+  blockGroups: MemoryBlockGroup[];
 }>();
 
 const focusedByteIndex = ref<number | undefined>(undefined);
@@ -26,17 +26,17 @@ const classes = computed(() => ({
   value: props.block.type == MifareClassicBlockType.Value,
 }));
 
-function byteIndex(index: number, byteGroup: MemoryBlockByteGroup) {
-  return byteGroup.offset + index;
+function byteIndex(index: number, blockGroup: MemoryBlockGroup) {
+  return blockGroup.offset + index;
 }
 
-function makeEvent(byteGroup: MemoryBlockByteGroup, index: number): MemoryByteEvent {
+function makeEvent(blockGroup: MemoryBlockGroup, index: number): MemoryByteEvent {
   return MemoryByteEvent.from(
     props.block,
-    byteGroup.origin,
-    byteIndex(index, byteGroup),
+    blockGroup.origin,
+    byteIndex(index, blockGroup),
     (state?: boolean) => {
-      focusedByteIndex.value = (state ?? true) ? byteIndex(index, byteGroup) : undefined;
+      focusedByteIndex.value = (state ?? true) ? byteIndex(index, blockGroup) : undefined;
     }
   );
 };
@@ -45,14 +45,14 @@ function makeEvent(byteGroup: MemoryBlockByteGroup, index: number): MemoryByteEv
 <template>
   <div class="memory-block component" :class="classes">
     <ul class="bytes">
-      <ul class="group" :class="byteGroup.class" v-for="byteGroup in props.byteGroups">
-        <li class="byte" v-for="(_, index) in Array.from({ length: byteGroup.length })"
-          :key="byteIndex(index, byteGroup)" :data-index="byteIndex(index, byteGroup)"
-          :class="{ focused: focusedByteIndex == byteIndex(index, byteGroup) }"
-          @mouseenter="emits.emit('byteMouseEnter', makeEvent(byteGroup, index))"
-          @mouseleave="emits.emit('byteMouseLeave', makeEvent(byteGroup, index))"
-          @click="emits.emit('byteMouseClick', makeEvent(byteGroup, index))">
-          {{ block.loaded ? hex(block.data[byteIndex(index, byteGroup)]) : '..' }}
+      <ul class="group" :class="blockGroup.class" v-for="blockGroup in props.blockGroups">
+        <li class="byte" v-for="(_, index) in Array.from({ length: blockGroup.length })"
+          :key="byteIndex(index, blockGroup)" :data-index="byteIndex(index, blockGroup)"
+          :class="{ focused: focusedByteIndex == byteIndex(index, blockGroup) }"
+          @mouseenter="emits.emit('byteMouseEnter', makeEvent(blockGroup, index))"
+          @mouseleave="emits.emit('byteMouseLeave', makeEvent(blockGroup, index))"
+          @click="emits.emit('byteMouseClick', makeEvent(blockGroup, index))">
+          {{ block.loaded ? hex(block.data[byteIndex(index, blockGroup)]) : '..' }}
         </li>
       </ul>
     </ul>
