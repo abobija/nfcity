@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Client from '@/comm/Client';
-import { onClientMessage } from '@/comm/hooks/ClientEventHooks';
+import ErrorDevMessage from '@/comm/msgs/dev/ErrorDevMessage';
 import PiccSectorDevMessage from '@/comm/msgs/dev/PiccSectorDevMessage';
 import ReadSectorWebMessage from '@/comm/msgs/web/ReadSectorWebMessage';
 import MemoryBlock from '@/components/MemoryBlock/MemoryBlock.vue';
@@ -34,20 +34,21 @@ const classes = computed(() => ({
 
 const client = inject('client') as Client;
 
-function onUnlock(key: PiccKey) {
+async function unlockAndLoadSector(key: PiccKey) {
   emit('stateChange', MemorySectorState.Unlocking);
-  client.send(ReadSectorWebMessage.from(props.sector.offset, key));
-}
+  const msg = await client.send(ReadSectorWebMessage.from(props.sector.offset, key));
 
-onClientMessage(e => {
-  if (!PiccSectorDevMessage.is(e.message)
-    || e.message.offset != props.sector.offset) {
+  if (PiccSectorDevMessage.is(msg)) {
+    props.sector.memory.updateSector(msg.offset, msg.blocks);
+    emit('stateChange', MemorySectorState.UnlockedAndLoaded);
     return;
   }
 
-  props.sector.memory.updateSector(e.message.offset, e.message.blocks);
-  emit('stateChange', MemorySectorState.UnlockedAndLoaded);
-});
+  if (ErrorDevMessage.is(msg)) {
+    emit('stateChange', MemorySectorState.Unlock);
+    return;
+  }
+}
 </script>
 
 <template>
@@ -63,7 +64,8 @@ onClientMessage(e => {
       <Transition appear :duration="100">
         <MemorySectorEmptyOverlay v-if="state == MemorySectorState.Empty"
           @click="$emit('stateChange', MemorySectorState.Unlock)" />
-        <MemorySectorUnlockOverlay :sector="sector" v-else-if="state == MemorySectorState.Unlock" @unlock="onUnlock" />
+        <MemorySectorUnlockOverlay :sector="sector" v-else-if="state == MemorySectorState.Unlock"
+          @unlock="unlockAndLoadSector" />
         <MemorySectorUnlockingOverlay v-else-if="state == MemorySectorState.Unlocking" />
       </Transition>
     </div>
