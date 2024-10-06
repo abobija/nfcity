@@ -13,10 +13,10 @@ import {
 } from '@/models/MifareClassic';
 import { PiccKey } from '@/models/Picc';
 import { computed, inject, onUpdated, ref } from 'vue';
-import MemorySectorEmptyOverlay from './MemorySectorEmptyOverlay.vue';
 import MemorySectorState from './MemorySectorState';
-import MemorySectorUnlockOverlay from './MemorySectorUnlockOverlay.vue';
-import MemorySectorUnlockingOverlay from './MemorySectorUnlockingOverlay.vue';
+import MemorySectorEmptyOverlay from './overlays/MemorySectorEmptyOverlay.vue';
+import MemorySectorUnlockOverlay from './overlays/MemorySectorUnlockOverlay.vue';
+import MemorySectorUnlockingOverlay from './overlays/MemorySectorUnlockingOverlay.vue';
 
 const props = defineProps<{
   sector: MifareClassicSector;

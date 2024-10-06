@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import '@/components/MemorySector/MemorySectorUnlockOverlay.scss';
 import { hex, hex2arr, isHex } from '@/helpers';
 import { logger } from '@/Logger';
 import { MifareClassicSector } from '@/models/MifareClassic';

@@ -1,3 +1,4 @@
+@use 'sass:color';
 @import '@/theme.scss';
 
 $transition: .3s ease-in-out;
@@ -77,4 +78,38 @@ $transition: .3s ease-in-out;
     }
   }
 
+}
+
+.memory-sector-overlay.empty.component {
+  cursor: pointer;
+  color: color.adjust($color-fg, $blackness: +50%, $alpha: -0.8);
+  transition: color .3s ease-in-out;
+
+  &:hover {
+    color: color.adjust($color-fg, $blackness: +50%);
+  }
+}
+
+.memory-sector-overlay.unlock.component {
+  form {
+
+    label,
+    input,
+    button {
+      font-size: 0.7rem;
+    }
+
+    input[type=text],
+    button {
+      padding: 0.4rem 0.5rem;
+    }
+
+    input[type=text] {
+      width: 6rem;
+    }
+
+    button[type="submit"] {
+      margin-left: 0.5rem;
+    }
+  }
 }

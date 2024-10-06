@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import '@/components/MemorySector/MemorySectorEmptyOverlay.scss';
-
 defineEmits<{
   (e: 'click'): void;
 }>();
