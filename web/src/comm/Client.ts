@@ -14,6 +14,12 @@ import { decode, encode } from 'cbor-x';
 import mqtt, { MqttClient } from 'mqtt';
 import ErrorDevMessage from './msgs/dev/ErrorDevMessage';
 
+export class ReceiveMessageTimeoutError extends Error {
+  constructor() {
+    super("Receive message timeout");
+  }
+}
+
 class Client {
   readonly brokerUrl: string;
   readonly rootTopic: string;
@@ -81,7 +87,7 @@ class Client {
 
       const _timeout = setTimeout(() => {
         emits.off('message', _handler);
-        reject(new Error('timeout'));
+        reject(new ReceiveMessageTimeoutError());
       }, timeoutMs);
 
       emits.on('message', _handler);
