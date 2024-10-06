@@ -1,10 +1,6 @@
 @use 'sass:color';
 @import '@/theme.scss';
 
-.dashboard.component {
-  margin: 1rem;
-}
-
 .dashboard.component .scene.picc-waiter {
   .message {
     font-size: 1.3rem;
@@ -13,6 +9,8 @@
 }
 
 .dashboard.component .scene.main {
+  margin: 1rem;
+
   >.header {
     display: flex;
     justify-content: space-between;
