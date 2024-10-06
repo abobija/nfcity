@@ -6,6 +6,8 @@ import PiccDevMessage from '@/comm/msgs/dev/PiccDevMessage';
 import PiccStateChangedDevMessage from '@/comm/msgs/dev/PiccStateChangedDevMessage';
 import GetPiccWebMessage from '@/comm/msgs/web/GetPiccWebMessage';
 import '@/components/Dashboard/Dashboard.scss';
+import TargetByte from '@/components/Dashboard/TargetByte';
+import TargetByteRenderer from '@/components/Dashboard/TargetByteRenderer.vue';
 import Memory from '@/components/Memory/Memory.vue';
 import MemoryFocus from '@/components/Memory/MemoryFocus';
 import {
@@ -23,8 +25,6 @@ import MifareClassic, {
 } from '@/models/MifareClassic';
 import { PiccState, PiccType } from '@/models/Picc';
 import { inject, onMounted, ref, watch } from 'vue';
-import TargetByte from './TargetByte';
-import TargetByteRenderer from './TargetByteRenderer.vue';
 
 enum DashboardState {
   Undefined = 0,

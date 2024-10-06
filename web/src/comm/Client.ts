@@ -7,12 +7,12 @@ import ClientPongEvent from '@/comm/events/ClientPongEvent';
 import ClientPongMissedEvent from '@/comm/events/ClientPongMissedEvent';
 import ClientReadyEvent from '@/comm/events/ClientReadyEvent';
 import { DeviceMessage, WebMessage } from '@/comm/msgs/Message';
+import ErrorDevMessage from '@/comm/msgs/dev/ErrorDevMessage';
 import PongDevMessage from '@/comm/msgs/dev/PongDevMessage';
 import PingWebMessage from '@/comm/msgs/web/PingWebMessage';
 import { trim, trimRight } from '@/helpers';
 import { decode, encode } from 'cbor-x';
 import mqtt, { MqttClient } from 'mqtt';
-import ErrorDevMessage from './msgs/dev/ErrorDevMessage';
 
 export class MessageReceiveTimeoutError extends Error {
   constructor() {

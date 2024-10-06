@@ -6,6 +6,10 @@ import ReadSectorWebMessage from '@/comm/msgs/web/ReadSectorWebMessage';
 import MemoryBlock from '@/components/MemoryBlock/MemoryBlock.vue';
 import '@/components/MemorySector/MemorySector.scss';
 import MemorySectorFocus from '@/components/MemorySector/MemorySectorFocus';
+import MemorySectorState from '@/components/MemorySector/MemorySectorState';
+import MemorySectorEmptyOverlay from '@/components/MemorySector/overlays/MemorySectorEmptyOverlay.vue';
+import MemorySectorUnlockOverlay from '@/components/MemorySector/overlays/MemorySectorUnlockOverlay.vue';
+import MemorySectorUnlockingOverlay from '@/components/MemorySector/overlays/MemorySectorUnlockingOverlay.vue';
 import {
   defaultKey,
   MifareClassicMemory,
@@ -13,10 +17,6 @@ import {
 } from '@/models/MifareClassic';
 import { PiccKey } from '@/models/Picc';
 import { computed, inject, onUpdated, ref } from 'vue';
-import MemorySectorState from './MemorySectorState';
-import MemorySectorEmptyOverlay from './overlays/MemorySectorEmptyOverlay.vue';
-import MemorySectorUnlockOverlay from './overlays/MemorySectorUnlockOverlay.vue';
-import MemorySectorUnlockingOverlay from './overlays/MemorySectorUnlockingOverlay.vue';
 
 const props = defineProps<{
   sector: MifareClassicSector;
