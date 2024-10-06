@@ -5,11 +5,13 @@ import { logger } from '@/Logger';
 import { defaultKey, MifareClassicSector } from '@/models/MifareClassic';
 import { PiccKey, PiccKeyType } from '@/models/Picc';
 import { onMounted, ref, useTemplateRef } from 'vue';
-import emits from './events/MemorySectorEvents';
-import MemorySectorUnlockEvent from './events/MemorySectorUnlockEvent';
 
-const props = defineProps<{
+defineProps<{
   sector: MifareClassicSector;
+}>();
+
+const emit = defineEmits<{
+  (e: 'unlock', piccKey: PiccKey): void;
 }>();
 
 const keyType = ref<'A' | 'B'>('A');
@@ -32,12 +34,11 @@ function onSubmit() {
     value: hex2arr(key.value),
   };
 
-  emits.emit('unlock', MemorySectorUnlockEvent.from(props.sector, piccKey));
+  emit('unlock', piccKey);
 }
 
 onMounted(() => {
   keyInput.value?.focus();
-  keyInput.value?.select();
 });
 </script>
 

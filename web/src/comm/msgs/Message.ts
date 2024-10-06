@@ -6,6 +6,9 @@ interface Message {
 
 export abstract class DeviceMessage implements Message {
   readonly $kind: string;
+  readonly $ctx?: {
+    $id: string;
+  };
 
   protected constructor(kind: string) {
     this.$kind = kind;

@@ -378,10 +378,12 @@ export class MifareClassicMemory implements PiccMemory {
     this._updateBlockCounter++;
   }
 
-  updateSector(blocks: PiccBlockDto[]): void {
+  updateSector(offset: number, blocks: PiccBlockDto[]): void {
     if (blocks.length < 4) {
       throw new Error('Invalid number of blocks');
     }
+
+    offset; // TODO: check if blocks are in sector with this offset
 
     blocks
       .sort((a, b) => b.address - a.address) // Sort so that trailer block is first

@@ -3,10 +3,8 @@ import Client from '@/comm/Client';
 import { onClientMessage } from '@/comm/hooks/ClientEventHooks';
 import HelloDevMessage from '@/comm/msgs/dev/HelloDevMessage';
 import PiccDevMessage from '@/comm/msgs/dev/PiccDevMessage';
-import PiccSectorDevMessage from '@/comm/msgs/dev/PiccSectorDevMessage';
 import PiccStateChangedDevMessage from '@/comm/msgs/dev/PiccStateChangedDevMessage';
 import GetPiccWebMessage from '@/comm/msgs/web/GetPiccWebMessage';
-import ReadSectorWebMessage from '@/comm/msgs/web/ReadSectorWebMessage';
 import '@/components/Dashboard/Dashboard.scss';
 import Memory from '@/components/Memory/Memory.vue';
 import MemoryFocus from '@/components/Memory/MemoryFocus';
@@ -21,12 +19,10 @@ import { logger } from '@/Logger';
 import MifareClassic, {
   MifareClassicBlock,
   MifareClassicBlockGroup,
-  MifareClassicMemory,
-  MifareClassicSector
+  MifareClassicMemory
 } from '@/models/MifareClassic';
-import { PiccKey, PiccState, PiccType } from '@/models/Picc';
+import { PiccState, PiccType } from '@/models/Picc';
 import { inject, onMounted, ref, watch } from 'vue';
-import { onMemorySectorUnlock } from '../MemorySector/hooks/MemorySectorEventHooks';
 import TargetByte from './TargetByte';
 import TargetByteRenderer from './TargetByteRenderer.vue';
 
@@ -44,14 +40,6 @@ const state = ref<DashboardState>(DashboardState.Undefined);
 const picc = ref<MifareClassic | undefined>(undefined);
 const memoryFocus = ref<MemoryFocus | undefined>(undefined);
 const tByte = ref<TargetByte | undefined>(undefined);
-
-function fetchSector(sector: MifareClassicSector, key: PiccKey) {
-  client.send(ReadSectorWebMessage.from(sector.offset, key));
-}
-
-function updateSector(message: PiccSectorDevMessage) {
-  picc.value?.memory.updateSector(message.blocks);
-}
 
 watch(state, (newState, oldState) => {
   logger.verbose(
@@ -123,18 +111,6 @@ onClientMessage(e => {
     state.value = DashboardState.PiccNotPresent;
     return;
   }
-});
-
-onMemorySectorUnlock(e => {
-  fetchSector(e.sector, e.key);
-});
-
-onClientMessage(e => {
-  if (!PiccSectorDevMessage.is(e.message)) {
-    return;
-  }
-
-  updateSector(e.message);
 });
 
 onMemoryByteMouseEnter(e => {

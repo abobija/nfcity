@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import '@/components/Memory/Memory.scss';
-import MemorySector from '@/components/MemorySector/MemorySector.vue';
-import { MifareClassicMemory } from '@/models/MifareClassic';
-import { computed } from 'vue';
 import MemoryFocus from '@/components/Memory/MemoryFocus';
+import MemorySector from '@/components/MemorySector/MemorySector.vue';
+import MemorySectorState from '@/components/MemorySector/MemorySectorState';
+import { MifareClassicMemory } from '@/models/MifareClassic';
+import { computed, ref } from 'vue';
 
-defineProps<{
+const props = defineProps<{
   memory: MifareClassicMemory;
   focus?: MemoryFocus;
 }>();
@@ -13,11 +14,30 @@ defineProps<{
 const classes = computed(() => ({
   focused: focus !== undefined,
 }));
+
+const sectorStates = ref<Map<number, MemorySectorState>>(new Map());
+
+function sectorState(sectorOffset: number): MemorySectorState {
+  return !props.memory.sectorAt(sectorOffset).isEmpty
+    ? MemorySectorState.UnlockedAndLoaded
+    : sectorStates.value.get(sectorOffset) ?? MemorySectorState.Empty;
+}
+
+function changeSectorState(sectorOffset: number, state: MemorySectorState) {
+  for (const [offset, s] of sectorStates.value) {
+    if (s === MemorySectorState.Unlock) {
+      sectorStates.value.set(offset, MemorySectorState.Empty);
+    }
+  }
+
+  sectorStates.value.set(sectorOffset, state);
+}
 </script>
 
 <template>
   <div class="memory component" :class="classes">
     <MemorySector v-for="(_, sectorOffset) in Array.from({ length: memory.numberOfSectors })" :key="sectorOffset"
-      :sector="memory.sectorAt(sectorOffset)" :focus="focus?.sectorFocus" />
+      :sector="memory.sectorAt(sectorOffset)" :state="sectorState(sectorOffset)" :focus="focus?.sectorFocus"
+      @state-change="(newState) => changeSectorState(sectorOffset, newState)" />
   </div>
 </template>
