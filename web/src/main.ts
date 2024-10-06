@@ -1,5 +1,6 @@
 import App from '@/App.vue';
 import Client from '@/comm/Client';
+import '@/form.scss';
 import '@/main.scss';
 import 'reset-css';
 import { createApp } from 'vue';

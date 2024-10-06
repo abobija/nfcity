@@ -19,13 +19,14 @@ import SystemInfo from '@/components/SystemInfo/SystemInfo.vue';
 import { hex } from '@/helpers';
 import { logger } from '@/Logger';
 import MifareClassic, {
-  defaultKey,
   MifareClassicBlock,
   MifareClassicBlockGroup,
-  MifareClassicMemory
+  MifareClassicMemory,
+  MifareClassicSector
 } from '@/models/MifareClassic';
-import { PiccState, PiccType } from '@/models/Picc';
+import { PiccKey, PiccState, PiccType } from '@/models/Picc';
 import { inject, onMounted, ref, watch } from 'vue';
+import { onMemorySectorUnlock } from '../MemorySector/hooks/MemorySectorEventHooks';
 import TargetByte from './TargetByte';
 import TargetByteRenderer from './TargetByteRenderer.vue';
 
@@ -43,6 +44,14 @@ const state = ref<DashboardState>(DashboardState.Undefined);
 const picc = ref<MifareClassic | undefined>(undefined);
 const memoryFocus = ref<MemoryFocus | undefined>(undefined);
 const tByte = ref<TargetByte | undefined>(undefined);
+
+function fetchSector(sector: MifareClassicSector, key: PiccKey) {
+  client.send(ReadSectorWebMessage.from(sector.offset, key));
+}
+
+function updateSector(message: PiccSectorDevMessage) {
+  picc.value?.memory.updateSector(message.blocks);
+}
 
 watch(state, (newState, oldState) => {
   logger.verbose(
@@ -116,12 +125,16 @@ onClientMessage(e => {
   }
 });
 
+onMemorySectorUnlock(e => {
+  fetchSector(e.sector, e.key);
+});
+
 onClientMessage(e => {
   if (!PiccSectorDevMessage.is(e.message)) {
     return;
   }
 
-  picc.value?.memory.updateSector(e.message.blocks);
+  updateSector(e.message);
 });
 
 onMemoryByteMouseEnter(e => {
@@ -150,11 +163,6 @@ onMemoryByteMouseLeave(e => {
 
 onMemoryByteMouseClick(clickedByte => {
   logger.verbose('Block byte clicked', clickedByte);
-
-  if (clickedByte.group.block.sector.isEmpty) {
-    client.send(ReadSectorWebMessage.from(clickedByte.group.block.sector.offset, defaultKey));
-    return;
-  }
 
   if (!tByte.value) {
     return;
@@ -222,11 +230,6 @@ onMemoryByteMouseClick(clickedByte => {
               </li>
             </ul>
           </div>
-          <div class="memory txt-nowrap">
-            {{ picc.memory.blockDistribution.flatMap(d => `${d[0]} sectors with ${d[1]} blocks`).join(' & ') }}
-            >> {{ MifareClassicBlock.size }} bytes per block
-            >> {{ picc.memory.size }} bytes of memory
-          </div>
         </div>
 
         <SystemInfo />
@@ -239,9 +242,13 @@ onMemoryByteMouseClick(clickedByte => {
         <div class="section">
           <div class="info-panel">
             <Transition appear>
-              <p class="hint" v-if="picc.memory.isEmpty">
-                Click on one of the sectors on the left to load its data.
-              </p>
+              <div v-if="picc.memory.isEmpty">
+                <p v-for="(d) in picc.memory.blockDistribution">
+                  {{ d[0] }} sectors with {{ d[1] }} blocks
+                </p>
+                <p>{{ MifareClassicBlock.size }} bytes per block</p>
+                <p>{{ picc.memory.size }} bytes of memory</p>
+              </div>
             </Transition>
 
             <TargetByteRenderer :byte="tByte as TargetByte" v-if="tByte" />

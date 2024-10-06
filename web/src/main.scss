@@ -11,10 +11,22 @@
 }
 
 :root,
-button {
+:root button,
+:root input,
+:root label {
   font-family: 'JetBrains Mono', monospace;
   font-weight: 200;
   font-size: x-large;
+}
+
+a {
+  color: $color-1;
+  text-decoration: none;
+
+  &:hover {
+    color: $color-4;
+    border-bottom: 1px dashed $color-4;
+  }
 }
 
 .center-screen {

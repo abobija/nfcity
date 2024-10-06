@@ -1,18 +1,36 @@
 type MSB = number;
 type LSB = number;
 
-function num2hex(num: number) {
+function num2hex(num: number): string {
   const hex = num.toString(16).toUpperCase();
 
   return hex.length % 2 ? '0' + hex : hex;
 }
 
-function arr2hex(arr: Uint8Array) {
-  return Array.from(arr).map(num2hex).join(' ');
+function arr2hex(arr: Uint8Array, separator: string = ' '): string {
+  return Array.from(arr).map(num2hex).join(separator);
 }
 
-export function hex(bytes: number | Uint8Array) {
-  return bytes instanceof Uint8Array ? arr2hex(bytes) : num2hex(bytes);
+export function hex(bytes: number | Uint8Array, separator: string = ' '): string {
+  return bytes instanceof Uint8Array ? arr2hex(bytes, separator) : num2hex(bytes);
+}
+
+export function isHex(str: string): boolean {
+  return /^[0-9A-Fa-f]*$/.test(str);
+}
+
+export function hex2arr(hex: string): Uint8Array {
+  if (!isHex(hex)) {
+    throw new Error('Invalid hex string');
+  }
+
+  if (hex.length % 2 !== 0) {
+    hex = '0' + hex;
+  }
+
+  return new Uint8Array(
+    Array.from({ length: hex.length / 2 }, (_, i) => parseInt(hex.slice(i * 2, i * 2 + 2), 16))
+  );
 }
 
 // convert number to binary, and join groups of for bits with a separator

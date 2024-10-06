@@ -40,3 +40,20 @@ $transition: .3s ease-in-out;
     }
   }
 }
+
+.memory-sector.component>.blocks {
+  position: relative;
+}
+
+.memory-sector.component>.blocks .memory-sector-overlay.component {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.8rem;
+}

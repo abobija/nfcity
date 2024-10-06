@@ -1,0 +1,26 @@
+@use 'sass:color';
+@import '@/theme.scss';
+
+.memory-sector-overlay.unlock.component {
+  form {
+
+    label,
+    input,
+    button {
+      font-size: 0.6rem;
+    }
+
+    input[type=text],
+    button {
+      padding: 0.2rem 0.4rem;
+    }
+
+    input[type=text] {
+      width: 5rem;
+    }
+
+    button[type="submit"] {
+      margin-left: 0.5rem;
+    }
+  }
+}
