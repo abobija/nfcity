@@ -12,6 +12,7 @@ import PingWebMessage from '@/comm/msgs/web/PingWebMessage';
 import { trim, trimRight } from '@/helpers';
 import { decode, encode } from 'cbor-x';
 import mqtt, { MqttClient } from 'mqtt';
+import ErrorDevMessage from './msgs/dev/ErrorDevMessage';
 
 class Client {
   readonly brokerUrl: string;
@@ -121,11 +122,16 @@ class Client {
     this.mqttClient.on('message', (topic, encodedMessage) => {
       const decodedMessage = decode(encodedMessage) as DeviceMessage;
 
+      let logLevel = LogLevel.DEBUG;
+
       if (PongDevMessage.is(decodedMessage)) {
         this.pinger.pong();
+        logLevel = LogLevel.VERBOSE;
+      } else if (ErrorDevMessage.is(decodedMessage)) {
+        logLevel = LogLevel.WARNING;
       }
 
-      logger.debug('message received', topic, decodedMessage);
+      logger.log(logLevel, 'message received', topic, decodedMessage);
       logger.verbose('encoded received message:', encodedMessage);
 
       emits.emit('message', ClientMessageEvent.from(this, decodedMessage));
