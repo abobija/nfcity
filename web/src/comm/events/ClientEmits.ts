@@ -6,7 +6,7 @@ import ClientPongMissedEvent from '@/comm/events/ClientPongMissedEvent';
 import ClientReadyEvent from '@/comm/events/ClientReadyEvent';
 import mitt from 'mitt';
 
-const emits = mitt<{
+const clientEmits = mitt<{
   'ready': ClientReadyEvent;
   'message': ClientMessageEvent;
   'ping': ClientPingEvent;
@@ -15,4 +15,4 @@ const emits = mitt<{
   'disconnect': ClientDisconnectEvent;
 }>();
 
-export default emits;
+export default clientEmits;

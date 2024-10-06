@@ -1,10 +1,10 @@
 import mitt from "mitt";
 import MemoryByteEvent from "./MemoryByteEvent";
 
-const emits = mitt<{
+const memoryByteEmits = mitt<{
   mouseEnter: MemoryByteEvent;
   mouseLeave: MemoryByteEvent;
   mouseClick: MemoryByteEvent;
 }>();
 
-export default emits;
+export default memoryByteEmits;

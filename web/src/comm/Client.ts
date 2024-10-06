@@ -1,6 +1,6 @@
 import { logger, LogLevel } from '@/Logger';
 import ClientDisconnectEvent from '@/comm/events/ClientDisconnectEvent';
-import emits from '@/comm/events/ClientEvents';
+import clientEmits from '@/comm/events/ClientEmits';
 import ClientMessageEvent from '@/comm/events/ClientMessageEvent';
 import ClientPingEvent from '@/comm/events/ClientPingEvent';
 import ClientPongEvent from '@/comm/events/ClientPongEvent';
@@ -112,16 +112,16 @@ class Client {
         }
 
         clearTimeout(_timeout);
-        emits.off('message', _handler);
+        clientEmits.off('message', _handler);
         resolve(e.message);
       };
 
       const _timeout = setTimeout(() => {
-        emits.off('message', _handler);
+        clientEmits.off('message', _handler);
         reject(new MessageReceiveTimeoutError());
       }, this.receiveTimeoutMs);
 
-      emits.on('message', _handler);
+      clientEmits.on('message', _handler);
     });
   }
 
@@ -148,7 +148,7 @@ class Client {
         }
 
         logger.debug('subscribed to', topic);
-        emits.emit('ready', ClientReadyEvent.from(this));
+        clientEmits.emit('ready', ClientReadyEvent.from(this));
       });
     });
 
@@ -166,7 +166,7 @@ class Client {
       logger.log(logLevel, 'message received', topic, decodedMessage);
       logger.verbose('encoded received message:', encodedMessage);
 
-      emits.emit('message', ClientMessageEvent.from(this, decodedMessage));
+      clientEmits.emit('message', ClientMessageEvent.from(this, decodedMessage));
     });
 
     this.mqttClient.on('reconnect', () => {
@@ -177,25 +177,25 @@ class Client {
     this.mqttClient.on('close', () => {
       logger.debug('close');
       this.pinger.stop();
-      emits.emit('disconnect', ClientDisconnectEvent.from(this));
+      clientEmits.emit('disconnect', ClientDisconnectEvent.from(this));
     });
 
     this.mqttClient.on('disconnect', () => {
       logger.debug('disconnected');
       this.pinger.stop();
-      emits.emit('disconnect', ClientDisconnectEvent.from(this));
+      clientEmits.emit('disconnect', ClientDisconnectEvent.from(this));
     });
 
     this.mqttClient.on('offline', () => {
       logger.debug('offline');
       this.pinger.stop();
-      emits.emit('disconnect', ClientDisconnectEvent.from(this));
+      clientEmits.emit('disconnect', ClientDisconnectEvent.from(this));
     });
 
     this.mqttClient.on('end', () => {
       logger.debug('end');
       this.pinger.stop();
-      emits.emit('disconnect', ClientDisconnectEvent.from(this));
+      clientEmits.emit('disconnect', ClientDisconnectEvent.from(this));
     });
 
     return this;
@@ -249,7 +249,7 @@ class ClientPinger {
     }
 
     this.lastPing = Date.now();
-    emits.emit('ping', ClientPingEvent.from(this.client, this.lastPing));
+    clientEmits.emit('ping', ClientPingEvent.from(this.client, this.lastPing));
 
     let result: PongDevMessage | undefined = undefined;
 
@@ -261,13 +261,13 @@ class ClientPinger {
 
         logger.verbose('pong');
         this.lastPong = Date.now();
-        emits.emit('pong', ClientPongEvent.from(this.client, this.lastPing, this.lastPong));
+        clientEmits.emit('pong', ClientPongEvent.from(this.client, this.lastPing, this.lastPong));
       } else {
         throw new Error('invalid type of pong message');
       }
     } catch (e) {
       logger.debug('pong miss,', 'reason', e);
-      emits.emit('pongMissed', ClientPongMissedEvent.from(this.client, this.lastPing, this.lastPong));
+      clientEmits.emit('pongMissed', ClientPongMissedEvent.from(this.client, this.lastPing, this.lastPong));
     }
 
     if (props.repeat) {

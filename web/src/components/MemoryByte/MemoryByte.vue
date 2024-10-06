@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import '@/components/MemoryBlock/MemoryBlock.scss';
-import emits from '@/components/MemoryByte/events/MemoryByteEvents';
+import memoryByteEmits from '@/components/MemoryByte/events/MemoryByteEmits';
 import '@/components/MemoryByte/MemoryByte.scss';
 import MemoryByteFocus from '@/components/MemoryByte/MemoryByteFocus';
 import { hex } from '@/helpers';
@@ -21,8 +21,9 @@ const classes = computed(() => ({
 
 <template>
   <li class="memory-byte component" :class="classes" :data-index="index"
-    @mouseenter="emits.emit('mouseEnter', { index, group })" @mouseleave="emits.emit('mouseLeave', { index, group })"
-    @click="emits.emit('mouseClick', { index, group })">
+    @mouseenter="memoryByteEmits.emit('mouseEnter', { index, group })"
+    @mouseleave="memoryByteEmits.emit('mouseLeave', { index, group })"
+    @click="memoryByteEmits.emit('mouseClick', { index, group })">
     {{ group.block.loaded ? hex(group.block.data[index]) : '..' }}
   </li>
 </template>

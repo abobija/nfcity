@@ -1,4 +1,4 @@
-import emits from "@/comm/events/ClientEvents";
+import clientEmits from "@/comm/events/ClientEmits";
 import { onMounted, onUnmounted } from "vue";
 import ClientDisconnectEvent from "../events/ClientDisconnectEvent";
 import ClientMessageEvent from "../events/ClientMessageEvent";
@@ -8,31 +8,31 @@ import ClientPongMissedEvent from "../events/ClientPongMissedEvent";
 import ClientReadyEvent from "../events/ClientReadyEvent";
 
 export function onClientReady(hook: (e: ClientReadyEvent) => void) {
-  onMounted(() => emits.on('ready', hook));
-  onUnmounted(() => emits.off('ready', hook));
+  onMounted(() => clientEmits.on('ready', hook));
+  onUnmounted(() => clientEmits.off('ready', hook));
 }
 
 export function onClientMessage(hook: (e: ClientMessageEvent) => void) {
-  onMounted(() => emits.on('message', hook));
-  onUnmounted(() => emits.off('message', hook));
+  onMounted(() => clientEmits.on('message', hook));
+  onUnmounted(() => clientEmits.off('message', hook));
 }
 
 export function onClientPing(hook: (e: ClientPingEvent) => void) {
-  onMounted(() => emits.on('ping', hook));
-  onUnmounted(() => emits.off('ping', hook));
+  onMounted(() => clientEmits.on('ping', hook));
+  onUnmounted(() => clientEmits.off('ping', hook));
 }
 
 export function onClientPong(hook: (e: ClientPongEvent) => void) {
-  onMounted(() => emits.on('pong', hook));
-  onUnmounted(() => emits.off('pong', hook));
+  onMounted(() => clientEmits.on('pong', hook));
+  onUnmounted(() => clientEmits.off('pong', hook));
 }
 
 export function onClientPongMissed(hook: (e: ClientPongMissedEvent) => void) {
-  onMounted(() => emits.on('pongMissed', hook));
-  onUnmounted(() => emits.off('pongMissed', hook));
+  onMounted(() => clientEmits.on('pongMissed', hook));
+  onUnmounted(() => clientEmits.off('pongMissed', hook));
 }
 
 export function onClientDisconnect(hook: (e: ClientDisconnectEvent) => void) {
-  onMounted(() => emits.on('disconnect', hook));
-  onUnmounted(() => emits.off('disconnect', hook));
+  onMounted(() => clientEmits.on('disconnect', hook));
+  onUnmounted(() => clientEmits.off('disconnect', hook));
 }

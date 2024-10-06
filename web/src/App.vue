@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import '@/App.scss';
 import Client from '@/comm/Client';
-import { onClientReady } from '@/comm/hooks/ClientEventHooks';
+import { onClientReady } from '@/comm/hooks/ClientEmitHooks';
 import Dashboard from '@/components/Dashboard/Dashboard.vue';
 import { logger } from '@/Logger';
 import { inject, onMounted, ref, watch } from 'vue';

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Client from '@/comm/Client';
-import { onClientPing, onClientPong, onClientPongMissed } from '@/comm/hooks/ClientEventHooks';
+import { onClientPing, onClientPong, onClientPongMissed } from '@/comm/hooks/ClientEmitHooks';
 import '@/components/MemoryBlock/MemoryBlock.scss';
 import '@/components/SystemInfo/SystemInfo.scss';
 import { inject, ref } from 'vue';

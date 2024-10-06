@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Client from '@/comm/Client';
-import { onClientMessage, onClientPongMissed } from '@/comm/hooks/ClientEventHooks';
+import { onClientMessage, onClientPongMissed } from '@/comm/hooks/ClientEmitHooks';
 import HelloDevMessage from '@/comm/msgs/dev/HelloDevMessage';
 import PiccDevMessage from '@/comm/msgs/dev/PiccDevMessage';
 import PiccStateChangedDevMessage from '@/comm/msgs/dev/PiccStateChangedDevMessage';
@@ -14,7 +14,7 @@ import {
   onMemoryByteMouseClick,
   onMemoryByteMouseEnter,
   onMemoryByteMouseLeave
-} from '@/components/MemoryByte/hooks/MemoryByteEventHooks';
+} from '@/components/MemoryByte/hooks/MemoryByteEmitHooks';
 import SystemInfo from '@/components/SystemInfo/SystemInfo.vue';
 import { hex } from '@/helpers';
 import { logger } from '@/Logger';
