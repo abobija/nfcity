@@ -56,4 +56,25 @@ $transition: .3s ease-in-out;
   justify-content: center;
   align-items: center;
   font-size: 0.8rem;
+
+  &.v-enter-active {
+    animation: sector-overlay-in .2s;
+  }
+
+  &.v-leave-active {
+    animation: sector-overlay-in .1s reverse;
+  }
+
+  @keyframes sector-overlay-in {
+    0% {
+      opacity: 0;
+      transform: scale(.8);
+    }
+
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
 }

@@ -46,11 +46,11 @@ onMounted(() => {
   <div class="memory-sector-overlay unlock component">
     <form class="form" @submit.prevent="onSubmit">
       <div class="row key">
-        <label for="key-a" title="Key type A">
+        <label for="key-a" title="Use key A">
           <input type="radio" name="key" value="A" id="key-a" v-model="keyType" />
           A
         </label>
-        <label for="key-b" title="Key type B">
+        <label for="key-b" title="Use key B">
           <input type="radio" name="key" value="B" id="key-b" v-model="keyType" />
           B
         </label>

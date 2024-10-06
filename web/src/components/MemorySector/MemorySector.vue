@@ -61,7 +61,7 @@ async function unlockAndLoadSector(key: PiccKey) {
         v-for="(_, blockOffset) in Array.from({ length: MifareClassicMemory.numberOfBlocksInSector(sector.offset) })"
         :key="blockOffset" :focus="focus?.blockFocus" />
 
-      <Transition appear :duration="100">
+      <Transition>
         <MemorySectorEmptyOverlay v-if="state == MemorySectorState.Empty"
           @click="$emit('stateChange', MemorySectorState.Unlock)" />
         <MemorySectorUnlockOverlay :sector="sector" v-else-if="state == MemorySectorState.Unlock"
