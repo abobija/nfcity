@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Client from '@/comm/Client';
-import { onClientMessage } from '@/comm/hooks/ClientEventHooks';
+import { onClientMessage, onClientPongMissed } from '@/comm/hooks/ClientEventHooks';
 import HelloDevMessage from '@/comm/msgs/dev/HelloDevMessage';
 import PiccDevMessage from '@/comm/msgs/dev/PiccDevMessage';
 import PiccStateChangedDevMessage from '@/comm/msgs/dev/PiccStateChangedDevMessage';
@@ -42,6 +42,19 @@ const memoryFocus = ref<MemoryFocus | undefined>(undefined);
 const tByte = ref<TargetByte | undefined>(undefined);
 const pinging = ref(false);
 
+function startPinging() {
+  client.pinger.ping({
+    repeat: true,
+    interval: 5000,
+  });
+  pinging.value = true;
+}
+
+function stopPinging() {
+  client.pinger.stop();
+  pinging.value = false;
+}
+
 watch(state, (newState, oldState) => {
   logger.verbose(
     'dashboard state changed',
@@ -59,22 +72,15 @@ watch(state, (newState, oldState) => {
   }
 });
 
-onMounted(() => {
-  state.value = DashboardState.Initialized;
-});
+onMounted(() => state.value = DashboardState.Initialized);
 
-onUnmounted(() => {
-  client.pinger.stop();
-  pinging.value = false;
-});
+onClientPongMissed(() => stopPinging());
+
+onUnmounted(() => stopPinging());
 
 onClientMessage(e => {
   if (!pinging.value) { // start pinging on first message from device
-    client.pinger.ping({
-      repeat: true,
-      interval: 5000,
-    });
-    pinging.value = true;
+    startPinging();
   }
 
   if (!HelloDevMessage.is(e.message)) {
