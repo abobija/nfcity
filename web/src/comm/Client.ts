@@ -12,7 +12,14 @@ import PongDevMessage from '@/comm/msgs/dev/PongDevMessage';
 import PingWebMessage from '@/comm/msgs/web/PingWebMessage';
 import { trim, trimRight } from '@/helpers';
 import { decode, encode } from 'cbor-x';
-import mqtt, { MqttClient } from 'mqtt';
+import mqtt, { MqttClient, PacketCallback } from 'mqtt';
+
+
+export class MessageSendTimeoutError extends Error {
+  constructor() {
+    super("Send message timeout");
+  }
+}
 
 export class MessageReceiveTimeoutError extends Error {
   constructor() {
@@ -28,6 +35,7 @@ class Client {
   private mqttClient: MqttClient | null = null;
   private readonly pinger: ClientPinger;
   private readonly sendTimeoutMs;
+  private readonly receiveTimeoutMs;
 
   protected constructor(brokerUrl: string, rootTopic: string) {
     this.brokerUrl = trimRight(brokerUrl, '/');
@@ -35,7 +43,8 @@ class Client {
     this.webTopic = 'web';
     this.devTopic = 'dev';
     this.pinger = ClientPinger.from(this);
-    this.sendTimeoutMs = 3000;
+    this.sendTimeoutMs = 2000;
+    this.receiveTimeoutMs = 3000;
   }
 
   static from(brokerUrl: string, rootTopic: string): Client {
@@ -54,29 +63,51 @@ class Client {
     return `${this.rootTopic}/${this.webTopic}`;
   }
 
-  async send(message: WebMessage, timeoutMs: number = this.sendTimeoutMs): Promise<DeviceMessage> {
+  async transceive(message: WebMessage): Promise<DeviceMessage> {
+    return this.receive(await this.send(message));
+  }
+
+  async send(message: WebMessage): Promise<SendContext> {
     if (!this.connected) {
       throw new Error('not connected');
     }
 
-    const topic = `/${this.webTopicAbs}`;
-    const encodedMessage = encode(message);
+    return new Promise((resolve, reject) => {
+      const topic = `/${this.webTopicAbs}`;
+      const encodedMessage = encode(message);
 
-    this.mqttClient!.publish(topic, encodedMessage, { qos: 0 }, err => {
-      if (err) {
-        logger.error('publish error', err);
-        return;
-      }
+      const _handler: PacketCallback = (err) => {
+        clearTimeout(_timeout);
 
-      const logLevel = message instanceof PingWebMessage ? LogLevel.VERBOSE : LogLevel.DEBUG;
+        if (err) {
+          reject(err);
+          return;
+        }
 
-      logger.log(logLevel, 'message sent', topic, message);
-      logger.verbose('encoded sent message:', encodedMessage);
+        const logLevel = message instanceof PingWebMessage ? LogLevel.VERBOSE : LogLevel.DEBUG;
+
+        logger.log(logLevel, 'message sent', topic, message);
+        logger.verbose('encoded sent message:', encodedMessage);
+
+        resolve(SendContext.from(message));
+      };
+
+      const _timeout = setTimeout(() => {
+        reject(new MessageSendTimeoutError());
+      }, this.sendTimeoutMs);
+
+      this.mqttClient!.publish(topic, encodedMessage, { qos: 0 }, _handler);
     });
+  }
+
+  private async receive(ctx: SendContext): Promise<DeviceMessage> {
+    if (!this.connected) {
+      throw new Error('not connected');
+    }
 
     return new Promise((resolve, reject) => {
       const _handler = (e: ClientMessageEvent) => {
-        if (e.message.$ctx?.$id !== message.$id) {
+        if (e.message.$ctx?.$id !== ctx.message.$id) {
           return;
         }
 
@@ -88,7 +119,7 @@ class Client {
       const _timeout = setTimeout(() => {
         emits.off('message', _handler);
         reject(new MessageReceiveTimeoutError());
-      }, timeoutMs);
+      }, this.receiveTimeoutMs);
 
       emits.on('message', _handler);
     });
@@ -184,6 +215,18 @@ class Client {
   }
 }
 
+class SendContext {
+  readonly message: WebMessage;
+
+  protected constructor(message: WebMessage) {
+    this.message = message;
+  }
+
+  static from(message: WebMessage): SendContext {
+    return new SendContext(message);
+  }
+}
+
 interface ClientPingerStartProps {
   repeat: boolean;
   interval: number;
@@ -214,7 +257,7 @@ class ClientPinger {
     emits.emit('ping', ClientPingEvent.from(this.client, this.lastPing));
 
     try {
-      const pong = await this.client.send(PingWebMessage.create(), props.interval);
+      const pong = await this.client.transceive(PingWebMessage.create());
 
       if (PongDevMessage.is(pong)) {
         this.pong();

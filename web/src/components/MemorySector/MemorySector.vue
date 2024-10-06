@@ -40,7 +40,7 @@ async function unlockAndLoadSector(key: PiccKey) {
   piccKey.value = key;
 
   emit('stateChange', MemorySectorState.Unlocking);
-  const msg = await client.send(ReadSectorWebMessage.from(props.sector.offset, key));
+  const msg = await client.transceive(ReadSectorWebMessage.from(props.sector.offset, key));
 
   if (PiccSectorDevMessage.is(msg)) {
     props.sector.memory.updateSector(msg.offset, msg.blocks);
