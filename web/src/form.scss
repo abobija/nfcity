@@ -1,56 +1,94 @@
 @use 'sass:color';
 @import '@/theme.scss';
 
-$input-color: $color-3;
+$focus-alpha: -0.6;
+$disabled-alpha: -0.5;
+$disabled-border-alpha: -0.8;
+
+$input-color: $color-fg;
 $input-bg-color: $color-bg;
-$input-border-color: color.adjust($input-color, $alpha: -0.6);
-$input-focus-color: color.adjust($input-color, $alpha: -0.6);
-$input-disabled-color: color.adjust($input-color, $alpha: -0.5);
-$input-disabled-border-color: color.adjust($input-color, $alpha: -0.8);
+$input-border-color: $color-3;
+$input-focus-color: color.adjust($input-color, $alpha: $focus-alpha);
+$input-disabled-color: color.adjust($input-color, $alpha: $disabled-alpha);
+$input-disabled-border-color: color.adjust($input-color, $alpha: $disabled-border-alpha);
+
+$button-color: $color-3;
+$button-bg-color: $color-bg;
+$button-border-color: $color-3;
+$button-focus-color: color.adjust($button-color, $alpha: $focus-alpha);
+$button-disabled-color: color.adjust($button-color, $alpha: $disabled-alpha);
+$button-disabled-border-color: color.adjust($button-color, $alpha: $disabled-border-alpha);
 
 form {
   display: block;
 }
 
 label,
+input {
+  color: $input-color;
+}
+
+label,
 input[type="radio"] {
   cursor: pointer;
   margin: 0;
-  color: $input-color;
+
+  &:hover {
+    font-weight: 600 !important;
+  }
 }
 
 input[type="text"],
 button,
 .btn {
-  background-color: $input-bg-color;
-  color: $input-color;
-  border: 1px solid $input-border-color;
+  border-style: solid;
+  border-width: 1px;
   padding: 0.5rem 1rem;
   transition: box-shadow 0.2s ease-in-out;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
 }
 
 input[type="text"] {
-  &:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0.4rem $input-focus-color;
+  border-color: $input-border-color;
+  background-color: $input-bg-color;
+
+  &:not(:disabled) {
+
+    &:hover,
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0.4rem $input-focus-color;
+    }
+  }
+
+  &:disabled {
+    color: $input-disabled-color;
+    border-color: $input-disabled-border-color;
   }
 }
 
 button,
 .btn {
   cursor: pointer;
+  color: $button-color;
+  border-color: $button-border-color;
+  background-color: $button-bg-color;
 
-  &:hover:not(:disabled) {
-    box-shadow: 0 0 0.4rem $input-focus-color;
-  }
+  &:not(:disabled) {
+    &:hover {
+      box-shadow: 0 0 0.4rem $button-focus-color;
+    }
 
-  &:active:not(:disabled) {
-    transform: scale(.95);
+    &:active {
+      transform: scale(.95);
+    }
   }
 
   &:disabled {
-    cursor: not-allowed;
-    color: $input-disabled-color;
-    border-color: $input-disabled-border-color;
+    color: $button-disabled-color;
+    border-color: $button-disabled-border-color;
   }
 }
