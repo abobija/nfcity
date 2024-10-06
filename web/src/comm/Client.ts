@@ -33,7 +33,7 @@ class Client {
   readonly devTopic: string;
   readonly webTopic: string;
   private mqttClient: MqttClient | null = null;
-  private readonly pinger: ClientPinger;
+  readonly pinger: ClientPinger;
   private readonly sendTimeoutMs;
   private readonly receiveTimeoutMs;
 
@@ -148,10 +148,6 @@ class Client {
         }
 
         logger.debug('subscribed to', topic);
-        this.pinger.ping({
-          repeat: true,
-          interval: 5000,
-        });
         emits.emit('ready', ClientReadyEvent.from(this));
       });
     });
@@ -233,7 +229,7 @@ interface ClientPingerStartProps {
 }
 
 class ClientPinger {
-  readonly client: Client;
+  private readonly client: Client;
   private timeout?: NodeJS.Timeout;
   private lastPing?: number;
   private lastPong?: number;
@@ -246,50 +242,39 @@ class ClientPinger {
     return new ClientPinger(client);
   }
 
-  async ping(props: ClientPingerStartProps) {
+  async ping(props: ClientPingerStartProps): Promise<PongDevMessage | undefined> {
     if (this.timeout) {
       clearTimeout(this.timeout);
       this.timeout = undefined;
     }
 
-    logger.verbose('ping');
     this.lastPing = Date.now();
     emits.emit('ping', ClientPingEvent.from(this.client, this.lastPing));
+
+    let result: PongDevMessage | undefined = undefined;
 
     try {
       const pong = await this.client.transceive(PingWebMessage.create());
 
       if (PongDevMessage.is(pong)) {
-        this.pong();
+        result = pong;
+
+        logger.verbose('pong');
+        this.lastPong = Date.now();
+        emits.emit('pong', ClientPongEvent.from(this.client, this.lastPing, this.lastPong));
       } else {
         throw new Error('invalid type of pong message');
       }
     } catch (e) {
-      this.pongMiss(e);
+      logger.debug('pong miss,', 'reason', e);
+      emits.emit('pongMissed', ClientPongMissedEvent.from(this.client, this.lastPing, this.lastPong));
     }
 
     if (props.repeat) {
       this.timeout = setTimeout(() => this.ping(props), props.interval);
     }
-  }
 
-  private pong(): void {
-    logger.verbose('pong');
-    this.lastPong = Date.now();
-    emits.emit('pong', ClientPongEvent.from(
-      this.client,
-      this.lastPing!,
-      this.lastPong
-    ));
-  }
-
-  private pongMiss(reason: unknown): void {
-    logger.debug('pong miss,', 'reason', reason);
-    emits.emit('pongMissed', ClientPongMissedEvent.from(
-      this.client,
-      this.lastPing!,
-      this.lastPong
-    ));
+    return result;
   }
 
   stop(): void {

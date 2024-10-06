@@ -24,7 +24,7 @@ import MifareClassic, {
   MifareClassicMemory
 } from '@/models/MifareClassic';
 import { PiccState, PiccType } from '@/models/Picc';
-import { inject, onMounted, ref, watch } from 'vue';
+import { inject, onMounted, onUnmounted, ref, watch } from 'vue';
 
 enum DashboardState {
   Undefined = 0,
@@ -40,6 +40,7 @@ const state = ref<DashboardState>(DashboardState.Undefined);
 const picc = ref<MifareClassic | undefined>(undefined);
 const memoryFocus = ref<MemoryFocus | undefined>(undefined);
 const tByte = ref<TargetByte | undefined>(undefined);
+const pinging = ref(false);
 
 watch(state, (newState, oldState) => {
   logger.verbose(
@@ -62,7 +63,20 @@ onMounted(() => {
   state.value = DashboardState.Initialized;
 });
 
+onUnmounted(() => {
+  client.pinger.stop();
+  pinging.value = false;
+});
+
 onClientMessage(e => {
+  if (!pinging.value) { // start pinging on first message from device
+    client.pinger.ping({
+      repeat: true,
+      interval: 5000,
+    });
+    pinging.value = true;
+  }
+
   if (!HelloDevMessage.is(e.message)) {
     return;
   }
