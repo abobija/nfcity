@@ -285,8 +285,6 @@ class ClientPinger {
     this.timeout = undefined;
     this.lastPing = undefined;
     this.lastPong = undefined;
-
-    logger.debug('ping stopped');
   }
 }
 
