@@ -2,36 +2,37 @@
 import '@/components/MemorySector/MemorySectorUnlockOverlay.scss';
 import { hex, hex2arr, isHex } from '@/helpers';
 import { logger } from '@/Logger';
-import { defaultKey, MifareClassicSector } from '@/models/MifareClassic';
+import { MifareClassicSector } from '@/models/MifareClassic';
 import { PiccKey, PiccKeyType } from '@/models/Picc';
 import { onMounted, ref, useTemplateRef } from 'vue';
 
-defineProps<{
+const props = defineProps<{
   sector: MifareClassicSector;
+  piccKey: PiccKey;
 }>();
 
 const emit = defineEmits<{
   (e: 'unlock', piccKey: PiccKey): void;
 }>();
 
-const keyType = ref<'A' | 'B'>('A');
+const keyType = ref<'A' | 'B'>(props.piccKey.type == PiccKeyType.A ? 'A' : 'B');
 const keyInput = useTemplateRef('key-input');
-const key = ref<string>(hex(defaultKey.value, ''));
+const keyValue = ref<string>(hex(props.piccKey.value, ''));
 
 function onSubmit() {
-  if (key.value.length != 12) {
+  if (keyValue.value.length != 12) {
     logger.error('Key must be 6 bytes (12 characters)');
     return;
   }
 
-  if (!isHex(key.value)) {
+  if (!isHex(keyValue.value)) {
     logger.error('Key must be a valid hex string');
     return;
   }
 
   const piccKey: PiccKey = {
     type: keyType.value == 'A' ? PiccKeyType.A : PiccKeyType.B,
-    value: hex2arr(key.value),
+    value: hex2arr(keyValue.value),
   };
 
   emit('unlock', piccKey);
@@ -54,7 +55,7 @@ onMounted(() => {
           <input type="radio" name="key" value="B" id="key-b" v-model="keyType" />
           B
         </label>
-        <input type="text" placeholder="Key (hex)" v-model.trim="key" ref="key-input" title="Key (hex)"
+        <input type="text" placeholder="Key (hex)" v-model.trim="keyValue" ref="key-input" title="Key (hex)"
           spellcheck="false" />
         <button class="primary" type="submit">Unlock</button>
       </div>

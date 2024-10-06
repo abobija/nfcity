@@ -7,11 +7,12 @@ import MemoryBlock from '@/components/MemoryBlock/MemoryBlock.vue';
 import '@/components/MemorySector/MemorySector.scss';
 import MemorySectorFocus from '@/components/MemorySector/MemorySectorFocus';
 import {
+  defaultKey,
   MifareClassicMemory,
   MifareClassicSector
 } from '@/models/MifareClassic';
 import { PiccKey } from '@/models/Picc';
-import { computed, inject } from 'vue';
+import { computed, inject, ref } from 'vue';
 import MemorySectorEmptyOverlay from './MemorySectorEmptyOverlay.vue';
 import MemorySectorState from './MemorySectorState';
 import MemorySectorUnlockOverlay from './MemorySectorUnlockOverlay.vue';
@@ -34,7 +35,11 @@ const classes = computed(() => ({
 
 const client = inject('client') as Client;
 
+const piccKey = ref<PiccKey>(defaultKey);
+
 async function unlockAndLoadSector(key: PiccKey) {
+  piccKey.value = key;
+
   emit('stateChange', MemorySectorState.Unlocking);
   const msg = await client.send(ReadSectorWebMessage.from(props.sector.offset, key));
 
@@ -64,7 +69,7 @@ async function unlockAndLoadSector(key: PiccKey) {
       <Transition>
         <MemorySectorEmptyOverlay v-if="state == MemorySectorState.Empty"
           @click="$emit('stateChange', MemorySectorState.Unlock)" />
-        <MemorySectorUnlockOverlay :sector="sector" v-else-if="state == MemorySectorState.Unlock"
+        <MemorySectorUnlockOverlay :piccKey :sector v-else-if="state == MemorySectorState.Unlock"
           @unlock="unlockAndLoadSector" />
         <MemorySectorUnlockingOverlay v-else-if="state == MemorySectorState.Unlocking" />
       </Transition>
