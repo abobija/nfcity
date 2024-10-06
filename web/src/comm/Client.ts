@@ -14,7 +14,7 @@ import { decode, encode } from 'cbor-x';
 import mqtt, { MqttClient } from 'mqtt';
 import ErrorDevMessage from './msgs/dev/ErrorDevMessage';
 
-export class ReceiveMessageTimeoutError extends Error {
+export class MessageReceiveTimeoutError extends Error {
   constructor() {
     super("Receive message timeout");
   }
@@ -87,7 +87,7 @@ class Client {
 
       const _timeout = setTimeout(() => {
         emits.off('message', _handler);
-        reject(new ReceiveMessageTimeoutError());
+        reject(new MessageReceiveTimeoutError());
       }, timeoutMs);
 
       emits.on('message', _handler);
@@ -131,7 +131,6 @@ class Client {
       let logLevel = LogLevel.DEBUG;
 
       if (PongDevMessage.is(decodedMessage)) {
-        this.pinger.pong();
         logLevel = LogLevel.VERBOSE;
       } else if (ErrorDevMessage.is(decodedMessage)) {
         logLevel = LogLevel.WARNING;
@@ -204,46 +203,36 @@ class ClientPinger {
     return new ClientPinger(client);
   }
 
-  private get pingHasBeenSent(): boolean {
-    return this.lastPing !== undefined;
-  }
-
-  private get isPongReceived(): boolean {
-    return this.lastPong !== undefined;
-  }
-
-  private pongIsMissing(interval: number): boolean {
-    return this.pingHasBeenSent
-      && this.isPongReceived
-      && ((Date.now() - this.lastPong!) > interval);
-  }
-
-  ping(props: ClientPingerStartProps): void {
-    if (this.pongIsMissing(props.interval)) {
-      this.pongMiss();
-    }
-
+  async ping(props: ClientPingerStartProps) {
     if (this.timeout) {
       clearTimeout(this.timeout);
       this.timeout = undefined;
     }
 
-    this.lastPing = Date.now();
-    this.client.send(PingWebMessage.create());
     logger.verbose('ping');
-
+    this.lastPing = Date.now();
     emits.emit('ping', ClientPingEvent.from(this.client, this.lastPing));
+
+    try {
+      const pong = await this.client.send(PingWebMessage.create(), props.interval);
+
+      if (PongDevMessage.is(pong)) {
+        this.pong();
+      } else {
+        throw new Error('invalid type of pong message');
+      }
+    } catch (e) {
+      this.pongMiss(e);
+    }
 
     if (props.repeat) {
       this.timeout = setTimeout(() => this.ping(props), props.interval);
     }
   }
 
-  pong(): void {
+  private pong(): void {
     logger.verbose('pong');
-
     this.lastPong = Date.now();
-
     emits.emit('pong', ClientPongEvent.from(
       this.client,
       this.lastPing!,
@@ -251,9 +240,8 @@ class ClientPinger {
     ));
   }
 
-  private pongMiss(): void {
-    logger.debug('pong miss');
-
+  private pongMiss(reason: unknown): void {
+    logger.debug('pong miss,', 'reason', reason);
     emits.emit('pongMissed', ClientPongMissedEvent.from(
       this.client,
       this.lastPing!,
