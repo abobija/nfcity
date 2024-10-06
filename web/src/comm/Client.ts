@@ -20,6 +20,7 @@ class Client {
   readonly webTopic: string;
   private mqttClient: MqttClient | null = null;
   private readonly pinger: ClientPinger;
+  private readonly sendTimeoutMs;
 
   protected constructor(brokerUrl: string, rootTopic: string) {
     this.brokerUrl = trimRight(brokerUrl, '/');
@@ -27,6 +28,7 @@ class Client {
     this.webTopic = 'web';
     this.devTopic = 'dev';
     this.pinger = ClientPinger.from(this);
+    this.sendTimeoutMs = 3000;
   }
 
   static from(brokerUrl: string, rootTopic: string): Client {
@@ -45,7 +47,7 @@ class Client {
     return `${this.rootTopic}/${this.webTopic}`;
   }
 
-  send(message: WebMessage): void {
+  async send(message: WebMessage, timeoutMs: number = this.sendTimeoutMs): Promise<DeviceMessage> {
     if (!this.connected) {
       throw new Error('not connected');
     }
@@ -63,6 +65,25 @@ class Client {
 
       logger.log(logLevel, 'message sent', topic, message);
       logger.verbose('encoded sent message:', encodedMessage);
+    });
+
+    return new Promise((resolve, reject) => {
+      const _handler = (e: ClientMessageEvent) => {
+        if (e.message.$ctx?.$id !== message.$id) {
+          return;
+        }
+
+        clearTimeout(_timeout);
+        emits.off('message', _handler);
+        resolve(e.message);
+      };
+
+      const _timeout = setTimeout(() => {
+        emits.off('message', _handler);
+        reject(new Error('timeout'));
+      }, timeoutMs);
+
+      emits.on('message', _handler);
     });
   }
 
@@ -102,7 +123,6 @@ class Client {
 
       if (PongDevMessage.is(decodedMessage)) {
         this.pinger.pong();
-        return;
       }
 
       logger.debug('message received', topic, decodedMessage);
