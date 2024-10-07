@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import '@/components/MemoryBytesViewer/MemoryBytesViewer.scss';
+import '@/components/MemoryViewer/MemoryViewer.scss';
 import { ascii, bin, hex, isAsciiPrintable } from '@/helpers';
 import { MifareClassicBlock } from '@/models/MifareClassic';
 import { computed } from 'vue';
-import MemoryBytesView from './MemoryBytesView';
+import MemoryBytesView from './MemoryView';
 
 const props = defineProps<{
   block: MifareClassicBlock;
