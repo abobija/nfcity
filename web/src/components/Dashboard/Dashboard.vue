@@ -93,6 +93,15 @@ watch(state, async (newState, oldState) => {
   }
 });
 
+watch(picc, async (newPicc, oldPicc) => {
+  if (newPicc && oldPicc && newPicc.hasUidOf(oldPicc)) {
+    return;
+  }
+
+  memoryFocus.value = undefined;
+  tByte.value = undefined;
+});
+
 onMounted(() => state.value = DashboardState.Initialized);
 
 onClientPongMissed(() => stopPinging());
