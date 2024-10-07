@@ -30,7 +30,8 @@ $transition: .3s ease-in-out;
     transition: border $transition, box-shadow $transition;
   }
 
-  &:hover {
+  &:hover,
+  &.focused {
     >.meta {
       color: $color-fg;
     }

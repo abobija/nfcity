@@ -14,11 +14,14 @@
   $highlight-color: $color-1;
   $lightness: -30%;
 
-  .memory-block-group.component:hover .memory-byte.component {
-    border-bottom-color: color.adjust($highlight-color, $lightness: $lightness) !important;
+  .memory-block-group.component:hover,
+  .memory-block-group.component.focused {
+    .memory-byte.component {
+      border-bottom-color: color.adjust($highlight-color, $lightness: $lightness) !important;
 
-    &:not(:last-child) {
-      border-right-color: color.adjust($highlight-color, $lightness: $lightness);
+      &:not(:last-child) {
+        border-right-color: color.adjust($highlight-color, $lightness: $lightness);
+      }
     }
   }
 }

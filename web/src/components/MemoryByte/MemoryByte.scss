@@ -30,7 +30,8 @@
     z-index: 1;
   }
 
-  &:hover {
+  &:hover,
+  &.focused {
     background-color: color.adjust($color-bg, $lightness: +5%);
     font-weight: 600;
   }
