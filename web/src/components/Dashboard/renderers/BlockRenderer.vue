@@ -1,0 +1,40 @@
+<script setup lang="ts">
+import { hex } from '@/helpers';
+import { MifareClassicBlock, MifareClassicBlockType } from '@/models/MifareClassic';
+
+defineProps<{
+  block: MifareClassicBlock;
+}>();
+</script>
+
+<template>
+  <div class="block renderer component">
+    <div class="header">
+      Block
+    </div>
+    <ul class="props">
+      <li class="prop">
+        <div class="name">Address</div>
+        <div class="value">{{ hex(block.address) }}</div>
+      </li>
+      <li class="prop">
+        <div class="name">Type</div>
+        <div class="value">{{ MifareClassicBlockType[block.type] }}</div>
+      </li>
+      <li class="prop">
+        <div class="name" title="Access Bits">Access</div>
+        <div class="value">
+          c1({{ block.accessBits.c1 }})
+          c2({{ block.accessBits.c2 }})
+          c3({{ block.accessBits.c3 }})
+        </div>
+      </li>
+      <li class="prop">
+        <div class="name">Content</div>
+        <div class="value">
+          <p>{{ hex(block.data) }}</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+</template>

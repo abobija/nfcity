@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import Client from '@/comm/Client';
-import { onClientMessage, onClientPongMissed } from '@/comm/hooks/ClientEmitHooks';
+import { onClientMessage, onClientPongMissed, onClientReady } from '@/comm/hooks/ClientEmitHooks';
 import HelloDevMessage from '@/comm/msgs/dev/HelloDevMessage';
 import PiccDevMessage from '@/comm/msgs/dev/PiccDevMessage';
 import PiccStateChangedDevMessage from '@/comm/msgs/dev/PiccStateChangedDevMessage';
 import GetPiccWebMessage from '@/comm/msgs/web/GetPiccWebMessage';
 import '@/components/Dashboard/Dashboard.scss';
 import TargetByte from '@/components/Dashboard/TargetByte';
-import TargetByteRenderer from '@/components/Dashboard/TargetByteRenderer.vue';
 import Memory from '@/components/Memory/Memory.vue';
 import MemoryFocus from '@/components/Memory/MemoryFocus';
 import {
@@ -21,10 +20,15 @@ import { Logger } from '@/Logger';
 import MifareClassic, {
   MifareClassicBlock,
   MifareClassicBlockGroup,
-  MifareClassicMemory
+  MifareClassicMemory,
+  MifareClassicSector
 } from '@/models/MifareClassic';
 import { PiccState, PiccType } from '@/models/Picc';
 import { inject, onMounted, onUnmounted, ref, watch } from 'vue';
+import BlockRenderer from './renderers/BlockRenderer.vue';
+import ByteRenderer from './renderers/ByteRenderer.vue';
+import GroupRenderer from './renderers/GroupRenderer.vue';
+import SectorRenderer from './renderers/SectorRenderer.vue';
 
 enum DashboardState {
   Undefined = 0,
@@ -105,6 +109,8 @@ watch(picc, async (newPicc, oldPicc) => {
 });
 
 onMounted(() => state.value = DashboardState.Initialized);
+
+onClientReady(() => state.value = DashboardState.Initialized);
 
 onClientPongMissed(() => stopPinging());
 
@@ -285,7 +291,12 @@ onMemoryByteMouseClick(clickedByte => {
               </div>
             </Transition>
 
-            <TargetByteRenderer :byte="tByte as TargetByte" v-if="tByte" />
+            <div v-if="tByte">
+              <SectorRenderer :sector="tByte.group.block.sector as MifareClassicSector" />
+              <BlockRenderer :block="tByte.group.block as MifareClassicBlock" />
+              <GroupRenderer :group="tByte.group as MifareClassicBlockGroup" />
+              <ByteRenderer :byte="tByte as TargetByte" />
+            </div>
           </div>
         </div>
       </div>

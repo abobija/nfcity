@@ -89,3 +89,34 @@
     }
   }
 }
+
+.dashboard.component .renderer.component {
+  font-size: .9rem;
+
+  &:not(:first-child) {
+    margin-top: .8rem;
+  }
+
+  .header {
+    font-weight: 600;
+    color: $color-3;
+  }
+
+  .props {
+    .prop {
+      display: flex;
+
+      .name {
+        flex-shrink: 0;
+      }
+
+      .value {
+        color: $color-fg;
+      }
+    }
+  }
+
+  .prop>.name {
+    width: 5rem;
+  }
+}
