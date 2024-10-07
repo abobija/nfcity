@@ -51,7 +51,7 @@ const retryMax = ref(5);
 const retryCount = ref(0);
 
 watch(state, async (newState, oldState) => {
-  logger.verbose(
+  logger.debug(
     'state changed',
     'from', DashboardState[oldState],
     'to', DashboardState[newState]

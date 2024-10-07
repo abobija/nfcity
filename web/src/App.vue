@@ -18,7 +18,7 @@ const client = inject('client') as Client;
 const state = ref<AppState>(AppState.Undefined);
 
 watch(state, (newState, oldState) => {
-  logger.verbose(
+  logger.debug(
     'state changed',
     'from', AppState[oldState],
     'to', AppState[newState]
