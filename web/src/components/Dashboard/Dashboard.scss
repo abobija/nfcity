@@ -5,6 +5,16 @@
   .message {
     font-size: 1.3rem;
     color: $color-4;
+    text-align: center;
+
+    &:not(:first-child) {
+      margin-top: 0.5rem;
+    }
+
+    &.sub {
+      font-size: 0.8rem;
+      color: color.adjust($color-4, $blackness: +50%);
+    }
   }
 }
 

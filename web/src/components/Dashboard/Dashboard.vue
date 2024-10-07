@@ -42,6 +42,8 @@ const picc = ref<MifareClassic | undefined>(undefined);
 const memoryFocus = ref<MemoryFocus | undefined>(undefined);
 const tByte = ref<TargetByte | undefined>(undefined);
 const pinging = ref(false);
+const retryMax = ref(5);
+const retryCount = ref(0);
 
 function startPinging() {
   client.pinger.ping({ repeatInterval: 5000 });
@@ -65,8 +67,7 @@ watch(state, async (newState, oldState) => {
       state.value = DashboardState.CheckingForReader;
     } break;
     case DashboardState.CheckingForReader: {
-      const retries = 5;
-      let tries = 0;
+      retryMax.value = retryCount.value = 5;
       do {
         try {
           await client.pinger.ping();
@@ -75,10 +76,10 @@ watch(state, async (newState, oldState) => {
         catch (e) {
           logger.warning('Failed to ping device', e);
         }
-      } while (++tries < retries);
+      } while (--retryCount.value > 0);
 
-      if (tries >= retries) {
-        logger.error('Failed to ping device after', retries, 'retries');
+      if (retryCount.value === 0) {
+        logger.error('Failed to ping device after', retryMax.value, 'retries');
         client.disconnect();
         return;
       }
@@ -226,6 +227,9 @@ onMemoryByteMouseClick(clickedByte => {
 
       <div v-if="state == DashboardState.CheckingForReader">
         <p class="message">checking for a reader...</p>
+        <p class="sub message" v-if="retryCount > 0 && retryCount < retryMax">
+          no response from device, retrying {{ retryCount }}
+        </p>
       </div>
       <div v-else-if="state == DashboardState.CeckingForPicc">
         <p class="message">checking for a card...</p>
