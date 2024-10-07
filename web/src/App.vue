@@ -3,8 +3,8 @@ import '@/App.scss';
 import Client from '@/comm/Client';
 import { onClientEnd, onClientReady } from '@/comm/hooks/ClientEmitHooks';
 import Dashboard from '@/components/Dashboard/Dashboard.vue';
-import { logger } from '@/Logger';
 import { inject, onMounted, ref, watch } from 'vue';
+import { Logger } from './Logger';
 
 enum AppState {
   Undefined = 0,
@@ -13,12 +13,13 @@ enum AppState {
   Connected,
 }
 
+const logger = Logger.fromName('App');
 const client = inject('client') as Client;
 const state = ref<AppState>(AppState.Undefined);
 
 watch(state, (newState, oldState) => {
   logger.verbose(
-    'app state changed',
+    'state changed',
     'from', AppState[oldState],
     'to', AppState[newState]
   );
