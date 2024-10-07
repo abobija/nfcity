@@ -29,6 +29,7 @@ import { inject, onMounted, onUnmounted, ref, watch } from 'vue';
 enum DashboardState {
   Undefined = 0,
   Initialized,
+  CheckingForReader,
   CeckingForPicc,
   PiccNotPresent,
   PiccRemoved,
@@ -52,7 +53,7 @@ function stopPinging() {
   pinging.value = false;
 }
 
-watch(state, (newState, oldState) => {
+watch(state, async (newState, oldState) => {
   logger.verbose(
     'dashboard state changed',
     'from', DashboardState[oldState],
@@ -61,6 +62,27 @@ watch(state, (newState, oldState) => {
 
   switch (newState) {
     case DashboardState.Initialized: {
+      state.value = DashboardState.CheckingForReader;
+    } break;
+    case DashboardState.CheckingForReader: {
+      const retries = 5;
+      let tries = 0;
+      do {
+        try {
+          await client.pinger.ping();
+          break;
+        }
+        catch (e) {
+          logger.warning('Failed to ping device', e);
+        }
+      } while (++tries < retries);
+
+      if (tries >= retries) {
+        logger.error('Failed to ping device after', retries, 'retries');
+        client.disconnect();
+        return;
+      }
+
       state.value = DashboardState.CeckingForPicc;
     } break;
     case DashboardState.CeckingForPicc: {
@@ -191,7 +213,10 @@ onMemoryByteMouseClick(clickedByte => {
   <div class="dashboard component">
     <div class="scene picc-waiter center-screen" v-if="state < DashboardState.PiccPaired">
 
-      <div v-if="state == DashboardState.CeckingForPicc">
+      <div v-if="state == DashboardState.CheckingForReader">
+        <p class="message">checking for a reader...</p>
+      </div>
+      <div v-else-if="state == DashboardState.CeckingForPicc">
         <p class="message">checking for a card...</p>
       </div>
       <div v-else-if="state == DashboardState.PiccNotPresent">

@@ -13,6 +13,10 @@ import PingWebMessage from '@/comm/msgs/web/PingWebMessage';
 import { trim, trimRight } from '@/helpers';
 import { decode, encode } from 'cbor-x';
 import mqtt, { MqttClient, PacketCallback } from 'mqtt';
+import ClientCloseEvent from './events/ClientCloseEvent';
+import ClientEndEvent from './events/ClientEndEvent';
+import ClientOfflineEvent from './events/ClientOfflineEvent';
+import ClientReconnectEvent from './events/ClientReconnectEvent';
 
 
 export class MessageSendTimeoutError extends Error {
@@ -172,12 +176,13 @@ class Client {
     this.mqttClient.on('reconnect', () => {
       logger.debug('reconnect');
       this.pinger.stop();
+      clientEmits.emit('reconnect', ClientReconnectEvent.from(this));
     });
 
     this.mqttClient.on('close', () => {
       logger.debug('close');
       this.pinger.stop();
-      clientEmits.emit('disconnect', ClientDisconnectEvent.from(this));
+      clientEmits.emit('close', ClientCloseEvent.from(this));
     });
 
     this.mqttClient.on('disconnect', () => {
@@ -189,13 +194,13 @@ class Client {
     this.mqttClient.on('offline', () => {
       logger.debug('offline');
       this.pinger.stop();
-      clientEmits.emit('disconnect', ClientDisconnectEvent.from(this));
+      clientEmits.emit('offline', ClientOfflineEvent.from(this));
     });
 
     this.mqttClient.on('end', () => {
       logger.debug('end');
       this.pinger.stop();
-      clientEmits.emit('disconnect', ClientDisconnectEvent.from(this));
+      clientEmits.emit('end', ClientEndEvent.from(this));
     });
 
     return this;
@@ -265,7 +270,12 @@ class ClientPinger {
         throw new Error('invalid type of pong message');
       }
     } catch (e) {
-      logger.debug('pong miss,', 'reason', e);
+      logger.verbose('pong miss,', 'reason', e);
+
+      if (!props || props.repeatInterval === false) {
+        throw e;
+      }
+
       clientEmits.emit('pongMissed', ClientPongMissedEvent.from(this.client, this.lastPing, this.lastPong));
     }
 

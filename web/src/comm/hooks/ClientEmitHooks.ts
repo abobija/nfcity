@@ -1,11 +1,15 @@
 import clientEmits from "@/comm/events/ClientEmits";
 import { onMounted, onUnmounted } from "vue";
+import ClientCloseEvent from "../events/ClientCloseEvent";
 import ClientDisconnectEvent from "../events/ClientDisconnectEvent";
+import ClientEndEvent from "../events/ClientEndEvent";
 import ClientMessageEvent from "../events/ClientMessageEvent";
+import ClientOfflineEvent from "../events/ClientOfflineEvent";
 import ClientPingEvent from "../events/ClientPingEvent";
 import ClientPongEvent from "../events/ClientPongEvent";
 import ClientPongMissedEvent from "../events/ClientPongMissedEvent";
 import ClientReadyEvent from "../events/ClientReadyEvent";
+import ClientReconnectEvent from "../events/ClientReconnectEvent";
 
 export function onClientReady(hook: (e: ClientReadyEvent) => void) {
   onMounted(() => clientEmits.on('ready', hook));
@@ -35,4 +39,24 @@ export function onClientPongMissed(hook: (e: ClientPongMissedEvent) => void) {
 export function onClientDisconnect(hook: (e: ClientDisconnectEvent) => void) {
   onMounted(() => clientEmits.on('disconnect', hook));
   onUnmounted(() => clientEmits.off('disconnect', hook));
+}
+
+export function onClientReconnect(hook: (e: ClientReconnectEvent) => void) {
+  onMounted(() => clientEmits.on('reconnect', hook));
+  onUnmounted(() => clientEmits.off('reconnect', hook));
+}
+
+export function onClientClose(hook: (e: ClientCloseEvent) => void) {
+  onMounted(() => clientEmits.on('close', hook));
+  onUnmounted(() => clientEmits.off('close', hook));
+}
+
+export function onClientOffline(hook: (e: ClientOfflineEvent) => void) {
+  onMounted(() => clientEmits.on('offline', hook));
+  onUnmounted(() => clientEmits.off('offline', hook));
+}
+
+export function onClientEnd(hook: (e: ClientEndEvent) => void) {
+  onMounted(() => clientEmits.on('end', hook));
+  onUnmounted(() => clientEmits.off('end', hook));
 }

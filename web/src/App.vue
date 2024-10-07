@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import '@/App.scss';
 import Client from '@/comm/Client';
-import { onClientReady } from '@/comm/hooks/ClientEmitHooks';
+import { onClientEnd, onClientReady } from '@/comm/hooks/ClientEmitHooks';
 import Dashboard from '@/components/Dashboard/Dashboard.vue';
 import { logger } from '@/Logger';
 import { inject, onMounted, ref, watch } from 'vue';
@@ -32,6 +32,8 @@ function connect() {
 onMounted(() => state.value = AppState.Initialized);
 
 onClientReady(() => state.value = AppState.Connected);
+
+onClientEnd(() => state.value = AppState.Initialized);
 </script>
 
 <template>
