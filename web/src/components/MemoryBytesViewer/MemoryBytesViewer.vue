@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import '@/components/MemoryBytesViewer/MemoryBytesViewer.scss';
 import { ascii, bin, hex, isAsciiPrintable } from '@/helpers';
+import { MifareClassicBlock } from '@/models/MifareClassic';
 import { computed } from 'vue';
 import MemoryBytesView from './MemoryBytesView';
 
 const props = defineProps<{
-  bytes: Uint8Array;
+  block: MifareClassicBlock;
+  offset?: number;
+  length?: number;
   view?: MemoryBytesView;
 }>();
 
@@ -13,6 +16,9 @@ defineEmits<{
   (e: 'viewChange', view: MemoryBytesView): void;
 }>();
 
+const _offset = computed(() => props.offset ?? 0);
+const _length = computed(() => props.length ?? (props.block.data.length - _offset.value));
+const bytes = computed(() => props.block.data.slice(_offset.value, _offset.value + _length.value));
 const _view = computed(() => props.view || MemoryBytesView.Hexadecimal);
 </script>
 

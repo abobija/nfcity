@@ -37,7 +37,7 @@ const view = ref(MemoryBytesView.Hexadecimal);
       <li class="prop">
         <div class="name">Content</div>
         <div class="value">
-          <MemoryBytesViewer :view :bytes="block.data" @view-change="v => view = v" />
+          <MemoryBytesViewer :view :block @view-change="v => view = v" />
         </div>
       </li>
     </ul>
