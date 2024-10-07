@@ -43,7 +43,7 @@ const groupClass: Map<MifareClassicBlockGroupType, string> = new Map([
 const classes = computed(() => {
   const arr: string[] = [groupClass.get(props.group.type)!];
 
-  if (props.focus?.group.hasSameTypeAs(props.group)) {
+  if (props.focus?.group.isSameAs(props.group)) {
     arr.push('focused');
   }
 

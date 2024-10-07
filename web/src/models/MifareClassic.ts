@@ -79,6 +79,12 @@ export class MifareClassicBlockGroup {
     return this.type === that.type;
   }
 
+  public isSameAs(that: MifareClassicBlockGroup): boolean {
+    return this.block.hasSameAddressAs(that.block)
+      && this.offset === that.offset
+      && this.length === that.length;
+  }
+
   static from(
     type: MifareClassicBlockGroupType,
     offset: number,
