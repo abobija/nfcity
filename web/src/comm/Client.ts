@@ -239,6 +239,11 @@ class ClientPinger {
   private timeout?: NodeJS.Timeout;
   private lastPing?: number;
   private lastPong?: number;
+  private _running: boolean = false;
+
+  public get running(): boolean {
+    return this._running;
+  }
 
   protected constructor(client: Client) {
     this.client = client;
@@ -251,13 +256,15 @@ class ClientPinger {
   async ping(props?: ClientPingerStartProps): Promise<PongDevMessage | undefined> {
     if (this.timeout) {
       clearTimeout(this.timeout);
-      this.timeout = undefined;
     }
 
-    this.lastPing = Date.now();
-    clientEmits.emit('ping', ClientPingEvent.from(this.client, this.lastPing));
-
     let result: PongDevMessage | undefined = undefined;
+
+    const shouldRepeat = typeof (props?.repeatInterval) === 'number';
+    this._running = true;
+    this.lastPing = Date.now();
+
+    clientEmits.emit('ping', ClientPingEvent.from(this.client, this.lastPing));
 
     try {
       const pong = await this.client.transceive(PingWebMessage.create());
@@ -274,15 +281,19 @@ class ClientPinger {
     } catch (e) {
       this.logger.verbose('pong miss,', 'reason', e);
 
-      if (!props || props.repeatInterval === false) {
+      if (!shouldRepeat) {
         throw e;
       }
 
       clientEmits.emit('pongMissed', ClientPongMissedEvent.from(this.client, this.lastPing, this.lastPong));
     }
 
-    if (props && props.repeatInterval !== false) {
-      this.timeout = setTimeout(() => this.ping(props), props.repeatInterval);
+    if (!this._running) {
+      this.logger.warning('ping interrupted');
+    }
+
+    if (this._running = shouldRepeat) {
+      this.timeout = setTimeout(() => this.ping(props), props.repeatInterval as number);
     }
 
     return result;
@@ -296,6 +307,7 @@ class ClientPinger {
     this.timeout = undefined;
     this.lastPing = undefined;
     this.lastPong = undefined;
+    this._running = false;
   }
 }
 
