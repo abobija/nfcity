@@ -21,11 +21,24 @@ const levelColor = {
   [LogLevel.VERBOSE]: pink
 };
 
-class Logger {
-  readonly level: LogLevel;
+const envLevel = LogLevel[import.meta.env.VITE_LOG_LEVEL as keyof typeof LogLevel]
+  || LogLevel.ERROR;
 
-  constructor(level: LogLevel) {
+export class Logger {
+  readonly level: LogLevel;
+  readonly name?: string;
+
+  protected constructor(level: LogLevel, name?: string) {
     this.level = level;
+    this.name = name;
+  }
+
+  static from(level: LogLevel, name?: string): Logger {
+    return new Logger(level, name);
+  }
+
+  static fromName(name: string): Logger {
+    return new Logger(envLevel, name);
   }
 
   error(message?: any, ...optionalParams: any[]): void {
@@ -53,7 +66,13 @@ class Logger {
       return;
     }
 
-    let format = `${levelColor[level]}[nfcity][${LogLevel[level].at(0)}]${resetColor}`;
+    let format = `${levelColor[level]}`;
+    format += '[nfcity]';
+    if (this.name) {
+      format += `[${this.name}]`;
+    }
+    format += `[${LogLevel[level].at(0)}]`;
+    format += resetColor;
 
     if (typeof (message) === 'string') {
       format += ` ${message}`;
@@ -68,6 +87,4 @@ class Logger {
   }
 }
 
-export const logger = new Logger(
-  LogLevel[import.meta.env.VITE_LOG_LEVEL as keyof typeof LogLevel] || LogLevel.ERROR
-);
+export const logger = Logger.from(envLevel);

@@ -1,4 +1,4 @@
-import { logger, LogLevel } from '@/Logger';
+import { Logger, LogLevel } from '@/Logger';
 import ClientDisconnectEvent from '@/comm/events/ClientDisconnectEvent';
 import clientEmits from '@/comm/events/ClientEmits';
 import ClientMessageEvent from '@/comm/events/ClientMessageEvent';
@@ -32,6 +32,7 @@ export class MessageReceiveTimeoutError extends Error {
 }
 
 class Client {
+  private readonly logger = Logger.fromName('Client');
   readonly brokerUrl: string;
   readonly rootTopic: string;
   readonly devTopic: string;
@@ -90,8 +91,8 @@ class Client {
 
         const logLevel = message instanceof PingWebMessage ? LogLevel.VERBOSE : LogLevel.DEBUG;
 
-        logger.log(logLevel, 'message sent', topic, message);
-        logger.verbose('encoded sent message:', encodedMessage);
+        this.logger.log(logLevel, 'message sent', topic, message);
+        this.logger.verbose('encoded sent message:', encodedMessage);
 
         resolve(SendContext.from(message));
       };
@@ -131,27 +132,27 @@ class Client {
 
   connect(): Client {
     if (this.connected) {
-      logger.debug('connect skipped: already connected');
+      this.logger.debug('connect skipped: already connected');
       return this;
     }
 
     this.mqttClient = mqtt.connect(this.brokerUrl);
 
     this.mqttClient.on('error', error => {
-      logger.error('error', error);
+      this.logger.error('error', error);
     });
 
     this.mqttClient.on('connect', () => {
-      logger.debug('connected');
+      this.logger.debug('connected');
       const topic = `/${this.devTopicAbs}`;
 
       this.mqttClient!.subscribe(topic, { qos: 0 }, err => {
         if (err) {
-          logger.error('subscribe error', err);
+          this.logger.error('subscribe error', err);
           return;
         }
 
-        logger.debug('subscribed to', topic);
+        this.logger.debug('subscribed to', topic);
         clientEmits.emit('ready', ClientReadyEvent.from(this));
       });
     });
@@ -167,38 +168,38 @@ class Client {
         logLevel = LogLevel.WARNING;
       }
 
-      logger.log(logLevel, 'message received', topic, decodedMessage);
-      logger.verbose('encoded received message:', encodedMessage);
+      this.logger.log(logLevel, 'message received', topic, decodedMessage);
+      this.logger.verbose('encoded received message:', encodedMessage);
 
       clientEmits.emit('message', ClientMessageEvent.from(this, decodedMessage));
     });
 
     this.mqttClient.on('reconnect', () => {
-      logger.debug('reconnect');
+      this.logger.debug('reconnect');
       this.pinger.stop();
       clientEmits.emit('reconnect', ClientReconnectEvent.from(this));
     });
 
     this.mqttClient.on('close', () => {
-      logger.debug('close');
+      this.logger.debug('close');
       this.pinger.stop();
       clientEmits.emit('close', ClientCloseEvent.from(this));
     });
 
     this.mqttClient.on('disconnect', () => {
-      logger.debug('disconnected');
+      this.logger.debug('disconnected');
       this.pinger.stop();
       clientEmits.emit('disconnect', ClientDisconnectEvent.from(this));
     });
 
     this.mqttClient.on('offline', () => {
-      logger.debug('offline');
+      this.logger.debug('offline');
       this.pinger.stop();
       clientEmits.emit('offline', ClientOfflineEvent.from(this));
     });
 
     this.mqttClient.on('end', () => {
-      logger.debug('end');
+      this.logger.debug('end');
       this.pinger.stop();
       clientEmits.emit('end', ClientEndEvent.from(this));
     });
@@ -233,6 +234,7 @@ interface ClientPingerStartProps {
 }
 
 class ClientPinger {
+  private readonly logger = Logger.fromName('ClientPinger');
   private readonly client: Client;
   private timeout?: NodeJS.Timeout;
   private lastPing?: number;
@@ -263,14 +265,14 @@ class ClientPinger {
       if (PongDevMessage.is(pong)) {
         result = pong;
 
-        logger.verbose('pong');
+        this.logger.verbose('pong');
         this.lastPong = Date.now();
         clientEmits.emit('pong', ClientPongEvent.from(this.client, this.lastPing, this.lastPong));
       } else {
         throw new Error('invalid type of pong message');
       }
     } catch (e) {
-      logger.verbose('pong miss,', 'reason', e);
+      this.logger.verbose('pong miss,', 'reason', e);
 
       if (!props || props.repeatInterval === false) {
         throw e;
