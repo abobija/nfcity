@@ -17,7 +17,7 @@ import {
 } from '@/components/MemoryByte/hooks/MemoryByteEmitHooks';
 import SystemInfo from '@/components/SystemInfo/SystemInfo.vue';
 import { hex } from '@/helpers';
-import { logger } from '@/Logger';
+import { Logger } from '@/Logger';
 import MifareClassic, {
   MifareClassicBlock,
   MifareClassicBlockGroup,
@@ -36,6 +36,7 @@ enum DashboardState {
   PiccPaired,
 }
 
+const logger = Logger.fromName('Dashboard');
 const client = inject('client') as Client;
 const state = ref<DashboardState>(DashboardState.Undefined);
 const picc = ref<MifareClassic | undefined>(undefined);
@@ -57,7 +58,7 @@ function stopPinging() {
 
 watch(state, async (newState, oldState) => {
   logger.verbose(
-    'dashboard state changed',
+    'state changed',
     'from', DashboardState[oldState],
     'to', DashboardState[newState]
   );
