@@ -125,7 +125,11 @@ onClientMessage(e => {
     return;
   }
 
-  state.value = DashboardState.CeckingForPicc;
+  if (state.value > DashboardState.CeckingForPicc) {
+    state.value = DashboardState.CeckingForPicc;
+  } else {
+    state.value = DashboardState.CheckingForReader;
+  }
 });
 
 onClientMessage(e => {

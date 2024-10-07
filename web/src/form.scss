@@ -72,12 +72,13 @@ input[type="text"] {
 
 button,
 .btn {
-  cursor: pointer;
-  color: $button-color;
-  border-color: $button-border-color;
   background-color: $button-bg-color;
 
   &:not(:disabled) {
+    cursor: pointer;
+    color: $button-color;
+    border-color: $button-border-color;
+
     &:hover {
       box-shadow: 0 0 0.4rem $button-focus-color;
     }
@@ -85,10 +86,22 @@ button,
     &:active {
       transform: scale(.95);
     }
+
+    &.activated {
+      background-color: $color-3;
+      color: $color-bg;
+      font-weight: bold;
+    }
   }
 
   &:disabled {
     color: $button-disabled-color;
     border-color: $button-disabled-border-color;
+  }
+}
+
+.btn-group {
+  button:not(:last-child) {
+    border-right: none;
   }
 }

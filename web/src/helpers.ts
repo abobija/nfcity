@@ -59,6 +59,22 @@ export function randomBytes(length: number) {
   );
 }
 
+export function isAsciiPrintable(code: number): boolean {
+  return code >= 32 && code <= 126;
+}
+
+function num2ascii(num: number): string {
+  return isAsciiPrintable(num) ? String.fromCharCode(num) : '.';
+}
+
+function arr2ascii(arr: Uint8Array, separator: string = ''): string {
+  return Array.from(arr).map(num2ascii).join(separator);
+}
+
+export function ascii(bytes: number | Uint8Array, separator: string = ''): string {
+  return bytes instanceof Uint8Array ? arr2ascii(bytes, separator) : num2ascii(bytes);
+}
+
 export function nibbles(byte: number): [MSB, LSB] {
   return [byte >> 4, byte & 0x0F];
 }

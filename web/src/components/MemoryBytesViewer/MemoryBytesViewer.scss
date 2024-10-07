@@ -1,2 +1,19 @@
 @use 'sass:color';
 @import '@/theme.scss';
+
+.memory-bytes-viewer.component {
+  .view {
+    button {
+      padding: .2rem .3rem;
+      font-size: .5rem;
+    }
+  }
+
+  .bytes {
+    margin-top: 0.5rem;
+
+    .ascii.non-printable {
+      opacity: 0.3;
+    }
+  }
+}

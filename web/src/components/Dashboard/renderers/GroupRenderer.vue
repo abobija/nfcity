@@ -1,10 +1,14 @@
 <script setup lang="ts">
+import MemoryBytesView from '@/components/MemoryBytesViewer/MemoryBytesView';
 import MemoryBytesViewer from '@/components/MemoryBytesViewer/MemoryBytesViewer.vue';
 import { MifareClassicBlockGroup, MifareClassicBlockGroupType } from '@/models/MifareClassic';
+import { ref } from 'vue';
 
 defineProps<{
   group: MifareClassicBlockGroup;
 }>();
+
+const view = ref(MemoryBytesView.Hexadecimal);
 </script>
 
 <template>
@@ -28,7 +32,7 @@ defineProps<{
       <li class="prop" v-if="group.type != MifareClassicBlockGroupType.Data">
         <div class="name">Content</div>
         <div class="value">
-          <MemoryBytesViewer :bytes="group.data()" />
+          <MemoryBytesViewer :view :bytes="group.data()" @view-change="v => view = v" />
         </div>
       </li>
     </ul>

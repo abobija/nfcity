@@ -1,11 +1,15 @@
 <script setup lang="ts">
+import MemoryBytesView from '@/components/MemoryBytesViewer/MemoryBytesView';
 import MemoryBytesViewer from '@/components/MemoryBytesViewer/MemoryBytesViewer.vue';
 import { hex } from '@/helpers';
 import { MifareClassicBlock, MifareClassicBlockType } from '@/models/MifareClassic';
+import { ref } from 'vue';
 
 defineProps<{
   block: MifareClassicBlock;
 }>();
+
+const view = ref(MemoryBytesView.Hexadecimal);
 </script>
 
 <template>
@@ -33,7 +37,7 @@ defineProps<{
       <li class="prop">
         <div class="name">Content</div>
         <div class="value">
-          <MemoryBytesViewer :bytes="block.data" />
+          <MemoryBytesViewer :view :bytes="block.data" @view-change="v => view = v" />
         </div>
       </li>
     </ul>
