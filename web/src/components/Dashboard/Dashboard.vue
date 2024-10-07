@@ -29,7 +29,7 @@ import { inject, onMounted, onUnmounted, ref, watch } from 'vue';
 enum DashboardState {
   Undefined = 0,
   Initialized,
-  PiccFetching,
+  CeckingForPicc,
   PiccNotPresent,
   PiccRemoved,
   PiccPaired,
@@ -61,9 +61,9 @@ watch(state, (newState, oldState) => {
 
   switch (newState) {
     case DashboardState.Initialized: {
-      state.value = DashboardState.PiccFetching;
+      state.value = DashboardState.CeckingForPicc;
     } break;
-    case DashboardState.PiccFetching: {
+    case DashboardState.CeckingForPicc: {
       client.send(GetPiccWebMessage.create());
     } break;
   }
@@ -191,7 +191,7 @@ onMemoryByteMouseClick(clickedByte => {
   <div class="dashboard component">
     <div class="scene picc-waiter center-screen" v-if="state < DashboardState.PiccPaired">
 
-      <div v-if="state == DashboardState.PiccFetching">
+      <div v-if="state == DashboardState.CeckingForPicc">
         <p class="message">checking for a card...</p>
       </div>
       <div v-else-if="state == DashboardState.PiccNotPresent">
