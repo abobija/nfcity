@@ -224,8 +224,7 @@ class SendContext {
 }
 
 interface ClientPingerStartProps {
-  repeat: boolean;
-  interval: number;
+  repeatInterval: false | number;
 }
 
 class ClientPinger {
@@ -242,7 +241,7 @@ class ClientPinger {
     return new ClientPinger(client);
   }
 
-  async ping(props: ClientPingerStartProps): Promise<PongDevMessage | undefined> {
+  async ping(props?: ClientPingerStartProps): Promise<PongDevMessage | undefined> {
     if (this.timeout) {
       clearTimeout(this.timeout);
       this.timeout = undefined;
@@ -270,8 +269,8 @@ class ClientPinger {
       clientEmits.emit('pongMissed', ClientPongMissedEvent.from(this.client, this.lastPing, this.lastPong));
     }
 
-    if (props.repeat) {
-      this.timeout = setTimeout(() => this.ping(props), props.interval);
+    if (props && props.repeatInterval !== false) {
+      this.timeout = setTimeout(() => this.ping(props), props.repeatInterval);
     }
 
     return result;

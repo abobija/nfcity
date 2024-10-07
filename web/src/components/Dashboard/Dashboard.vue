@@ -43,10 +43,7 @@ const tByte = ref<TargetByte | undefined>(undefined);
 const pinging = ref(false);
 
 function startPinging() {
-  client.pinger.ping({
-    repeat: true,
-    interval: 5000,
-  });
+  client.pinger.ping({ repeatInterval: 5000 });
   pinging.value = true;
 }
 
