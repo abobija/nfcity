@@ -118,7 +118,7 @@ onClientMessage(e => {
     return;
   }
 
-  state.value = DashboardState.Initialized;
+  state.value = DashboardState.CeckingForPicc;
 });
 
 onClientMessage(e => {
