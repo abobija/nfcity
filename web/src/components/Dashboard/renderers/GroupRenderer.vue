@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { hex } from '@/helpers';
+import MemoryBytesViewer from '@/components/MemoryBytesViewer/MemoryBytesViewer.vue';
 import { MifareClassicBlockGroup, MifareClassicBlockGroupType } from '@/models/MifareClassic';
 
 defineProps<{
@@ -27,7 +27,9 @@ defineProps<{
       </li>
       <li class="prop" v-if="group.type != MifareClassicBlockGroupType.Data">
         <div class="name">Content</div>
-        <div class="value">{{ hex(group.data()) }}</div>
+        <div class="value">
+          <MemoryBytesViewer :bytes="group.data()" />
+        </div>
       </li>
     </ul>
   </div>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import MemoryBytesViewer from '@/components/MemoryBytesViewer/MemoryBytesViewer.vue';
 import { hex } from '@/helpers';
 import { MifareClassicBlock, MifareClassicBlockType } from '@/models/MifareClassic';
 
@@ -32,7 +33,7 @@ defineProps<{
       <li class="prop">
         <div class="name">Content</div>
         <div class="value">
-          <p>{{ hex(block.data) }}</p>
+          <MemoryBytesViewer :bytes="block.data" />
         </div>
       </li>
     </ul>
