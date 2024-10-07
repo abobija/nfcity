@@ -83,7 +83,9 @@ watch(state, async (newState, oldState) => {
         return;
       }
 
-      state.value = DashboardState.CeckingForPicc;
+      if (state.value <= DashboardState.CheckingForReader) {
+        state.value = DashboardState.CeckingForPicc;
+      }
     } break;
     case DashboardState.CeckingForPicc: {
       client.send(GetPiccWebMessage.create());
