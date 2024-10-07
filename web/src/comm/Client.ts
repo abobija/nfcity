@@ -31,6 +31,18 @@ export class MessageReceiveTimeoutError extends Error {
   }
 }
 
+class SendContext {
+  readonly message: WebMessage;
+
+  protected constructor(message: WebMessage) {
+    this.message = message;
+  }
+
+  static from(message: WebMessage): SendContext {
+    return new SendContext(message);
+  }
+}
+
 class Client {
   private readonly logger = Logger.fromName('Client');
   readonly brokerUrl: string;
@@ -38,7 +50,6 @@ class Client {
   readonly devTopic: string;
   readonly webTopic: string;
   private mqttClient: MqttClient | null = null;
-  readonly pinger: ClientPinger;
   private readonly sendTimeoutMs;
   private readonly receiveTimeoutMs;
 
@@ -47,7 +58,6 @@ class Client {
     this.rootTopic = trim(rootTopic, '/');
     this.webTopic = 'web';
     this.devTopic = 'dev';
-    this.pinger = ClientPinger.from(this);
     this.sendTimeoutMs = 2000;
     this.receiveTimeoutMs = 3000;
   }
@@ -176,31 +186,26 @@ class Client {
 
     this.mqttClient.on('reconnect', () => {
       this.logger.debug('reconnect');
-      this.pinger.stop();
       clientEmits.emit('reconnect', ClientReconnectEvent.from(this));
     });
 
     this.mqttClient.on('close', () => {
       this.logger.debug('close');
-      this.pinger.stop();
       clientEmits.emit('close', ClientCloseEvent.from(this));
     });
 
     this.mqttClient.on('disconnect', () => {
       this.logger.debug('disconnected');
-      this.pinger.stop();
       clientEmits.emit('disconnect', ClientDisconnectEvent.from(this));
     });
 
     this.mqttClient.on('offline', () => {
       this.logger.debug('offline');
-      this.pinger.stop();
       clientEmits.emit('offline', ClientOfflineEvent.from(this));
     });
 
     this.mqttClient.on('end', () => {
       this.logger.debug('end');
-      this.pinger.stop();
       clientEmits.emit('end', ClientEndEvent.from(this));
     });
 
@@ -212,28 +217,15 @@ class Client {
       throw new Error('not connected');
     }
 
-    this.pinger.stop();
     this.mqttClient.end(true);
   }
 }
 
-class SendContext {
-  readonly message: WebMessage;
-
-  protected constructor(message: WebMessage) {
-    this.message = message;
-  }
-
-  static from(message: WebMessage): SendContext {
-    return new SendContext(message);
-  }
-}
-
-interface ClientPingerStartProps {
+interface ClientPingerPingProps {
   repeatInterval: false | number;
 }
 
-class ClientPinger {
+export class ClientPinger {
   private readonly logger = Logger.fromName('ClientPinger');
   private readonly client: Client;
   private timeout?: NodeJS.Timeout;
@@ -253,17 +245,26 @@ class ClientPinger {
     return new ClientPinger(client);
   }
 
-  async ping(props?: ClientPingerStartProps): Promise<PongDevMessage | undefined> {
+  private static defaultPingProps(): ClientPingerPingProps {
+    return {
+      repeatInterval: false,
+    };
+  }
+
+  async ping(props?: ClientPingerPingProps): Promise<PongDevMessage | undefined> {
+    props ??= ClientPinger.defaultPingProps();
+
     if (this.timeout) {
       clearTimeout(this.timeout);
     }
 
     let result: PongDevMessage | undefined = undefined;
 
-    const shouldRepeat = typeof (props?.repeatInterval) === 'number';
+    const shouldRepeat = typeof (props.repeatInterval) === 'number';
     this._running = true;
     this.lastPing = Date.now();
 
+    this.logger.verbose('ping');
     clientEmits.emit('ping', ClientPingEvent.from(this.client, this.lastPing));
 
     try {
@@ -272,8 +273,8 @@ class ClientPinger {
       if (PongDevMessage.is(pong)) {
         result = pong;
 
-        this.logger.verbose('pong');
         this.lastPong = Date.now();
+        this.logger.verbose('pong');
         clientEmits.emit('pong', ClientPongEvent.from(this.client, this.lastPing, this.lastPong));
       } else {
         throw new Error('invalid type of pong message');
@@ -289,7 +290,8 @@ class ClientPinger {
     }
 
     if (!this._running) {
-      this.logger.warning('ping interrupted');
+      this.logger.debug('ping interrupted');
+      return result;
     }
 
     if (this._running = shouldRepeat) {

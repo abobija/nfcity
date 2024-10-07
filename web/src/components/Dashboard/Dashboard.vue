@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Client from '@/comm/Client';
+import Client, { ClientPinger } from '@/comm/Client';
 import { onClientMessage, onClientPongMissed, onClientReady } from '@/comm/hooks/ClientEmitHooks';
 import HelloDevMessage from '@/comm/msgs/dev/HelloDevMessage';
 import PiccDevMessage from '@/comm/msgs/dev/PiccDevMessage';
@@ -42,23 +42,13 @@ enum DashboardState {
 
 const logger = Logger.fromName('Dashboard');
 const client = inject('client') as Client;
+const pinger = ClientPinger.from(client);
 const state = ref<DashboardState>(DashboardState.Undefined);
 const picc = ref<MifareClassic | undefined>(undefined);
 const memoryFocus = ref<MemoryFocus | undefined>(undefined);
 const tByte = ref<TargetByte | undefined>(undefined);
-const pinging = ref(false);
 const retryMax = ref(5);
 const retryCount = ref(0);
-
-function startPinging() {
-  client.pinger.ping({ repeatInterval: 5000 });
-  pinging.value = true;
-}
-
-function stopPinging() {
-  client.pinger.stop();
-  pinging.value = false;
-}
 
 watch(state, async (newState, oldState) => {
   logger.verbose(
@@ -75,7 +65,7 @@ watch(state, async (newState, oldState) => {
       retryMax.value = retryCount.value = 5;
       do {
         try {
-          await client.pinger.ping();
+          await pinger.ping();
           break;
         }
         catch (e) {
@@ -99,7 +89,7 @@ watch(state, async (newState, oldState) => {
   }
 });
 
-watch(picc, async (newPicc, oldPicc) => {
+watch(picc, (newPicc, oldPicc) => {
   if (newPicc && oldPicc && newPicc.hasUidOf(oldPicc)) {
     return;
   }
@@ -112,20 +102,23 @@ onMounted(() => state.value = DashboardState.Initialized);
 
 onClientReady(() => state.value = DashboardState.Initialized);
 
-onClientPongMissed(() => stopPinging());
+onClientPongMissed(() => pinger.stop());
 
-onUnmounted(() => stopPinging());
+onUnmounted(() => pinger.stop());
 
 onClientMessage(e => {
-  if (!pinging.value) { // start pinging on first message from device
-    startPinging();
+  if (!pinger.running) { // start pinging on first message from device
+    pinger.ping({ repeatInterval: 3500 });
   }
 
   if (!HelloDevMessage.is(e.message)) {
     return;
   }
 
-  if (state.value > DashboardState.CeckingForPicc) {
+  if (state.value >= DashboardState.PiccPaired) {
+    client.send(GetPiccWebMessage.create());
+  }
+  else if (state.value > DashboardState.CeckingForPicc) {
     state.value = DashboardState.CeckingForPicc;
   } else {
     state.value = DashboardState.CheckingForReader;
@@ -253,7 +246,7 @@ onMemoryByteMouseClick(clickedByte => {
       </div>
 
     </div>
-    <div class="scene main" v-else-if="state == DashboardState.PiccPaired && picc">
+    <div class="scene main" v-else-if="picc">
 
       <div class="header">
         <div class="picc">
