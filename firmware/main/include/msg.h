@@ -76,7 +76,7 @@ CborError dec_read_sector_msg(const uint8_t *buffer, size_t buffer_size, web_rea
 #define ENC_PICC_STATE_CHANGED_MSG_KIND "picc_state_changed"
 #define ENC_PICC_SECTOR_MSG_KIND        "picc_sector"
 
-#define ENC_BUFFER_SIZE (512)
+#define ENC_BUFFER_SIZE (1024)
 
 CborError enc_hello_message(CborEncoder *encoder);
 

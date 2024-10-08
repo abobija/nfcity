@@ -3,6 +3,7 @@
 #include <string.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/event_groups.h"
+#include "freertos/semphr.h"
 #include "esp_wifi.h"
 #include "esp_system.h"
 #include "esp_check.h"
@@ -34,19 +35,23 @@
 #define RC522_SPI_SCANNER_GPIO_SDA 22
 #define RC522_SCANNER_GPIO_RST     18
 
-const char *TAG = "nfcity";
-const char *MSG_LOG_TAG = "nfcity";
-
 extern const uint8_t mqtt_emqx_cert_start[] asm("_binary_mqtt_emqx_io_pem_start");
 extern const uint8_t mqtt_emqx_cert_end[] asm("_binary_mqtt_emqx_io_pem_end");
 
-static esp_mqtt_client_handle_t mqtt_client;
-static SemaphoreHandle_t rc522_task_mutex;
+const char *TAG = "nfcity";
+const char *MSG_LOG_TAG = "nfcity";
+
 static rc522_driver_handle_t rc522_driver;
 static rc522_handle_t rc522_scanner;
 static EventGroupHandle_t wait_bits;
+static SemaphoreHandle_t rc522_task_mutex;
+static const uint16_t rc522_task_mutex_take_timeout_ms = 1000;
+static esp_mqtt_client_handle_t mqtt_client;
 static char mqtt_topic_buffer[64] = { 0 };
 static char *mqtt_subtopic_ptr = NULL;
+static uint8_t enc_buffer[ENC_BUFFER_SIZE] = { 0 };
+static SemaphoreHandle_t enc_buffer_mutex;
+static const uint16_t enc_buffer_mutex_take_timeout_ms = 1000;
 static rc522_picc_t picc = { 0 };
 
 static rc522_spi_config_t rc522_driver_config = {
@@ -62,8 +67,7 @@ static rc522_spi_config_t rc522_driver_config = {
     .rst_io_num = RC522_SCANNER_GPIO_RST,
 };
 
-static esp_err_t read_sector(
-    web_read_sector_msg_t *msg, uint8_t buffer[4 * RC522_MIFARE_BLOCK_SIZE] /* FIXME: for mifare 4k  */);
+static esp_err_t read_sector(web_read_sector_msg_t *msg, uint8_t *buffer);
 
 // TODO: Check for return values everywhere
 
@@ -89,13 +93,21 @@ static void on_mqtt_connected(void *arg, esp_event_base_t base, int32_t id, void
     ESP_LOGI(TAG, "mqtt connected");
     esp_mqtt_client_subscribe_single(mqtt_client, mqtt_subtopic(MQTT_WEB_SUBTOPIC), MQTT_QOS_0);
 
-    uint8_t enc_buffer[ENC_BUFFER_SIZE] = { 0 };
+    if (xSemaphoreTake(enc_buffer_mutex, pdMS_TO_TICKS(enc_buffer_mutex_take_timeout_ms)) != pdTRUE) {
+        ESP_LOGE(TAG, "Failed to take enc_buffer_mutex");
+        return;
+    }
+
     CborEncoder root = { 0 };
     cbor_encoder_init(&root, enc_buffer, sizeof(enc_buffer), 0);
     enc_hello_message(&root);
     size_t enc_length = cbor_encoder_get_buffer_size(&root, enc_buffer);
 
     mqtt_pub(enc_buffer, enc_length, MQTT_QOS_0);
+
+    if (xSemaphoreGive(enc_buffer_mutex) != pdTRUE) {
+        ESP_LOGE(TAG, "Failed to give enc_buffer_mutex");
+    }
 
     xEventGroupSetBits(wait_bits, MQTT_READY_BIT);
 }
@@ -119,9 +131,13 @@ static void on_mqtt_data(void *arg, esp_event_base_t base, int32_t eid, void *da
 
     // encoding response
 
+    if (xSemaphoreTake(enc_buffer_mutex, pdMS_TO_TICKS(enc_buffer_mutex_take_timeout_ms)) != pdTRUE) {
+        ESP_LOGE(TAG, "Failed to take enc_buffer_mutex");
+        return;
+    }
+
     esp_err_t err = ESP_OK;
     CborEncoder root = { 0 };
-    uint8_t enc_buffer[ENC_BUFFER_SIZE] = { 0 };
     size_t enc_length = 0;
 
     switch (web_msg.kind) {
@@ -161,6 +177,10 @@ static void on_mqtt_data(void *arg, esp_event_base_t base, int32_t eid, void *da
     if (enc_length > 0) {
         mqtt_pub(enc_buffer, enc_length, MQTT_QOS_0);
     }
+
+    if (xSemaphoreGive(enc_buffer_mutex) != pdTRUE) {
+        ESP_LOGE(TAG, "Failed to give enc_buffer_mutex");
+    }
 }
 
 static void on_picc_state_changed(void *arg, esp_event_base_t base, int32_t event_id, void *data)
@@ -171,25 +191,32 @@ static void on_picc_state_changed(void *arg, esp_event_base_t base, int32_t even
 
     memcpy(&picc, event->picc, sizeof(rc522_picc_t));
 
-    uint8_t enc_buffer[ENC_BUFFER_SIZE] = { 0 };
+    if (xSemaphoreTake(enc_buffer_mutex, pdMS_TO_TICKS(enc_buffer_mutex_take_timeout_ms)) != pdTRUE) {
+        ESP_LOGE(TAG, "Failed to take enc_buffer_mutex");
+        return;
+    }
+
     CborEncoder root = { 0 };
     cbor_encoder_init(&root, enc_buffer, sizeof(enc_buffer), 0);
     enc_picc_state_changed_message(&root, &picc, event->old_state);
     size_t enc_length = cbor_encoder_get_buffer_size(&root, enc_buffer);
 
     mqtt_pub(enc_buffer, enc_length, MQTT_QOS_0);
+
+    if (xSemaphoreGive(enc_buffer_mutex) != pdTRUE) {
+        ESP_LOGE(TAG, "Failed to give enc_buffer_mutex");
+    }
 }
 
-static esp_err_t read_sector(
-    web_read_sector_msg_t *msg, uint8_t buffer[4 * RC522_MIFARE_BLOCK_SIZE] /* FIXME: for mifare 4k  */)
+static esp_err_t read_sector(web_read_sector_msg_t *msg, uint8_t *buffer)
 {
     if (picc.state != RC522_PICC_STATE_ACTIVE && picc.state != RC522_PICC_STATE_ACTIVE_H) {
         ESP_LOGW(TAG, "cannot read memory. picc is not active");
         return ESP_FAIL;
     }
 
-    if (xSemaphoreTake(rc522_task_mutex, pdMS_TO_TICKS(1000)) != pdTRUE) {
-        ESP_LOGE(TAG, "Failed to take mutex");
+    if (xSemaphoreTake(rc522_task_mutex, pdMS_TO_TICKS(rc522_task_mutex_take_timeout_ms)) != pdTRUE) {
+        ESP_LOGE(TAG, "Failed to take rc522_task_mutex");
         return ESP_FAIL;
     }
 
@@ -205,7 +232,7 @@ static esp_err_t read_sector(
     rc522_mifare_get_sector_desc(msg->offset, &sector_desc);
     ESP_GOTO_ON_ERROR(rc522_mifare_auth_sector(rc522_scanner, &picc, &sector_desc, &key), _exit, TAG, "auth failed");
 
-    for (uint8_t i = 0; i < 4; i++) { // FIXME: for mifare 4k
+    for (uint8_t i = 0; i < sector_desc.number_of_blocks; i++) {
         uint8_t block_addr = sector_desc.block_0_address + i;
         uint8_t *buffer_ptr = buffer + (i * RC522_MIFARE_BLOCK_SIZE);
 
@@ -228,6 +255,13 @@ void app_main()
     }
 
     xEventGroupClearBits(wait_bits, MQTT_READY_BIT);
+
+    enc_buffer_mutex = xSemaphoreCreateMutex();
+
+    if (enc_buffer_mutex == NULL) {
+        ESP_LOGE(TAG, "Failed to create enc buffer mutex");
+        return;
+    }
 
     // {{ wifi
     ESP_ERROR_CHECK(nvs_flash_init());
@@ -269,7 +303,7 @@ void app_main()
     rc522_task_mutex = xSemaphoreCreateMutex();
 
     if (rc522_task_mutex == NULL) {
-        ESP_LOGE(TAG, "Failed to create mutex");
+        ESP_LOGE(TAG, "Failed to create rc522 task mutex");
         return;
     }
 
