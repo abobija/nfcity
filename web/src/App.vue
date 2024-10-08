@@ -4,7 +4,7 @@ import Client from '@/comm/Client';
 import { onClientEnd, onClientReady } from '@/comm/hooks/ClientEmitHooks';
 import Dashboard from '@/components/Dashboard/Dashboard.vue';
 import { inject, onMounted, ref, watch } from 'vue';
-import { Logger } from './Logger';
+import { Logger } from './utils/Logger';
 
 enum AppState {
   Undefined = 0,

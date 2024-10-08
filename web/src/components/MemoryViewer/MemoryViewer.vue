@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import '@/components/MemoryViewer/MemoryViewer.scss';
-import { ascii, bin, hex, isAsciiPrintable } from '@/helpers';
 import { MifareClassicBlock } from '@/models/MifareClassic';
+import { ascii, bin, hex, isAsciiPrintable } from '@/utils/helpers';
 import { computed } from 'vue';
 import MemoryBytesView from './MemoryView';
 

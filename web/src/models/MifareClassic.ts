@@ -1,7 +1,7 @@
 import PiccBlockDto from "@/comm/dtos/PiccBlockDto";
 import PiccDto from "@/comm/dtos/PiccDto";
-import { arrEquals, nibbles } from "@/helpers";
 import Picc, { PiccBlock, PiccBlockAccessBits, PiccKey, PiccKeyType, PiccMemory, PiccSector, PiccState, PiccType } from "@/models/Picc";
+import { arrEquals, nibbles } from "@/utils/helpers";
 
 export const defaultKey: PiccKey = {
   type: PiccKeyType.A,

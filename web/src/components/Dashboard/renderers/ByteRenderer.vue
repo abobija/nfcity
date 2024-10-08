@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { hex } from '@/helpers';
+import { hex } from '@/utils/helpers';
 import TargetByte from '../TargetByte';
 
 defineProps<{

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { hex, hex2arr, isHex } from '@/helpers';
-import { logger } from '@/Logger';
 import { MifareClassicSector } from '@/models/MifareClassic';
 import { PiccKey, PiccKeyType } from '@/models/Picc';
+import { hex, hex2arr, isHex } from '@/utils/helpers';
+import { logger } from '@/utils/Logger';
 import { onMounted, ref, useTemplateRef } from 'vue';
 
 const props = defineProps<{
