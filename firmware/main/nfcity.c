@@ -78,12 +78,12 @@ static inline int mqtt_pub(const uint8_t *data, int len, int qos)
 static void mqtt_event_handler(void *arg, esp_event_base_t base, int32_t id, void *data)
 {
     esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)data;
-    ESP_LOGW(TAG, "mqtt event id: %d", event->event_id);
+    ESP_LOGD(TAG, "mqtt event: %d", event->event_id);
 }
 
 static void on_mqtt_connected(void *arg, esp_event_base_t base, int32_t id, void *data)
 {
-    ESP_LOGW(TAG, "mqtt connected");
+    ESP_LOGI(TAG, "mqtt connected");
     esp_mqtt_client_subscribe_single(mqtt_client, mqtt_subtopic(MQTT_WEB_SUBTOPIC), MQTT_QOS_0);
 
     uint8_t buffer[ENC_HELLO_BYTES] = { 0 };
@@ -101,7 +101,7 @@ static void on_picc_state_changed(void *arg, esp_event_base_t base, int32_t even
 {
     rc522_picc_state_changed_event_t *event = (rc522_picc_state_changed_event_t *)data;
 
-    ESP_LOGW(TAG, "picc state changed (state=%d, old_state=%d)", event->picc->state, event->old_state);
+    ESP_LOGD(TAG, "picc state changed from %d to %d", event->old_state, event->picc->state);
 
     memcpy(&picc, event->picc, sizeof(rc522_picc_t));
 
@@ -117,13 +117,6 @@ static void on_picc_state_changed(void *arg, esp_event_base_t base, int32_t even
 static esp_err_t read_sector(
     web_read_sector_msg_t *msg, uint8_t buffer[4 * RC522_MIFARE_BLOCK_SIZE] /* FIXME: for mifare 4k  */)
 {
-    ESP_LOGW(TAG,
-        "TODO: read_sector (offset=%d, key_type=%d, key: %.*s)",
-        msg->offset,
-        msg->key.type,
-        RC522_MIFARE_KEY_SIZE,
-        msg->key.value);
-
     if (picc.state != RC522_PICC_STATE_ACTIVE && picc.state != RC522_PICC_STATE_ACTIVE_H) {
         ESP_LOGW(TAG, "cannot read memory. picc is not active");
         return ESP_FAIL;
@@ -151,9 +144,6 @@ static esp_err_t read_sector(
         uint8_t *buffer_ptr = buffer + (i * RC522_MIFARE_BLOCK_SIZE);
 
         ESP_GOTO_ON_ERROR(rc522_mifare_read(rc522_scanner, &picc, block_addr, buffer_ptr), _exit, TAG, "read failed");
-
-        ESP_LOGW(TAG, "data at block %d:", block_addr);
-        ESP_LOG_BUFFER_HEXDUMP(TAG, buffer_ptr, RC522_MIFARE_BLOCK_SIZE, ESP_LOG_WARN);
     }
 _exit:
     rc522_mifare_deauth(rc522_scanner, &picc);
@@ -224,18 +214,17 @@ static void on_mqtt_data(void *arg, esp_event_base_t base, int32_t eid, void *da
 {
     esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)data;
 
-    ESP_LOGW(TAG, "mqtt data (topic=%.*s):", event->topic_len, event->topic);
-    ESP_LOG_BUFFER_HEXDUMP(TAG, event->data, event->data_len, ESP_LOG_WARN);
-
     CborError err = CborNoError;
     web_msg_t msg = { 0 };
     if ((err = dec_msg((uint8_t *)event->data, event->data_len, &msg)) != CborNoError) {
-        ESP_LOGE(TAG, "Failed to decode message description: %d", err);
+        ESP_LOGE(TAG, "Failed to decode message (err=%d)", err);
         return;
     }
 
-    ESP_LOGW(TAG, "msg id: %s, kind: %d", msg.id, msg.kind);
-
+    if(msg.kind != WEB_MSG_PING) {
+        ESP_LOGI(TAG, "msg received (kind=%d, id=%s)", msg.kind, msg.id);
+    }
+    
     handle_message_from_web(&msg, (uint8_t *)event->data, event->data_len);
 }
 
