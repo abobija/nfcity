@@ -61,11 +61,13 @@ watch(state, async (newState, oldState) => {
 
   switch (newState) {
     case DashboardState.Initialized: {
+      checkingForReaderCancelationToken.value?.cancel("State changed to Initialized");
+      pingCancelationToken.value?.cancel("State changed to Initialized");
       state.value = DashboardState.CheckingForReader;
     } break;
     case DashboardState.CheckingForReader: {
       retryMax.value = retryCount.value = 5;
-      checkingForReaderCancelationToken.value?.cancel();
+      checkingForReaderCancelationToken.value?.cancel("State changed to CheckingForReader");
       checkingForReaderCancelationToken.value = CancelationToken.create();
       do {
         try {
@@ -113,7 +115,10 @@ onMounted(() => state.value = DashboardState.Initialized);
 
 onClientReady(() => state.value = DashboardState.Initialized);
 
-onUnmounted(() => pingCancelationToken.value?.cancel("Dashboard unmounted"));
+onUnmounted(() => {
+  checkingForReaderCancelationToken.value?.cancel("Dashboard unmounted");
+  pingCancelationToken.value?.cancel("Dashboard unmounted");
+});
 
 onClientMessage(e => {
   if (state.value == DashboardState.CheckingForReader) {
