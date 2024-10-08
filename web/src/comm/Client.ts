@@ -280,7 +280,7 @@ class Client {
     return context;
   }
 
-  pingLoop(intervalMs: number, cancelationToken?: CancelationToken): void {
+  async pingLoop(intervalMs: number, cancelationToken?: CancelationToken): Promise<void> {
     const _ping = async () => {
       try {
         await this.ping(cancelationToken);
@@ -297,6 +297,7 @@ class Client {
       }
     };
 
+    await _ping();
     const _interval = setInterval(_ping, intervalMs);
 
     this.logger.debug('Ping loop started');
