@@ -123,7 +123,7 @@ onClientMessage(e => {
   // start pinging on first message from device
   if (!pingCancelationToken.value || pingCancelationToken.value.isCanceled) {
     pingCancelationToken.value = CancelationToken.create();
-    client.pingLoop(3000, pingCancelationToken.value);
+    client.pingLoop(2500, pingCancelationToken.value);
   }
 
   if (!HelloDevMessage.is(e.message)) {
