@@ -1,0 +1,34 @@
+menu "NFCity"
+    
+    comment ""
+    comment "The broker needs to be a secure server (wss://)"
+    comment "since the NFCity browser app supports only wss protocol."
+    comment ""
+
+    config NFCITY_MQTT_BROKER
+        string "MQTT Broker"
+        default "wss://broker.emqx.io:8084/mqtt"
+        help
+            The MQTT broker to connect to.
+    
+    config NFCITY_MQTT_USE_CREDENTIALS
+        bool "Use MQTT Credentials"
+        default n
+        help
+            Enable this option to use credentials to connect to the MQTT broker.
+
+    config NFCITY_MQTT_USERNAME
+        string "MQTT Username"
+        default "username"
+        depends on NFCITY_MQTT_USE_CREDENTIALS
+        help
+            The username to use to connect to the MQTT broker.
+
+    config NFCITY_MQTT_PASSWORD
+        string "MQTT Password"
+        default "password"
+        depends on NFCITY_MQTT_USE_CREDENTIALS
+        help
+            The password to use to connect to the MQTT broker.
+
+endmenu
