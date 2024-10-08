@@ -1,3 +1,4 @@
+import { CancelationToken, OperationCanceledError } from '@/CancelationToken';
 import { Logger, LogLevel } from '@/Logger';
 import ClientDisconnectEvent from '@/comm/events/ClientDisconnectEvent';
 import clientEmits from '@/comm/events/ClientEmits';
@@ -18,16 +19,17 @@ import ClientEndEvent from './events/ClientEndEvent';
 import ClientOfflineEvent from './events/ClientOfflineEvent';
 import ClientReconnectEvent from './events/ClientReconnectEvent';
 
+export abstract class MessageTimeoutError extends Error { }
 
-export class MessageSendTimeoutError extends Error {
+export class MessageSendTimeoutError extends MessageTimeoutError {
   constructor() {
-    super("Send message timeout");
+    super("Message send timeout");
   }
 }
 
-export class MessageReceiveTimeoutError extends Error {
+export class MessageReceiveTimeoutError extends MessageTimeoutError {
   constructor() {
-    super("Receive message timeout");
+    super("Message receive timeout");
   }
 }
 
@@ -78,11 +80,12 @@ class Client {
     return `${this.rootTopic}/${this.webTopic}`;
   }
 
-  async transceive(message: WebMessage): Promise<DeviceMessage> {
-    return this.receive(await this.send(message));
+  async transceive(message: WebMessage, cancelationToken?: CancelationToken): Promise<DeviceMessage> {
+    const ctx = await this.send(message, cancelationToken);
+    return this.receive(ctx, cancelationToken);
   }
 
-  async send(message: WebMessage): Promise<SendContext> {
+  async send(message: WebMessage, cancelationToken?: CancelationToken): Promise<SendContext> {
     if (!this.connected) {
       throw new Error('not connected');
     }
@@ -91,7 +94,19 @@ class Client {
       const topic = `/${this.webTopicAbs}`;
       const encodedMessage = encode(message);
 
-      const _handler: PacketCallback = (err) => {
+      const _timeout = setTimeout(() => {
+        reject(new MessageSendTimeoutError());
+      }, this.sendTimeoutMs);
+
+      const _onCanceled = () => {
+        clearTimeout(_timeout);
+        reject(new OperationCanceledError());
+      }
+
+      cancelationToken?.onCancel(_onCanceled);
+
+      const _onMessagePublished: PacketCallback = (err) => {
+        cancelationToken?.offCancel(_onCanceled);
         clearTimeout(_timeout);
 
         if (err) {
@@ -107,36 +122,40 @@ class Client {
         resolve(SendContext.from(message));
       };
 
-      const _timeout = setTimeout(() => {
-        reject(new MessageSendTimeoutError());
-      }, this.sendTimeoutMs);
-
-      this.mqttClient!.publish(topic, encodedMessage, { qos: 0 }, _handler);
+      this.mqttClient!.publish(topic, encodedMessage, { qos: 0 }, _onMessagePublished);
     });
   }
 
-  private async receive(ctx: SendContext): Promise<DeviceMessage> {
+  private async receive(ctx: SendContext, cancelationToken?: CancelationToken): Promise<DeviceMessage> {
     if (!this.connected) {
       throw new Error('not connected');
     }
 
     return new Promise((resolve, reject) => {
-      const _handler = (e: ClientMessageEvent) => {
+      const _onCanceled = () => {
+        clearTimeout(_timeout);
+        reject(new OperationCanceledError());
+      }
+
+      cancelationToken?.onCancel(_onCanceled);
+
+      const _onMessageReceived = (e: ClientMessageEvent) => {
         if (e.message.$ctx?.$id !== ctx.message.$id) {
           return;
         }
 
+        cancelationToken?.offCancel(_onCanceled);
         clearTimeout(_timeout);
-        clientEmits.off('message', _handler);
+        clientEmits.off('message', _onMessageReceived);
         resolve(e.message);
       };
 
       const _timeout = setTimeout(() => {
-        clientEmits.off('message', _handler);
+        clientEmits.off('message', _onMessageReceived);
         reject(new MessageReceiveTimeoutError());
       }, this.receiveTimeoutMs);
 
-      clientEmits.on('message', _handler);
+      clientEmits.on('message', _onMessageReceived);
     });
   }
 
@@ -219,97 +238,95 @@ class Client {
 
     this.mqttClient.end(true);
   }
-}
 
-interface ClientPingerPingProps {
-  repeatInterval: false | number;
-}
-
-export class ClientPinger {
-  private readonly logger = Logger.fromName('ClientPinger');
-  private readonly client: Client;
-  private timeout?: NodeJS.Timeout;
-  private lastPing?: number;
-  private lastPong?: number;
-  private _running: boolean = false;
-
-  public get running(): boolean {
-    return this._running;
-  }
-
-  protected constructor(client: Client) {
-    this.client = client;
-  }
-
-  static from(client: Client): ClientPinger {
-    return new ClientPinger(client);
-  }
-
-  private static defaultPingProps(): ClientPingerPingProps {
-    return {
-      repeatInterval: false,
-    };
-  }
-
-  async ping(props?: ClientPingerPingProps): Promise<PongDevMessage | undefined> {
-    props ??= ClientPinger.defaultPingProps();
-
-    if (this.timeout) {
-      clearTimeout(this.timeout);
-    }
-
-    let result: PongDevMessage | undefined = undefined;
-
-    const shouldRepeat = typeof (props.repeatInterval) === 'number';
-    this._running = true;
-    this.lastPing = Date.now();
-
+  async ping(cancelationToken?: CancelationToken): Promise<ClientPingContext> {
     this.logger.verbose('ping');
-    clientEmits.emit('ping', ClientPingEvent.from(this.client, this.lastPing));
+
+    const context = ClientPingContext.create(Date.now());
+
+    clientEmits.emit('ping', ClientPingEvent.from(this, context.pingTimestamp));
+    cancelationToken?.throwIfCanceled();
 
     try {
-      const pong = await this.client.transceive(PingWebMessage.create());
+      const pong = await this.transceive(PingWebMessage.create(), cancelationToken);
+      cancelationToken?.throwIfCanceled();
 
       if (PongDevMessage.is(pong)) {
-        result = pong;
-
-        this.lastPong = Date.now();
         this.logger.verbose('pong');
-        clientEmits.emit('pong', ClientPongEvent.from(this.client, this.lastPing, this.lastPong));
+        context.pong = pong;
+        clientEmits.emit('pong', ClientPongEvent.from(
+          this, context.pingTimestamp, context.pongTimestamp!
+        ));
+        cancelationToken?.throwIfCanceled();
       } else {
         throw new Error('invalid type of pong message');
       }
     } catch (e) {
-      this.logger.verbose('pong miss,', 'reason', e);
+      cancelationToken?.throwIfCanceled();
 
-      if (!shouldRepeat) {
-        throw e;
+      if (e instanceof MessageTimeoutError) {
+        this.logger.verbose('pong miss,', 'reason', e);
+
+        clientEmits.emit('pongMissed', ClientPongMissedEvent.from(
+          this,
+          context.pingTimestamp,
+          context.pongTimestamp
+        ));
       }
 
-      clientEmits.emit('pongMissed', ClientPongMissedEvent.from(this.client, this.lastPing, this.lastPong));
+      throw e;
     }
 
-    if (!this._running) {
-      this.logger.debug('ping interrupted');
-      return result;
-    }
-
-    if (this._running = shouldRepeat) {
-      this.timeout = setTimeout(() => this.ping(props), props.repeatInterval as number);
-    }
-
-    return result;
+    return context;
   }
 
-  stop(): void {
-    if (this.timeout) {
-      clearTimeout(this.timeout);
-    }
+  pingLoop(intervalMs: number, cancelationToken?: CancelationToken): void {
+    const _ping = async () => {
+      try {
+        await this.ping(cancelationToken);
+      }
+      catch (e) {
+        if (e instanceof OperationCanceledError) {
+          clearTimeout(_interval);
+          this.logger.debug("Ping loop canceled, reason:", cancelationToken?.reason);
+          return;
+        }
 
-    this.timeout = undefined;
-    this.lastPing = undefined;
-    this.lastPong = undefined;
-    this._running = false;
+        this.logger.debug('Failed to ping in loop', e);
+        cancelationToken?.cancel("Failed to ping");
+      }
+    };
+
+    const _interval = setInterval(_ping, intervalMs);
+
+    this.logger.debug('Ping loop started');
+  }
+}
+
+export class ClientPingContext {
+  pingTimestamp: number;
+  private _pong?: PongDevMessage;
+  private _pongTimestamp?: number;
+
+  get pong(): PongDevMessage | undefined {
+    return this._pong;
+  }
+
+  set pong(message: PongDevMessage) {
+    this._pong = message;
+    this._pongTimestamp = Date.now();
+  }
+
+  public get pongTimestamp(): number | undefined {
+    return this._pongTimestamp;
+  }
+
+  protected constructor(pingTimestamp: number) {
+    this.pingTimestamp = pingTimestamp;
+  }
+
+  static create(pingTimestamp: number): ClientPingContext {
+    return new ClientPingContext(pingTimestamp);
   }
 }
 

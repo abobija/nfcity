@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import Client, { ClientPinger } from '@/comm/Client';
-import { onClientMessage, onClientPongMissed, onClientReady } from '@/comm/hooks/ClientEmitHooks';
+import { CancelationToken, OperationCanceledError } from '@/CancelationToken';
+import Client from '@/comm/Client';
+import { onClientMessage, onClientReady } from '@/comm/hooks/ClientEmitHooks';
 import HelloDevMessage from '@/comm/msgs/dev/HelloDevMessage';
 import PiccDevMessage from '@/comm/msgs/dev/PiccDevMessage';
 import PiccStateChangedDevMessage from '@/comm/msgs/dev/PiccStateChangedDevMessage';
@@ -42,13 +43,14 @@ enum DashboardState {
 
 const logger = Logger.fromName('Dashboard');
 const client = inject('client') as Client;
-const pinger = ClientPinger.from(client);
 const state = ref<DashboardState>(DashboardState.Undefined);
 const picc = ref<MifareClassic | undefined>(undefined);
 const memoryFocus = ref<MemoryFocus | undefined>(undefined);
 const tByte = ref<TargetByte | undefined>(undefined);
 const retryMax = ref(5);
 const retryCount = ref(0);
+const checkingForReaderCancelationToken = ref<CancelationToken>();
+const pingCancelationToken = ref<CancelationToken>();
 
 watch(state, async (newState, oldState) => {
   logger.debug(
@@ -63,15 +65,24 @@ watch(state, async (newState, oldState) => {
     } break;
     case DashboardState.CheckingForReader: {
       retryMax.value = retryCount.value = 5;
+      checkingForReaderCancelationToken.value?.cancel();
+      checkingForReaderCancelationToken.value = CancelationToken.create();
       do {
         try {
-          await pinger.ping();
+          await client.ping(checkingForReaderCancelationToken.value as CancelationToken);
           break;
         }
         catch (e) {
-          logger.warning('Failed to ping device', e);
+          if (e instanceof OperationCanceledError) {
+            break;
+          }
+          logger.debug('Failed to ping while checking for reader', e);
         }
       } while (--retryCount.value > 0);
+
+      if (checkingForReaderCancelationToken.value.isCanceled) {
+        logger.debug("Checking for reader canceled, reason:", checkingForReaderCancelationToken.value.reason);
+      }
 
       if (retryCount.value === 0) {
         logger.error('Failed to ping device after', retryMax.value, 'retries');
@@ -102,13 +113,17 @@ onMounted(() => state.value = DashboardState.Initialized);
 
 onClientReady(() => state.value = DashboardState.Initialized);
 
-onClientPongMissed(() => pinger.stop());
-
-onUnmounted(() => pinger.stop());
+onUnmounted(() => pingCancelationToken.value?.cancel("Dashboard unmounted"));
 
 onClientMessage(e => {
-  if (!pinger.running) { // start pinging on first message from device
-    pinger.ping({ repeatInterval: 3500 });
+  if (state.value == DashboardState.CheckingForReader) {
+    checkingForReaderCancelationToken.value?.cancel("New message arrived from device");
+  }
+
+  // start pinging on first message from device
+  if (!pingCancelationToken.value || pingCancelationToken.value.isCanceled) {
+    pingCancelationToken.value = CancelationToken.create();
+    client.pingLoop(3000, pingCancelationToken.value);
   }
 
   if (!HelloDevMessage.is(e.message)) {
