@@ -244,7 +244,7 @@ static CborError enc_picc_block(CborEncoder *encoder, uint8_t address, uint8_t o
 }
 
 CborError enc_picc_sector_message(
-    web_msg_t *ctx, CborEncoder *root, uint8_t sector_offset, uint8_t sector_block_0_address, uint8_t *sector_data)
+    web_msg_t *ctx, CborEncoder *root, rc522_mifare_sector_desc_t *sector_desc, uint8_t *sector_data)
 {
     CborEncoder message_map;
 
@@ -252,15 +252,17 @@ CborError enc_picc_sector_message(
     CBOR_ERRCHECK(enc_kind(&message_map, ENC_PICC_SECTOR_MSG_KIND));
     CBOR_ERRCHECK(enc_ctx(&message_map, ctx));
     CBOR_ERRCHECK(cbor_encode_text_stringz(&message_map, "offset"));
-    CBOR_ERRCHECK(cbor_encode_uint(&message_map, sector_offset));
+    CBOR_ERRCHECK(cbor_encode_uint(&message_map, sector_desc->index));
     CBOR_ERRCHECK(cbor_encode_text_stringz(&message_map, "blocks"));
     CborEncoder blocks_array;
-    CBOR_ERRCHECK(cbor_encoder_create_array(&message_map, &blocks_array, 4)); // FIXME: for mifare 4k
-    for (uint8_t i = 0; i < 4; i++) {                                         // FIXME: for mifare 4k
+    CBOR_ERRCHECK(cbor_encoder_create_array(&message_map, &blocks_array, sector_desc->number_of_blocks));
+    for (uint8_t i = 0; i < sector_desc->number_of_blocks; i++) {
         CborEncoder block_map;
         CBOR_ERRCHECK(cbor_encoder_create_map(&blocks_array, &block_map, ENC_PICC_BLOCK_LEN));
-        CBOR_ERRCHECK(
-            enc_picc_block(&block_map, sector_block_0_address + i, i, sector_data + (i * RC522_MIFARE_BLOCK_SIZE)));
+        CBOR_ERRCHECK(enc_picc_block(&block_map,
+            sector_desc->block_0_address + i,
+            i,
+            sector_data + (i * RC522_MIFARE_BLOCK_SIZE)));
         CBOR_ERRCHECK(cbor_encoder_close_container(&blocks_array, &block_map));
     }
     CBOR_ERRCHECK(cbor_encoder_close_container(&message_map, &blocks_array));

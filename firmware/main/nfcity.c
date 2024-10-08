@@ -35,6 +35,8 @@
 #define RC522_SPI_SCANNER_GPIO_SDA 22
 #define RC522_SCANNER_GPIO_RST     18
 
+#define PICC_MEM_BUFFER_SIZE (1024)
+
 extern const uint8_t mqtt_emqx_cert_start[] asm("_binary_mqtt_emqx_io_pem_start");
 extern const uint8_t mqtt_emqx_cert_end[] asm("_binary_mqtt_emqx_io_pem_end");
 
@@ -52,6 +54,7 @@ static char *mqtt_subtopic_ptr = NULL;
 static uint8_t enc_buffer[ENC_BUFFER_SIZE] = { 0 };
 static SemaphoreHandle_t enc_buffer_mutex;
 static const uint16_t enc_buffer_mutex_take_timeout_ms = 1000;
+static uint8_t picc_mem_buffer[PICC_MEM_BUFFER_SIZE] = { 0 }; // protect?
 static rc522_picc_t picc = { 0 };
 
 static rc522_spi_config_t rc522_driver_config = {
@@ -67,7 +70,7 @@ static rc522_spi_config_t rc522_driver_config = {
     .rst_io_num = RC522_SCANNER_GPIO_RST,
 };
 
-static esp_err_t read_sector(web_read_sector_msg_t *msg, uint8_t *buffer);
+static esp_err_t read_sector(web_read_sector_msg_t *msg, rc522_mifare_sector_desc_t *sector_desc, uint8_t *buffer);
 
 // TODO: Check for return values everywhere
 
@@ -140,24 +143,22 @@ static void on_mqtt_data(void *arg, esp_event_base_t base, int32_t eid, void *da
     CborEncoder root = { 0 };
     size_t enc_length = 0;
 
+    cbor_encoder_init(&root, enc_buffer, sizeof(enc_buffer), 0);
+
     switch (web_msg.kind) {
         case WEB_MSG_PING: {
-            cbor_encoder_init(&root, enc_buffer, sizeof(enc_buffer), 0);
             enc_pong_message(&web_msg, &root);
         } break;
         case WEB_MSG_GET_PICC: {
-            cbor_encoder_init(&root, enc_buffer, sizeof(enc_buffer), 0);
             enc_picc_message(&web_msg, &root, &picc);
         } break;
         case WEB_MSG_READ_SECTOR: {
             web_read_sector_msg_t read_sector_msg = { 0 };
             dec_read_sector_msg((uint8_t *)event->data, event->data_len, &read_sector_msg);
-            uint8_t sector_buffer[4 * RC522_MIFARE_BLOCK_SIZE] = { 0 }; // FIXME: for mifare 4k
-            if ((err = read_sector(&read_sector_msg, sector_buffer)) == ESP_OK) {
-                uint8_t sector_block_0_address = 0;
-                rc522_mifare_get_sector_block_0_address(read_sector_msg.offset, &sector_block_0_address);
-                cbor_encoder_init(&root, enc_buffer, sizeof(enc_buffer), 0);
-                enc_picc_sector_message(&web_msg, &root, read_sector_msg.offset, sector_block_0_address, sector_buffer);
+            rc522_mifare_sector_desc_t sector_desc = { 0 };
+            rc522_mifare_get_sector_desc(read_sector_msg.offset, &sector_desc);
+            if ((err = read_sector(&read_sector_msg, &sector_desc, picc_mem_buffer)) == ESP_OK) {
+                enc_picc_sector_message(&web_msg, &root, &sector_desc, picc_mem_buffer);
             }
         } break;
         default: {
@@ -167,9 +168,7 @@ static void on_mqtt_data(void *arg, esp_event_base_t base, int32_t eid, void *da
     }
 
     if (err != ESP_OK) {
-        cbor_encoder_init(&root, enc_buffer, sizeof(enc_buffer), 0);
         enc_error_message(&web_msg, &root, err);
-        enc_length = cbor_encoder_get_buffer_size(&root, enc_buffer);
     }
 
     enc_length = cbor_encoder_get_buffer_size(&root, enc_buffer);
@@ -208,7 +207,7 @@ static void on_picc_state_changed(void *arg, esp_event_base_t base, int32_t even
     }
 }
 
-static esp_err_t read_sector(web_read_sector_msg_t *msg, uint8_t *buffer)
+static esp_err_t read_sector(web_read_sector_msg_t *msg, rc522_mifare_sector_desc_t *sector_desc, uint8_t *buffer)
 {
     if (picc.state != RC522_PICC_STATE_ACTIVE && picc.state != RC522_PICC_STATE_ACTIVE_H) {
         ESP_LOGW(TAG, "cannot read memory. picc is not active");
@@ -228,12 +227,10 @@ static esp_err_t read_sector(web_read_sector_msg_t *msg, uint8_t *buffer)
 
     esp_err_t ret = ESP_OK;
 
-    rc522_mifare_sector_desc_t sector_desc = { 0 };
-    rc522_mifare_get_sector_desc(msg->offset, &sector_desc);
-    ESP_GOTO_ON_ERROR(rc522_mifare_auth_sector(rc522_scanner, &picc, &sector_desc, &key), _exit, TAG, "auth failed");
+    ESP_GOTO_ON_ERROR(rc522_mifare_auth_sector(rc522_scanner, &picc, sector_desc, &key), _exit, TAG, "auth failed");
 
-    for (uint8_t i = 0; i < sector_desc.number_of_blocks; i++) {
-        uint8_t block_addr = sector_desc.block_0_address + i;
+    for (uint8_t i = 0; i < sector_desc->number_of_blocks; i++) {
+        uint8_t block_addr = sector_desc->block_0_address + i;
         uint8_t *buffer_ptr = buffer + (i * RC522_MIFARE_BLOCK_SIZE);
 
         ESP_GOTO_ON_ERROR(rc522_mifare_read(rc522_scanner, &picc, block_addr, buffer_ptr), _exit, TAG, "read failed");

@@ -89,6 +89,6 @@ CborError enc_picc_message(web_msg_t *ctx, CborEncoder *encoder, rc522_picc_t *p
 CborError enc_picc_state_changed_message(CborEncoder *encoder, rc522_picc_t *picc, rc522_picc_state_t old_state);
 
 CborError enc_picc_sector_message(
-    web_msg_t *ctx, CborEncoder *encoder, uint8_t sector_offset, uint8_t sector_block_0_address, uint8_t *sector_data);
+    web_msg_t *ctx, CborEncoder *encoder, rc522_mifare_sector_desc_t *sector_desc, uint8_t *sector_data);
 
 // }} encoding
