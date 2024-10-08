@@ -21,8 +21,6 @@
 #define MQTT_READY_BIT BIT0
 
 #define MQTT_BROKER_URL   "wss://broker.emqx.io:8084/mqtt"
-#define MQTT_USERNAME     "emqx"
-#define MQTT_PASSWORD     "public"
 #define MQTT_QOS_0        0
 #define MQTT_QOS_1        1
 #define MQTT_QOS_2        2
@@ -35,7 +33,7 @@
 #define RC522_SPI_SCANNER_GPIO_SDA 22
 #define RC522_SCANNER_GPIO_RST     18
 
-#define PICC_MEM_BUFFER_SIZE (1024)
+#define PICC_MEM_BUFFER_SIZE 1024
 
 extern const uint8_t mqtt_emqx_cert_start[] asm("_binary_mqtt_emqx_io_pem_start");
 extern const uint8_t mqtt_emqx_cert_end[] asm("_binary_mqtt_emqx_io_pem_end");
@@ -317,8 +315,6 @@ void app_main()
         .broker.address.uri = MQTT_BROKER_URL,
         .broker.verification.certificate = (const char *)mqtt_emqx_cert_start,
         .broker.verification.certificate_len = mqtt_emqx_cert_end - mqtt_emqx_cert_start,
-        .credentials.username = MQTT_USERNAME,
-        .credentials.authentication.password = MQTT_PASSWORD,
     };
 
     mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
