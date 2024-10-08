@@ -99,7 +99,9 @@ class Client {
       }, this.sendTimeoutMs);
 
       const _onCanceled = () => {
-        clearTimeout(_timeout);
+        if (_timeout) {
+          clearTimeout(_timeout);
+        }
         reject(new OperationCanceledError());
       }
 
@@ -107,7 +109,9 @@ class Client {
 
       const _onMessagePublished: PacketCallback = (err) => {
         cancelationToken?.offCancel(_onCanceled);
-        clearTimeout(_timeout);
+        if (_timeout) {
+          clearTimeout(_timeout);
+        }
 
         if (err) {
           reject(err);
@@ -133,7 +137,9 @@ class Client {
 
     return new Promise((resolve, reject) => {
       const _onCanceled = () => {
-        clearTimeout(_timeout);
+        if (_timeout) {
+          clearTimeout(_timeout);
+        }
         reject(new OperationCanceledError());
       }
 
@@ -145,7 +151,9 @@ class Client {
         }
 
         cancelationToken?.offCancel(_onCanceled);
-        clearTimeout(_timeout);
+        if (_timeout) {
+          clearTimeout(_timeout);
+        }
         clientEmits.off('message', _onMessageReceived);
         resolve(e.message);
       };
@@ -291,7 +299,9 @@ class Client {
       }
       catch (e) {
         if (e instanceof OperationCanceledError) {
-          clearTimeout(_interval);
+          if (_interval) {
+            clearTimeout(_interval);
+          }
           this.logger.debug("Ping loop canceled, reason:", cancelationToken?.reason);
           return;
         }
