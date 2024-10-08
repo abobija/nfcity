@@ -35,8 +35,8 @@
 
 #define PICC_MEM_BUFFER_SIZE 1024
 
-extern const uint8_t mqtt_emqx_cert_start[] asm("_binary_mqtt_emqx_io_pem_start");
-extern const uint8_t mqtt_emqx_cert_end[] asm("_binary_mqtt_emqx_io_pem_end");
+extern const uint8_t mqtt_broker_pem_start[] asm("_binary_mqtt_broker_pem_start");
+extern const uint8_t mqtt_broker_pem_end[] asm("_binary_mqtt_broker_pem_end");
 
 const char *TAG = "nfcity";
 const char *MSG_LOG_TAG = "nfcity";
@@ -313,8 +313,8 @@ void app_main()
 
     const esp_mqtt_client_config_t mqtt_cfg = {
         .broker.address.uri = MQTT_BROKER_URL,
-        .broker.verification.certificate = (const char *)mqtt_emqx_cert_start,
-        .broker.verification.certificate_len = mqtt_emqx_cert_end - mqtt_emqx_cert_start,
+        .broker.verification.certificate = (const char *)mqtt_broker_pem_start,
+        .broker.verification.certificate_len = mqtt_broker_pem_end - mqtt_broker_pem_start,
     };
 
     mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
