@@ -70,6 +70,27 @@ static rc522_spi_config_t rc522_driver_config = {
     .rst_io_num = RC522_SCANNER_GPIO_RST,
 };
 
+typedef struct
+{
+    esp_mqtt_event_id_t event;
+    const char *name;
+} mqtt_event_name_map_entry_t;
+
+static mqtt_event_name_map_entry_t mqtt_event_name_map[] = {
+    { MQTT_EVENT_ERROR, "error" },
+    { MQTT_EVENT_CONNECTED, "connected" },
+    { MQTT_EVENT_DISCONNECTED, "disconnected" },
+    { MQTT_EVENT_SUBSCRIBED, "subscribed" },
+    { MQTT_EVENT_UNSUBSCRIBED, "unsubscribed" },
+    { MQTT_EVENT_PUBLISHED, "published" },
+    { MQTT_EVENT_DATA, "data" },
+    { MQTT_EVENT_BEFORE_CONNECT, "before_connect" },
+    { MQTT_EVENT_DELETED, "deleted" },
+    { MQTT_USER_EVENT, "user_event" },
+};
+
+static const char *mqtt_event_name(esp_mqtt_event_id_t id);
+
 static esp_err_t read_sector(web_read_sector_msg_t *msg, rc522_mifare_sector_desc_t *sector_desc, uint8_t *buffer);
 
 // TODO: Check for return values everywhere
@@ -103,12 +124,15 @@ static void on_mqtt_event(void *arg, esp_event_base_t base, int32_t id, void *da
             log_level = ESP_LOG_INFO;
         } break;
     }
-    ESP_LOG_LEVEL_LOCAL(log_level, TAG, "mqtt event (id=%d)", event->event_id);
+    ESP_LOG_LEVEL_LOCAL(log_level,
+        TAG,
+        "mqtt event (id=%d, name=%s)",
+        event->event_id,
+        mqtt_event_name((esp_mqtt_event_id_t)event->event_id));
 }
 
 static void on_mqtt_connected(void *arg, esp_event_base_t base, int32_t id, void *data)
 {
-    ESP_LOGI(TAG, "mqtt connected");
     esp_mqtt_client_subscribe_single(mqtt_client, mqtt_subtopic(MQTT_WEB_SUBTOPIC), MQTT_QOS_0);
 
     if (xSemaphoreTake(enc_buffer_mutex, pdMS_TO_TICKS(enc_buffer_mutex_take_timeout_ms)) != pdTRUE) {
@@ -220,6 +244,17 @@ static void on_picc_state_changed(void *arg, esp_event_base_t base, int32_t even
     if (xSemaphoreGive(enc_buffer_mutex) != pdTRUE) {
         ESP_LOGE(TAG, "Failed to give enc_buffer_mutex");
     }
+}
+
+static const char *mqtt_event_name(esp_mqtt_event_id_t id)
+{
+    for (uint8_t i = 0; i < sizeof(mqtt_event_name_map) / sizeof(mqtt_event_name_map[0]); i++) {
+        if (mqtt_event_name_map[i].event == id) {
+            return mqtt_event_name_map[i].name;
+        }
+    }
+
+    return "unknown";
 }
 
 static esp_err_t read_sector(web_read_sector_msg_t *msg, rc522_mifare_sector_desc_t *sector_desc, uint8_t *buffer)
