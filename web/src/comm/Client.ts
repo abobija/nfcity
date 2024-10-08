@@ -281,9 +281,13 @@ class Client {
   }
 
   async pingLoop(intervalMs: number, cancelationToken?: CancelationToken): Promise<void> {
+    const maxErrorCounter = 3;
+    let errorCounter = 0;
+
     const _ping = async () => {
       try {
         await this.ping(cancelationToken);
+        errorCounter = 0;
       }
       catch (e) {
         if (e instanceof OperationCanceledError) {
@@ -293,7 +297,10 @@ class Client {
         }
 
         this.logger.debug('Failed to ping in loop', e);
-        cancelationToken?.cancel("Failed to ping");
+
+        if (++errorCounter >= maxErrorCounter) {
+          cancelationToken?.cancel("Failed to ping in loop");
+        }
       }
     };
 
