@@ -88,7 +88,8 @@ static inline int mqtt_pub(const uint8_t *data, int len, int qos)
 static void on_mqtt_event(void *arg, esp_event_base_t base, int32_t id, void *data)
 {
     esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)data;
-    ESP_LOGD(TAG, "mqtt event (id=%d)", event->event_id);
+    esp_log_level_t log_level = (id == MQTT_EVENT_PUBLISHED || id == MQTT_EVENT_DATA) ? ESP_LOG_DEBUG : ESP_LOG_INFO;
+    ESP_LOG_LEVEL_LOCAL(log_level, TAG, "mqtt event (id=%d)", event->event_id);
 }
 
 static void on_mqtt_connected(void *arg, esp_event_base_t base, int32_t id, void *data)
@@ -245,20 +246,11 @@ _exit:
 void app_main()
 {
     wait_bits = xEventGroupCreate();
-
-    if (wait_bits == NULL) {
-        ESP_LOGE(TAG, "Failed to create event group");
-        return;
-    }
-
+    assert(wait_bits != NULL);
     xEventGroupClearBits(wait_bits, MQTT_READY_BIT);
 
     enc_buffer_mutex = xSemaphoreCreateMutex();
-
-    if (enc_buffer_mutex == NULL) {
-        ESP_LOGE(TAG, "Failed to create enc buffer mutex");
-        return;
-    }
+    assert(enc_buffer_mutex != NULL);
 
     // {{ wifi
     ESP_ERROR_CHECK(nvs_flash_init());
@@ -281,11 +273,7 @@ void app_main()
     };
 
     mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
-
-    if (mqtt_client == NULL) {
-        ESP_LOGE(TAG, "Failed to initialize MQTT client");
-        return;
-    }
+    assert(mqtt_client != NULL);
 
     ESP_ERROR_CHECK(esp_mqtt_client_register_event(mqtt_client, ESP_EVENT_ANY_ID, on_mqtt_event, NULL));
     ESP_ERROR_CHECK(esp_mqtt_client_register_event(mqtt_client, MQTT_EVENT_CONNECTED, on_mqtt_connected, NULL));
@@ -298,11 +286,7 @@ void app_main()
 
     // {{ rc522
     rc522_task_mutex = xSemaphoreCreateMutex();
-
-    if (rc522_task_mutex == NULL) {
-        ESP_LOGE(TAG, "Failed to create rc522 task mutex");
-        return;
-    }
+    assert(rc522_task_mutex != NULL);
 
     ESP_ERROR_CHECK(rc522_spi_create(&rc522_driver_config, &rc522_driver));
     ESP_ERROR_CHECK(rc522_driver_install(rc522_driver));
