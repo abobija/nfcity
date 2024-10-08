@@ -62,9 +62,12 @@ static rc522_spi_config_t rc522_driver_config = {
     .rst_io_num = RC522_SCANNER_GPIO_RST,
 };
 
+static esp_err_t read_sector(
+    web_read_sector_msg_t *msg, uint8_t buffer[4 * RC522_MIFARE_BLOCK_SIZE] /* FIXME: for mifare 4k  */);
+
 // TODO: Check for return values everywhere
 
-static char *mqtt_subtopic(const char *subtopic)
+static inline char *mqtt_subtopic(const char *subtopic)
 {
     strcpy(mqtt_subtopic_ptr, subtopic);
     return mqtt_topic_buffer;
@@ -75,10 +78,10 @@ static inline int mqtt_pub(const uint8_t *data, int len, int qos)
     return esp_mqtt_client_publish(mqtt_client, mqtt_subtopic(MQTT_DEV_SUBTOPIC), (char *)data, len, qos, 0);
 }
 
-static void mqtt_event_handler(void *arg, esp_event_base_t base, int32_t id, void *data)
+static void on_mqtt_event(void *arg, esp_event_base_t base, int32_t id, void *data)
 {
     esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)data;
-    ESP_LOGD(TAG, "mqtt event: %d", event->event_id);
+    ESP_LOGD(TAG, "mqtt event (id=%d)", event->event_id);
 }
 
 static void on_mqtt_connected(void *arg, esp_event_base_t base, int32_t id, void *data)
@@ -86,15 +89,78 @@ static void on_mqtt_connected(void *arg, esp_event_base_t base, int32_t id, void
     ESP_LOGI(TAG, "mqtt connected");
     esp_mqtt_client_subscribe_single(mqtt_client, mqtt_subtopic(MQTT_WEB_SUBTOPIC), MQTT_QOS_0);
 
-    uint8_t buffer[ENC_HELLO_BYTES] = { 0 };
+    uint8_t enc_buffer[ENC_BUFFER_SIZE] = { 0 };
     CborEncoder root = { 0 };
-    cbor_encoder_init(&root, buffer, ENC_HELLO_BYTES, 0);
+    cbor_encoder_init(&root, enc_buffer, sizeof(enc_buffer), 0);
     enc_hello_message(&root);
-    size_t len = cbor_encoder_get_buffer_size(&root, buffer);
+    size_t enc_length = cbor_encoder_get_buffer_size(&root, enc_buffer);
 
-    mqtt_pub(buffer, len, MQTT_QOS_0);
+    mqtt_pub(enc_buffer, enc_length, MQTT_QOS_0);
 
     xEventGroupSetBits(wait_bits, MQTT_READY_BIT);
+}
+
+static void on_mqtt_data(void *arg, esp_event_base_t base, int32_t eid, void *data)
+{
+    esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)data;
+
+    // decoding request
+
+    CborError dec_err = CborNoError;
+    web_msg_t web_msg = { 0 };
+    if ((dec_err = dec_msg((uint8_t *)event->data, event->data_len, &web_msg)) != CborNoError) {
+        ESP_LOGE(TAG, "Failed to decode message (dec_err=%d)", dec_err);
+        return;
+    }
+
+    if (web_msg.kind != WEB_MSG_PING) {
+        ESP_LOGI(TAG, "msg received (kind=%d, id=%s)", web_msg.kind, web_msg.id);
+    }
+
+    // encoding response
+
+    esp_err_t err = ESP_OK;
+    CborEncoder root = { 0 };
+    uint8_t enc_buffer[ENC_BUFFER_SIZE] = { 0 };
+    size_t enc_length = 0;
+
+    switch (web_msg.kind) {
+        case WEB_MSG_PING: {
+            cbor_encoder_init(&root, enc_buffer, sizeof(enc_buffer), 0);
+            enc_pong_message(&web_msg, &root);
+        } break;
+        case WEB_MSG_GET_PICC: {
+            cbor_encoder_init(&root, enc_buffer, sizeof(enc_buffer), 0);
+            enc_picc_message(&web_msg, &root, &picc);
+        } break;
+        case WEB_MSG_READ_SECTOR: {
+            web_read_sector_msg_t read_sector_msg = { 0 };
+            dec_read_sector_msg((uint8_t *)event->data, event->data_len, &read_sector_msg);
+            uint8_t sector_buffer[4 * RC522_MIFARE_BLOCK_SIZE] = { 0 }; // FIXME: for mifare 4k
+            if ((err = read_sector(&read_sector_msg, sector_buffer)) == ESP_OK) {
+                uint8_t sector_block_0_address = 0;
+                rc522_mifare_get_sector_block_0_address(read_sector_msg.offset, &sector_block_0_address);
+                cbor_encoder_init(&root, enc_buffer, sizeof(enc_buffer), 0);
+                enc_picc_sector_message(&web_msg, &root, read_sector_msg.offset, sector_block_0_address, sector_buffer);
+            }
+        } break;
+        default: {
+            ESP_LOGW(TAG, "Unsupported meessage kind: %d", web_msg.kind);
+            err = ESP_ERR_NOT_SUPPORTED; // TODO: use custom err
+        } break;
+    }
+
+    if (err != ESP_OK) {
+        cbor_encoder_init(&root, enc_buffer, sizeof(enc_buffer), 0);
+        enc_error_message(&web_msg, &root, err);
+        enc_length = cbor_encoder_get_buffer_size(&root, enc_buffer);
+    }
+
+    enc_length = cbor_encoder_get_buffer_size(&root, enc_buffer);
+
+    if (enc_length > 0) {
+        mqtt_pub(enc_buffer, enc_length, MQTT_QOS_0);
+    }
 }
 
 static void on_picc_state_changed(void *arg, esp_event_base_t base, int32_t event_id, void *data)
@@ -105,13 +171,13 @@ static void on_picc_state_changed(void *arg, esp_event_base_t base, int32_t even
 
     memcpy(&picc, event->picc, sizeof(rc522_picc_t));
 
-    uint8_t buffer[ENC_PICC_STATE_CHANGED_BYTES] = { 0 };
+    uint8_t enc_buffer[ENC_BUFFER_SIZE] = { 0 };
     CborEncoder root = { 0 };
-    cbor_encoder_init(&root, buffer, ENC_PICC_STATE_CHANGED_BYTES, 0);
+    cbor_encoder_init(&root, enc_buffer, sizeof(enc_buffer), 0);
     enc_picc_state_changed_message(&root, &picc, event->old_state);
-    size_t len = cbor_encoder_get_buffer_size(&root, buffer);
+    size_t enc_length = cbor_encoder_get_buffer_size(&root, enc_buffer);
 
-    mqtt_pub(buffer, len, MQTT_QOS_0);
+    mqtt_pub(enc_buffer, enc_length, MQTT_QOS_0);
 }
 
 static esp_err_t read_sector(
@@ -152,82 +218,6 @@ _exit:
     return ret;
 }
 
-static esp_err_t handle_message_from_web(web_msg_t *web_msg, const uint8_t *data, size_t data_len)
-{
-    esp_err_t ret = ESP_OK;
-
-    switch (web_msg->kind) {
-        case WEB_MSG_PING: {
-            uint8_t buffer[ENC_PONG_BYTES] = { 0 };
-            CborEncoder root = { 0 };
-            cbor_encoder_init(&root, buffer, ENC_PONG_BYTES, 0);
-            enc_pong_message(web_msg, &root);
-            size_t len = cbor_encoder_get_buffer_size(&root, buffer);
-
-            mqtt_pub(buffer, len, MQTT_QOS_0);
-        } break;
-        case WEB_MSG_GET_PICC: {
-            uint8_t buffer[ENC_PICC_BYTES] = { 0 };
-            CborEncoder root = { 0 };
-            cbor_encoder_init(&root, buffer, ENC_PICC_BYTES, 0);
-            enc_picc_message(web_msg, &root, &picc);
-            size_t len = cbor_encoder_get_buffer_size(&root, buffer);
-
-            mqtt_pub(buffer, len, MQTT_QOS_0);
-        } break;
-        case WEB_MSG_READ_SECTOR: {
-            web_read_sector_msg_t msg = { 0 };
-            dec_read_sector_msg(data, data_len, &msg);
-            uint8_t sector_buffer[4 * RC522_MIFARE_BLOCK_SIZE] = { 0 }; // FIXME: for mifare 4k
-            if ((ret = read_sector(&msg, sector_buffer)) == ESP_OK) {
-                uint8_t sector_block_0_address = 0;
-                rc522_mifare_get_sector_block_0_address(msg.offset, &sector_block_0_address);
-                CborEncoder root = { 0 };
-                uint8_t buffer[ENC_PICC_SECTOR_BYTES] = { 0 };
-                cbor_encoder_init(&root, buffer, sizeof(buffer), 0);
-                enc_picc_sector_message(web_msg, &root, msg.offset, sector_block_0_address, sector_buffer);
-                size_t len = cbor_encoder_get_buffer_size(&root, buffer);
-
-                mqtt_pub(buffer, len, MQTT_QOS_0);
-            }
-        } break;
-        default: {
-            ESP_LOGW(TAG, "Unsupported meessage kind: %d", web_msg->kind);
-            ret = ESP_ERR_NOT_SUPPORTED; // TODO: use custom err
-        } break;
-    }
-
-    if (ret != ESP_OK) {
-        CborEncoder root = { 0 };
-        uint8_t buffer[ENC_ERROR_BYTES] = { 0 };
-        cbor_encoder_init(&root, buffer, sizeof(buffer), 0);
-        enc_error_message(web_msg, &root, ret);
-        size_t len = cbor_encoder_get_buffer_size(&root, buffer);
-
-        mqtt_pub(buffer, len, MQTT_QOS_0);
-    }
-
-    return ret;
-}
-
-static void on_mqtt_data(void *arg, esp_event_base_t base, int32_t eid, void *data)
-{
-    esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)data;
-
-    CborError err = CborNoError;
-    web_msg_t msg = { 0 };
-    if ((err = dec_msg((uint8_t *)event->data, event->data_len, &msg)) != CborNoError) {
-        ESP_LOGE(TAG, "Failed to decode message (err=%d)", err);
-        return;
-    }
-
-    if(msg.kind != WEB_MSG_PING) {
-        ESP_LOGI(TAG, "msg received (kind=%d, id=%s)", msg.kind, msg.id);
-    }
-    
-    handle_message_from_web(&msg, (uint8_t *)event->data, event->data_len);
-}
-
 void app_main()
 {
     wait_bits = xEventGroupCreate();
@@ -266,7 +256,7 @@ void app_main()
         return;
     }
 
-    ESP_ERROR_CHECK(esp_mqtt_client_register_event(mqtt_client, ESP_EVENT_ANY_ID, mqtt_event_handler, NULL));
+    ESP_ERROR_CHECK(esp_mqtt_client_register_event(mqtt_client, ESP_EVENT_ANY_ID, on_mqtt_event, NULL));
     ESP_ERROR_CHECK(esp_mqtt_client_register_event(mqtt_client, MQTT_EVENT_CONNECTED, on_mqtt_connected, NULL));
     ESP_ERROR_CHECK(esp_mqtt_client_register_event(mqtt_client, MQTT_EVENT_DATA, on_mqtt_data, NULL));
 

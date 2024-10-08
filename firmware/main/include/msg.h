@@ -76,13 +76,7 @@ CborError dec_read_sector_msg(const uint8_t *buffer, size_t buffer_size, web_rea
 #define ENC_PICC_STATE_CHANGED_MSG_KIND "picc_state_changed"
 #define ENC_PICC_SECTOR_MSG_KIND        "picc_sector"
 
-#define ENC_CTX_BYTES                (64)
-#define ENC_HELLO_BYTES              (32)
-#define ENC_ERROR_BYTES              (ENC_CTX_BYTES + 16)
-#define ENC_PONG_BYTES               (ENC_CTX_BYTES + 32)
-#define ENC_PICC_BYTES               (ENC_CTX_BYTES + 128)
-#define ENC_PICC_STATE_CHANGED_BYTES (32 + ENC_PICC_BYTES)
-#define ENC_PICC_SECTOR_BYTES        (ENC_CTX_BYTES + (4 * 64)) // FIXME: for mifare 4k
+#define ENC_BUFFER_SIZE (512)
 
 CborError enc_hello_message(CborEncoder *encoder);
 
