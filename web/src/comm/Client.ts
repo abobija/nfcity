@@ -1,10 +1,14 @@
+import ClientCloseEvent from '@/comm/events/ClientCloseEvent';
 import ClientDisconnectEvent from '@/comm/events/ClientDisconnectEvent';
 import clientEmits from '@/comm/events/ClientEmits';
+import ClientEndEvent from '@/comm/events/ClientEndEvent';
 import ClientMessageEvent from '@/comm/events/ClientMessageEvent';
+import ClientOfflineEvent from '@/comm/events/ClientOfflineEvent';
 import ClientPingEvent from '@/comm/events/ClientPingEvent';
 import ClientPongEvent from '@/comm/events/ClientPongEvent';
 import ClientPongMissedEvent from '@/comm/events/ClientPongMissedEvent';
 import ClientReadyEvent from '@/comm/events/ClientReadyEvent';
+import ClientReconnectEvent from '@/comm/events/ClientReconnectEvent';
 import { DeviceMessage, WebMessage } from '@/comm/msgs/Message';
 import ErrorDevMessage from '@/comm/msgs/dev/ErrorDevMessage';
 import PongDevMessage from '@/comm/msgs/dev/PongDevMessage';
@@ -14,10 +18,6 @@ import { Logger, LogLevel } from '@/utils/Logger';
 import { trim, trimRight } from '@/utils/helpers';
 import { decode, encode } from 'cbor-x';
 import mqtt, { MqttClient, PacketCallback } from 'mqtt';
-import ClientCloseEvent from './events/ClientCloseEvent';
-import ClientEndEvent from './events/ClientEndEvent';
-import ClientOfflineEvent from './events/ClientOfflineEvent';
-import ClientReconnectEvent from './events/ClientReconnectEvent';
 
 export abstract class MessageTimeoutError extends Error { }
 

@@ -6,6 +6,10 @@ import PiccDevMessage from '@/comm/msgs/dev/PiccDevMessage';
 import PiccStateChangedDevMessage from '@/comm/msgs/dev/PiccStateChangedDevMessage';
 import GetPiccWebMessage from '@/comm/msgs/web/GetPiccWebMessage';
 import '@/components/Dashboard/Dashboard.scss';
+import BlockRenderer from '@/components/Dashboard/renderers/BlockRenderer.vue';
+import ByteRenderer from '@/components/Dashboard/renderers/ByteRenderer.vue';
+import GroupRenderer from '@/components/Dashboard/renderers/GroupRenderer.vue';
+import SectorRenderer from '@/components/Dashboard/renderers/SectorRenderer.vue';
 import TargetByte from '@/components/Dashboard/TargetByte';
 import Memory from '@/components/Memory/Memory.vue';
 import MemoryFocus from '@/components/Memory/MemoryFocus';
@@ -26,10 +30,6 @@ import { CancelationToken, OperationCanceledError } from '@/utils/CancelationTok
 import { hex } from '@/utils/helpers';
 import { Logger } from '@/utils/Logger';
 import { inject, onMounted, onUnmounted, ref, watch } from 'vue';
-import BlockRenderer from './renderers/BlockRenderer.vue';
-import ByteRenderer from './renderers/ByteRenderer.vue';
-import GroupRenderer from './renderers/GroupRenderer.vue';
-import SectorRenderer from './renderers/SectorRenderer.vue';
 
 enum DashboardState {
   Undefined = 0,

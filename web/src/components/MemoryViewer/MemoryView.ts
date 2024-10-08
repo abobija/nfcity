@@ -1,8 +1,8 @@
-enum MemoryBytesView {
+enum MemoryView {
   Hexadecimal,
   Ascii,
   Decimal,
   Binary,
 }
 
-export default MemoryBytesView;
+export default MemoryView;
