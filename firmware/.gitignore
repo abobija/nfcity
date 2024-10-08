@@ -3,4 +3,3 @@ sdkconfig.old
 sdkconfig
 managed_components
 sdkconfig.defaults.local
-main/*.pem

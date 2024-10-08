@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.20)
 
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/sdkconfig.defaults.local)
     set(SDKCONFIG_DEFAULTS "sdkconfig.defaults;sdkconfig.defaults.local")

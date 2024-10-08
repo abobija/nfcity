@@ -20,7 +20,6 @@
 
 #define MQTT_READY_BIT BIT0
 
-#define MQTT_BROKER_URL   "wss://broker.emqx.io:8084/mqtt"
 #define MQTT_QOS_0        0
 #define MQTT_QOS_1        1
 #define MQTT_QOS_2        2
@@ -35,8 +34,13 @@
 
 #define PICC_MEM_BUFFER_SIZE 1024
 
+#ifndef CONFIG_ESP_TLS_SKIP_SERVER_CERT_VERIFY
 extern const uint8_t mqtt_broker_pem_start[] asm("_binary_mqtt_broker_pem_start");
 extern const uint8_t mqtt_broker_pem_end[] asm("_binary_mqtt_broker_pem_end");
+#else
+const uint8_t *mqtt_broker_pem_start = NULL;
+const uint8_t *mqtt_broker_pem_end = mqtt_broker_pem_start;
+#endif
 
 const char *TAG = "nfcity";
 const char *MSG_LOG_TAG = "nfcity";
@@ -312,9 +316,13 @@ void app_main()
     mqtt_subtopic_ptr = mqtt_topic_buffer + strlen(mqtt_topic_buffer);
 
     const esp_mqtt_client_config_t mqtt_cfg = {
-        .broker.address.uri = MQTT_BROKER_URL,
+        .broker.address.uri = CONFIG_NFCITY_MQTT_BROKER,
         .broker.verification.certificate = (const char *)mqtt_broker_pem_start,
         .broker.verification.certificate_len = mqtt_broker_pem_end - mqtt_broker_pem_start,
+#ifdef NFCITY_MQTT_USE_CREDENTIALS
+        .credentials.username = CONFIG_NFCITY_MQTT_USERNAME,
+        .credentials.authentication.password = CONFIG_NFCITY_MQTT_PASSWORD,
+#endif
     };
 
     mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
