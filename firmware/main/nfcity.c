@@ -88,7 +88,21 @@ static inline int mqtt_pub(const uint8_t *data, int len, int qos)
 static void on_mqtt_event(void *arg, esp_event_base_t base, int32_t id, void *data)
 {
     esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)data;
-    esp_log_level_t log_level = (id == MQTT_EVENT_PUBLISHED || id == MQTT_EVENT_DATA) ? ESP_LOG_DEBUG : ESP_LOG_INFO;
+    esp_log_level_t log_level = ESP_LOG_NONE;
+    switch (id) {
+        case MQTT_EVENT_PUBLISHED:
+        case MQTT_EVENT_DATA: {
+            log_level = ESP_LOG_DEBUG;
+        } break;
+        case MQTT_EVENT_ERROR:
+        case MQTT_EVENT_DISCONNECTED:
+        case MQTT_EVENT_UNSUBSCRIBED: {
+            log_level = ESP_LOG_WARN;
+        } break;
+        default: {
+            log_level = ESP_LOG_INFO;
+        } break;
+    }
     ESP_LOG_LEVEL_LOCAL(log_level, TAG, "mqtt event (id=%d)", event->event_id);
 }
 
