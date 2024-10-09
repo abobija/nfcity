@@ -27,15 +27,15 @@ export function isValidClientStorage(storage: ClientStorage): storage is ValidCl
 }
 
 export function validateClientStorage(storage: ClientStorage) {
-  const errors: { field: keyof ClientStorage, error: unknown }[] = [];
+  const errors: { value: unknown, field: keyof ClientStorage, error: unknown }[] = [];
 
   try {
     ClientValidator.validateBrokerUrl(storage.brokerUrl);
-  } catch (error) { errors.push({ field: 'brokerUrl', error }); }
+  } catch (error) { errors.push({ value: storage.brokerUrl, field: 'brokerUrl', error }); }
 
   try {
     ClientValidator.validateRootTopic(storage.rootTopic);
-  } catch (error) { errors.push({ field: 'rootTopic', error }); }
+  } catch (error) { errors.push({ value: storage.rootTopic, field: 'rootTopic', error }); }
 
   return errors;
 }
