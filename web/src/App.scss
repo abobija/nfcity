@@ -23,16 +23,16 @@
       align-items: center;
 
       .btn.connect {
-        margin-bottom: 2rem;
-      }
-
-      &>p {
-        margin-top: .3rem;
+        margin-bottom: 3rem;
       }
 
       .broker {
         color: $color-1;
         font-size: .7rem;
+
+        .static {
+          opacity: .5;
+        }
       }
 
       .btn.edit {

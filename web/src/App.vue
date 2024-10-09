@@ -47,7 +47,8 @@ onClientEnd(() => state.value = AppState.Initialized);
           connect
         </button>
         <p class="broker">
-          {{ client.rootTopicMasked }} @ {{ client.brokerHostname }}
+          <span class="static">to</span>
+          {{ client.rootTopicMasked }}
         </p>
         <p>
           <button class="btn txt primary edit" @click="() => logger.info('not implemented')">change</button>
