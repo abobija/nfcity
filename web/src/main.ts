@@ -16,11 +16,7 @@ const clientStorage = (() => {
     brokerUrl: "wss://broker.emqx.io:8084/mqtt",
   } as IncompleteClientStorage;
 
-  const item = localStorage.getItem(key);
-
-  if (!item) {
-    localStorage.setItem(key, JSON.stringify(defaultStorage));
-  }
+  const lsItem = localStorage.getItem(key);
 
   function sanitize(storage: ClientStorage): ClientStorage {
     const sanitizedStorage = clone(storage);
@@ -38,9 +34,8 @@ const clientStorage = (() => {
     return sanitizedStorage;
   }
 
-  const clientStorage = ref(
-    sanitize(item ? JSON.parse(item) : defaultStorage)
-  );
+  const lsItemJson = lsItem ? JSON.parse(lsItem) : defaultStorage
+  const clientStorage = ref(lsItem ? sanitize(lsItemJson) : defaultStorage);
 
   watch(clientStorage, (newStorage, oldStorage) => {
     if (!isValidClientStorage(newStorage)) {
