@@ -11,28 +11,13 @@
 #include "nvs_flash.h"
 #include "esp_event.h"
 #include "esp_netif.h"
+#include "esp_random.h"
 #include "protocol_examples_common.h"
 #include "mqtt_client.h"
 #include "msg.h"
 #include "rc522.h"
 #include "driver/rc522_spi.h"
 #include "picc/rc522_mifare.h"
-
-#define MQTT_READY_BIT BIT0
-
-#define MQTT_QOS_0        0
-#define MQTT_QOS_1        1
-#define MQTT_QOS_2        2
-#define MQTT_DEV_SUBTOPIC "dev"
-#define MQTT_WEB_SUBTOPIC "web"
-
-#define RC522_SPI_BUS_GPIO_MISO    21
-#define RC522_SPI_BUS_GPIO_MOSI    23
-#define RC522_SPI_BUS_GPIO_SCLK    19
-#define RC522_SPI_SCANNER_GPIO_SDA 22
-#define RC522_SCANNER_GPIO_RST     18
-
-#define PICC_MEM_BUFFER_SIZE 1024
 
 #ifndef CONFIG_ESP_TLS_SKIP_SERVER_CERT_VERIFY
 extern const uint8_t mqtt_broker_pem_start[] asm("_binary_mqtt_broker_pem_start");
@@ -41,6 +26,25 @@ extern const uint8_t mqtt_broker_pem_end[] asm("_binary_mqtt_broker_pem_end");
 const uint8_t *mqtt_broker_pem_start = NULL;
 const uint8_t *mqtt_broker_pem_end = mqtt_broker_pem_start;
 #endif
+
+#define NVS_NAMESPACE              "nfcity"
+#define NVS_KEY_MQTT_ROOT_TOPIC_ID "mqtt_rt_id"
+
+#define MQTT_ROOT_TOPIC_PREFIX     "nfcity-"
+#define MQTT_DEV_SUBTOPIC          "/dev"
+#define MQTT_WEB_SUBTOPIC          "/web"
+#define MQTT_QOS_0                 0
+#define MQTT_QOS_1                 1
+#define MQTT_QOS_2                 2
+#define MQTT_READY_BIT             BIT0
+
+#define RC522_SPI_BUS_GPIO_MISO    21
+#define RC522_SPI_BUS_GPIO_MOSI    23
+#define RC522_SPI_BUS_GPIO_SCLK    19
+#define RC522_SPI_SCANNER_GPIO_SDA 22
+#define RC522_SCANNER_GPIO_RST     18
+
+#define PICC_MEM_BUFFER_SIZE       1024
 
 const char *TAG = "nfcity";
 const char *MSG_LOG_TAG = "nfcity";
@@ -204,7 +208,7 @@ static void on_mqtt_data(void *arg, esp_event_base_t base, int32_t eid, void *da
         } break;
         default: {
             ESP_LOGW(TAG, "Unsupported meessage kind: %d", web_msg.kind);
-            err = ESP_ERR_NOT_SUPPORTED; // TODO: use custom err
+            err = ESP_ERR_NOT_SUPPORTED;
         } break;
     }
 
@@ -296,61 +300,100 @@ _exit:
 
 void app_main()
 {
-    wait_bits = xEventGroupCreate();
-    assert(wait_bits != NULL);
-    xEventGroupClearBits(wait_bits, MQTT_READY_BIT);
-
-    enc_buffer_mutex = xSemaphoreCreateMutex();
-    assert(enc_buffer_mutex != NULL);
-
-    // {{ wifi
     ESP_ERROR_CHECK(nvs_flash_init());
-    ESP_ERROR_CHECK(esp_netif_init());
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
-    ESP_ERROR_CHECK(example_connect());
-    // }}
 
-    // {{ mqtt
-    const char *mqtt_root_topic = "/nfcity-7493/"; // TODO: Generate random ID
-    strcpy(mqtt_topic_buffer, mqtt_root_topic);
-    mqtt_subtopic_ptr = mqtt_topic_buffer + strlen(mqtt_topic_buffer);
+    { // concurency
+        wait_bits = xEventGroupCreate();
+        assert(wait_bits != NULL);
+        xEventGroupClearBits(wait_bits, MQTT_READY_BIT);
+        enc_buffer_mutex = xSemaphoreCreateMutex();
+        assert(enc_buffer_mutex != NULL);
+        rc522_task_mutex = xSemaphoreCreateMutex();
+        assert(rc522_task_mutex != NULL);
+    }
 
-    const esp_mqtt_client_config_t mqtt_cfg = {
-        .broker.address.uri = CONFIG_NFCITY_MQTT_BROKER,
-        .broker.verification.certificate = (const char *)mqtt_broker_pem_start,
-        .broker.verification.certificate_len = mqtt_broker_pem_end - mqtt_broker_pem_start,
+    { // wifi
+        ESP_ERROR_CHECK(esp_netif_init());
+        ESP_ERROR_CHECK(esp_event_loop_create_default());
+        ESP_ERROR_CHECK(example_connect());
+    }
+
+    { // mqtt
+        char root_topic_id[10 + 1] = { 0 };
+        nvs_handle_t nfcity_nvs;
+        ESP_ERROR_CHECK(nvs_open(NVS_NAMESPACE, NVS_READWRITE, &nfcity_nvs));
+        size_t root_topic_id_size = 0;
+        esp_err_t nvs_err = nvs_get_str(nfcity_nvs, NVS_KEY_MQTT_ROOT_TOPIC_ID, NULL, &root_topic_id_size);
+        assert(nvs_err == ESP_OK || nvs_err == ESP_ERR_NVS_NOT_FOUND);
+        if (nvs_err == ESP_OK) { // retrieve root_topic_id from cache
+            ESP_LOGI(TAG, "size of root_topic_id retrieved from cache: %d", root_topic_id_size);
+            assert(root_topic_id_size == sizeof(root_topic_id));
+            ESP_ERROR_CHECK(nvs_get_str(nfcity_nvs, NVS_KEY_MQTT_ROOT_TOPIC_ID, root_topic_id, &root_topic_id_size));
+            root_topic_id[sizeof(root_topic_id) - 1] = 0;
+            ESP_LOGI(TAG, "root_topic_id retrieved from cache: %s", root_topic_id);
+        }
+        else { // generate and cache random root_topic_id
+            root_topic_id_size = sizeof(root_topic_id);
+            uint8_t rnd_root_topic_id_bytes[(sizeof(root_topic_id) - 1) / 2] = { 0 };
+            esp_fill_random(rnd_root_topic_id_bytes, sizeof(rnd_root_topic_id_bytes));
+            for (uint8_t i = 0; i < sizeof(rnd_root_topic_id_bytes); ++i) {
+                sprintf(root_topic_id + (i * 2), "%02x", rnd_root_topic_id_bytes[i]);
+            }
+            root_topic_id[sizeof(root_topic_id) - 1] = 0;
+            ESP_LOGI(TAG, "root_topic_id generated: %s", root_topic_id);
+            ESP_ERROR_CHECK(nvs_set_str(nfcity_nvs, NVS_KEY_MQTT_ROOT_TOPIC_ID, root_topic_id));
+            ESP_ERROR_CHECK(nvs_commit(nfcity_nvs));
+            ESP_LOGI(TAG, "root_topic_id cached");
+        }
+        nvs_close(nfcity_nvs);
+        memset(mqtt_topic_buffer, 0, sizeof(mqtt_topic_buffer));
+        sprintf(mqtt_topic_buffer,
+            "/%.*s%.*s",
+            sizeof(MQTT_ROOT_TOPIC_PREFIX) - 1,
+            MQTT_ROOT_TOPIC_PREFIX,
+            sizeof(root_topic_id) - 1,
+            root_topic_id);
+        mqtt_subtopic_ptr = mqtt_topic_buffer + strlen(mqtt_topic_buffer);
+        ESP_LOGI(TAG, "*** +------------------------------------+");
+        ESP_LOGI(TAG, "*** |%*c", 37, '|');
+        ESP_LOGI(TAG, "*** | MQTT_ROOT_TOPIC: %s |", mqtt_topic_buffer + 1);
+        ESP_LOGI(TAG, "*** |%*c", 37, '|');
+        ESP_LOGI(TAG, "*** +------------------------------------+");
+
+        const esp_mqtt_client_config_t mqtt_cfg = {
+            .broker.address.uri = CONFIG_NFCITY_MQTT_BROKER,
+            .broker.verification.certificate = (const char *)mqtt_broker_pem_start,
+            .broker.verification.certificate_len = mqtt_broker_pem_end - mqtt_broker_pem_start,
 #ifdef NFCITY_MQTT_USE_CREDENTIALS
-        .credentials.username = CONFIG_NFCITY_MQTT_USERNAME,
-        .credentials.authentication.password = CONFIG_NFCITY_MQTT_PASSWORD,
+            .credentials.username = CONFIG_NFCITY_MQTT_USERNAME,
+            .credentials.authentication.password = CONFIG_NFCITY_MQTT_PASSWORD,
 #endif
-    };
+        };
 
-    mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
-    assert(mqtt_client != NULL);
+        mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
+        assert(mqtt_client != NULL);
 
-    ESP_ERROR_CHECK(esp_mqtt_client_register_event(mqtt_client, ESP_EVENT_ANY_ID, on_mqtt_event, NULL));
-    ESP_ERROR_CHECK(esp_mqtt_client_register_event(mqtt_client, MQTT_EVENT_CONNECTED, on_mqtt_connected, NULL));
-    ESP_ERROR_CHECK(esp_mqtt_client_register_event(mqtt_client, MQTT_EVENT_DATA, on_mqtt_data, NULL));
+        ESP_ERROR_CHECK(esp_mqtt_client_register_event(mqtt_client, ESP_EVENT_ANY_ID, on_mqtt_event, NULL));
+        ESP_ERROR_CHECK(esp_mqtt_client_register_event(mqtt_client, MQTT_EVENT_CONNECTED, on_mqtt_connected, NULL));
+        ESP_ERROR_CHECK(esp_mqtt_client_register_event(mqtt_client, MQTT_EVENT_DATA, on_mqtt_data, NULL));
 
-    ESP_ERROR_CHECK(esp_mqtt_client_start(mqtt_client));
-    // }}
+        ESP_ERROR_CHECK(esp_mqtt_client_start(mqtt_client));
+    }
 
-    xEventGroupWaitBits(wait_bits, MQTT_READY_BIT, pdFALSE, pdTRUE, portMAX_DELAY);
+    { // rc522
+        xEventGroupWaitBits(wait_bits, MQTT_READY_BIT, pdFALSE, pdTRUE, portMAX_DELAY);
 
-    // {{ rc522
-    rc522_task_mutex = xSemaphoreCreateMutex();
-    assert(rc522_task_mutex != NULL);
+        ESP_ERROR_CHECK(rc522_spi_create(&rc522_driver_config, &rc522_driver));
+        ESP_ERROR_CHECK(rc522_driver_install(rc522_driver));
 
-    ESP_ERROR_CHECK(rc522_spi_create(&rc522_driver_config, &rc522_driver));
-    ESP_ERROR_CHECK(rc522_driver_install(rc522_driver));
+        rc522_config_t rc522_scanner_config = {
+            .driver = rc522_driver,
+            .task_mutex = rc522_task_mutex,
+        };
 
-    rc522_config_t rc522_scanner_config = {
-        .driver = rc522_driver,
-        .task_mutex = rc522_task_mutex,
-    };
-
-    ESP_ERROR_CHECK(rc522_create(&rc522_scanner_config, &rc522_scanner));
-    ESP_ERROR_CHECK(rc522_register_events(rc522_scanner, RC522_EVENT_PICC_STATE_CHANGED, on_picc_state_changed, NULL));
-    ESP_ERROR_CHECK(rc522_start(rc522_scanner));
-    // }}
+        ESP_ERROR_CHECK(rc522_create(&rc522_scanner_config, &rc522_scanner));
+        ESP_ERROR_CHECK(
+            rc522_register_events(rc522_scanner, RC522_EVENT_PICC_STATE_CHANGED, on_picc_state_changed, NULL));
+        ESP_ERROR_CHECK(rc522_start(rc522_scanner));
+    }
 }

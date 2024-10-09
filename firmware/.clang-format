@@ -2,7 +2,10 @@
 Language: Cpp
 BasedOnStyle: WebKit
 AlignConsecutiveBitFields: true
-AlignConsecutiveMacros: true
+AlignConsecutiveMacros:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: true
 AlignEscapedNewlines: Right
 AlignOperands: true
 AlignTrailingComments: true
