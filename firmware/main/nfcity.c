@@ -302,7 +302,7 @@ void app_main()
 {
     ESP_ERROR_CHECK(nvs_flash_init());
 
-    { // concurency
+    { // concurrency
         wait_bits = xEventGroupCreate();
         assert(wait_bits != NULL);
         xEventGroupClearBits(wait_bits, MQTT_READY_BIT);
