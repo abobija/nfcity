@@ -114,3 +114,23 @@ export function arrEquals(arr1: Uint8Array, arr2: Uint8Array): boolean {
 
   return arr1.every((el, i) => el === arr2[i]);
 }
+
+export interface StrMaskOptions {
+  char?: string;
+  side?: 'left' | 'right';
+  offset?: number;
+  ratio?: number;
+}
+
+export function strmask(str: string, opts?: StrMaskOptions): string {
+  const char = opts?.char ?? '*';
+  const side = opts?.side ?? 'right';
+  const offset = opts?.offset ?? 1;
+  const ratio = opts?.ratio ?? 0.5;
+  const length = str.length * ratio;
+  const mask = char.repeat(Math.min(3, length));
+
+  return side === 'left'
+    ? str.slice(0, offset) + mask + str.slice(offset + length)
+    : str.slice(0, -offset - length) + mask + str.slice(-offset);
+};

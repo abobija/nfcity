@@ -3,6 +3,7 @@ import Client from '@/comm/Client';
 import { onClientPing, onClientPong, onClientPongMissed } from '@/comm/hooks/ClientEmitHooks';
 import '@/components/MemoryBlock/MemoryBlock.scss';
 import '@/components/SystemInfo/SystemInfo.scss';
+import { strmask } from '@/utils/helpers';
 import { inject, ref } from 'vue';
 
 enum PingState {
@@ -36,7 +37,11 @@ onClientPongMissed(() => {
   <div class="component system-info">
     <div class="ping">
       <span class="root-topic" title="root topic">
-        {{ client.rootTopic }}
+        {{ strmask(client.rootTopic, {
+          side: 'right',
+          offset: 2,
+          ratio: .4,
+        }) }}
       </span>
       <Transition mode="out-in" :duration="75">
         <span class="status undefined" v-if="pingState == PingState.Undefined" title="ping pong">
