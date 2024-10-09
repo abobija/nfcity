@@ -28,9 +28,9 @@ const uint8_t *mqtt_broker_pem_end = mqtt_broker_pem_start;
 #endif
 
 #define NVS_NAMESPACE              "nfcity"
-#define NVS_KEY_MQTT_ROOT_TOPIC_ID "mqtt_rt_id"
+#define NVS_KEY_MQTT_ROOT_TOPIC    "mqtt_rtopic"
 
-#define MQTT_ROOT_TOPIC_PREFIX     "nfcity-"
+#define MQTT_ROOT_TOPIC_LENGTH     16
 #define MQTT_DEV_SUBTOPIC          "/dev"
 #define MQTT_WEB_SUBTOPIC          "/web"
 #define MQTT_QOS_0                 0
@@ -319,46 +319,41 @@ void app_main()
     }
 
     { // mqtt
-        char root_topic_id[10 + 1] = { 0 };
+        char root_topic[MQTT_ROOT_TOPIC_LENGTH + 1] = { 0 };
         nvs_handle_t nfcity_nvs;
         ESP_ERROR_CHECK(nvs_open(NVS_NAMESPACE, NVS_READWRITE, &nfcity_nvs));
-        size_t root_topic_id_size = 0;
-        esp_err_t nvs_err = nvs_get_str(nfcity_nvs, NVS_KEY_MQTT_ROOT_TOPIC_ID, NULL, &root_topic_id_size);
+        size_t root_topic_size = 0;
+        esp_err_t nvs_err = nvs_get_str(nfcity_nvs, NVS_KEY_MQTT_ROOT_TOPIC, NULL, &root_topic_size);
         assert(nvs_err == ESP_OK || nvs_err == ESP_ERR_NVS_NOT_FOUND);
-        if (nvs_err == ESP_OK) { // retrieve root_topic_id from cache
-            ESP_LOGI(TAG, "size of root_topic_id retrieved from cache: %d", root_topic_id_size);
-            assert(root_topic_id_size == sizeof(root_topic_id));
-            ESP_ERROR_CHECK(nvs_get_str(nfcity_nvs, NVS_KEY_MQTT_ROOT_TOPIC_ID, root_topic_id, &root_topic_id_size));
-            root_topic_id[sizeof(root_topic_id) - 1] = 0;
-            ESP_LOGI(TAG, "root_topic_id retrieved from cache: %s", root_topic_id);
+        if (nvs_err == ESP_OK) { // retrieve root_topic from cache
+            ESP_LOGI(TAG, "size of root_topic retrieved from cache: %d", root_topic_size);
+            assert(root_topic_size == (MQTT_ROOT_TOPIC_LENGTH + 1));
+            ESP_ERROR_CHECK(nvs_get_str(nfcity_nvs, NVS_KEY_MQTT_ROOT_TOPIC, root_topic, &root_topic_size));
+            root_topic[MQTT_ROOT_TOPIC_LENGTH] = 0;
+            ESP_LOGI(TAG, "root_topic retrieved from cache: %s", root_topic);
         }
-        else { // generate and cache random root_topic_id
-            root_topic_id_size = sizeof(root_topic_id);
-            uint8_t rnd_root_topic_id_bytes[(sizeof(root_topic_id) - 1) / 2] = { 0 };
-            esp_fill_random(rnd_root_topic_id_bytes, sizeof(rnd_root_topic_id_bytes));
-            for (uint8_t i = 0; i < sizeof(rnd_root_topic_id_bytes); ++i) {
-                sprintf(root_topic_id + (i * 2), "%02x", rnd_root_topic_id_bytes[i]);
+        else { // generate and cache random root_topic
+            root_topic_size = MQTT_ROOT_TOPIC_LENGTH + 1;
+            uint8_t rnd_root_topic_bytes[MQTT_ROOT_TOPIC_LENGTH / 2] = { 0 };
+            esp_fill_random(rnd_root_topic_bytes, sizeof(rnd_root_topic_bytes));
+            for (uint8_t i = 0; i < sizeof(rnd_root_topic_bytes); ++i) {
+                sprintf(root_topic + (i * 2), "%02x", rnd_root_topic_bytes[i]);
             }
-            root_topic_id[sizeof(root_topic_id) - 1] = 0;
-            ESP_LOGI(TAG, "root_topic_id generated: %s", root_topic_id);
-            ESP_ERROR_CHECK(nvs_set_str(nfcity_nvs, NVS_KEY_MQTT_ROOT_TOPIC_ID, root_topic_id));
+            root_topic[MQTT_ROOT_TOPIC_LENGTH] = 0;
+            ESP_LOGI(TAG, "root_topic generated: %s", root_topic);
+            ESP_ERROR_CHECK(nvs_set_str(nfcity_nvs, NVS_KEY_MQTT_ROOT_TOPIC, root_topic));
             ESP_ERROR_CHECK(nvs_commit(nfcity_nvs));
-            ESP_LOGI(TAG, "root_topic_id cached");
+            ESP_LOGI(TAG, "root_topic cached");
         }
         nvs_close(nfcity_nvs);
         memset(mqtt_topic_buffer, 0, sizeof(mqtt_topic_buffer));
-        sprintf(mqtt_topic_buffer,
-            "/%.*s%.*s",
-            sizeof(MQTT_ROOT_TOPIC_PREFIX) - 1,
-            MQTT_ROOT_TOPIC_PREFIX,
-            sizeof(root_topic_id) - 1,
-            root_topic_id);
+        sprintf(mqtt_topic_buffer, "/%.*s", MQTT_ROOT_TOPIC_LENGTH, root_topic);
         mqtt_subtopic_ptr = mqtt_topic_buffer + strlen(mqtt_topic_buffer);
-        ESP_LOGI(TAG, "*** +------------------------------------+");
-        ESP_LOGI(TAG, "*** |%*c", 37, '|');
+        ESP_LOGI(TAG, "*** +-----------------------------------+");
+        ESP_LOGI(TAG, "*** |%*c", 36, '|');
         ESP_LOGI(TAG, "*** | MQTT_ROOT_TOPIC: %s |", mqtt_topic_buffer + 1);
-        ESP_LOGI(TAG, "*** |%*c", 37, '|');
-        ESP_LOGI(TAG, "*** +------------------------------------+");
+        ESP_LOGI(TAG, "*** |%*c", 36, '|');
+        ESP_LOGI(TAG, "*** +-----------------------------------+");
 
         const esp_mqtt_client_config_t mqtt_cfg = {
             .broker.address.uri = CONFIG_NFCITY_MQTT_BROKER,
