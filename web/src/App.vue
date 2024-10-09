@@ -76,7 +76,8 @@ onClientEnd(() => state.value = AppState.Initialized);
       <h2 class="subtitle">deep dive into NFC cards</h2>
       <div class="enter" v-if="clientStorage">
         <div class="config" v-if="configClient">
-          <ClientConfig :client-storage="clientStorage" @save="onClientConfigSave" />
+          <ClientConfig :client-storage="clientStorage" @save="onClientConfigSave" @cancel="() => configClient = false"
+            :cancelable="isCompleteClientStorage(clientStorage)" />
         </div>
         <div class="connect" v-else>
           <button class="btn primary connect" @click="connect" :disabled="state == AppState.Connecting">

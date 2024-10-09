@@ -7,10 +7,12 @@ import { onMounted, ref, useTemplateRef } from 'vue';
 
 const props = defineProps<{
   clientStorage: ClientStorage;
+  cancelable?: boolean;
 }>();
 
 const emits = defineEmits<{
   (e: 'save', clientStorageProposal: ValidClientStorage): void;
+  (e: 'cancel'): void;
 }>();
 
 const localClientStorage = ref(clone(props.clientStorage));
@@ -53,6 +55,7 @@ function onSubmit() {
       </div>
       <div class="form-group">
         <button class="btn primary" type="submit">Save</button>
+        <button v-if="props.cancelable" class="btn secondary" @click="emits('cancel')" type="button">Cancel</button>
       </div>
     </form>
   </div>

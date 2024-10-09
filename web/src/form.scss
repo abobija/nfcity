@@ -24,6 +24,13 @@ form .form-group,
   &:not(:first-child):not(:last-child) {
     margin: 0.5rem 0;
   }
+
+  button,
+  .bnt {
+    &:not(:last-child) {
+      margin-right: .8rem;
+    }
+  }
 }
 
 label,
@@ -77,7 +84,6 @@ button,
 .btn {
   &:not(:disabled) {
     cursor: pointer;
-    font-weight: 600;
 
     &:active {
       transform: scale(.95);
@@ -149,10 +155,14 @@ button.txt,
     &:disabled {
       color: color.adjust($color-fg, $alpha: $disabled-alpha);
     }
-
   }
 }
 
 @include define-txt-button('primary', $color-primary);
 
 @include define-txt-button('secondary', $color-secondary);
+
+button.primary,
+.btn.primary {
+  font-weight: 600;
+}
