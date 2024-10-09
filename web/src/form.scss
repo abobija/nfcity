@@ -7,17 +7,10 @@ $disabled-border-alpha: -0.8;
 
 $input-color: $color-fg;
 $input-bg-color: $color-bg;
-$input-border-color: $color-3;
+$input-border-color: $color-fg;
 $input-focus-color: color.adjust($input-color, $alpha: $focus-alpha);
 $input-disabled-color: color.adjust($input-color, $alpha: $disabled-alpha);
 $input-disabled-border-color: color.adjust($input-color, $alpha: $disabled-border-alpha);
-
-$button-color: $color-3;
-$button-bg-color: $color-bg;
-$button-border-color: $color-3;
-$button-focus-color: color.adjust($button-color, $alpha: $focus-alpha);
-$button-disabled-color: color.adjust($button-color, $alpha: $disabled-alpha);
-$button-disabled-border-color: color.adjust($button-color, $alpha: $disabled-border-alpha);
 
 form {
   display: block;
@@ -72,31 +65,16 @@ input[type="text"] {
 
 button,
 .btn {
-  background-color: $button-bg-color;
-
   &:not(:disabled) {
     cursor: pointer;
-    color: $button-color;
-    border-color: $button-border-color;
-
-    &:hover {
-      box-shadow: 0 0 0.4rem $button-focus-color;
-    }
 
     &:active {
       transform: scale(.95);
     }
 
     &.activated {
-      background-color: $color-3;
-      color: $color-bg;
       font-weight: bold;
     }
-  }
-
-  &:disabled {
-    color: $button-disabled-color;
-    border-color: $button-disabled-border-color;
   }
 }
 
@@ -105,3 +83,34 @@ button,
     border-right: none;
   }
 }
+
+@mixin define-button($class-name, $color-fg, $color-bg) {
+
+  button.#{$class-name},
+  .btn.#{$class-name} {
+    background-color: $color-bg;
+
+    &:not(:disabled) {
+      color: $color-fg;
+      border-color: $color-fg;
+
+      &:hover {
+        box-shadow: 0 0 0.4rem color.adjust($color-fg, $alpha: $focus-alpha);
+      }
+
+      &.activated {
+        background-color: $color-fg;
+        color: $color-bg;
+      }
+    }
+
+    &:disabled {
+      color: color.adjust($color-fg, $alpha: $disabled-alpha);
+      border-color: color.adjust($color-fg, $alpha: $disabled-border-alpha);
+    }
+  }
+}
+
+@include define-button('primary', $color-3, $color-bg);
+
+@include define-button('secondary', $color-fg, $color-bg);

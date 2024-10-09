@@ -289,7 +289,9 @@ onMemoryByteMouseClick(clickedByte => {
           </div>
         </div>
 
-        <SystemInfo />
+        <div class="misc">
+          <SystemInfo />
+        </div>
       </div>
 
       <div class="main">
