@@ -48,11 +48,11 @@ function onSubmit() {
     <form @submit.prevent="onSubmit">
       <div class="form-group">
         <input type="text" placeholder="Broker" v-model.trim="localClientStorage.brokerUrl" ref="broker-url"
-          spellcheck="false" />
+          spellcheck="false" required />
       </div>
       <div class="form-group">
         <input type="text" placeholder="Root Topic" v-model.trim="localClientStorage.rootTopic" ref="root-topic"
-          spellcheck="false" :maxlength="ClientValidator.RootTopicLength" />
+          spellcheck="false" :maxlength="ClientValidator.RootTopicLength" required />
       </div>
       <div class="form-group">
         <button class="btn primary" type="submit">Save</button>
