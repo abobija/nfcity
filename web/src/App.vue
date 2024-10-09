@@ -87,7 +87,7 @@ onClientEnd(() => state.value = AppState.Initialized);
             {{ client?.rootTopicMasked }}
           </p>
           <p>
-            <button class="btn txt primary edit" @click="() => logger.info('not implemented')">change</button>
+            <button class="btn txt primary edit" @click="() => configClient = true">change</button>
           </p>
         </div>
         <div class="footer">
