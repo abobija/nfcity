@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ClientValidator } from '@/comm/Client';
 import '@/components/ClientConfig/ClientConfig.scss';
 import { ClientStorage, validateClientStorage, ValidClientStorage } from '@/storage/ClientStorage';
 import { clone } from '@/utils/helpers';
@@ -51,7 +52,7 @@ function onSubmit() {
       </div>
       <div class="form-group">
         <input type="text" placeholder="Root Topic" v-model.trim="localClientStorage.rootTopic" ref="root-topic"
-          spellcheck="false" />
+          spellcheck="false" :maxlength="ClientValidator.RootTopicLength" />
       </div>
       <div class="form-group">
         <button class="btn primary" type="submit">Save</button>
