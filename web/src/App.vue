@@ -8,7 +8,7 @@ import { useClientMaybe } from '@/hooks/useClient';
 import { Logger } from '@/utils/Logger';
 import { onMounted, ref, watch } from 'vue';
 import { useClientStorage } from './hooks/useClientStorage';
-import { ValidatedClientStorage } from './storage/ClientStorage';
+import { CompleteClientStorage, isCompleteClientStorage } from './storage/ClientStorage';
 
 enum AppState {
   Undefined = 0,
@@ -31,7 +31,7 @@ watch(state, (newState, oldState) => {
 });
 
 onMounted(() => {
-  if (clientStorage.value.rootTopic) {
+  if (isCompleteClientStorage(clientStorage.value)) {
     updateClient(Client.from(
       clientStorage.value.brokerUrl,
       clientStorage.value.rootTopic,
@@ -41,12 +41,12 @@ onMounted(() => {
   state.value = AppState.Initialized;
 });
 
-function onClientConfigSave(newStorage: ValidatedClientStorage) {
-  clientStorage.value = newStorage;
+function onClientConfigSave(clientStorageProposal: CompleteClientStorage) {
+  clientStorage.value = clientStorageProposal;
 
   updateClient(Client.from(
-    newStorage.brokerUrl,
-    newStorage.rootTopic,
+    clientStorageProposal.brokerUrl,
+    clientStorageProposal.rootTopic,
   ));
 }
 

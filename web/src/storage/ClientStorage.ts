@@ -1,10 +1,18 @@
-interface ClientStorage {
-  readonly brokerUrl: string;
+export interface ClientStorage {
+  readonly brokerUrl?: string;
   readonly rootTopic?: string;
 }
 
-export interface NonValidatedClientStorage extends ClientStorage { }
+export interface IncompleteClientStorage extends ClientStorage { }
 
-export interface ValidatedClientStorage extends ClientStorage {
+export interface CompleteClientStorage extends ClientStorage {
+  readonly brokerUrl: string;
   readonly rootTopic: string;
+}
+
+export function isCompleteClientStorage(storage: ClientStorage): storage is CompleteClientStorage {
+  return (
+    typeof storage.brokerUrl === 'string'
+    && typeof storage.rootTopic === 'string'
+  );
 }

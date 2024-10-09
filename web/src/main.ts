@@ -6,14 +6,14 @@ import '@/main.scss';
 import { logger, Logger } from '@/utils/Logger';
 import 'reset-css';
 import { createApp, ref, watch } from 'vue';
-import { NonValidatedClientStorage } from './storage/ClientStorage';
+import { ClientStorage, IncompleteClientStorage } from './storage/ClientStorage';
 
 const clientStorage = (() => {
   const logger = Logger.fromName('clientStorage');
   const key = 'client';
   const defaultStorage = {
     brokerUrl: "wss://broker.emqx.io:8084/mqtt",
-  } as NonValidatedClientStorage;
+  } as IncompleteClientStorage;
 
   const item = localStorage.getItem(key);
 
@@ -22,7 +22,7 @@ const clientStorage = (() => {
   }
 
   const clientStorage = ref(
-    (item ? JSON.parse(item) : defaultStorage) as NonValidatedClientStorage
+    (item ? JSON.parse(item) : defaultStorage) as ClientStorage
   );
 
   watch(clientStorage, (newStorage, oldStorage) => {

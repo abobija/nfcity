@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { ClientValidator } from '@/comm/Client';
 import '@/components/ClientConfig/ClientConfig.scss';
-import { NonValidatedClientStorage, ValidatedClientStorage } from '@/storage/ClientStorage';
+import { ClientStorage, CompleteClientStorage } from '@/storage/ClientStorage';
 import { clone } from '@/utils/helpers';
 import { logger } from '@/utils/Logger';
 import { onMounted, ref, useTemplateRef } from 'vue';
 
 const props = defineProps<{
-  clientStorage: NonValidatedClientStorage;
+  clientStorage: ClientStorage;
 }>();
 
 const emits = defineEmits<{
-  (e: 'save', clientStorage: ValidatedClientStorage): void;
+  (e: 'save', clientStorageProposal: CompleteClientStorage): void;
 }>();
 
 const localClientStorage = ref(clone(props.clientStorage));
@@ -46,7 +46,7 @@ function onSubmit() {
     return;
   }
 
-  emits('save', localClientStorage.value as ValidatedClientStorage);
+  emits('save', localClientStorage.value as CompleteClientStorage);
 }
 </script>
 
