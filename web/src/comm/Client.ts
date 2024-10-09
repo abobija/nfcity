@@ -176,7 +176,7 @@ class Client {
     this.mqttClient = mqtt.connect(this.brokerUrl);
 
     this.mqttClient.on('error', error => {
-      this.logger.error('error', error);
+      this.logger.warning('error', error);
     });
 
     this.mqttClient.on('connect', () => {
@@ -185,7 +185,7 @@ class Client {
 
       this.mqttClient!.subscribe(topic, { qos: 0 }, err => {
         if (err) {
-          this.logger.error('subscribe error', err);
+          this.logger.warning('subscribe error', err);
           return;
         }
 
@@ -309,7 +309,7 @@ class Client {
         this.logger.debug('Failed to ping in loop', e);
 
         if (++errorCounter >= maxErrorCounter) {
-          cancelationToken?.cancel("Failed to ping in loop");
+          cancelationToken?.cancel(`Failed to ping in loop for ${maxErrorCounter} times`);
         }
       }
     };
