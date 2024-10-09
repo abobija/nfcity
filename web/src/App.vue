@@ -75,22 +75,25 @@ onClientEnd(() => state.value = AppState.Initialized);
       <h1 class="title">nfcity</h1>
       <h2 class="subtitle">deep dive into NFC cards</h2>
       <div class="enter" v-if="clientStorage">
-        <div class="config" v-if="configClient">
-          <ClientConfig :client-storage="clientStorage" @save="onClientConfigSave" @cancel="() => configClient = false"
-            :cancelable="isCompleteClientStorage(clientStorage)" />
-        </div>
-        <div class="connect" v-else>
-          <button class="btn primary connect" @click="connect" :disabled="state == AppState.Connecting">
-            connect
-          </button>
-          <p class="broker">
-            <span class="static">to</span>
-            {{ client?.rootTopicMasked }}
-          </p>
-          <p>
-            <button class="btn txt primary edit" @click="() => configClient = true">change</button>
-          </p>
-        </div>
+        <Transition mode="out-in" :duration="75">
+
+          <div class="config" v-if="configClient">
+            <ClientConfig :client-storage="clientStorage" @save="onClientConfigSave"
+              @cancel="() => configClient = false" :cancelable="isCompleteClientStorage(clientStorage)" />
+          </div>
+          <div class="connect" v-else>
+            <button class="btn primary connect" @click="connect" :disabled="state == AppState.Connecting">
+              connect
+            </button>
+            <p class="broker">
+              <span class="static">to</span>
+              {{ client?.rootTopicMasked }}
+            </p>
+            <p>
+              <button class="btn txt primary edit" @click="() => configClient = true">change</button>
+            </p>
+          </div>
+        </Transition>
         <div class="footer">
           <div class="credits">
             made by <a href="https://github.com/abobija" target="_blank">ab</a>
