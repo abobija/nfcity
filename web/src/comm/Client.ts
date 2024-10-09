@@ -364,11 +364,11 @@ export abstract class ClientValidator {
 
   static validateBrokerUrl(brokerUrl?: string): void {
     if (!brokerUrl) {
-      throw new Error('brokerUrl is required');
+      throw new Error('Broker URL is required');
     }
 
     if (!brokerUrl.startsWith('wss://')) {
-      throw new Error('brokerUrl must use wss://');
+      throw new Error('Broker URL must use wss://');
     }
 
     new URL(brokerUrl);
@@ -376,15 +376,15 @@ export abstract class ClientValidator {
 
   static validateRootTopic(rootTopic?: string): void {
     if (!rootTopic) {
-      throw new Error('rootTopic is required');
-    }
-
-    if (!rootTopic.match(/^[a-zA-Z0-9_]+$/)) {
-      throw new Error('rootTopic must be alphanumeric');
+      throw new Error('Root Topic is required');
     }
 
     if (rootTopic.length != ClientValidator.RootTopicLength) {
-      throw new Error(`rootTopic must be ${ClientValidator.RootTopicLength} characters long`);
+      throw new Error(`Root Topic must be ${ClientValidator.RootTopicLength} characters long`);
+    }
+
+    if (!rootTopic.match(/^[0-9a-fA-F]+$/)) {
+      throw new Error('Root Topic must contain only hexadecimal characters');
     }
   }
 }

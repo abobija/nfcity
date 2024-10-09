@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { ClientValidator } from '@/comm/Client';
 import '@/components/ClientConfig/ClientConfig.scss';
-import { ClientStorage, CompleteClientStorage } from '@/storage/ClientStorage';
+import { ClientStorage, validateClientStorage, ValidClientStorage } from '@/storage/ClientStorage';
 import { clone } from '@/utils/helpers';
 import { logger } from '@/utils/Logger';
 import { onMounted, ref, useTemplateRef } from 'vue';
@@ -11,7 +10,7 @@ const props = defineProps<{
 }>();
 
 const emits = defineEmits<{
-  (e: 'save', clientStorageProposal: CompleteClientStorage): void;
+  (e: 'save', clientStorageProposal: ValidClientStorage): void;
 }>();
 
 const localClientStorage = ref(clone(props.clientStorage));
@@ -22,31 +21,22 @@ onMounted(() => {
   rootTopicRef.value?.focus();
 });
 
-function validate() {
-  try {
-    ClientValidator.validateBrokerUrl(localClientStorage.value.brokerUrl);
-  } catch {
-    brokerUrlRef.value?.focus();
-    return false;
-  }
-
-  try {
-    ClientValidator.validateRootTopic(localClientStorage.value.rootTopic);
-  } catch {
-    rootTopicRef.value?.focus();
-    return false;
-  }
-
-  return true;
-}
-
 function onSubmit() {
-  if (!validate()) {
-    logger.warning('Validation failed');
+  const errors = validateClientStorage(localClientStorage.value);
+
+  if (errors.length > 0) {
+    errors.forEach(e => logger.debug('validation', e.error));
+
+    if (errors.some(e => e.field == 'brokerUrl')) {
+      brokerUrlRef.value?.focus();
+    } else if (errors.some(e => e.field == 'rootTopic')) {
+      rootTopicRef.value?.focus();
+    }
+
     return;
   }
 
-  emits('save', localClientStorage.value as CompleteClientStorage);
+  emits('save', localClientStorage.value as ValidClientStorage);
 }
 </script>
 

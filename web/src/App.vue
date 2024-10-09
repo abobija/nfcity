@@ -8,7 +8,7 @@ import { useClientMaybe } from '@/hooks/useClient';
 import { Logger } from '@/utils/Logger';
 import { onMounted, ref, watch } from 'vue';
 import { useClientStorage } from './hooks/useClientStorage';
-import { CompleteClientStorage, isCompleteClientStorage } from './storage/ClientStorage';
+import { isCompleteClientStorage, ValidClientStorage } from './storage/ClientStorage';
 
 enum AppState {
   Undefined = 0,
@@ -41,7 +41,7 @@ onMounted(() => {
   state.value = AppState.Initialized;
 });
 
-function onClientConfigSave(clientStorageProposal: CompleteClientStorage) {
+function onClientConfigSave(clientStorageProposal: ValidClientStorage) {
   clientStorage.value = clientStorageProposal;
 
   updateClient(Client.from(
