@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Client from '@/comm/Client';
 import { onClientMessage, onClientReady } from '@/comm/hooks/ClientEmitHooks';
 import HelloDevMessage from '@/comm/msgs/dev/HelloDevMessage';
 import PiccDevMessage from '@/comm/msgs/dev/PiccDevMessage';
@@ -19,6 +18,7 @@ import {
   onMemoryByteMouseLeave
 } from '@/components/MemoryByte/hooks/MemoryByteEmitHooks';
 import SystemInfo from '@/components/SystemInfo/SystemInfo.vue';
+import { useClient } from '@/hooks/useClient';
 import MifareClassic, {
   MifareClassicBlock,
   MifareClassicBlockGroup,
@@ -29,7 +29,7 @@ import { PiccState, PiccType } from '@/models/Picc';
 import { CancelationToken, OperationCanceledError } from '@/utils/CancelationToken';
 import { hex } from '@/utils/helpers';
 import { Logger } from '@/utils/Logger';
-import { inject, onMounted, onUnmounted, ref, watch } from 'vue';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
 
 enum DashboardState {
   Undefined = 0,
@@ -42,7 +42,7 @@ enum DashboardState {
 }
 
 const logger = Logger.fromName('Dashboard');
-const client = inject('client') as Client;
+const { client } = useClient();
 const state = ref<DashboardState>(DashboardState.Undefined);
 const picc = ref<MifareClassic | undefined>(undefined);
 const memoryFocus = ref<MemoryFocus | undefined>(undefined);
@@ -71,7 +71,7 @@ watch(state, async (newState, oldState) => {
       checkingForReaderCancelationToken.value = CancelationToken.create();
       do {
         try {
-          await client.ping(checkingForReaderCancelationToken.value as CancelationToken);
+          await client.value.ping(checkingForReaderCancelationToken.value as CancelationToken);
           break;
         }
         catch (e) {
@@ -88,7 +88,7 @@ watch(state, async (newState, oldState) => {
 
       if (retryCount.value === 0) {
         logger.error('Failed to ping device after', retryMax.value, 'retries');
-        client.disconnect();
+        client.value.disconnect();
         return;
       }
 
@@ -97,7 +97,7 @@ watch(state, async (newState, oldState) => {
       }
     } break;
     case DashboardState.CeckingForPicc: {
-      client.send(GetPiccWebMessage.create());
+      client.value.send(GetPiccWebMessage.create());
     } break;
   }
 });
@@ -128,7 +128,7 @@ onClientMessage(e => {
   // start pinging on first message from device
   if (!pingCancelationToken.value || pingCancelationToken.value.isCanceled) {
     pingCancelationToken.value = CancelationToken.create();
-    client.pingLoop(2500, pingCancelationToken.value);
+    client.value.pingLoop(2500, pingCancelationToken.value);
   }
 
   if (!HelloDevMessage.is(e.message)) {
@@ -136,7 +136,7 @@ onClientMessage(e => {
   }
 
   if (state.value >= DashboardState.PiccPaired) {
-    client.send(GetPiccWebMessage.create());
+    client.value.send(GetPiccWebMessage.create());
   }
   else if (state.value > DashboardState.CeckingForPicc) {
     state.value = DashboardState.CeckingForPicc;
@@ -161,7 +161,7 @@ onClientMessage(e => {
 
   if (!MifareClassic.isMifareClassic(piccDto)) {
     logger.error('Unsupported PICC type', PiccType[piccDto.type]);
-    client.disconnect();
+    client.value.disconnect();
     return;
   }
 

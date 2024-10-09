@@ -1,0 +1,19 @@
+@use 'sass:color';
+@import '@/theme.scss';
+
+.client-config.component {
+  form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    input[type="text"] {
+      font-size: .8rem;
+      width: 16rem;
+    }
+
+    button[type="submit"] {
+      margin-top: 1rem;
+    }
+  }
+}

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import Client from '@/comm/Client';
 import { onClientPing, onClientPong, onClientPongMissed } from '@/comm/hooks/ClientEmitHooks';
 import '@/components/MemoryBlock/MemoryBlock.scss';
 import '@/components/SystemInfo/SystemInfo.scss';
-import { inject, ref } from 'vue';
+import { useClient } from '@/hooks/useClient';
+import { ref } from 'vue';
 
 enum PingState {
   Undefined,
@@ -12,8 +12,7 @@ enum PingState {
   PongMiss,
 }
 
-const client = inject('client') as Client;
-
+const { client } = useClient();
 const pingState = ref<PingState>(PingState.Undefined);
 const pingLatency = ref<number | undefined>(undefined);
 

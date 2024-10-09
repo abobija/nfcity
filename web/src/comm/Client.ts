@@ -64,6 +64,9 @@ class Client {
   }
 
   protected constructor(brokerUrl: string, rootTopic: string) {
+    ClientValidator.validateBrokerUrl(brokerUrl);
+    ClientValidator.validateRootTopic(rootTopic);
+
     this.brokerUrl = trimRight(brokerUrl, '/');
     this.rootTopic = trim(rootTopic, '/');
     this.webTopic = 'web';
@@ -353,6 +356,36 @@ export class ClientPingContext {
 
   static create(pingTimestamp: number): ClientPingContext {
     return new ClientPingContext(pingTimestamp);
+  }
+}
+
+export abstract class ClientValidator {
+  static readonly RootTopicLength = 16;
+
+  static validateBrokerUrl(brokerUrl?: string): void {
+    if (!brokerUrl) {
+      throw new Error('brokerUrl is required');
+    }
+
+    if (!brokerUrl.startsWith('wss://')) {
+      throw new Error('brokerUrl must use wss://');
+    }
+
+    new URL(brokerUrl);
+  }
+
+  static validateRootTopic(rootTopic?: string): void {
+    if (!rootTopic) {
+      throw new Error('rootTopic is required');
+    }
+
+    if (!rootTopic.match(/^[a-zA-Z0-9_]+$/)) {
+      throw new Error('rootTopic must be alphanumeric');
+    }
+
+    if (rootTopic.length != ClientValidator.RootTopicLength) {
+      throw new Error(`rootTopic must be ${ClientValidator.RootTopicLength} characters long`);
+    }
   }
 }
 

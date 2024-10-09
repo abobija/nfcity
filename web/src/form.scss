@@ -19,6 +19,13 @@ form {
   display: block;
 }
 
+form .form-group,
+.form .form-group {
+  &:not(:first-child):not(:last-child) {
+    margin: 0.5rem 0;
+  }
+}
+
 label,
 input {
   color: $input-color;

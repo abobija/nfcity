@@ -18,29 +18,35 @@
 
     .enter {
       margin-top: 3.5rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
 
-      .btn.connect {
-        margin-bottom: 3rem;
-      }
+      >.connect {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
 
-      .broker {
-        color: $color-1;
-        font-size: .7rem;
-
-        .static {
-          opacity: .5;
+        .btn.connect {
+          margin-bottom: 3rem;
         }
-      }
 
-      .btn.edit {
-        font-size: .6rem;
+        .broker {
+          color: $color-1;
+          font-size: .7rem;
+
+          .static {
+            opacity: .5;
+          }
+        }
+
+        .btn.edit {
+          font-size: .6rem;
+        }
       }
     }
 
     .footer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       margin-top: 4rem;
       font-size: .6rem;
 

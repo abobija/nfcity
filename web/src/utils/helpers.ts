@@ -134,3 +134,7 @@ export function strmask(str: string, opts?: StrMaskOptions): string {
     ? str.slice(0, offset) + mask + str.slice(offset + length)
     : str.slice(0, -offset - length) + mask + str.slice(-offset);
 };
+
+export function clone<T>(obj: T): T {
+  return JSON.parse(JSON.stringify(obj));
+}

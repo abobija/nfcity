@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Client from '@/comm/Client';
 import ErrorDevMessage from '@/comm/msgs/dev/ErrorDevMessage';
 import PiccSectorDevMessage from '@/comm/msgs/dev/PiccSectorDevMessage';
 import ReadSectorWebMessage from '@/comm/msgs/web/ReadSectorWebMessage';
@@ -10,13 +9,14 @@ import MemorySectorState from '@/components/MemorySector/MemorySectorState';
 import MemorySectorEmptyOverlay from '@/components/MemorySector/overlays/MemorySectorEmptyOverlay.vue';
 import MemorySectorUnlockOverlay from '@/components/MemorySector/overlays/MemorySectorUnlockOverlay.vue';
 import MemorySectorUnlockingOverlay from '@/components/MemorySector/overlays/MemorySectorUnlockingOverlay.vue';
+import { useClient } from '@/hooks/useClient';
 import {
   defaultKey,
   MifareClassicMemory,
   MifareClassicSector
 } from '@/models/MifareClassic';
 import { PiccKey } from '@/models/Picc';
-import { computed, inject, onUpdated, ref } from 'vue';
+import { computed, onUpdated, ref } from 'vue';
 
 const props = defineProps<{
   sector: MifareClassicSector;
@@ -33,14 +33,14 @@ const classes = computed(() => ({
   empty: props.sector.isEmpty,
 }));
 
-const client = inject('client') as Client;
+const { client } = useClient();
 const piccKey = ref<PiccKey>(defaultKey);
 
 async function unlockAndLoadSector(key: PiccKey) {
   piccKey.value = key;
 
   emit('stateChange', MemorySectorState.Unlocking);
-  const msg = await client.transceive(ReadSectorWebMessage.from(props.sector.offset, key));
+  const msg = await client.value.transceive(ReadSectorWebMessage.from(props.sector.offset, key));
 
   if (PiccSectorDevMessage.is(msg)) {
     props.sector.memory.updateSector(msg.offset, msg.blocks);
