@@ -50,8 +50,13 @@
       margin-top: 4rem;
       font-size: .6rem;
 
+      .version {
+        opacity: .7;
+      }
+
       .credits {
-        opacity: 0.5;
+        font-size: .5rem;
+        opacity: .5;
       }
     }
   }

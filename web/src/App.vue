@@ -10,6 +10,8 @@ import { onMounted, ref, watch } from 'vue';
 import { useClientStorage } from './hooks/useClientStorage';
 import { isCompleteClientStorage, ValidClientStorage } from './storage/ClientStorage';
 
+const { VITE_APP_VERSION } = import.meta.env;
+
 enum AppState {
   Undefined = 0,
   Initialized,
@@ -67,6 +69,7 @@ function connect() {
 onClientReady(() => state.value = AppState.Connected);
 
 onClientEnd(() => state.value = AppState.Initialized);
+
 </script>
 
 <template>
@@ -95,9 +98,12 @@ onClientEnd(() => state.value = AppState.Initialized);
           </div>
         </Transition>
         <div class="footer">
-          <div class="credits">
+          <p class="version">
+            v{{ VITE_APP_VERSION }}
+          </p>
+          <p class="credits">
             made by <a href="https://github.com/abobija" target="_blank">ab</a>
-          </div>
+          </p>
         </div>
       </div>
     </div>
