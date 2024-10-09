@@ -15,7 +15,7 @@ import PongDevMessage from '@/comm/msgs/dev/PongDevMessage';
 import PingWebMessage from '@/comm/msgs/web/PingWebMessage';
 import { CancelationToken, OperationCanceledError } from '@/utils/CancelationToken';
 import { Logger, LogLevel } from '@/utils/Logger';
-import { trim, trimRight } from '@/utils/helpers';
+import { strmask, trim, trimRight } from '@/utils/helpers';
 import { decode, encode } from 'cbor-x';
 import mqtt, { MqttClient, PacketCallback } from 'mqtt';
 
@@ -54,6 +54,14 @@ class Client {
   private mqttClient: MqttClient | null = null;
   private readonly sendTimeoutMs;
   private readonly receiveTimeoutMs;
+
+  get rootTopicMasked(): string {
+    return strmask(this.rootTopic, { side: 'right', offset: 2, ratio: 0.3 });
+  }
+
+  get brokerHostname(): string {
+    return new URL(this.brokerUrl).hostname;
+  }
 
   protected constructor(brokerUrl: string, rootTopic: string) {
     this.brokerUrl = trimRight(brokerUrl, '/');

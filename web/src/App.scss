@@ -1,7 +1,9 @@
 @import '@/theme.scss';
 
 .app {
-  .enter {
+  .login {
+    color: $color-4;
+
     .title {
       font-size: 3rem;
       font-weight: 600;
@@ -12,17 +14,39 @@
       margin-top: 1rem;
       font-size: 1.2rem;
       font-weight: 400;
-      color: $color-4;
     }
 
-    .connect {
-      margin-top: 4rem;
+    .enter {
+      margin-top: 3.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      .btn.connect {
+        margin-bottom: 2rem;
+      }
+
+      &>p {
+        margin-top: .3rem;
+      }
+
+      .broker {
+        color: $color-1;
+        font-size: .7rem;
+      }
+
+      .btn.edit {
+        font-size: .6rem;
+      }
     }
 
-    .credits {
+    .footer {
       margin-top: 4rem;
-      color: rgba($color-fg, 0.5);
-      opacity: 0.5;
+      font-size: .6rem;
+
+      .credits {
+        opacity: 0.5;
+      }
     }
   }
 }

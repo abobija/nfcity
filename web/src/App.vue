@@ -39,14 +39,24 @@ onClientEnd(() => state.value = AppState.Initialized);
 
 <template>
   <div class="app">
-    <div class="enter center-screen" v-if="state < AppState.Connected">
+    <div class="login center-screen" v-if="state < AppState.Connected">
       <h1 class="title">nfcity</h1>
       <h2 class="subtitle">deep dive into NFC cards</h2>
-      <button class="connect btn primary" @click="connect" :disabled="state == AppState.Connecting">
-        connect
-      </button>
-      <div class="credits">
-        made by <a href="https://github.com/abobija" target="_blank">ab</a>
+      <div class="enter">
+        <button class="btn primary connect" @click="connect" :disabled="state == AppState.Connecting">
+          connect
+        </button>
+        <p class="broker">
+          {{ client.rootTopicMasked }} @ {{ client.brokerHostname }}
+        </p>
+        <p>
+          <button class="btn txt primary edit" @click="() => logger.info('not implemented')">change</button>
+        </p>
+      </div>
+      <div class="footer">
+        <div class="credits">
+          made by <a href="https://github.com/abobija" target="_blank">ab</a>
+        </div>
       </div>
     </div>
     <Dashboard v-else />

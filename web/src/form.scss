@@ -12,6 +12,9 @@ $input-focus-color: color.adjust($input-color, $alpha: $focus-alpha);
 $input-disabled-color: color.adjust($input-color, $alpha: $disabled-alpha);
 $input-disabled-border-color: color.adjust($input-color, $alpha: $disabled-border-alpha);
 
+$color-primary: $color-3;
+$color-secondary: $color-4;
+
 form {
   display: block;
 }
@@ -67,6 +70,7 @@ button,
 .btn {
   &:not(:disabled) {
     cursor: pointer;
+    font-weight: 600;
 
     &:active {
       transform: scale(.95);
@@ -78,6 +82,14 @@ button,
   }
 }
 
+button.txt,
+.btn.txt {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  transition: text-shadow 0.2s ease-in-out;
+}
+
 .btn-group {
   button:not(:last-child) {
     border-right: none;
@@ -86,8 +98,8 @@ button,
 
 @mixin define-button($class-name, $color-fg, $color-bg) {
 
-  button.#{$class-name},
-  .btn.#{$class-name} {
+  button.#{$class-name}:not(.txt),
+  .btn.#{$class-name}:not(.txt) {
     background-color: $color-bg;
 
     &:not(:disabled) {
@@ -111,6 +123,29 @@ button,
   }
 }
 
-@include define-button('primary', $color-3, $color-bg);
+@include define-button('primary', $color-primary, $color-bg);
 
-@include define-button('secondary', $color-fg, $color-bg);
+@include define-button('secondary', $color-secondary, $color-bg);
+
+@mixin define-txt-button($class-name, $color-fg) {
+
+  button.txt.#{$class-name},
+  .btn.txt.#{$class-name} {
+    &:not(:disabled) {
+      color: $color-fg;
+
+      &:hover {
+        text-shadow: 0 0 0.4rem color.adjust($color-fg, $alpha: 0.8 * $focus-alpha);
+      }
+    }
+
+    &:disabled {
+      color: color.adjust($color-fg, $alpha: $disabled-alpha);
+    }
+
+  }
+}
+
+@include define-txt-button('primary', $color-primary);
+
+@include define-txt-button('secondary', $color-secondary);

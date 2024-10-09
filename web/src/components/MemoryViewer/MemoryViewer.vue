@@ -26,13 +26,13 @@ const _view = computed(() => props.view || MemoryView.Hexadecimal);
   <div class="memory-bytes-viewer component">
     <div class="view">
       <div class="btn-group">
-        <button :class="{ activated: _view === MemoryView.Hexadecimal }"
+        <button class="btn secondary" :class="{ activated: _view === MemoryView.Hexadecimal }"
           @click="$emit('viewChange', MemoryView.Hexadecimal)">hex</button>
-        <button :class="{ activated: _view === MemoryView.Binary }"
+        <button class="btn secondary" :class="{ activated: _view === MemoryView.Binary }"
           @click="$emit('viewChange', MemoryView.Binary)">bin</button>
-        <button :class="{ activated: _view === MemoryView.Decimal }"
+        <button class="btn secondary" :class="{ activated: _view === MemoryView.Decimal }"
           @click="$emit('viewChange', MemoryView.Decimal)">dec</button>
-        <button :class="{ activated: _view === MemoryView.Ascii }"
+        <button class="btn secondary" :class="{ activated: _view === MemoryView.Ascii }"
           @click="$emit('viewChange', MemoryView.Ascii)">ascii</button>
       </div>
     </div>
