@@ -7,7 +7,7 @@ import { createApp } from 'vue';
 
 const client = Client.from(
   'wss://broker.emqx.io:8084/mqtt', // TODO: Make it configurable
-  'nfcity-cce9199a6d' // TODO: Make it configurable
+  '48dbf5d4de339570' // TODO: Make it configurable
 );
 
 createApp(App)

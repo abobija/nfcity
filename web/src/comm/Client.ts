@@ -56,7 +56,7 @@ class Client {
   private readonly receiveTimeoutMs;
 
   get rootTopicMasked(): string {
-    return strmask(this.rootTopic, { side: 'right', offset: 2, ratio: 0.3 });
+    return strmask(this.rootTopic, { side: 'right', offset: 2, ratio: .65 });
   }
 
   get brokerHostname(): string {
