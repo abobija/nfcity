@@ -21,6 +21,7 @@ const logger = Logger.fromName('App');
 const { client, updateClient } = useClientMaybe();
 const clientStorage = useClientStorage();
 const state = ref<AppState>(AppState.Undefined);
+const configClient = ref(false);
 
 watch(state, (newState, oldState) => {
   logger.debug(
@@ -31,7 +32,9 @@ watch(state, (newState, oldState) => {
 });
 
 onMounted(() => {
-  if (isCompleteClientStorage(clientStorage.value)) {
+  if (!isCompleteClientStorage(clientStorage.value)) {
+    configClient.value = true;
+  } else {
     updateClient(Client.from(
       clientStorage.value.brokerUrl,
       clientStorage.value.rootTopic,
@@ -39,6 +42,12 @@ onMounted(() => {
   }
 
   state.value = AppState.Initialized;
+});
+
+watch(clientStorage, (newClientStorage) => {
+  if (isCompleteClientStorage(newClientStorage)) {
+    configClient.value = false;
+  }
 });
 
 function onClientConfigSave(clientStorageProposal: ValidClientStorage) {
@@ -66,7 +75,7 @@ onClientEnd(() => state.value = AppState.Initialized);
       <h1 class="title">nfcity</h1>
       <h2 class="subtitle">deep dive into NFC cards</h2>
       <div class="enter" v-if="clientStorage">
-        <div class="config" v-if="!clientStorage.rootTopic">
+        <div class="config" v-if="configClient">
           <ClientConfig :client-storage="clientStorage" @save="onClientConfigSave" />
         </div>
         <div class="connect" v-else>
