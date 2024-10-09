@@ -11,7 +11,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'unlock', piccKey: PiccKey): void;
+  (e: 'unlock', piccKeyProposal: PiccKey): void;
 }>();
 
 const keyType = ref<'A' | 'B'>(props.piccKey.type == PiccKeyType.A ? 'A' : 'B');
