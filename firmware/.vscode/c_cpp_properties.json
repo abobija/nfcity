@@ -6,15 +6,13 @@
             "includePath": [
                 "${env:IDF_PATH}/components/**",
                 "${env:IDF_PATH}/examples/common_components/protocol_examples_common/**",
-                "${workspaceFolder}/**",
-                "~/repos/rc522/**"
+                "${workspaceFolder}/**"
             ],
             "browse": {
                 "path": [
                     "${env:IDF_PATH}/components",
                     "${workspaceFolder}",
-                    "${env:IDF_PATH}/examples/common_components/protocol_examples_common",
-                    "~/repos/rc522"
+                    "${env:IDF_PATH}/examples/common_components/protocol_examples_common"
                 ]
             }
         }
