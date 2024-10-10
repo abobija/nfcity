@@ -1,3 +1,4 @@
+import Client from "@/comm/Client";
 import { ClientStorage, IncompleteClientStorage, isValidClientStorage, validateClientStorage } from "@/storage/ClientStorage";
 import { clone } from "@/utils/helpers";
 import { Logger } from "@/utils/Logger";
@@ -12,7 +13,7 @@ export function newClientStorageInjection(): ClientStorageInjection {
   const logger = Logger.fromName('clientStorage');
   const key = 'client';
   const defaultStorage = {
-    brokerUrl: "wss://broker.emqx.io:8084/mqtt",
+    brokerUrl: Client.DefaultBrokerUrl,
   } as IncompleteClientStorage;
 
   const lsItem = localStorage.getItem(key);

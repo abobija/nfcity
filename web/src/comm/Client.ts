@@ -47,6 +47,7 @@ class SendContext {
 
 class Client {
   private readonly logger = Logger.fromName('Client');
+  static readonly DefaultBrokerUrl = "wss://broker.emqx.io:8084/mqtt";
   readonly brokerUrl: string;
   readonly rootTopic: string;
   readonly devTopic: string;
