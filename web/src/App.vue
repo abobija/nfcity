@@ -11,8 +11,13 @@ import { Logger } from '@/utils/Logger';
 import { onMounted, ref, watch } from 'vue';
 
 const {
+  VITE_APP_NAME,
+  VITE_APP_DESCRIPTION,
   VITE_APP_VERSION,
-  VITE_APP_GITHUB_REPO_PATH,
+  VITE_APP_REPO,
+  VITE_APP_REPO_VERSION_PATH,
+  VITE_APP_AUTHOR,
+  VITE_APP_AUTHOR_URL,
 } = import.meta.env;
 
 enum AppState {
@@ -77,8 +82,8 @@ onClientEnd(() => state.value = AppState.Initialized);
 <template>
   <div class="app">
     <div class="login center-screen" v-if="state < AppState.Connected">
-      <h1 class="title">nfcity</h1>
-      <h2 class="subtitle">deep dive into NFC cards</h2>
+      <h1 class="title">{{ VITE_APP_NAME }}</h1>
+      <h2 class="subtitle">{{ VITE_APP_DESCRIPTION }}</h2>
       <div class="enter" v-if="clientStorage">
         <Transition mode="out-in" :duration="75">
           <div class="config" v-if="configClient">
@@ -102,12 +107,12 @@ onClientEnd(() => state.value = AppState.Initialized);
         </Transition>
         <div class="footer">
           <p class="version">
-            <a :href="`https://github.com/abobija/nfcity/${VITE_APP_GITHUB_REPO_PATH}`" target="_blank">
+            <a :href="`${VITE_APP_REPO}/${VITE_APP_REPO_VERSION_PATH}`" target="_blank">
               v{{ VITE_APP_VERSION }}
             </a>
           </p>
           <p class="credits">
-            by <a href="https://github.com/abobija" target="_blank">ab</a>
+            by <a :href="VITE_APP_AUTHOR_URL" target="_blank">{{ VITE_APP_AUTHOR }}</a>
           </p>
         </div>
       </div>
