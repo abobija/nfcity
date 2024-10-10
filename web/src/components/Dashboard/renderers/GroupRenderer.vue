@@ -29,7 +29,7 @@ const view = ref(MemoryView.Hexadecimal);
         <div class="name">Length</div>
         <div class="value">{{ group.length }}</div>
       </li>
-      <li class="prop memory" v-if="group.type != MifareClassicBlockGroupType.Data">
+      <li class="prop memory">
         <div class="name">Content</div>
         <div class="value">
           <MemoryViewer :view :block="group.block" :offset="group.offset" :length="group.length"
