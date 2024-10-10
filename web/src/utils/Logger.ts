@@ -1,9 +1,4 @@
-const red = "\x1b[31m";
-const orange = "\x1b[33m";
-const green = "\x1b[32m";
-const pink = "\x1b[95m";
-const cyan = "\x1b[36m";
-const resetColor = "\x1b[0m";
+import { colorReset, cyan, green, orange, pink, red } from "@/utils/terminalColors";
 
 export enum LogLevel {
   ERROR,
@@ -18,7 +13,7 @@ const levelColor = {
   [LogLevel.WARNING]: orange,
   [LogLevel.INFO]: green,
   [LogLevel.DEBUG]: cyan,
-  [LogLevel.VERBOSE]: pink
+  [LogLevel.VERBOSE]: pink,
 };
 
 const envLevel = LogLevel[import.meta.env.VITE_LOG_LEVEL as keyof typeof LogLevel]
@@ -72,7 +67,7 @@ export class Logger {
       format += `[${this.name}]`;
     }
     format += `[${LogLevel[level].at(0)}]`;
-    format += resetColor;
+    format += colorReset;
 
     if (typeof (message) === 'string') {
       format += ` ${message}`;
