@@ -293,11 +293,14 @@ onMemoryByteMouseClick(clickedByte => {
           <div class="info-panel">
             <Transition appear>
               <div v-if="picc.memory.isEmpty">
-                <p v-for="(d) in picc.memory.blockDistribution">
-                  {{ d[0] }} sectors with {{ d[1] }} blocks
+                <p>
+                  {{ PiccType[picc.type] }} has
                 </p>
-                <p>{{ MifareClassicBlock.size }} bytes per block</p>
-                <p>{{ picc.memory.size }} bytes of memory</p>
+                <p v-for="(d) in picc.memory.blockDistribution">
+                  {{ d[0] }} sectors with {{ d[1] }} blocks,
+                </p>
+                <p>{{ MifareClassicBlock.size }} bytes per block,</p>
+                <p>{{ picc.memory.size }} bytes of memory.</p>
               </div>
             </Transition>
 
