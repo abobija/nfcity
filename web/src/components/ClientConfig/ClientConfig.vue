@@ -38,7 +38,6 @@ function onSubmit() {
       errorInput = rootTopicRef.value;
     }
 
-    errorInput?.select();
     errorInput?.focus();
 
     return;
