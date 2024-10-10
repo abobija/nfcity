@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import '@/App.scss';
 import Client from '@/comm/Client';
-import { onClientEnd, onClientReady } from '@/comm/hooks/ClientEmitHooks';
+import { onClientReady } from '@/comm/hooks/ClientEmitHooks';
 import ClientConfig from '@/components/ClientConfig/ClientConfig.vue';
 import Dashboard from '@/components/Dashboard/Dashboard.vue';
 import { useClientMaybe } from '@/hooks/useClient';
@@ -25,7 +25,8 @@ enum AppState {
   Undefined = 0,
   Initialized,
   Connecting,
-  Connected,
+  ClientReady,
+  InDashboard,
 }
 
 const logger = makeLogger('App');
@@ -40,6 +41,10 @@ watch(state, (newState, oldState) => {
     'from', AppState[oldState],
     'to', AppState[newState]
   );
+
+  if (newState == AppState.ClientReady && oldState < AppState.ClientReady) {
+    state.value = AppState.InDashboard;
+  }
 });
 
 onMounted(() => {
@@ -75,14 +80,16 @@ function connect() {
   client.value?.connect();
 }
 
-onClientReady(() => state.value = AppState.Connected);
-
-onClientEnd(() => state.value = AppState.Initialized);
+onClientReady(() => {
+  if (state.value < AppState.ClientReady) {
+    state.value = AppState.ClientReady;
+  }
+});
 </script>
 
 <template>
   <div class="app">
-    <div class="login center-screen" v-if="state < AppState.Connected">
+    <div class="login center-screen" v-if="state < AppState.InDashboard">
       <h1 class="title">{{ VITE_APP_NAME }}</h1>
       <h2 class="subtitle">{{ VITE_APP_DESCRIPTION }}</h2>
       <div class="enter" v-if="clientStorage">
