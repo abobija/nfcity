@@ -300,7 +300,7 @@ class Client {
     const maxErrorCounter = 3;
     let errorCounter = 0;
 
-    const _ping = async () => {
+    const pingLoop = async () => {
       try {
         await this.ping(cancelationToken);
         errorCounter = 0;
@@ -308,7 +308,7 @@ class Client {
       catch (e) {
         if (e instanceof OperationCanceledError) {
           if (_interval) {
-            clearTimeout(_interval);
+            clearInterval(_interval);
           }
           this.logger.debug("ping loop canceled,", 'ct', cancelationToken?.id);
           return;
@@ -322,8 +322,8 @@ class Client {
       }
     };
 
-    await _ping();
-    const _interval = setInterval(_ping, intervalMs);
+    await pingLoop();
+    const _interval = setInterval(pingLoop, intervalMs);
 
     this.logger.debug('ping loop started,', 'ct', cancelationToken?.id);
   }
