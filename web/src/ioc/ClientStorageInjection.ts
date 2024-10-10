@@ -4,13 +4,14 @@ import { clone } from "@/utils/helpers";
 import { Logger } from "@/utils/Logger";
 import { readonly, Ref, ref, watch } from "vue";
 
+const logger = Logger.fromName('ClientStorageInjection');
+
 export default interface ClientStorageInjection {
   clientStorage: Readonly<Ref<ClientStorage>>;
   updateClientStorage: (newClientStorage: ClientStorage) => void;
 }
 
 export function newClientStorageInjection(): ClientStorageInjection {
-  const logger = Logger.fromName('clientStorage');
   const key = 'client';
   const defaultStorage = {
     brokerUrl: Client.DefaultBrokerUrl,

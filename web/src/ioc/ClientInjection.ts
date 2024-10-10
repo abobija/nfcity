@@ -1,6 +1,8 @@
 import Client from "@/comm/Client";
-import { logger } from "@/utils/Logger";
+import { Logger } from "@/utils/Logger";
 import { Ref, ref, shallowReadonly, watch } from "vue";
+
+const logger = Logger.fromName('ClientInjection');
 
 export default interface ClientInjection<T = Client | undefined> {
   client: Readonly<Ref<T>>;
