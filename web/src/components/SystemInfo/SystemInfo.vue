@@ -34,8 +34,8 @@ onClientPongMissed(() => {
 <template>
   <div class="component system-info">
     <div class="ping">
-      <span class="root-topic" title="root topic">
-        {{ client.rootTopicMasked }}
+      <span class="root-topic">
+        {{ client.rootTopicMasked }} @ {{ client.brokerUrl.hostname }}
       </span>
       <Transition mode="out-in" :duration="75">
         <span class="status undefined" v-if="pingState == PingState.Undefined" title="ping pong">
