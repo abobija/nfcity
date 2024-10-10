@@ -1,7 +1,7 @@
-import { clientStorageKey } from "@/iocKeys";
-import { ClientStorage } from "@/storage/ClientStorage";
-import { inject, Ref } from "vue";
+import ClientStorageInjection from "@/ioc/ClientStorageInjection";
+import { clientStorageKey } from "@/ioc/keys";
+import { inject } from "vue";
 
 export function useClientStorage() {
-  return inject(clientStorageKey) as Ref<ClientStorage>;
+  return inject(clientStorageKey) as ClientStorageInjection;
 };

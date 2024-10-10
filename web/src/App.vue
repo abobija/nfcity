@@ -21,7 +21,7 @@ enum AppState {
 
 const logger = Logger.fromName('App');
 const { client, updateClient } = useClientMaybe();
-const clientStorage = useClientStorage();
+const { clientStorage, updateClientStorage } = useClientStorage();
 const state = ref<AppState>(AppState.Undefined);
 const configClient = ref(false);
 
@@ -53,7 +53,7 @@ watch(clientStorage, (newClientStorage) => {
 });
 
 function onClientConfigSave(clientStorageProposal: ValidClientStorage) {
-  clientStorage.value = clientStorageProposal;
+  updateClientStorage(clientStorageProposal);
 
   updateClient(Client.from(
     clientStorageProposal.brokerUrl,
