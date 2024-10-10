@@ -51,6 +51,7 @@ const retryMax = ref(5);
 const retryCount = ref(0);
 const checkingForReaderCancelationToken = ref<CancelationToken>();
 const pingCancelationToken = ref<CancelationToken>();
+const overlay = ref(true);
 
 watch(state, async (newState, oldState) => {
   logger.debug(
@@ -58,6 +59,8 @@ watch(state, async (newState, oldState) => {
     'from', DashboardState[oldState],
     'to', DashboardState[newState]
   );
+
+  overlay.value = newState < DashboardState.PiccPaired;
 
   switch (newState) {
     case DashboardState.Initialized: {
@@ -247,27 +250,8 @@ onMemoryByteMouseClick(clickedByte => {
 
 <template>
   <div class="dashboard component">
-    <div class="scene picc-waiter center-screen" v-if="state < DashboardState.PiccPaired">
 
-      <div v-if="state == DashboardState.CheckingForReader">
-        <p class="message">checking for a reader...</p>
-        <p class="sub message" v-if="retryCount > 0 && retryCount < retryMax">
-          no response from device, retrying {{ retryCount }}
-        </p>
-      </div>
-      <div v-else-if="state == DashboardState.CeckingForPicc">
-        <p class="message">checking for a card...</p>
-      </div>
-      <div v-else-if="state == DashboardState.PiccNotPresent">
-        <p class="message">put a card on the reader</p>
-      </div>
-      <div v-else-if="state == DashboardState.PiccRemoved">
-        <p class="message">card removed, put it back please</p>
-      </div>
-
-    </div>
-    <div class="scene main" v-else-if="picc">
-
+    <main v-if="picc">
       <div class="header">
         <div class="picc">
           <div class="general">
@@ -319,7 +303,25 @@ onMemoryByteMouseClick(clickedByte => {
           </div>
         </div>
       </div>
+    </main>
 
+    <div class="full-screen center overlay" v-if="overlay">
+      <div v-if="state == DashboardState.CheckingForReader">
+        <p class="message">checking for a reader...</p>
+        <p class="sub message" v-if="retryCount > 0 && retryCount < retryMax">
+          no response from device, retrying {{ retryCount }}
+        </p>
+      </div>
+      <div v-else-if="state == DashboardState.CeckingForPicc">
+        <p class="message">checking for a card...</p>
+      </div>
+      <div v-else-if="state == DashboardState.PiccNotPresent">
+        <p class="message">put a card on the reader</p>
+      </div>
+      <div v-else-if="state == DashboardState.PiccRemoved">
+        <p class="message">card removed, put it back please</p>
+      </div>
     </div>
+
   </div>
 </template>

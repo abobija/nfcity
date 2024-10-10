@@ -28,12 +28,24 @@ a {
   }
 }
 
-.center-screen {
+.full-screen {
   height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  width: 100vw;
+
+  &.center {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  &.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    background-color: rgba($color-bg, .5);
+  }
 }
 
 .txt-nowrap {

@@ -89,7 +89,7 @@ onClientReady(() => {
 
 <template>
   <div class="app">
-    <div class="login center-screen" v-if="state < AppState.InDashboard">
+    <div class="login full-screen center" v-if="state < AppState.InDashboard">
       <h1 class="title">{{ VITE_APP_NAME }}</h1>
       <h2 class="subtitle">{{ VITE_APP_DESCRIPTION }}</h2>
       <div class="enter" v-if="clientStorage">

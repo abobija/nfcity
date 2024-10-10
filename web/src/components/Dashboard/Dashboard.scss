@@ -1,24 +1,7 @@
 @use 'sass:color';
 @import '@/theme.scss';
 
-.dashboard.component .scene.picc-waiter {
-  .message {
-    font-size: 1.3rem;
-    color: $color-4;
-    text-align: center;
-
-    &:not(:first-child) {
-      margin-top: 0.5rem;
-    }
-
-    &.sub {
-      font-size: 0.8rem;
-      color: color.adjust($color-4, $blackness: +50%);
-    }
-  }
-}
-
-.dashboard.component .scene.main {
+.dashboard.component>main {
   margin: 1rem;
 
   >.header {
@@ -126,5 +109,22 @@
 
   .prop.memory {
     margin-top: .3rem;
+  }
+}
+
+.dashboard.component .overlay {
+  .message {
+    font-size: 1.3rem;
+    color: $color-4;
+    text-align: center;
+
+    &:not(:first-child) {
+      margin-top: 0.5rem;
+    }
+
+    &.sub {
+      font-size: 0.8rem;
+      color: color.adjust($color-4, $blackness: +50%);
+    }
   }
 }
