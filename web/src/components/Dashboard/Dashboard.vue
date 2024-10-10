@@ -31,6 +31,8 @@ import { hex } from '@/utils/helpers';
 import makeLogger from '@/utils/Logger';
 import { onMounted, onUnmounted, ref, watch } from 'vue';
 
+// TODO: client offline state
+
 enum DashboardState {
   Undefined = 0,
   Initialized,
