@@ -54,7 +54,7 @@ onClientPongMissed(() => {
       <span class="miss" v-if="pingState == PingState.PongMiss">
         miss
       </span>
-      <span class="latency" v-if="pingLatency" title="latency [ms]">
+      <span class="latency" v-if="pingLatency" title="ping-pong latency [ms]">
         {{ pingLatency }}
       </span>
     </div>
