@@ -113,10 +113,14 @@
 }
 
 .dashboard.component .overlay {
+  background-color: rgba($color-bg, .6);
+
   .message {
     font-size: 1.3rem;
-    color: $color-4;
+    color: $color-3;
     text-align: center;
+    text-shadow: 0 0 .2rem $color-bg,
+      0 0 1.5rem rgba($color-3, .75);
 
     &:not(:first-child) {
       margin-top: 0.5rem;

@@ -306,21 +306,23 @@ onMemoryByteMouseClick(clickedByte => {
     </main>
 
     <div class="full-screen center overlay" v-if="overlay">
-      <div v-if="state == DashboardState.CheckingForReader">
-        <p class="message">checking for a reader...</p>
-        <p class="sub message" v-if="retryCount > 0 && retryCount < retryMax">
-          no response from device, retrying {{ retryCount }}
-        </p>
-      </div>
-      <div v-else-if="state == DashboardState.CeckingForPicc">
-        <p class="message">checking for a card...</p>
-      </div>
-      <div v-else-if="state == DashboardState.PiccNotPresent">
-        <p class="message">put a card on the reader</p>
-      </div>
-      <div v-else-if="state == DashboardState.PiccRemoved">
-        <p class="message">card removed, put it back please</p>
-      </div>
+      <Transition mode="out-in" :duration="100" appear>
+        <div v-if="state == DashboardState.CheckingForReader">
+          <p class="message">checking for a reader...</p>
+          <p class="sub message" v-if="retryCount > 0 && retryCount < retryMax">
+            no response from device, retrying {{ retryCount }}
+          </p>
+        </div>
+        <div v-else-if="state == DashboardState.CeckingForPicc">
+          <p class="message">checking for a card...</p>
+        </div>
+        <div v-else-if="state == DashboardState.PiccNotPresent">
+          <p class="message">bring a card closer to the reader</p>
+        </div>
+        <div v-else-if="state == DashboardState.PiccRemoved">
+          <p class="message">card removed, please bring it back</p>
+        </div>
+      </Transition>
     </div>
 
   </div>
