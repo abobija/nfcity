@@ -67,6 +67,9 @@ class Logger {
     }
 
     let format = consoleLogStyleSet(logLevelProps[level].style);
+
+    const now = new Date();
+    format += `${now.toTimeString().split(' ')[0]}.${now.getMilliseconds().toString().padStart(3, '0')} `;
     format += `[${LogLevel[level].at(0)}]`;
     format += '[nfcity]';
     if (this.name) {
