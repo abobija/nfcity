@@ -65,13 +65,13 @@ watch(state, async (newState, oldState) => {
 
   switch (newState) {
     case DashboardState.Initialized: {
-      checkingForReaderCancelationToken.value?.cancel("State changed to Initialized");
-      pingCancelationToken.value?.cancel("State changed to Initialized");
+      checkingForReaderCancelationToken.value?.cancel("state changed to Initialized");
+      pingCancelationToken.value?.cancel("state changed to Initialized");
       state.value = DashboardState.CheckingForReader;
     } break;
     case DashboardState.CheckingForReader: {
       retryMax.value = retryCount.value = 5;
-      checkingForReaderCancelationToken.value?.cancel("State changed to CheckingForReader");
+      checkingForReaderCancelationToken.value?.cancel("state changed to CheckingForReader");
       checkingForReaderCancelationToken.value = CancelationToken.create();
       do {
         try {
@@ -82,16 +82,16 @@ watch(state, async (newState, oldState) => {
           if (e instanceof OperationCanceledError) {
             break;
           }
-          logger.debug('Failed to ping while checking for reader', e);
+          logger.debug('failed to ping while checking for reader', e);
         }
       } while (--retryCount.value > 0);
 
       if (checkingForReaderCancelationToken.value.isCanceled) {
-        logger.debug("Checking for reader canceled, reason:", checkingForReaderCancelationToken.value.reason);
+        logger.debug("checking for reader canceled, reason:", checkingForReaderCancelationToken.value.reason);
       }
 
       if (retryCount.value === 0) {
-        logger.error('Failed to ping device after', retryMax.value, 'retries');
+        logger.error('failed to ping device after', retryMax.value, 'retries');
         client.value.disconnect();
         return;
       }
@@ -120,8 +120,8 @@ onMounted(() => state.value = DashboardState.Initialized);
 onClientReady(() => state.value = DashboardState.Initialized);
 
 onUnmounted(() => {
-  checkingForReaderCancelationToken.value?.cancel("Dashboard unmounted");
-  pingCancelationToken.value?.cancel("Dashboard unmounted");
+  checkingForReaderCancelationToken.value?.cancel("dashboard unmounted");
+  pingCancelationToken.value?.cancel("dashboard unmounted");
 });
 
 onClientPongMissed(() => {
@@ -176,7 +176,7 @@ onClientMessage(e => {
   }
 
   if (!MifareClassic.isMifareClassic(piccDto)) {
-    logger.error('Unsupported PICC type', PiccType[piccDto.type]);
+    logger.error('unsupported PICC type', PiccType[piccDto.type]);
     client.value.disconnect();
     return;
   }
@@ -205,8 +205,6 @@ onClientMessage(e => {
 });
 
 onMemoryByteMouseEnter(e => {
-  logger.verbose('Block byte entered', e);
-
   if (tByte.value?.locked) {
     return;
   }
@@ -218,9 +216,7 @@ onMemoryByteMouseEnter(e => {
   };
 });
 
-onMemoryByteMouseLeave(e => {
-  logger.verbose('Block byte left', e);
-
+onMemoryByteMouseLeave(() => {
   if (tByte.value?.locked) {
     return;
   }
@@ -229,8 +225,6 @@ onMemoryByteMouseLeave(e => {
 });
 
 onMemoryByteMouseClick(clickedByte => {
-  logger.verbose('Block byte clicked', clickedByte);
-
   if (!tByte.value) {
     return;
   }
