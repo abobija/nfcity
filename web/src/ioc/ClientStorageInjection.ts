@@ -1,9 +1,9 @@
 import { ClientStorage, defaultClientStorage, isValidClientStorage, validateClientStorage } from "@/storage/ClientStorage";
 import { clone } from "@/utils/helpers";
-import { Logger } from "@/utils/Logger";
+import makeLogger from "@/utils/Logger";
 import { readonly, Ref, ref, watch } from "vue";
 
-const logger = Logger.fromName('ClientStorageInjection');
+const logger = makeLogger('ClientStorageInjection');
 
 export default interface ClientStorageInjection {
   clientStorage: Readonly<Ref<ClientStorage>>;

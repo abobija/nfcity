@@ -7,7 +7,7 @@ import Dashboard from '@/components/Dashboard/Dashboard.vue';
 import { useClientMaybe } from '@/hooks/useClient';
 import { useClientStorage } from '@/hooks/useClientStorage';
 import { isValidClientStorage, ValidClientStorage } from '@/storage/ClientStorage';
-import { Logger } from '@/utils/Logger';
+import makeLogger from '@/utils/Logger';
 import { onMounted, ref, watch } from 'vue';
 
 const {
@@ -28,7 +28,7 @@ enum AppState {
   Connected,
 }
 
-const logger = Logger.fromName('App');
+const logger = makeLogger('App');
 const { client, updateClient } = useClientMaybe();
 const { clientStorage, updateClientStorage } = useClientStorage();
 const state = ref<AppState>(AppState.Undefined);

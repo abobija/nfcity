@@ -28,7 +28,7 @@ import MifareClassic, {
 import { PiccState, PiccType } from '@/models/Picc';
 import { CancelationToken, OperationCanceledError } from '@/utils/CancelationToken';
 import { hex } from '@/utils/helpers';
-import { Logger } from '@/utils/Logger';
+import makeLogger from '@/utils/Logger';
 import { onMounted, onUnmounted, ref, watch } from 'vue';
 
 enum DashboardState {
@@ -41,7 +41,7 @@ enum DashboardState {
   PiccPaired,
 }
 
-const logger = Logger.fromName('Dashboard');
+const logger = makeLogger('Dashboard');
 const { client } = useClient();
 const state = ref<DashboardState>(DashboardState.Undefined);
 const picc = ref<MifareClassic | undefined>(undefined);

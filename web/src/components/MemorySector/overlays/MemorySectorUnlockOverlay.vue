@@ -2,7 +2,7 @@
 import { MifareClassicSector } from '@/models/MifareClassic';
 import { PiccKey, PiccKeyType } from '@/models/Picc';
 import { hex, hex2arr, isHex } from '@/utils/helpers';
-import { logger } from '@/utils/Logger';
+import { loge } from '@/utils/Logger';
 import { onMounted, ref, useTemplateRef } from 'vue';
 
 const props = defineProps<{
@@ -20,12 +20,12 @@ const keyValue = ref<string>(hex(props.piccKey.value, ''));
 
 function onSubmit() {
   if (keyValue.value.length != 12) {
-    logger.error('Key must be 6 bytes (12 characters)');
+    loge('Key must be 6 bytes (12 characters)');
     return;
   }
 
   if (!isHex(keyValue.value)) {
-    logger.error('Key must be a valid hex string');
+    loge('Key must be a valid hex string');
     return;
   }
 

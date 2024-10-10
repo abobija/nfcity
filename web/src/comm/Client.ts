@@ -14,7 +14,7 @@ import ErrorDevMessage from '@/comm/msgs/dev/ErrorDevMessage';
 import PongDevMessage from '@/comm/msgs/dev/PongDevMessage';
 import PingWebMessage from '@/comm/msgs/web/PingWebMessage';
 import { CancelationToken, OperationCanceledError } from '@/utils/CancelationToken';
-import { Logger, LogLevel } from '@/utils/Logger';
+import logger, { LogLevel } from '@/utils/Logger';
 import { strmask, trim } from '@/utils/helpers';
 import { decode, encode } from 'cbor-x';
 import mqtt, { MqttClient, PacketCallback } from 'mqtt';
@@ -46,7 +46,7 @@ class SendContext {
 }
 
 class Client {
-  private readonly logger = Logger.fromName('Client');
+  private readonly logger = logger('Client');
   static readonly DefaultBrokerUrl = "wss://broker.emqx.io:8084/mqtt";
   readonly brokerUrl: URL;
   readonly rootTopic: string;

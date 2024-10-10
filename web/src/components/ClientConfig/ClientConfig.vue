@@ -3,7 +3,7 @@ import { ClientValidator } from '@/comm/Client';
 import '@/components/ClientConfig/ClientConfig.scss';
 import { ClientStorage, validateClientStorage, ValidClientStorage } from '@/storage/ClientStorage';
 import { clone } from '@/utils/helpers';
-import { logger } from '@/utils/Logger';
+import { logd } from '@/utils/Logger';
 import { onMounted, ref, useTemplateRef } from 'vue';
 
 const props = defineProps<{
@@ -32,7 +32,7 @@ function onSubmit() {
     return;
   }
 
-  errors.forEach(e => logger.debug('validation', e.error));
+  errors.forEach(e => logd('validation', e.error));
 
   let errorInput: HTMLInputElement | null = null;
 

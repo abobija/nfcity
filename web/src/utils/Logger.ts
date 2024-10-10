@@ -24,7 +24,7 @@ const logLevelProps: Record<LogLevel, LogLevelProps> = {
 const envLevel = LogLevel[import.meta.env.VITE_APP_LOG_LEVEL as keyof typeof LogLevel]
   || LogLevel.ERROR;
 
-export class Logger {
+class Logger {
   readonly level: LogLevel;
   readonly name?: string;
 
@@ -87,4 +87,15 @@ export class Logger {
   }
 }
 
-export const logger = Logger.from(envLevel);
+const defaultLogger = Logger.from(envLevel);
+
+export const log = defaultLogger.log.bind(defaultLogger);
+export const loge = defaultLogger.error.bind(defaultLogger);
+export const logw = defaultLogger.warning.bind(defaultLogger);
+export const logi = defaultLogger.info.bind(defaultLogger);
+export const logd = defaultLogger.debug.bind(defaultLogger);
+export const logv = defaultLogger.verbose.bind(defaultLogger);
+
+export default function makeLogger(name: string): Logger {
+  return Logger.from(envLevel, name);
+}
