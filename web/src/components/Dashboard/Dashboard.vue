@@ -133,10 +133,11 @@ onClientPongMissed(() => {
 onClientMessage(e => {
   switch (state.value) {
     case DashboardState.CheckingForReader: {
-      checkingForReaderCancelationToken.value?.cancel("New message arrived from device");
+      checkingForReaderCancelationToken.value?.cancel("new dev msg arrived");
     } break;
     case DashboardState.PongMissed: {
       state.value = DashboardState.PiccPaired;
+      pingCancelationToken.value?.cancel("new dev msg arrived");
     } break;
   }
 

@@ -310,14 +310,14 @@ class Client {
           if (_interval) {
             clearTimeout(_interval);
           }
-          this.logger.debug("Ping loop canceled, reason:", cancelationToken?.reason);
+          this.logger.debug("ping loop canceled,", 'ct', cancelationToken?.id);
           return;
         }
 
-        this.logger.debug('Failed to ping in loop', e);
+        this.logger.debug('failed to ping in loop,', 'ct', cancelationToken?.id, 'err', e);
 
         if (++errorCounter >= maxErrorCounter) {
-          cancelationToken?.cancel(`Failed to ping in loop for ${maxErrorCounter} times`);
+          cancelationToken?.cancel(`failed to ping in loop for ${maxErrorCounter} times`);
         }
       }
     };
@@ -325,7 +325,7 @@ class Client {
     await _ping();
     const _interval = setInterval(_ping, intervalMs);
 
-    this.logger.debug('Ping loop started');
+    this.logger.debug('ping loop started,', 'ct', cancelationToken?.id);
   }
 }
 
