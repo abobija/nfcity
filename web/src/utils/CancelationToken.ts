@@ -7,7 +7,7 @@ export class OperationCanceledError extends Error {
 
 export class CancelationToken {
   private _isCanceled = false;
-  private cancelHandlers: (() => void)[] = [];
+  private readonly cancelHandlers: (() => void)[] = [];
   private _reason?: any;
 
   get isCanceled(): boolean {
