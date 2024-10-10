@@ -5,10 +5,10 @@ import { onClientEnd, onClientReady } from '@/comm/hooks/ClientEmitHooks';
 import ClientConfig from '@/components/ClientConfig/ClientConfig.vue';
 import Dashboard from '@/components/Dashboard/Dashboard.vue';
 import { useClientMaybe } from '@/hooks/useClient';
+import { useClientStorage } from '@/hooks/useClientStorage';
+import { isValidClientStorage, ValidClientStorage } from '@/storage/ClientStorage';
 import { Logger } from '@/utils/Logger';
 import { onMounted, ref, watch } from 'vue';
-import { useClientStorage } from './hooks/useClientStorage';
-import { isCompleteClientStorage, ValidClientStorage } from './storage/ClientStorage';
 
 const {
   VITE_APP_VERSION,
@@ -37,20 +37,20 @@ watch(state, (newState, oldState) => {
 });
 
 onMounted(() => {
-  if (!isCompleteClientStorage(clientStorage.value)) {
-    configClient.value = true;
-  } else {
+  if (isValidClientStorage(clientStorage.value)) {
     updateClient(Client.from(
       clientStorage.value.brokerUrl,
       clientStorage.value.rootTopic,
     ));
+  } else {
+    configClient.value = true;
   }
 
   state.value = AppState.Initialized;
 });
 
 watch(clientStorage, (newClientStorage) => {
-  if (isCompleteClientStorage(newClientStorage)) {
+  if (isValidClientStorage(newClientStorage)) {
     configClient.value = false;
   }
 });
@@ -81,10 +81,9 @@ onClientEnd(() => state.value = AppState.Initialized);
       <h2 class="subtitle">deep dive into NFC cards</h2>
       <div class="enter" v-if="clientStorage">
         <Transition mode="out-in" :duration="75">
-
           <div class="config" v-if="configClient">
             <ClientConfig :client-storage="clientStorage" @save="onClientConfigSave"
-              @cancel="() => configClient = false" :cancelable="isCompleteClientStorage(clientStorage)" />
+              @cancel="() => configClient = false" :cancelable="isValidClientStorage(clientStorage)" />
           </div>
           <div class="connect" v-else-if="client">
             <button class="btn primary connect" @click="connect" :disabled="state == AppState.Connecting">

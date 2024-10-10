@@ -1,29 +1,20 @@
-import { ClientValidator } from "@/comm/Client";
+import Client, { ClientValidator } from "@/comm/Client";
 
-export interface ClientStorage {
-  readonly brokerUrl?: string;
-  readonly rootTopic?: string;
-}
-
-export interface IncompleteClientStorage extends ClientStorage { }
-
-export interface CompleteClientStorage extends ClientStorage {
+export interface ValidClientStorage {
   readonly brokerUrl: string;
   readonly rootTopic: string;
 }
 
-export interface ValidClientStorage extends CompleteClientStorage { }
+export interface ClientStorage extends Partial<ValidClientStorage> { }
 
-export function isCompleteClientStorage(storage: ClientStorage): storage is CompleteClientStorage {
-  return (
-    typeof storage.brokerUrl === 'string'
-    && typeof storage.rootTopic === 'string'
-  );
-}
+export interface DefaultClientStorage extends Pick<ValidClientStorage, 'brokerUrl'> { }
+
+export const defaultClientStorage: DefaultClientStorage = {
+  brokerUrl: Client.DefaultBrokerUrl,
+};
 
 export function isValidClientStorage(storage: ClientStorage): storage is ValidClientStorage {
-  return isCompleteClientStorage(storage)
-    && validateClientStorage(storage).length === 0;
+  return validateClientStorage(storage).length === 0;
 }
 
 export function validateClientStorage(storage: ClientStorage) {

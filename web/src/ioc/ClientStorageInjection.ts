@@ -1,5 +1,4 @@
-import Client from "@/comm/Client";
-import { ClientStorage, IncompleteClientStorage, isValidClientStorage, validateClientStorage } from "@/storage/ClientStorage";
+import { ClientStorage, defaultClientStorage, isValidClientStorage, validateClientStorage } from "@/storage/ClientStorage";
 import { clone } from "@/utils/helpers";
 import { Logger } from "@/utils/Logger";
 import { readonly, Ref, ref, watch } from "vue";
@@ -13,10 +12,6 @@ export default interface ClientStorageInjection {
 
 export function newClientStorageInjection(): ClientStorageInjection {
   const key = 'client';
-  const defaultStorage = {
-    brokerUrl: Client.DefaultBrokerUrl,
-  } as IncompleteClientStorage;
-
   const lsItem = localStorage.getItem(key);
 
   function sanitize(storage: ClientStorage): ClientStorage {
@@ -35,12 +30,12 @@ export function newClientStorageInjection(): ClientStorageInjection {
     return sanitizedStorage;
   }
 
-  const lsItemJson = lsItem ? JSON.parse(lsItem) : defaultStorage
-  const clientStorageRef = ref(lsItem ? sanitize(lsItemJson) : defaultStorage);
+  const lsItemJson = lsItem ? JSON.parse(lsItem) : defaultClientStorage
+  const clientStorageRef = ref(lsItem ? sanitize(lsItemJson) : defaultClientStorage);
 
   watch(clientStorageRef, (newStorage, oldStorage) => {
     if (!isValidClientStorage(newStorage)) {
-      throw Error('invalid storage');
+      throw Error('invalid newStorage');
     }
 
     localStorage.setItem(key, JSON.stringify(newStorage));

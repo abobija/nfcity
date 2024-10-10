@@ -27,23 +27,22 @@ onMounted(() => {
 function onSubmit() {
   const errors = validateClientStorage(localClientStorage.value);
 
-  if (errors.length > 0) {
-    errors.forEach(e => logger.debug('validation', e.error));
-
-    let errorInput: HTMLInputElement | null = null;
-
-    if (errors.some(e => e.field == 'brokerUrl')) {
-      errorInput = brokerUrlRef.value;
-    } else if (errors.some(e => e.field == 'rootTopic')) {
-      errorInput = rootTopicRef.value;
-    }
-
-    errorInput?.focus();
-
+  if (errors.length === 0) {
+    emits('save', localClientStorage.value as ValidClientStorage);
     return;
   }
 
-  emits('save', localClientStorage.value as ValidClientStorage);
+  errors.forEach(e => logger.debug('validation', e.error));
+
+  let errorInput: HTMLInputElement | null = null;
+
+  if (errors.some(e => e.field == 'brokerUrl')) {
+    errorInput = brokerUrlRef.value;
+  } else if (errors.some(e => e.field == 'rootTopic')) {
+    errorInput = rootTopicRef.value;
+  }
+
+  errorInput?.focus();
 }
 </script>
 
