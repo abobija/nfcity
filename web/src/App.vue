@@ -10,7 +10,10 @@ import { onMounted, ref, watch } from 'vue';
 import { useClientStorage } from './hooks/useClientStorage';
 import { isCompleteClientStorage, ValidClientStorage } from './storage/ClientStorage';
 
-const { VITE_APP_VERSION } = import.meta.env;
+const {
+  VITE_APP_VERSION,
+  VITE_APP_GITHUB_REPO_PATH,
+} = import.meta.env;
 
 enum AppState {
   Undefined = 0,
@@ -69,7 +72,6 @@ function connect() {
 onClientReady(() => state.value = AppState.Connected);
 
 onClientEnd(() => state.value = AppState.Initialized);
-
 </script>
 
 <template>
@@ -84,25 +86,29 @@ onClientEnd(() => state.value = AppState.Initialized);
             <ClientConfig :client-storage="clientStorage" @save="onClientConfigSave"
               @cancel="() => configClient = false" :cancelable="isCompleteClientStorage(clientStorage)" />
           </div>
-          <div class="connect" v-else>
+          <div class="connect" v-else-if="client">
             <button class="btn primary connect" @click="connect" :disabled="state == AppState.Connecting">
               connect
             </button>
             <p class="broker">
               <span class="static">to</span>
-              {{ client?.rootTopicMasked }}
+              {{ client.rootTopicMasked }}
+              <span class="static">@</span>
+              {{ client.brokerUrl.hostname }}
             </p>
             <p>
-              <button class="btn txt primary edit" @click="() => configClient = true">change</button>
+              <button class="btn txt secondary edit" @click="() => configClient = true">change</button>
             </p>
           </div>
         </Transition>
         <div class="footer">
           <p class="version">
-            v{{ VITE_APP_VERSION }}
+            <a :href="`https://github.com/abobija/nfcity/${VITE_APP_GITHUB_REPO_PATH}`" target="_blank">
+              v{{ VITE_APP_VERSION }}
+            </a>
           </p>
           <p class="credits">
-            made by <a href="https://github.com/abobija" target="_blank">ab</a>
+            by <a href="https://github.com/abobija" target="_blank">ab</a>
           </p>
         </div>
       </div>

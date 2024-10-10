@@ -15,7 +15,7 @@ import PongDevMessage from '@/comm/msgs/dev/PongDevMessage';
 import PingWebMessage from '@/comm/msgs/web/PingWebMessage';
 import { CancelationToken, OperationCanceledError } from '@/utils/CancelationToken';
 import { Logger, LogLevel } from '@/utils/Logger';
-import { strmask, trim, trimRight } from '@/utils/helpers';
+import { strmask, trim } from '@/utils/helpers';
 import { decode, encode } from 'cbor-x';
 import mqtt, { MqttClient, PacketCallback } from 'mqtt';
 
@@ -48,7 +48,7 @@ class SendContext {
 class Client {
   private readonly logger = Logger.fromName('Client');
   static readonly DefaultBrokerUrl = "wss://broker.emqx.io:8084/mqtt";
-  readonly brokerUrl: string;
+  readonly brokerUrl: URL;
   readonly rootTopic: string;
   readonly devTopic: string;
   readonly webTopic: string;
@@ -60,15 +60,11 @@ class Client {
     return strmask(this.rootTopic, { side: 'right', offset: 2, ratio: .65 });
   }
 
-  get brokerHostname(): string {
-    return new URL(this.brokerUrl).hostname;
-  }
-
   protected constructor(brokerUrl: string, rootTopic: string) {
     ClientValidator.validateBrokerUrl(brokerUrl);
     ClientValidator.validateRootTopic(rootTopic);
 
-    this.brokerUrl = trimRight(brokerUrl, '/');
+    this.brokerUrl = new URL(brokerUrl);
     this.rootTopic = trim(rootTopic, '/');
     this.webTopic = 'web';
     this.devTopic = 'dev';
@@ -185,7 +181,7 @@ class Client {
       return this;
     }
 
-    this.mqttClient = mqtt.connect(this.brokerUrl);
+    this.mqttClient = mqtt.connect(this.brokerUrl.toString());
 
     this.mqttClient.on('error', error => {
       this.logger.warning('error', error);

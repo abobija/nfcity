@@ -1,3 +1,4 @@
+@use 'sass:color';
 @import '@/theme.scss';
 
 .app {
@@ -7,13 +8,14 @@
     .title {
       font-size: 3rem;
       font-weight: 600;
-      color: $color-5;
+      color: $color-1
     }
 
     .subtitle {
       margin-top: 1rem;
       font-size: 1.2rem;
       font-weight: 400;
+      color: color.adjust($color-1, $lightness: -25%);
     }
 
     .enter {
@@ -25,11 +27,11 @@
         align-items: center;
 
         .btn.connect {
-          margin-bottom: 3rem;
+          margin-bottom: 3.5rem;
         }
 
         .broker {
-          color: $color-1;
+          color: $color-5;
           font-size: .7rem;
 
           .static {
