@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onClientMessage, onClientReady } from '@/comm/hooks/ClientEmitHooks';
+import { onClientMessage, onClientPongMissed, onClientReady } from '@/comm/hooks/ClientEmitHooks';
 import HelloDevMessage from '@/comm/msgs/dev/HelloDevMessage';
 import PiccDevMessage from '@/comm/msgs/dev/PiccDevMessage';
 import PiccStateChangedDevMessage from '@/comm/msgs/dev/PiccStateChangedDevMessage';
@@ -38,6 +38,7 @@ enum DashboardState {
   CeckingForPicc,
   PiccNotPresent,
   PiccRemoved,
+  PongMissed,
   PiccPaired,
 }
 
@@ -123,9 +124,20 @@ onUnmounted(() => {
   pingCancelationToken.value?.cancel("Dashboard unmounted");
 });
 
+onClientPongMissed(() => {
+  if (state.value > DashboardState.PongMissed) {
+    state.value = DashboardState.PongMissed;
+  }
+});
+
 onClientMessage(e => {
-  if (state.value == DashboardState.CheckingForReader) {
-    checkingForReaderCancelationToken.value?.cancel("New message arrived from device");
+  switch (state.value) {
+    case DashboardState.CheckingForReader: {
+      checkingForReaderCancelationToken.value?.cancel("New message arrived from device");
+    } break;
+    case DashboardState.PongMissed: {
+      state.value = DashboardState.PiccPaired;
+    } break;
   }
 
   // start pinging on first message from device
@@ -321,6 +333,10 @@ onMemoryByteMouseClick(clickedByte => {
         </div>
         <div v-else-if="state == DashboardState.PiccRemoved">
           <p class="message">card removed, please bring it back</p>
+        </div>
+        <div v-else-if="state == DashboardState.PongMissed">
+          <p class="message">device is not responding</p>
+          <p class="sub message">please wait a moment, the device is attempting to reconnect</p>
         </div>
       </Transition>
     </div>
