@@ -130,5 +130,22 @@
       font-size: 0.8rem;
       color: color.adjust($color-4, $blackness: +50%);
     }
+
+    &:not(.sub) {
+      animation: glichy-overlay-message 3s ease-in-out infinite;
+
+      @keyframes glichy-overlay-message {
+
+        0%,
+        2% {
+          transform: skewX(15deg);
+        }
+
+        1%,
+        3% {
+          transform: skewX(0);
+        }
+      }
+    }
   }
 }
