@@ -1,4 +1,4 @@
-import { colorReset, cyan, green, orange, pink, red } from "@/utils/terminalColors";
+import ConsoleLogStyle, { consoleLogStyleReset, consoleLogStyleSet } from "@/utils/ConsoleLogStyle";
 
 export enum LogLevel {
   ERROR,
@@ -8,12 +8,17 @@ export enum LogLevel {
   VERBOSE
 }
 
-const levelColor = {
-  [LogLevel.ERROR]: red,
-  [LogLevel.WARNING]: orange,
-  [LogLevel.INFO]: green,
-  [LogLevel.DEBUG]: cyan,
-  [LogLevel.VERBOSE]: pink,
+interface LogLevelProps {
+  style: ConsoleLogStyle;
+  logFn: (message?: any, ...optionalParams: any[]) => void;
+}
+
+const logLevelProps: Record<LogLevel, LogLevelProps> = {
+  [LogLevel.ERROR]: { style: { color: 'red' }, logFn: console.error },
+  [LogLevel.WARNING]: { style: { color: 'yellow' }, logFn: console.warn },
+  [LogLevel.INFO]: { style: { color: 'green' }, logFn: console.info },
+  [LogLevel.DEBUG]: { style: { color: 'magenta' }, logFn: console.debug },
+  [LogLevel.VERBOSE]: { style: { color: 'cyan' }, logFn: console.debug },
 };
 
 const envLevel = LogLevel[import.meta.env.VITE_APP_LOG_LEVEL as keyof typeof LogLevel]
@@ -61,13 +66,13 @@ export class Logger {
       return;
     }
 
-    let format = `${levelColor[level]}`;
+    let format = consoleLogStyleSet(logLevelProps[level].style);
+    format += `[${LogLevel[level].at(0)}]`;
     format += '[nfcity]';
     if (this.name) {
       format += `[${this.name}]`;
     }
-    format += `[${LogLevel[level].at(0)}]`;
-    format += colorReset;
+    format += consoleLogStyleReset();
 
     if (typeof (message) === 'string') {
       format += ` ${message}`;
@@ -75,7 +80,7 @@ export class Logger {
       optionalParams = [message, ...optionalParams];
     }
 
-    console.log(
+    logLevelProps[level].logFn(
       format,
       ...optionalParams
     );
