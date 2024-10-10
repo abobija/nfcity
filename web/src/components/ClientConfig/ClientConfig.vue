@@ -30,11 +30,16 @@ function onSubmit() {
   if (errors.length > 0) {
     errors.forEach(e => logger.debug('validation', e.error));
 
+    let errorInput: HTMLInputElement | null = null;
+
     if (errors.some(e => e.field == 'brokerUrl')) {
-      brokerUrlRef.value?.focus();
+      errorInput = brokerUrlRef.value;
     } else if (errors.some(e => e.field == 'rootTopic')) {
-      rootTopicRef.value?.focus();
+      errorInput = rootTopicRef.value;
     }
+
+    errorInput?.select();
+    errorInput?.focus();
 
     return;
   }
