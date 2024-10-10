@@ -51,14 +51,15 @@
       align-items: center;
       margin-top: 4rem;
       font-size: .6rem;
+      opacity: .6;
 
       .version {
         opacity: .7;
       }
 
-      .credits {
+      .copyright {
         font-size: .5rem;
-        opacity: .5;
+        margin-top: .2rem;
       }
     }
   }

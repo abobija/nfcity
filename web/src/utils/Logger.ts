@@ -16,7 +16,7 @@ const levelColor = {
   [LogLevel.VERBOSE]: pink,
 };
 
-const envLevel = LogLevel[import.meta.env.VITE_LOG_LEVEL as keyof typeof LogLevel]
+const envLevel = LogLevel[import.meta.env.VITE_APP_LOG_LEVEL as keyof typeof LogLevel]
   || LogLevel.ERROR;
 
 export class Logger {

@@ -13,11 +13,12 @@ import { onMounted, ref, watch } from 'vue';
 const {
   VITE_APP_NAME,
   VITE_APP_DESCRIPTION,
-  VITE_APP_VERSION,
-  VITE_APP_REPO,
-  VITE_APP_REPO_VERSION_PATH,
   VITE_APP_AUTHOR,
   VITE_APP_AUTHOR_URL,
+  VITE_APP_REPO,
+  VITE_APP_REPO_TAG,
+  VITE_APP_LICENSE_NAME,
+  VITE_APP_LICENSE_URL,
 } = import.meta.env;
 
 enum AppState {
@@ -107,12 +108,15 @@ onClientEnd(() => state.value = AppState.Initialized);
         </Transition>
         <div class="footer">
           <p class="version">
-            <a :href="`${VITE_APP_REPO}/${VITE_APP_REPO_VERSION_PATH}`" target="_blank">
-              v{{ VITE_APP_VERSION }}
+            version
+            <a :href="`${VITE_APP_REPO}/tree/${VITE_APP_REPO_TAG}`" target="_blank">
+              {{ VITE_APP_REPO_TAG }}
             </a>
+            under
+            <a :href="VITE_APP_LICENSE_URL" target="_blank">{{ VITE_APP_LICENSE_NAME }}</a>
           </p>
-          <p class="credits">
-            by <a :href="VITE_APP_AUTHOR_URL" target="_blank">{{ VITE_APP_AUTHOR }}</a>
+          <p class="copyright">
+            copyrigh 2024 <a :href="VITE_APP_AUTHOR_URL" target="_blank">{{ VITE_APP_AUTHOR }}</a>
           </p>
         </div>
       </div>
