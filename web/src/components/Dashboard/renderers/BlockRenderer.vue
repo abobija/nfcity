@@ -34,7 +34,7 @@ const view = ref(MemoryView.Hexadecimal);
           c3({{ block.accessBits.c3 }})
         </div>
       </li>
-      <li class="prop">
+      <li class="prop memory">
         <div class="name">Content</div>
         <div class="value">
           <MemoryViewer :view :block @view-change="v => view = v" />
