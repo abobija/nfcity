@@ -35,7 +35,7 @@ import { onMounted, onUnmounted, ref, watch } from "vue";
 enum DashboardState {
   Undefined = 0,
   Initialized,
-  ClientOffline,
+  ClientOffline, // TODO: implement timeout for reconnection
   CheckingForReader,
   CeckingForPicc,
   PiccNotPresent,
