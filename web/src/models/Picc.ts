@@ -58,7 +58,7 @@ export interface PiccSector {
 }
 
 export interface PiccMemory {
-  sectors: Map<SectorOffset, PiccSector>;
+  sectors: PiccSector[];
 }
 
 export default interface Picc {

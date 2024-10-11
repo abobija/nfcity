@@ -345,7 +345,7 @@ export class MifareClassicSector implements PiccSector {
 
 export class MifareClassicMemory implements PiccMemory {
   readonly picc: MifareClassic;
-  readonly sectors: Map<number, MifareClassicSector>;
+  readonly sectors: MifareClassicSector[];
   readonly numberOfSectors: number;
   readonly blockDistribution: Array<[number, number]>;
   readonly size: number;
@@ -355,8 +355,8 @@ export class MifareClassicMemory implements PiccMemory {
     this.numberOfSectors = MifareClassicMemory.numberOfSectors(piccType);
 
     // Initialize sectors
-    this.sectors = new Map(
-      Array.from({ length: this.numberOfSectors }).map((_, sectorOffset) => {
+    this.sectors = Array.from({ length: this.numberOfSectors })
+      .map((_, sectorOffset) => {
         const sector = MifareClassicSector.from(this, sectorOffset, new Map());
 
         // Initialize sector blocks
@@ -365,9 +365,8 @@ export class MifareClassicMemory implements PiccMemory {
             sector.blocks.set(blockOffset, MifareClassicUndefinedBlock.from(sector, blockOffset))
           });
 
-        return [sectorOffset, sector];
-      })
-    );
+        return sector;
+      });
 
     if (this.numberOfSectors < 16) {
       this.blockDistribution = [[5, 4]];
@@ -387,7 +386,7 @@ export class MifareClassicMemory implements PiccMemory {
   }
 
   sectorAt(sectorOffset: number): MifareClassicSector {
-    return this.sectors.get(sectorOffset)!;
+    return this.sectors.at(sectorOffset)!; // FIXME: !
   }
 
   static numberOfBlocksInSector(sectorOffset: number): number {
