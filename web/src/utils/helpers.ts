@@ -138,3 +138,7 @@ export function strmask(str: string, opts?: StrMaskOptions): string {
 export function clone<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
 }
+
+export function randomHexStr(bytesLength: number): string {
+  return hex(crypto.getRandomValues(new Uint8Array(bytesLength)), '');
+}

@@ -1,3 +1,4 @@
+import { randomHexStr } from "./helpers";
 
 export class OperationCanceledError extends Error {
   constructor() {
@@ -6,7 +7,7 @@ export class OperationCanceledError extends Error {
 }
 
 export class CancelationToken {
-  readonly id: string = crypto.getRandomValues(new Uint32Array(1))[0].toString(16);
+  readonly id: string = randomHexStr(4);
   private _isCanceled = false;
   private readonly cancelHandlers: (() => void)[] = [];
   private _reason?: any;
