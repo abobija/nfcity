@@ -51,9 +51,8 @@ function onEditSubmit() {
     logger.debug('edited bytes are not saveable, skipping');
     return;
   }
-  else {
-    logger.info('TODO: edit submitted with new bytes', editingBytes.value);
-  }
+
+  logger.info('TODO: edit submitted with new bytes', editingBytes.value);
 
   editingBytes.value = undefined;
 }
