@@ -43,7 +43,6 @@ export interface PiccBlockAccessBits {
 
 export interface PiccBlock {
   address: BlockAddress;
-  offset: number;
   data: Uint8Array;
   accessBits: PiccBlockAccessBits;
 }

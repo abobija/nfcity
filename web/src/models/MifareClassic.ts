@@ -103,7 +103,6 @@ export abstract class MifareClassicBlock implements PiccBlock {
   readonly type: MifareClassicBlockType;
   readonly sector: MifareClassicSector;
   readonly address: number;
-  readonly offset: number;
   readonly data: Uint8Array;
   readonly accessBits: PiccBlockAccessBits;
   readonly blockGroups: MifareClassicBlockGroup[];
@@ -117,7 +116,6 @@ export abstract class MifareClassicBlock implements PiccBlock {
     this.type = type;
     this.sector = sector;
     this.address = block.address;
-    this.offset = block.offset;
     this.data = block.data;
     this.accessBits = block.accessBits;
     bytesGroups.forEach(group => group.block = this);
@@ -139,7 +137,6 @@ export class MifareClassicUndefinedBlock extends MifareClassicBlock {
       MifareClassicBlockType.Undefined,
       sector,
       {
-        offset,
         address: sector.block0Address + offset,
         data: new Uint8Array(0),
         accessBits: { c1: 0, c2: 0, c3: 0 },
@@ -317,12 +314,11 @@ export class MifareClassicSector implements PiccSector {
 
     this.key = sector.key;
 
-    const trailer = MifareClassicSectorTrailerBlock.from(this, {
-      ...sector.blocks.at(-1)!,// FIXME: !
-      offset: this.trailerOffset,
-    });
+    const trailer = MifareClassicSectorTrailerBlock.from(this,
+      sector.blocks.at(-1)! /* FIXME: !*/
+    );
 
-    this.blocks[trailer.offset] = trailer;
+    this.blocks[this.trailerOffset] = trailer;
 
     sector.blocks.slice(0, -1)
       .forEach((block, offset) => {
@@ -330,16 +326,16 @@ export class MifareClassicSector implements PiccSector {
         const accessBits = trailer.accessBitsPool[accessPoolIndex];
 
         if (block.address === 0) {
-          this.blocks[offset] = MifareClassicManufacturerBlock.from(this, { ...block, offset, accessBits });
+          this.blocks[offset] = MifareClassicManufacturerBlock.from(this, { ...block, accessBits });
           return;
         }
 
         if (MifareClassicValueBlock.isValueBlock(accessBits)) {
-          this.blocks[offset] = MifareClassicValueBlock.from(this, { ...block, offset, accessBits });
+          this.blocks[offset] = MifareClassicValueBlock.from(this, { ...block, accessBits });
           return;
         }
 
-        this.blocks[offset] = MifareClassicDataBlock.from(this, { ...block, offset, accessBits });
+        this.blocks[offset] = MifareClassicDataBlock.from(this, { ...block, accessBits });
       });
   }
 }
