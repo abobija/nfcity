@@ -2,10 +2,12 @@
 @import '@/theme.scss';
 
 .memory-bytes-viewer.component {
-  .view {
-    button {
-      padding: .2rem .3rem;
-      font-size: .5rem;
+  .toolbar {
+    display: flex;
+    justify-content: start;
+
+    &>.group:not(:first-child) {
+      margin-left: 1rem;
     }
   }
 

@@ -53,6 +53,11 @@
     margin-top: 1rem;
     display: flex;
     flex-direction: row;
+    flex-wrap: nowrap;
+
+    &>.section.info {
+      flex-grow: 1;
+    }
 
     >.section {
       &:not(:last-child) {
@@ -80,6 +85,28 @@
 .dashboard.component .renderer.component {
   font-size: .9rem;
 
+  .memory-bytes-viewer.component {
+    .toolbar {
+      button {
+        padding: .2rem .3rem;
+        font-size: .5rem;
+      }
+    }
+
+    form.edit {
+
+      button,
+      textarea {
+        font-size: .9rem;
+        padding: .3rem .5rem;
+      }
+
+      textarea {
+        width: 18rem;
+      }
+    }
+  }
+
   &:not(:first-child) {
     margin-top: .8rem;
   }
@@ -93,11 +120,8 @@
     .prop {
       display: flex;
 
-      .name {
-        flex-shrink: 0;
-      }
-
       .value {
+        flex-grow: 1;
         color: $color-fg;
       }
     }

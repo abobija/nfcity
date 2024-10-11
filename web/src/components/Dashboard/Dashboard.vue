@@ -289,10 +289,10 @@ onMemoryByteMouseClick(clickedByte => {
       </div>
 
       <div class="main">
-        <div class="section">
+        <div class="section memory">
           <Memory :memory="picc.memory as MifareClassicMemory" :focus="memoryFocus as MemoryFocus | undefined" />
         </div>
-        <div class="section">
+        <div class="section info">
           <div class="info-panel">
             <Transition appear>
               <div v-if="picc.memory.isEmpty">

@@ -21,8 +21,8 @@ form {
 
 form .form-group,
 .form .form-group {
-  &:not(:first-child):not(:last-child) {
-    margin: 0.5rem 0;
+  &:not(:first-child) {
+    margin-top: 0.5rem;
   }
 
   button,
@@ -34,7 +34,8 @@ form .form-group,
 }
 
 label,
-input {
+input,
+textarea {
   color: $input-color;
 }
 
@@ -49,6 +50,7 @@ input[type="radio"] {
 }
 
 input[type="text"],
+textarea,
 button,
 .btn {
   border-style: solid;
@@ -61,7 +63,8 @@ button,
   }
 }
 
-input[type="text"] {
+input[type="text"],
+textarea {
   border-color: $input-border-color;
   background-color: $input-bg-color;
 
