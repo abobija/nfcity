@@ -1,13 +1,14 @@
 import PiccBlockDto from "@/communication/dtos/PiccBlockDto";
 import PiccSectorDto from "@/communication/dtos/PiccSectorDto";
-import { DeviceMessage } from "@/communication/Message";
+import { DeviceMessage, DeviceMessageContext } from "@/communication/Message";
 
-export default class PiccSectorDeviceMessage extends DeviceMessage implements PiccSectorDto {
+export default class PiccSectorDeviceMessage implements DeviceMessage, PiccSectorDto {
+  readonly $kind: string = 'picc_sector';
+  readonly $ctx?: DeviceMessageContext | undefined;
   readonly offset: number;
   readonly blocks: PiccBlockDto[];
 
   protected constructor(offset: number, blocks: PiccBlockDto[]) {
-    super('picc_sector');
     this.offset = offset;
     this.blocks = blocks;
   }

@@ -1,11 +1,12 @@
 import PiccDto from "@/communication/dtos/PiccDto";
-import { DeviceMessage } from "@/communication/Message";
+import { DeviceMessage, DeviceMessageContext } from "@/communication/Message";
 
-export default class PiccDeviceMessage extends DeviceMessage {
+export default class PiccDeviceMessage implements DeviceMessage {
+  readonly $kind: string = 'picc';
   readonly picc: PiccDto;
+  readonly $ctx?: DeviceMessageContext | undefined;
 
   protected constructor(picc: PiccDto) {
-    super('picc');
     this.picc = picc;
   }
 

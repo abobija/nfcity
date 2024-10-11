@@ -1,9 +1,10 @@
-import { DeviceMessage } from "@/communication/Message";
+import { DeviceMessage, DeviceMessageContext } from "@/communication/Message";
 
-export default class ErrorDeviceMessage extends DeviceMessage {
-  protected constructor() {
-    super('error');
-  }
+export default class ErrorDeviceMessage implements DeviceMessage {
+  readonly $kind: string = 'error';
+  readonly $ctx?: DeviceMessageContext;
+
+  protected constructor() { }
 
   static create() {
     return new ErrorDeviceMessage();

@@ -1,9 +1,10 @@
-import { DeviceMessage } from "@/communication/Message";
+import { DeviceMessage, DeviceMessageContext } from "@/communication/Message";
 
-export default class PongDeviceMessage extends DeviceMessage {
-  protected constructor() {
-    super('pong');
-  }
+export default class PongDeviceMessage implements DeviceMessage {
+  readonly $kind: string = 'pong';
+  readonly $ctx?: DeviceMessageContext | undefined;
+
+  protected constructor() { }
 
   static create() {
     return new PongDeviceMessage();

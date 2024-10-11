@@ -4,32 +4,23 @@ interface Message {
   readonly $kind: string;
 }
 
-export abstract class DeviceMessage implements Message {
-  readonly $kind: string;
-  readonly $ctx?: {
-    readonly $id: string;
-  };
-
-  protected constructor(kind: string) {
-    this.$kind = kind;
-  }
-}
-
-export abstract class WebMessage implements Message {
-  readonly $kind: string;
+export interface DeviceMessageContext {
   readonly $id: string;
-
-  protected constructor(kind: string) {
-    this.$kind = kind;
-    this.$id = crypto.randomUUID();
-  }
 }
 
-export abstract class AuthorizedWebMessage extends WebMessage {
-  readonly key: PiccKey;
+export interface DeviceMessage extends Message {
+  readonly $ctx?: DeviceMessageContext;
+}
 
-  protected constructor(kind: string, key: PiccKey) {
-    super(kind);
-    this.key = key;
-  }
+export interface WebMessage extends Message {
+  readonly $id: string;
+}
+
+export abstract class BaseWebMessage implements WebMessage {
+  abstract $kind: string;
+  readonly $id: string = crypto.randomUUID();
+}
+
+export abstract class AuthorizedWebMessage extends BaseWebMessage {
+  abstract key: PiccKey;
 }

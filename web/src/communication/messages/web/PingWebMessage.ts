@@ -1,15 +1,9 @@
-import { WebMessage } from "@/communication/Message";
+import { BaseWebMessage } from "@/communication/Message";
 
-export default class PingWebMessage extends WebMessage {
-  protected constructor() {
-    super('ping');
-  }
+export default class PingWebMessage extends BaseWebMessage {
+  readonly $kind: string = 'ping';
 
   static create(): PingWebMessage {
     return new PingWebMessage();
-  }
-
-  static is(message: WebMessage): message is PingWebMessage {
-    return message.$kind === 'ping';
   }
 }

@@ -1,12 +1,13 @@
-import { DeviceMessage } from "@/communication/Message";
+import { DeviceMessage, DeviceMessageContext } from "@/communication/Message";
 
 /**
  * Message sent by the device on connection with the broker.
  */
-export default class HelloDeviceMessage extends DeviceMessage {
-  protected constructor() {
-    super('hello');
-  }
+export default class HelloDeviceMessage implements DeviceMessage {
+  readonly $kind: string = 'hello';
+  readonly $ctx?: DeviceMessageContext | undefined;
+
+  protected constructor() { }
 
   static create() {
     return new HelloDeviceMessage();

@@ -1,13 +1,14 @@
 import PiccDto from "@/communication/dtos/PiccDto";
 import PiccStateChangeDto from "@/communication/dtos/PiccStateChangeDto";
-import { DeviceMessage } from "@/communication/Message";
+import { DeviceMessage, DeviceMessageContext } from "@/communication/Message";
 
-export default class PiccStateChangedDeviceMessage extends DeviceMessage implements PiccStateChangeDto {
+export default class PiccStateChangedDeviceMessage implements DeviceMessage, PiccStateChangeDto {
+  readonly $kind: string = 'picc_state_changed';
+  readonly $ctx?: DeviceMessageContext | undefined;
   readonly old_state: number;
   readonly picc: PiccDto;
 
   protected constructor(old_state: number, picc: PiccDto) {
-    super('picc_state_changed');
     this.old_state = old_state;
     this.picc = picc;
   }
