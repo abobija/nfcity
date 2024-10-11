@@ -321,7 +321,7 @@ onMemoryByteMouseClick(clickedByte => {
     <div class="full-screen center overlay" v-if="overlay">
       <Transition mode="out-in" :duration="100" appear>
         <div v-if="state == DashboardState.ClientOffline">
-          <p class="message">connection with the broker is lost</p>
+          <p class="message">lost connection to the server</p>
           <p class="sub message">hang tight, attempting to reconnect...</p>
         </div>
         <div v-else-if="state == DashboardState.CheckingForReader">
