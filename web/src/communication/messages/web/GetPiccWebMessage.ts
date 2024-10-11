@@ -1,7 +1,7 @@
-import { BaseWebMessage } from "@/communication/Message";
+import { BaseWebMessage, WebMessageKind } from "@/communication/Message";
 
 export default class GetPiccWebMessage extends BaseWebMessage {
-  readonly $kind: string = 'get_picc';
+  readonly $kind: WebMessageKind = 'get_picc';
 
   static create(): GetPiccWebMessage {
     return new GetPiccWebMessage();

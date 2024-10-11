@@ -1,8 +1,8 @@
-import { AuthorizedWebMessage } from "@/communication/Message";
+import { AuthorizedWebMessage, WebMessageKind } from "@/communication/Message";
 import { PiccKey } from "@/models/Picc";
 
 export default class ReadSectorWebMessage extends AuthorizedWebMessage {
-  readonly $kind: string = 'read_sector';
+  readonly $kind: WebMessageKind = 'read_sector';
   readonly key: PiccKey;
   readonly offset: number;
 
