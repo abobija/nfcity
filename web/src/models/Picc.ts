@@ -27,8 +27,6 @@ export enum PiccKeyType {
   B = 1,
 }
 
-type SectorOffset = number;
-type BlockOffset = number;
 type Bit = number;
 type BlockAddress = number;
 
@@ -45,15 +43,15 @@ export interface PiccBlockAccessBits {
 
 export interface PiccBlock {
   address: BlockAddress;
-  offset: BlockOffset;
+  offset: number;
   data: Uint8Array;
   accessBits: PiccBlockAccessBits;
 }
 
 export interface PiccSector {
   key: PiccKey;
-  offset: SectorOffset;
-  blocks: Map<BlockOffset, PiccBlock>;
+  offset: number;
+  blocks: PiccBlock[];
   block0Address: BlockAddress;
 }
 
