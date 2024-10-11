@@ -145,7 +145,7 @@ export abstract class MifareClassicBlock implements PiccBlock {
       return;
     }
 
-    const trailer = sector.blockAt(trailerOffset);
+    const trailer = sector.blockAtOffset(trailerOffset);
 
     if (trailer === undefined || !(trailer instanceof MifareClassicSectorTrailerBlock)) {
       throw new Error('Trailer block not found');
@@ -329,8 +329,8 @@ export class MifareClassicSector implements PiccSector {
     return this.offset == that.offset;
   }
 
-  blockAt(blockOffset: number): MifareClassicBlock {
-    return this.blocks.at(blockOffset)!; // FIXME: !
+  blockAtOffset(offset: number): MifareClassicBlock {
+    return this.blocks.at(offset)!; // FIXME: !
   }
 
   updateWith(sectorDto: PiccSectorDto): void {
@@ -340,7 +340,7 @@ export class MifareClassicSector implements PiccSector {
 
     sectorDto.blocks
       .sort((a, b) => b.address - a.address) // Sort so that trailer block is first
-      .forEach(blockDto => this.blockAt(blockDto.offset).updateWith(blockDto));
+      .forEach(blockDto => this.blockAtOffset(blockDto.offset).updateWith(blockDto));
   }
 }
 
@@ -386,8 +386,8 @@ export class MifareClassicMemory implements PiccMemory {
     return new MifareClassicMemory(picc, piccType);
   }
 
-  sectorAt(sectorOffset: number): MifareClassicSector {
-    return this.sectors.at(sectorOffset)!; // FIXME: !
+  sectorAtOffset(offset: number): MifareClassicSector {
+    return this.sectors.at(offset)!; // FIXME: !
   }
 
   static numberOfBlocksInSector(sectorOffset: number): number {

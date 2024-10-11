@@ -18,7 +18,7 @@ const classes = computed(() => ({
 const sectorStates = ref<Map<number, MemorySectorState>>(new Map());
 
 function sectorState(sectorOffset: number): MemorySectorState {
-  return !props.memory.sectorAt(sectorOffset).isEmpty
+  return !props.memory.sectorAtOffset(sectorOffset).isEmpty
     ? MemorySectorState.UnlockedAndLoaded
     : sectorStates.value.get(sectorOffset) ?? MemorySectorState.Empty;
 }
@@ -37,7 +37,7 @@ function changeSectorState(sectorOffset: number, state: MemorySectorState) {
 <template>
   <div class="memory component" :class="classes">
     <MemorySector v-for="(_, sectorOffset) in Array.from({ length: memory.numberOfSectors })" :key="sectorOffset"
-      :sector="memory.sectorAt(sectorOffset)" :state="sectorState(sectorOffset)" :focus="focus?.sectorFocus"
+      :sector="memory.sectorAtOffset(sectorOffset)" :state="sectorState(sectorOffset)" :focus="focus?.sectorFocus"
       @state-change="(newState) => changeSectorState(sectorOffset, newState)" />
   </div>
 </template>

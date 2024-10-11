@@ -67,7 +67,7 @@ onUpdated(() => {
       <span class="offset">{{ sector.offset }}</span>
     </div>
     <div class="blocks">
-      <MemoryBlock :block="sector.blockAt(blockOffset)"
+      <MemoryBlock :block="sector.blockAtOffset(blockOffset)"
         v-for="(_, blockOffset) in Array.from({ length: MifareClassicMemory.numberOfBlocksInSector(sector.offset) })"
         :key="blockOffset" :focus="focus?.blockFocus" />
 
