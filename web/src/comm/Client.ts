@@ -15,7 +15,7 @@ import PongDevMessage from '@/comm/msgs/dev/PongDevMessage';
 import PingWebMessage from '@/comm/msgs/web/PingWebMessage';
 import { CancelationToken, OperationCanceledError } from '@/utils/CancelationToken';
 import logger, { LogLevel } from '@/utils/Logger';
-import { strmask, trim } from '@/utils/helpers';
+import { randomHexStr, strmask, trim } from '@/utils/helpers';
 import { decode, encode } from 'cbor-x';
 import mqtt, { MqttClient, PacketCallback } from 'mqtt';
 
@@ -181,7 +181,9 @@ class Client {
       return this;
     }
 
-    this.mqttClient = mqtt.connect(this.brokerUrl.toString());
+    this.mqttClient = mqtt.connect(this.brokerUrl.toString(), {
+      clientId: `nfcity_${randomHexStr(4)}`,
+    });
 
     this.mqttClient.on('error', error => {
       this.logger.warning('error', error);
