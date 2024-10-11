@@ -4,7 +4,7 @@ import '@/components/MemoryViewer/MemoryViewer.scss';
 import { MifareClassicBlock } from '@/models/MifareClassic';
 import { ascii, bin, hex, isAsciiPrintable } from '@/utils/helpers';
 import makeLogger from '@/utils/Logger';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import MemoryEdit from '../MemoryEdit/MemoryEdit.vue';
 
 const props = defineProps<{
@@ -25,6 +25,12 @@ const _length = computed(() => props.length ?? (props.block.data.length - _offse
 const bytes = computed(() => props.block.data.slice(_offset.value, _offset.value + _length.value));
 const _view = computed(() => props.view || MemoryView.Hexadecimal);
 const editingBytes = ref<Uint8Array>();
+
+watch(
+  () => { props.block.address, props.offset, props.length },
+  () => editingBytes.value = undefined,
+  { deep: true }
+);
 
 function onEdit() {
   editingBytes.value = Uint8Array.from(bytes.value); // clone
