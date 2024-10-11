@@ -19,6 +19,8 @@ export interface WebMessage extends Message {
 export abstract class BaseWebMessage implements WebMessage {
   abstract $kind: string;
   readonly $id: string = crypto.randomUUID();
+
+  protected constructor() { }
 }
 
 export abstract class AuthorizedWebMessage extends BaseWebMessage {
