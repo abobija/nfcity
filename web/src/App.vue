@@ -17,6 +17,7 @@ const {
   VITE_APP_AUTHOR_URL,
   VITE_APP_REPO,
   VITE_APP_REPO_TAG,
+  VITE_APP_REPO_TAG_NAME,
   VITE_APP_LICENSE_NAME,
   VITE_APP_LICENSE_URL,
 } = import.meta.env;
@@ -115,15 +116,15 @@ onClientReady(() => {
         </Transition>
         <div class="footer">
           <p class="version">
-            version
-            <a :href="`${VITE_APP_REPO}/tree/${VITE_APP_REPO_TAG}`" target="_blank">
-              {{ VITE_APP_REPO_TAG }}
+            <span>v</span>
+            <a v-if="VITE_APP_REPO" :href="`${VITE_APP_REPO}/tree/${VITE_APP_REPO_TAG}`" target="_blank">
+              {{ VITE_APP_REPO_TAG_NAME || VITE_APP_REPO_TAG }}
             </a>
-            under
-            <a :href="VITE_APP_LICENSE_URL" target="_blank">{{ VITE_APP_LICENSE_NAME }}</a>
+            <span v-else>{{ VITE_APP_REPO_TAG_NAME || VITE_APP_REPO_TAG }}</span>
           </p>
           <p class="copyright">
-            copyrigh 2024 <a :href="VITE_APP_AUTHOR_URL" target="_blank">{{ VITE_APP_AUTHOR }}</a>
+            copyrigh 2024 <a :href="VITE_APP_AUTHOR_URL" target="_blank">{{ VITE_APP_AUTHOR }}</a>,
+            <a :href="VITE_APP_LICENSE_URL" class="license" target="_blank">{{ VITE_APP_LICENSE_NAME }}</a>
           </p>
         </div>
       </div>
