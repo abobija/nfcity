@@ -1,6 +1,6 @@
 
 import Client, { ClientValidator } from "@/comm/Client";
-import { clientStorageKey } from "@/keys";
+import { keys } from "@/keys";
 import { clone } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";
 import { inject, readonly, ref, Ref, watch } from "vue";
@@ -83,7 +83,6 @@ export function newClientStorageInjection(): ClientStorageInjection {
   }
 }
 
-
 export default function useClientStorage() {
-  return inject(clientStorageKey) as ClientStorageInjection;
+  return inject(keys.clientStorage) as ClientStorageInjection;
 };

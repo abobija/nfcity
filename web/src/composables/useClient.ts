@@ -1,5 +1,5 @@
 import Client from "@/comm/Client";
-import { clientKey } from "@/keys";
+import { keys } from "@/keys";
 import makeLogger from "@/utils/Logger";
 import { inject, ref, Ref, shallowReadonly, watch } from "vue";
 
@@ -32,5 +32,5 @@ export default function useClient() {
 }
 
 function useIt<T = Client | undefined>() {
-  return inject(clientKey) as ClientInjection<T>;
+  return inject(keys.client) as ClientInjection<T>;
 }

@@ -1,2 +1,4 @@
-export const clientKey = 'client';
-export const clientStorageKey = 'clientStorage';
+export const keys = {
+  client: 'client',
+  clientStorage: 'client:storage',
+}
