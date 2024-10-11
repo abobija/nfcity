@@ -5,8 +5,7 @@ import onClientReady from "@/comm/composables/onClientReady";
 import ClientConfig from "@/components/ClientConfig/ClientConfig.vue";
 import Dashboard from "@/components/Dashboard/Dashboard.vue";
 import { useClientMaybe } from "@/composables/useClient";
-import useClientStorage from "@/composables/useClientStorage";
-import { isValidClientStorage, ValidClientStorage } from "@/storage/ClientStorage";
+import useClientStorage, { isValidClientStorage, ValidClientStorage } from "@/composables/useClientStorage";
 import makeLogger from "@/utils/Logger";
 import { onMounted, ref, watch } from "vue";
 

@@ -1,11 +1,11 @@
 import PiccBlockDto from "@/comm/dtos/PiccBlockDto";
 import PiccDto from "@/comm/dtos/PiccDto";
 import Picc, { PiccBlock, PiccBlockAccessBits, PiccKey, PiccKeyType, PiccMemory, PiccSector, PiccState, PiccType } from "@/models/Picc";
-import { arrEquals, nibbles } from "@/utils/helpers";
+import { arrEquals, hex2arr, nibbles } from "@/utils/helpers";
 
 export const defaultKey: PiccKey = {
   type: PiccKeyType.A,
-  value: Uint8Array.from([0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]),
+  value: hex2arr('FFFFFFFFFFFF'),
 };
 
 export enum MifareClassicBlockGroupType {
