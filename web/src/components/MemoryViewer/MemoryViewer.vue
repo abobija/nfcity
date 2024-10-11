@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import MemoryEdit from "@/components/MemoryEdit/MemoryEdit.vue";
+import MemoryEditor from "@/components/MemoryEditor/MemoryEditor.vue";
 import MemoryView from "@/components/MemoryViewer/MemoryView";
 import '@/components/MemoryViewer/MemoryViewer.scss';
 import { MifareClassicBlock } from "@/models/MifareClassic";
@@ -83,7 +83,7 @@ function onEditSubmit() {
     </div>
     <form class="edit" v-if="editingBytes" @submit.prevent="onEditSubmit">
       <div class="form-group">
-        <MemoryEdit v-model="editingBytes" />
+        <MemoryEditor v-model="editingBytes" />
       </div>
       <div class="form-group">
         <button type="submit" class="btn primary" :disabled="!editingBytesAreSaveable">save</button>
