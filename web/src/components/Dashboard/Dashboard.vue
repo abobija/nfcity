@@ -341,7 +341,7 @@ onMemoryByteMouseClick(clickedByte => {
         </div>
         <div v-else-if="state == DashboardState.PongMissed">
           <p class="message">device is not responding</p>
-          <p class="sub message">please wait a moment, the device is attempting to reconnect</p>
+          <p class="sub message">please wait a moment, the device should recover soon</p>
         </div>
       </Transition>
     </div>
