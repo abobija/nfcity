@@ -2,7 +2,7 @@ import PiccDto from "@/communication/dtos/PiccDto";
 import { DeviceMessage } from "@/communication/Message";
 
 export default class PiccDeviceMessage extends DeviceMessage {
-  readonly picc: Readonly<PiccDto>;
+  readonly picc: PiccDto;
 
   protected constructor(picc: PiccDto) {
     super('picc');

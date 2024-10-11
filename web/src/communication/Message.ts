@@ -1,13 +1,13 @@
 import { PiccKey } from "@/models/Picc";
 
 interface Message {
-  $kind: string;
+  readonly $kind: string;
 }
 
 export abstract class DeviceMessage implements Message {
   readonly $kind: string;
   readonly $ctx?: {
-    $id: string;
+    readonly $id: string;
   };
 
   protected constructor(kind: string) {
