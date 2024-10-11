@@ -133,6 +133,40 @@ export abstract class MifareClassicBlock implements PiccBlock {
   hasSameAddressAs(that: MifareClassicBlock): boolean {
     return this.address == that.address;
   }
+
+  updateWith(block: PiccBlockDto): void {
+    const sector = this.sector;
+    const trailerOffset = sector.numberOfBlocks - 1;
+
+    if (block.offset == trailerOffset) {
+      sector.blocks.set(block.offset, MifareClassicSectorTrailerBlock.from(sector, block));
+      return;
+    }
+
+    const trailer = sector.blocks.get(trailerOffset);
+
+    if (trailer === undefined || !(trailer instanceof MifareClassicSectorTrailerBlock)) {
+      throw new Error('Trailer block not found');
+    }
+
+    const accessPoolIndex = MifareClassicSectorTrailerBlock.calculateBlockAccessBitsPoolIndex(
+      block.offset,
+      sector.numberOfBlocks
+    );
+    const accessBits = trailer.accessBitsPool[accessPoolIndex];
+
+    if (block.address == 0) {
+      sector.blocks.set(block.offset, MifareClassicManufacturerBlock.from(sector, block, accessBits));
+      return;
+    }
+
+    if (MifareClassicValueBlock.isValueBlock(accessBits)) {
+      sector.blocks.set(block.offset, MifareClassicValueBlock.from(sector, block, accessBits));
+      return
+    }
+
+    sector.blocks.set(block.offset, MifareClassicDataBlock.from(sector, block, accessBits));
+  }
 }
 
 export class MifareClassicUndefinedBlock extends MifareClassicBlock {
@@ -269,6 +303,15 @@ export class MifareClassicSector implements PiccSector {
   readonly blocks: Map<number, MifareClassicBlock>;
   readonly block0Address: number;
 
+  get numberOfBlocks() {
+    return this.blocks.size;
+  }
+
+  // returns true if none of the blocks in the sector are loaded
+  get isEmpty() {
+    return Array.from(this.blocks.values()).every(block => !block.loaded);
+  }
+
   protected constructor(memory: MifareClassicMemory, offset: number, blocks: Map<number, MifareClassicBlock>) {
     this.memory = memory;
     this.offset = offset;
@@ -278,11 +321,6 @@ export class MifareClassicSector implements PiccSector {
 
   static from(memory: MifareClassicMemory, offset: number, blocks: Map<number, MifareClassicBlock>) {
     return new MifareClassicSector(memory, offset, blocks);
-  }
-
-  // returns true if none of the blocks in the sector are loaded
-  get isEmpty() {
-    return Array.from(this.blocks.values()).every(block => !block.loaded);
   }
 
   hasSameOffsetAs(that: MifareClassicSector): boolean {
@@ -341,48 +379,14 @@ export class MifareClassicMemory implements PiccMemory {
     return this.sectors.get(sectorOffset)!;
   }
 
-  private updateBlock(block: PiccBlockDto): void {
-    const sectorOffset = MifareClassicMemory.sectorOffset(block.address);
-    const sector = this.sectorAt(sectorOffset);
-    const numberOfBlocks = MifareClassicMemory.numberOfBlocksInSector(sectorOffset);
-
-    if (block.offset == numberOfBlocks - 1) {
-      sector.blocks.set(block.offset, MifareClassicSectorTrailerBlock.from(sector, block));
-      return;
-    }
-
-    const trailer = sector.blocks.get(numberOfBlocks - 1);
-
-    if (trailer === undefined || !(trailer instanceof MifareClassicSectorTrailerBlock)) {
-      throw new Error('Trailer block not found');
-    }
-
-    const accessPoolIndex = MifareClassicSectorTrailerBlock.calculateBlockAccessBitsPoolIndex(block.offset, numberOfBlocks);
-    const accessBits = trailer.accessBitsPool[accessPoolIndex];
-
-    if (block.address == 0) {
-      sector.blocks.set(block.offset, MifareClassicManufacturerBlock.from(sector, block, accessBits));
-      return;
-    }
-
-    if (MifareClassicValueBlock.isValueBlock(accessBits)) {
-      sector.blocks.set(block.offset, MifareClassicValueBlock.from(sector, block, accessBits));
-      return
-    }
-
-    sector.blocks.set(block.offset, MifareClassicDataBlock.from(sector, block, accessBits));
-  }
-
   updateSector(offset: number, blocks: PiccBlockDto[]): void {
     if (blocks.length < 4) {
       throw new Error('Invalid number of blocks');
     }
 
-    offset; // TODO: check if blocks are in sector with this offset
-
     blocks
       .sort((a, b) => b.address - a.address) // Sort so that trailer block is first
-      .forEach(block => this.updateBlock(block));
+      .forEach(block => this.sectorAt(offset).blockAt(block.offset).updateWith(block));
   }
 
   static numberOfBlocksInSector(sectorOffset: number): number {
