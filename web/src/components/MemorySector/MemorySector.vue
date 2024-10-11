@@ -11,7 +11,6 @@ import MemorySectorUnlockOverlay from "@/components/MemorySector/overlays/Memory
 import MemorySectorUnlockingOverlay from "@/components/MemorySector/overlays/MemorySectorUnlockingOverlay.vue";
 import useClient from "@/composables/useClient";
 import {
-  MifareClassicMemory,
   MifareClassicSector
 } from "@/models/MifareClassic";
 import { PiccKey } from "@/models/Picc";
@@ -28,18 +27,19 @@ const emit = defineEmits<{
 }>();
 
 const classes = computed(() => ({
-  focused: props.focus?.sector.hasSameOffsetAs(props.sector),
+  focused: props.focus?.sector === props.sector,
   empty: props.sector.isEmpty,
 }));
 
 const { client } = useClient();
 const piccKey = ref<PiccKey>(props.sector.key);
+const sectorOffset = computed(() => props.sector.memory.offsetOfSector(props.sector));
 
 async function unlockAndLoadSector(key: PiccKey) {
   piccKey.value = key;
 
   emit('stateChange', MemorySectorState.Unlocking);
-  const msg = await client.value.transceive(ReadSectorWebMessage.from(props.sector.offset, key));
+  const msg = await client.value.transceive(ReadSectorWebMessage.from(sectorOffset.value, key));
 
   if (isPiccSectorDeviceMessage(msg)) {
     props.sector.updateWith({ key, blocks: msg.blocks });
@@ -63,12 +63,10 @@ onUpdated(() => {
 <template>
   <div class="memory-sector component" :class="classes">
     <div class="meta">
-      <span class="offset">{{ sector.offset }}</span>
+      <span class="offset">{{ sectorOffset }}</span>
     </div>
     <div class="blocks">
-      <MemoryBlock :block="sector.blockAtOffset(blockOffset)"
-        v-for="(_, blockOffset) in Array.from({ length: MifareClassicMemory.numberOfBlocksInSector(sector.offset) })"
-        :key="blockOffset" :focus="focus?.blockFocus" />
+      <MemoryBlock :block v-for="block in sector.blocks" :key="block.address" :focus="focus?.blockFocus" />
 
       <Transition>
         <MemorySectorEmptyOverlay v-if="state == MemorySectorState.Empty"

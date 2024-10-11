@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { MifareClassicSector } from "@/models/MifareClassic";
+import { computed } from "vue";
 
-defineProps<{
+const props = defineProps<{
   sector: MifareClassicSector;
 }>();
+
+const sectorOffset = computed(() => props.sector.memory.offsetOfSector(props.sector));
 </script>
 
 <template>
@@ -14,7 +17,7 @@ defineProps<{
     <ul class="props">
       <li class="prop">
         <div class="name">Offset</div>
-        <div class="value">{{ sector.offset }}</div>
+        <div class="value">{{ sectorOffset }}</div>
       </li>
     </ul>
   </div>

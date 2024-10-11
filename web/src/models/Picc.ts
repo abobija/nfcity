@@ -49,7 +49,6 @@ export interface PiccBlock {
 
 export interface PiccSector {
   key: PiccKey;
-  offset: number;
   blocks: PiccBlock[];
   block0Address: BlockAddress;
 }
