@@ -1,7 +1,8 @@
 import PiccBlockDto from "@/communication/dtos/PiccBlockDto";
+import PiccSectorDto from "@/communication/dtos/PiccSectorDto";
 import { DeviceMessage } from "@/communication/Message";
 
-export default class PiccSectorDeviceMessage extends DeviceMessage {
+export default class PiccSectorDeviceMessage extends DeviceMessage implements PiccSectorDto {
   readonly offset: number;
   readonly blocks: PiccBlockDto[];
 
