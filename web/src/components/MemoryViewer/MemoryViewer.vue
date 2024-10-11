@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import WriteBlockWebMessage from "@/communication/messages/web/WriteBlockWebMessage";
 import MemoryEditor from "@/components/MemoryEditor/MemoryEditor.vue";
 import MemoryView from "@/components/MemoryViewer/MemoryView";
 import '@/components/MemoryViewer/MemoryViewer.scss';
 import { MifareClassicBlock } from "@/models/MifareClassic";
+import { UpdatablePiccBlock } from "@/models/Picc";
 import { ascii, bin, hex, isAsciiPrintable } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";
 import { computed, ref, watch } from "vue";
@@ -47,12 +49,27 @@ function onEditCancel() {
 }
 
 function onEditSubmit() {
-  if (!editingBytesAreSaveable.value) {
+  if (!editingBytesAreSaveable.value || !editingBytes.value) {
     logger.debug('edited bytes are not saveable, skipping');
     return;
   }
 
-  logger.info('TODO: edit submitted with new bytes', editingBytes.value);
+  // clone original bytes
+  const bytesToWrite = Uint8Array.from(props.block.data);
+
+  // modify clone with edited bytes
+  editingBytes.value.forEach(
+    (b, i) => bytesToWrite[_offset.value + i] = b
+  );
+
+  const newBlock: UpdatablePiccBlock = {
+    address: props.block.address,
+    data: bytesToWrite,
+  };
+
+  const message = WriteBlockWebMessage.from(newBlock, props.block.sector.key);
+
+  logger.info('TODO: send message to update block', message);
 
   editingBytes.value = undefined;
 }
