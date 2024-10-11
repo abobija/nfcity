@@ -1,4 +1,4 @@
-import { AuthorizedWebMessage } from "@/communication/msgs/Message";
+import { AuthorizedWebMessage } from "@/communication/Message";
 import { PiccKey } from "@/models/Picc";
 
 export default class ReadSectorWebMessage extends AuthorizedWebMessage {

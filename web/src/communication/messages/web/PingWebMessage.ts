@@ -1,4 +1,4 @@
-import { WebMessage } from "@/communication/msgs/Message";
+import { WebMessage } from "@/communication/Message";
 
 export default class PingWebMessage extends WebMessage {
   protected constructor() {

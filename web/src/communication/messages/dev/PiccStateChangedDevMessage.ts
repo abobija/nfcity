@@ -1,5 +1,5 @@
 import PiccDto from "@/communication/dtos/PiccDto";
-import { DeviceMessage } from "@/communication/msgs/Message";
+import { DeviceMessage } from "@/communication/Message";
 
 export default class PiccStateChangedDevMessage extends DeviceMessage {
   readonly old_state: number;

@@ -9,13 +9,13 @@ import ClientPongEvent from "@/communication/events/ClientPongEvent";
 import ClientPongMissedEvent from "@/communication/events/ClientPongMissedEvent";
 import ClientReadyEvent from "@/communication/events/ClientReadyEvent";
 import ClientReconnectEvent from "@/communication/events/ClientReconnectEvent";
-import { DeviceMessage, WebMessage } from "@/communication/msgs/Message";
-import ErrorDevMessage from "@/communication/msgs/dev/ErrorDevMessage";
-import PongDevMessage from "@/communication/msgs/dev/PongDevMessage";
-import PingWebMessage from "@/communication/msgs/web/PingWebMessage";
+import { DeviceMessage, WebMessage } from "@/communication/Message";
+import ErrorDevMessage from "@/communication/messages/dev/ErrorDevMessage";
+import PongDevMessage from "@/communication/messages/dev/PongDevMessage";
+import PingWebMessage from "@/communication/messages/web/PingWebMessage";
 import { CancelationToken, OperationCanceledError } from "@/utils/CancelationToken";
-import logger, { LogLevel } from "@/utils/Logger";
 import { randomHexStr, strmask, trim } from "@/utils/helpers";
+import logger, { LogLevel } from "@/utils/Logger";
 import { decode, encode } from "cbor-x";
 import mqtt, { MqttClient, PacketCallback } from "mqtt";
 

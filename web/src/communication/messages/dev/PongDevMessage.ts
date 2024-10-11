@@ -1,4 +1,4 @@
-import { DeviceMessage } from "@/communication/msgs/Message";
+import { DeviceMessage } from "@/communication/Message";
 
 export default class PongDevMessage extends DeviceMessage {
   protected constructor() {

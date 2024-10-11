@@ -1,6 +1,6 @@
 import Client from "@/communication/Client";
 import { ClientEvent } from "@/communication/events/ClientEvent";
-import { DeviceMessage } from "@/communication/msgs/Message";
+import { DeviceMessage } from "@/communication/Message";
 
 export default class ClientMessageEvent extends ClientEvent {
   readonly message: DeviceMessage;

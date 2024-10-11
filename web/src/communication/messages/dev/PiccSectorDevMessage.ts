@@ -1,5 +1,5 @@
 import PiccBlockDto from "@/communication/dtos/PiccBlockDto";
-import { DeviceMessage } from "@/communication/msgs/Message";
+import { DeviceMessage } from "@/communication/Message";
 
 export default class PiccSectorDevMessage extends DeviceMessage {
   readonly offset: number;

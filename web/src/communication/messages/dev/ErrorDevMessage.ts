@@ -1,4 +1,4 @@
-import { DeviceMessage } from "@/communication/msgs/Message";
+import { DeviceMessage } from "@/communication/Message";
 
 export default class ErrorDevMessage extends DeviceMessage {
   protected constructor() {
