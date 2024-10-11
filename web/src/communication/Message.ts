@@ -3,7 +3,8 @@ import { PiccKey } from "@/models/Picc";
 export type WebMessageKind =
   | 'ping'
   | 'get_picc'
-  | 'read_sector';
+  | 'read_sector'
+  | 'write_block';
 
 export type DeviceMessageKind =
   | 'pong'
