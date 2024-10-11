@@ -39,5 +39,10 @@ export abstract class BaseWebMessage implements WebMessage {
 }
 
 export abstract class AuthorizedWebMessage extends BaseWebMessage {
-  abstract key: PiccKey;
+  readonly key: PiccKey;
+
+  protected constructor(key: PiccKey) {
+    super();
+    this.key = key;
+  }
 }

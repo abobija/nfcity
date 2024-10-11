@@ -3,13 +3,11 @@ import { PiccKey } from "@/models/Picc";
 
 export default class ReadSectorWebMessage extends AuthorizedWebMessage {
   readonly $kind: WebMessageKind = 'read_sector';
-  readonly key: PiccKey;
   readonly offset: number;
 
   protected constructor(offset: number, key: PiccKey) {
-    super();
+    super(key);
     this.offset = offset;
-    this.key = key;
   }
 
   static from(offset: number, key: PiccKey): ReadSectorWebMessage {
