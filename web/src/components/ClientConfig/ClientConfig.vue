@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ClientValidator } from "@/comm/Client";
+import { ClientValidator } from "@/communication/Client";
 import '@/components/ClientConfig/ClientConfig.scss';
 import { ClientStorage, validateClientStorage, ValidClientStorage } from "@/composables/useClientStorage";
 import { clone } from "@/utils/helpers";

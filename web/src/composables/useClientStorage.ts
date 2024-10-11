@@ -1,5 +1,5 @@
 
-import Client, { ClientValidator } from "@/comm/Client";
+import Client, { ClientValidator } from "@/communication/Client";
 import { keys } from "@/keys";
 import { clone } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";

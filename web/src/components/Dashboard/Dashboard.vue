@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import onClientMessage from "@/comm/composables/onClientMessage";
-import onClientOffline from "@/comm/composables/onClientOffline";
-import onClientPongMissed from "@/comm/composables/onClientPongMissed";
-import onClientReady from "@/comm/composables/onClientReady";
-import HelloDevMessage from "@/comm/msgs/dev/HelloDevMessage";
-import PiccDevMessage from "@/comm/msgs/dev/PiccDevMessage";
-import PiccStateChangedDevMessage from "@/comm/msgs/dev/PiccStateChangedDevMessage";
-import GetPiccWebMessage from "@/comm/msgs/web/GetPiccWebMessage";
+import onClientMessage from "@/communication/composables/onClientMessage";
+import onClientOffline from "@/communication/composables/onClientOffline";
+import onClientPongMissed from "@/communication/composables/onClientPongMissed";
+import onClientReady from "@/communication/composables/onClientReady";
+import HelloDevMessage from "@/communication/msgs/dev/HelloDevMessage";
+import PiccDevMessage from "@/communication/msgs/dev/PiccDevMessage";
+import PiccStateChangedDevMessage from "@/communication/msgs/dev/PiccStateChangedDevMessage";
+import GetPiccWebMessage from "@/communication/msgs/web/GetPiccWebMessage";
 import '@/components/Dashboard/Dashboard.scss';
 import BlockRenderer from "@/components/Dashboard/renderers/BlockRenderer.vue";
 import ByteRenderer from "@/components/Dashboard/renderers/ByteRenderer.vue";

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import ErrorDevMessage from "@/comm/msgs/dev/ErrorDevMessage";
-import PiccSectorDevMessage from "@/comm/msgs/dev/PiccSectorDevMessage";
-import ReadSectorWebMessage from "@/comm/msgs/web/ReadSectorWebMessage";
+import ErrorDevMessage from "@/communication/msgs/dev/ErrorDevMessage";
+import PiccSectorDevMessage from "@/communication/msgs/dev/PiccSectorDevMessage";
+import ReadSectorWebMessage from "@/communication/msgs/web/ReadSectorWebMessage";
 import MemoryBlock from "@/components/MemoryBlock/MemoryBlock.vue";
 import '@/components/MemorySector/MemorySector.scss';
 import MemorySectorFocus from "@/components/MemorySector/MemorySectorFocus";

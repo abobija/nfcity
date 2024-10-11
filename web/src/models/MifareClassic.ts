@@ -1,5 +1,5 @@
-import PiccBlockDto from "@/comm/dtos/PiccBlockDto";
-import PiccDto from "@/comm/dtos/PiccDto";
+import PiccBlockDto from "@/communication/dtos/PiccBlockDto";
+import PiccDto from "@/communication/dtos/PiccDto";
 import Picc, { PiccBlock, PiccBlockAccessBits, PiccKey, PiccKeyType, PiccMemory, PiccSector, PiccState, PiccType } from "@/models/Picc";
 import { arrEquals, hex2arr, nibbles } from "@/utils/helpers";
 

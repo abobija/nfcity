@@ -1,4 +1,4 @@
-import Client from "@/comm/Client";
+import Client from "@/communication/Client";
 import { keys } from "@/keys";
 import makeLogger from "@/utils/Logger";
 import { inject, ref, Ref, shallowReadonly, watch } from "vue";

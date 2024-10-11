@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import '@/App.scss';
-import Client from "@/comm/Client";
-import onClientReady from "@/comm/composables/onClientReady";
+import Client from "@/communication/Client";
+import onClientReady from "@/communication/composables/onClientReady";
 import ClientConfig from "@/components/ClientConfig/ClientConfig.vue";
 import Dashboard from "@/components/Dashboard/Dashboard.vue";
 import { useClientMaybe } from "@/composables/useClient";
