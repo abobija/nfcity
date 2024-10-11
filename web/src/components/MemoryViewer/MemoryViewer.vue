@@ -25,6 +25,12 @@ const _length = computed(() => props.length ?? (props.block.data.length - _offse
 const bytes = computed(() => props.block.data.slice(_offset.value, _offset.value + _length.value));
 const _view = computed(() => props.view || MemoryView.Hexadecimal);
 const editingBytes = ref<Uint8Array>();
+const editingBytesAreSaveable = ref(false);
+
+watch(editingBytes, () => {
+  editingBytesAreSaveable.value = editingBytes.value?.length === bytes.value.length &&
+    editingBytes.value?.some((b, i) => b !== bytes.value[i]) === true;
+});
 
 watch(
   () => { props.block.address, props.offset, props.length },
@@ -41,16 +47,9 @@ function onEditCancel() {
 }
 
 function onEditSubmit() {
-  if (!editingBytes.value) {
-    logger.warning('edit submitted with no editing bytes');
+  if (!editingBytesAreSaveable.value) {
+    logger.debug('edited bytes are not saveable, skipping');
     return;
-  }
-  else if (editingBytes.value.length !== bytes.value.length) {
-    logger.warning('edit submitted with invalid length', editingBytes.value.length, 'expected', bytes.value.length);
-    return;
-  }
-  else if (editingBytes.value.some((b, i) => b !== bytes.value[i]) !== true) {
-    logger.debug('edit submitted with no changes, skipping');
   }
   else {
     logger.info('TODO: edit submitted with new bytes', editingBytes.value);
@@ -87,7 +86,7 @@ function onEditSubmit() {
         <MemoryEdit v-model="editingBytes" />
       </div>
       <div class="form-group">
-        <button type="submit" class="btn primary">save</button>
+        <button type="submit" class="btn primary" :disabled="!editingBytesAreSaveable">save</button>
         <button type="button" class="btn secondary" @click="onEditCancel">cancel</button>
       </div>
     </form>
