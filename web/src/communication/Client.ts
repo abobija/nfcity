@@ -10,8 +10,8 @@ import ClientPongMissedEvent from "@/communication/events/ClientPongMissedEvent"
 import ClientReadyEvent from "@/communication/events/ClientReadyEvent";
 import ClientReconnectEvent from "@/communication/events/ClientReconnectEvent";
 import { DeviceMessage, WebMessage } from "@/communication/Message";
-import ErrorDevMessage from "@/communication/messages/dev/ErrorDevMessage";
-import PongDevMessage from "@/communication/messages/dev/PongDevMessage";
+import ErrorDeviceMessage from "@/communication/messages/device/ErrorDeviceMessage";
+import PongDeviceMessage from "@/communication/messages/device/PongDeviceMessage";
 import PingWebMessage from "@/communication/messages/web/PingWebMessage";
 import { CancelationToken, OperationCanceledError } from "@/utils/CancelationToken";
 import { randomHexStr, strmask, trim } from "@/utils/helpers";
@@ -209,9 +209,9 @@ class Client {
 
       let logLevel = LogLevel.DEBUG;
 
-      if (PongDevMessage.is(decodedMessage)) {
+      if (PongDeviceMessage.is(decodedMessage)) {
         logLevel = LogLevel.VERBOSE;
-      } else if (ErrorDevMessage.is(decodedMessage)) {
+      } else if (ErrorDeviceMessage.is(decodedMessage)) {
         logLevel = LogLevel.WARNING;
       }
 
@@ -269,7 +269,7 @@ class Client {
       const pong = await this.transceive(PingWebMessage.create(), cancelationToken);
       cancelationToken?.throwIfCanceled();
 
-      if (PongDevMessage.is(pong)) {
+      if (PongDeviceMessage.is(pong)) {
         this.logger.verbose('pong');
         context.pong = pong;
         clientEmits.emit('pong', ClientPongEvent.from(
@@ -333,14 +333,14 @@ class Client {
 
 export class ClientPingContext {
   pingTimestamp: number;
-  private _pong?: PongDevMessage;
+  private _pong?: PongDeviceMessage;
   private _pongTimestamp?: number;
 
-  get pong(): PongDevMessage | undefined {
+  get pong(): PongDeviceMessage | undefined {
     return this._pong;
   }
 
-  set pong(message: PongDevMessage) {
+  set pong(message: PongDeviceMessage) {
     this._pong = message;
     this._pongTimestamp = Date.now();
   }

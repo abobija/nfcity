@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import ErrorDevMessage from "@/communication/messages/dev/ErrorDevMessage";
-import PiccSectorDevMessage from "@/communication/messages/dev/PiccSectorDevMessage";
+import ErrorDeviceMessage from "@/communication/messages/device/ErrorDeviceMessage";
+import PiccSectorDeviceMessage from "@/communication/messages/device/PiccSectorDeviceMessage";
 import ReadSectorWebMessage from "@/communication/messages/web/ReadSectorWebMessage";
 import MemoryBlock from "@/components/MemoryBlock/MemoryBlock.vue";
 import '@/components/MemorySector/MemorySector.scss';
@@ -42,13 +42,13 @@ async function unlockAndLoadSector(key: PiccKey) {
   emit('stateChange', MemorySectorState.Unlocking);
   const msg = await client.value.transceive(ReadSectorWebMessage.from(props.sector.offset, key));
 
-  if (PiccSectorDevMessage.is(msg)) {
+  if (PiccSectorDeviceMessage.is(msg)) {
     props.sector.memory.updateSector(msg.offset, msg.blocks);
     emit('stateChange', MemorySectorState.UnlockedAndLoaded);
     return;
   }
 
-  if (ErrorDevMessage.is(msg)) {
+  if (ErrorDeviceMessage.is(msg)) {
     emit('stateChange', MemorySectorState.Unlock);
     return;
   }

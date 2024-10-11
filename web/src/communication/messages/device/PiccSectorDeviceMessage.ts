@@ -1,7 +1,7 @@
 import PiccBlockDto from "@/communication/dtos/PiccBlockDto";
 import { DeviceMessage } from "@/communication/Message";
 
-export default class PiccSectorDevMessage extends DeviceMessage {
+export default class PiccSectorDeviceMessage extends DeviceMessage {
   readonly offset: number;
   readonly blocks: PiccBlockDto[];
 
@@ -11,11 +11,11 @@ export default class PiccSectorDevMessage extends DeviceMessage {
     this.blocks = blocks;
   }
 
-  static from(offset: number, blocks: PiccBlockDto[]): PiccSectorDevMessage {
-    return new PiccSectorDevMessage(offset, blocks);
+  static from(offset: number, blocks: PiccBlockDto[]): PiccSectorDeviceMessage {
+    return new PiccSectorDeviceMessage(offset, blocks);
   }
 
-  static is(message: DeviceMessage): message is PiccSectorDevMessage {
+  static is(message: DeviceMessage): message is PiccSectorDeviceMessage {
     return message.$kind === 'picc_sector';
   }
 }

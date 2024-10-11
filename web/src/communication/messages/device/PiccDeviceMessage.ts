@@ -1,7 +1,7 @@
 import PiccDto from "@/communication/dtos/PiccDto";
 import { DeviceMessage } from "@/communication/Message";
 
-export default class PiccDevMessage extends DeviceMessage {
+export default class PiccDeviceMessage extends DeviceMessage {
   readonly picc: PiccDto;
 
   protected constructor(picc: PiccDto) {
@@ -9,11 +9,11 @@ export default class PiccDevMessage extends DeviceMessage {
     this.picc = picc;
   }
 
-  static from(picc: PiccDto): PiccDevMessage {
-    return new PiccDevMessage(picc);
+  static from(picc: PiccDto): PiccDeviceMessage {
+    return new PiccDeviceMessage(picc);
   }
 
-  static is(message: DeviceMessage): message is PiccDevMessage {
+  static is(message: DeviceMessage): message is PiccDeviceMessage {
     return message.$kind === 'picc';
   }
 }

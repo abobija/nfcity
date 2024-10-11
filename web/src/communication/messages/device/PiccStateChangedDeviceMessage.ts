@@ -1,7 +1,7 @@
 import PiccDto from "@/communication/dtos/PiccDto";
 import { DeviceMessage } from "@/communication/Message";
 
-export default class PiccStateChangedDevMessage extends DeviceMessage {
+export default class PiccStateChangedDeviceMessage extends DeviceMessage {
   readonly old_state: number;
   readonly picc: PiccDto;
 
@@ -11,11 +11,11 @@ export default class PiccStateChangedDevMessage extends DeviceMessage {
     this.picc = picc;
   }
 
-  static from(old_state: number, picc: PiccDto): PiccStateChangedDevMessage {
-    return new PiccStateChangedDevMessage(old_state, picc);
+  static from(old_state: number, picc: PiccDto): PiccStateChangedDeviceMessage {
+    return new PiccStateChangedDeviceMessage(old_state, picc);
   }
 
-  static is(message: DeviceMessage): message is PiccStateChangedDevMessage {
+  static is(message: DeviceMessage): message is PiccStateChangedDeviceMessage {
     return message.$kind === 'picc_state_changed';
   }
 }
