@@ -11,7 +11,6 @@ import MemorySectorUnlockOverlay from "@/components/MemorySector/overlays/Memory
 import MemorySectorUnlockingOverlay from "@/components/MemorySector/overlays/MemorySectorUnlockingOverlay.vue";
 import useClient from "@/composables/useClient";
 import {
-  defaultKey,
   MifareClassicMemory,
   MifareClassicSector
 } from "@/models/MifareClassic";
@@ -34,7 +33,7 @@ const classes = computed(() => ({
 }));
 
 const { client } = useClient();
-const piccKey = ref<PiccKey>(defaultKey);
+const piccKey = ref<PiccKey>(props.sector.key);
 
 async function unlockAndLoadSector(key: PiccKey) {
   piccKey.value = key;
@@ -56,7 +55,7 @@ async function unlockAndLoadSector(key: PiccKey) {
 
 onUpdated(() => {
   if (props.state == MemorySectorState.Empty) {
-    piccKey.value = defaultKey;
+    piccKey.value = props.sector.key;
   }
 });
 </script>

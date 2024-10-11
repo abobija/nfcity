@@ -3,7 +3,7 @@ import PiccDto from "@/communication/dtos/PiccDto";
 import Picc, { PiccBlock, PiccBlockAccessBits, PiccKey, PiccKeyType, PiccMemory, PiccSector, PiccState, PiccType } from "@/models/Picc";
 import { arrEquals, hex2arr, nibbles } from "@/utils/helpers";
 
-export const defaultKey: PiccKey = {
+const defaultKey: PiccKey = {
   type: PiccKeyType.A,
   value: hex2arr('FFFFFFFFFFFF'),
 };
@@ -263,6 +263,7 @@ export class MifareClassicManufacturerBlock extends MifareClassicBlock {
 }
 
 export class MifareClassicSector implements PiccSector {
+  key: PiccKey = defaultKey;
   readonly memory: MifareClassicMemory;
   readonly offset: number;
   readonly blocks: Map<number, MifareClassicBlock>;

@@ -51,6 +51,7 @@ export interface PiccBlock {
 }
 
 export interface PiccSector {
+  key: PiccKey;
   offset: SectorOffset;
   blocks: Map<BlockOffset, PiccBlock>;
   block0Address: BlockAddress;
