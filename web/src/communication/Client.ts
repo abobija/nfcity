@@ -10,8 +10,8 @@ import ClientPongMissedEvent from "@/communication/events/ClientPongMissedEvent"
 import ClientReadyEvent from "@/communication/events/ClientReadyEvent";
 import ClientReconnectEvent from "@/communication/events/ClientReconnectEvent";
 import { DeviceMessage, WebMessage } from "@/communication/Message";
-import ErrorDeviceMessage from "@/communication/messages/device/ErrorDeviceMessage";
-import PongDeviceMessage from "@/communication/messages/device/PongDeviceMessage";
+import { isErrorDeviceMessage } from "@/communication/messages/device/ErrorDeviceMessage";
+import PongDeviceMessage, { isPongDeviceMessage } from "@/communication/messages/device/PongDeviceMessage";
 import PingWebMessage from "@/communication/messages/web/PingWebMessage";
 import { CancelationToken, OperationCanceledError } from "@/utils/CancelationToken";
 import { randomHexStr, strmask, trim } from "@/utils/helpers";
@@ -209,9 +209,9 @@ class Client {
 
       let logLevel = LogLevel.DEBUG;
 
-      if (PongDeviceMessage.is(decodedMessage)) {
+      if (isPongDeviceMessage(decodedMessage)) {
         logLevel = LogLevel.VERBOSE;
-      } else if (ErrorDeviceMessage.is(decodedMessage)) {
+      } else if (isErrorDeviceMessage(decodedMessage)) {
         logLevel = LogLevel.WARNING;
       }
 
@@ -269,7 +269,7 @@ class Client {
       const pong = await this.transceive(PingWebMessage.create(), cancelationToken);
       cancelationToken?.throwIfCanceled();
 
-      if (PongDeviceMessage.is(pong)) {
+      if (isPongDeviceMessage(pong)) {
         this.logger.verbose('pong');
         context.pong = pong;
         clientEmits.emit('pong', ClientPongEvent.from(

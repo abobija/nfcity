@@ -1,19 +1,10 @@
-import { DeviceMessage, DeviceMessageContext } from "@/communication/Message";
+import { DeviceMessage } from "@/communication/Message";
 
 /**
  * Message sent by the device on connection with the broker.
  */
-export default class HelloDeviceMessage implements DeviceMessage {
-  readonly $kind: string = 'hello';
-  readonly $ctx?: DeviceMessageContext | undefined;
+export default interface HelloDeviceMessage extends DeviceMessage { }
 
-  protected constructor() { }
-
-  static create() {
-    return new HelloDeviceMessage();
-  }
-
-  static is(message: DeviceMessage): message is HelloDeviceMessage {
-    return message.$kind === 'hello';
-  }
+export function isHelloDeviceMessage(message: DeviceMessage): message is HelloDeviceMessage {
+  return message.$kind === 'hello';
 }

@@ -3,9 +3,9 @@ import onClientMessage from "@/communication/composables/onClientMessage";
 import onClientOffline from "@/communication/composables/onClientOffline";
 import onClientPongMissed from "@/communication/composables/onClientPongMissed";
 import onClientReady from "@/communication/composables/onClientReady";
-import HelloDeviceMessage from "@/communication/messages/device/HelloDeviceMessage";
-import PiccDeviceMessage from "@/communication/messages/device/PiccDeviceMessage";
-import PiccStateChangedDeviceMessage from "@/communication/messages/device/PiccStateChangedDeviceMessage";
+import { isHelloDeviceMessage } from "@/communication/messages/device/HelloDeviceMessage";
+import { isPiccDeviceMessage } from "@/communication/messages/device/PiccDeviceMessage";
+import { isPiccStateChangedDeviceMessage } from "@/communication/messages/device/PiccStateChangedDeviceMessage";
 import GetPiccWebMessage from "@/communication/messages/web/GetPiccWebMessage";
 import '@/components/Dashboard/Dashboard.scss';
 import BlockRenderer from "@/components/Dashboard/renderers/BlockRenderer.vue";
@@ -151,7 +151,7 @@ onClientMessage(e => {
     client.value.pingLoop(2500, pingCancelationToken.value);
   }
 
-  if (!HelloDeviceMessage.is(e.message)) {
+  if (!isHelloDeviceMessage(e.message)) {
     return;
   }
 
@@ -168,7 +168,7 @@ onClientMessage(e => {
 onClientMessage(e => {
   const { message } = e;
 
-  if (!PiccDeviceMessage.is(message) && !PiccStateChangedDeviceMessage.is(message)) {
+  if (!isPiccDeviceMessage(message) && !isPiccStateChangedDeviceMessage(message)) {
     return;
   }
 
@@ -197,7 +197,7 @@ onClientMessage(e => {
   }
 
   if (picc.value.state == PiccState.Idle) {
-    if (PiccStateChangedDeviceMessage.is(message)
+    if (isPiccStateChangedDeviceMessage(message)
       && [PiccState.Active, PiccState.ActiveH].includes(message.old_state)) {
       state.value = DashboardState.PiccRemoved;
       return;

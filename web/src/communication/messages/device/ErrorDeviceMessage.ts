@@ -1,16 +1,7 @@
-import { DeviceMessage, DeviceMessageContext } from "@/communication/Message";
+import { DeviceMessage } from "@/communication/Message";
 
-export default class ErrorDeviceMessage implements DeviceMessage {
-  readonly $kind: string = 'error';
-  readonly $ctx?: DeviceMessageContext;
+export default interface ErrorDeviceMessage extends DeviceMessage { }
 
-  protected constructor() { }
-
-  static create() {
-    return new ErrorDeviceMessage();
-  }
-
-  static is(message: DeviceMessage): message is ErrorDeviceMessage {
-    return message.$kind === 'error';
-  }
+export function isErrorDeviceMessage(message: DeviceMessage): message is ErrorDeviceMessage {
+  return message.$kind === 'error';
 }
