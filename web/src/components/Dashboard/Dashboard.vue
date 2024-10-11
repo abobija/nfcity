@@ -319,31 +319,33 @@ onMemoryByteMouseClick(clickedByte => {
     </main>
 
     <div class="full-screen center overlay" v-if="overlay">
-      <Transition mode="out-in" :duration="100" appear>
-        <div v-if="state == DashboardState.ClientOffline">
-          <p class="message">lost connection to the server</p>
-          <p class="sub message">hang tight, attempting to reconnect...</p>
-        </div>
-        <div v-else-if="state == DashboardState.CheckingForReader">
-          <p class="message">checking for a reader...</p>
-          <p class="sub message" v-if="retryCount > 0 && retryCount < retryMax">
-            no response from device, retrying {{ retryCount }}
-          </p>
-        </div>
-        <div v-else-if="state == DashboardState.CeckingForPicc">
-          <p class="message">checking for a card...</p>
-        </div>
-        <div v-else-if="state == DashboardState.PiccNotPresent">
-          <p class="message">bring a card closer to the reader</p>
-        </div>
-        <div v-else-if="state == DashboardState.PiccRemoved">
-          <p class="message">card removed, please bring it back</p>
-        </div>
-        <div v-else-if="state == DashboardState.PongMissed">
-          <p class="message">device is not responding</p>
-          <p class="sub message">please wait a moment, the device should recover soon</p>
-        </div>
-      </Transition>
+      <div class="content">
+        <Transition mode="out-in" :duration="100" appear>
+          <div v-if="state == DashboardState.ClientOffline">
+            <p class="message">server connection lost</p>
+            <p class="sub message">hang tight, attempting to reconnect...</p>
+          </div>
+          <div v-else-if="state == DashboardState.CheckingForReader">
+            <p class="message">checking for a reader...</p>
+            <p class="sub message" v-if="retryCount > 0 && retryCount < retryMax">
+              no response from device, retrying {{ retryCount }}
+            </p>
+          </div>
+          <div v-else-if="state == DashboardState.CeckingForPicc">
+            <p class="message">checking for a card...</p>
+          </div>
+          <div v-else-if="state == DashboardState.PiccNotPresent">
+            <p class="message">bring a card closer to the reader</p>
+          </div>
+          <div v-else-if="state == DashboardState.PiccRemoved">
+            <p class="message">card removed, please bring it back</p>
+          </div>
+          <div v-else-if="state == DashboardState.PongMissed">
+            <p class="message">device is not responding</p>
+            <p class="sub message">please wait a moment, the device should recover soon</p>
+          </div>
+        </Transition>
+      </div>
     </div>
 
   </div>
