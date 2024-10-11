@@ -300,8 +300,6 @@ export class MifareClassicMemory implements PiccMemory {
   readonly numberOfSectors: number;
   readonly blockDistribution: Array<[number, number]>;
   readonly size: number;
-  private _updateBlockCounter: number = 0;
-  private _updateSectorCounter: number = 0;
 
   protected constructor(picc: MifareClassic, piccType: PiccType) {
     this.picc = picc;
@@ -339,14 +337,6 @@ export class MifareClassicMemory implements PiccMemory {
     return new MifareClassicMemory(picc, piccType);
   }
 
-  get isEmpty() {
-    return this._updateBlockCounter <= 0;
-  }
-
-  get updateSectorCounter() {
-    return this._updateSectorCounter;
-  }
-
   sectorAt(sectorOffset: number): MifareClassicSector {
     return this.sectors.get(sectorOffset)!;
   }
@@ -381,8 +371,6 @@ export class MifareClassicMemory implements PiccMemory {
     }
 
     sector.blocks.set(block.offset, MifareClassicDataBlock.from(sector, block, accessBits));
-
-    this._updateBlockCounter++;
   }
 
   updateSector(offset: number, blocks: PiccBlockDto[]): void {
@@ -395,8 +383,6 @@ export class MifareClassicMemory implements PiccMemory {
     blocks
       .sort((a, b) => b.address - a.address) // Sort so that trailer block is first
       .forEach(block => this.updateBlock(block));
-
-    this._updateSectorCounter++;
   }
 
   static numberOfBlocksInSector(sectorOffset: number): number {
