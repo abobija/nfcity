@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import '@/components/Memory/Memory.scss';
-import MemoryFocus from '@/components/Memory/MemoryFocus';
-import MemorySector from '@/components/MemorySector/MemorySector.vue';
-import MemorySectorState from '@/components/MemorySector/MemorySectorState';
-import { MifareClassicMemory } from '@/models/MifareClassic';
-import { computed, ref } from 'vue';
+import MemoryFocus from "@/components/Memory/MemoryFocus";
+import MemorySector from "@/components/MemorySector/MemorySector.vue";
+import MemorySectorState from "@/components/MemorySector/MemorySectorState";
+import { MifareClassicMemory } from "@/models/MifareClassic";
+import { computed, ref } from "vue";
 
 const props = defineProps<{
   memory: MifareClassicMemory;

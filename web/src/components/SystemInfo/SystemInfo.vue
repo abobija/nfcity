@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { onClientPing, onClientPong, onClientPongMissed } from '@/comm/hooks/ClientEmitHooks';
+import onClientPing from "@/comm/composables/onClientPing";
+import onClientPong from "@/comm/composables/onClientPong";
+import onClientPongMissed from "@/comm/composables/onClientPongMissed";
 import '@/components/MemoryBlock/MemoryBlock.scss';
 import '@/components/SystemInfo/SystemInfo.scss';
-import { useClient } from '@/hooks/useClient';
-import { ref } from 'vue';
+import useClient from "@/composables/useClient";
+import { ref } from "vue";
 
 enum PingState {
   Undefined,

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { MifareClassicSector } from '@/models/MifareClassic';
-import { PiccKey, PiccKeyType } from '@/models/Picc';
-import { hex, hex2arr, isHex } from '@/utils/helpers';
-import { loge } from '@/utils/Logger';
-import { onMounted, ref, useTemplateRef } from 'vue';
+import { MifareClassicSector } from "@/models/MifareClassic";
+import { PiccKey, PiccKeyType } from "@/models/Picc";
+import { hex, hex2arr, isHex } from "@/utils/helpers";
+import { loge } from "@/utils/Logger";
+import { onMounted, ref, useTemplateRef } from "vue";
 
 const props = defineProps<{
   sector: MifareClassicSector;

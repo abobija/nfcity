@@ -7,7 +7,7 @@ export function useClientMaybe() {
   return useIt<Client | undefined>();
 }
 
-export function useClient() {
+export default function useClient() {
   return useIt<Client>();
 }
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { MifareClassicSector } from '@/models/MifareClassic';
+import { MifareClassicSector } from "@/models/MifareClassic";
 
 defineProps<{
   sector: MifareClassicSector;

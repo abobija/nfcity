@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import MemoryView from '@/components/MemoryViewer/MemoryView';
+import MemoryEdit from "@/components/MemoryEdit/MemoryEdit.vue";
+import MemoryView from "@/components/MemoryViewer/MemoryView";
 import '@/components/MemoryViewer/MemoryViewer.scss';
-import { MifareClassicBlock } from '@/models/MifareClassic';
-import { ascii, bin, hex, isAsciiPrintable } from '@/utils/helpers';
-import makeLogger from '@/utils/Logger';
-import { computed, ref, watch } from 'vue';
-import MemoryEdit from '../MemoryEdit/MemoryEdit.vue';
+import { MifareClassicBlock } from "@/models/MifareClassic";
+import { ascii, bin, hex, isAsciiPrintable } from "@/utils/helpers";
+import makeLogger from "@/utils/Logger";
+import { computed, ref, watch } from "vue";
 
 const props = defineProps<{
   block: MifareClassicBlock;

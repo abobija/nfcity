@@ -1,23 +1,23 @@
-import ClientCloseEvent from '@/comm/events/ClientCloseEvent';
-import ClientDisconnectEvent from '@/comm/events/ClientDisconnectEvent';
-import clientEmits from '@/comm/events/ClientEmits';
-import ClientEndEvent from '@/comm/events/ClientEndEvent';
-import ClientMessageEvent from '@/comm/events/ClientMessageEvent';
-import ClientOfflineEvent from '@/comm/events/ClientOfflineEvent';
-import ClientPingEvent from '@/comm/events/ClientPingEvent';
-import ClientPongEvent from '@/comm/events/ClientPongEvent';
-import ClientPongMissedEvent from '@/comm/events/ClientPongMissedEvent';
-import ClientReadyEvent from '@/comm/events/ClientReadyEvent';
-import ClientReconnectEvent from '@/comm/events/ClientReconnectEvent';
-import { DeviceMessage, WebMessage } from '@/comm/msgs/Message';
-import ErrorDevMessage from '@/comm/msgs/dev/ErrorDevMessage';
-import PongDevMessage from '@/comm/msgs/dev/PongDevMessage';
-import PingWebMessage from '@/comm/msgs/web/PingWebMessage';
-import { CancelationToken, OperationCanceledError } from '@/utils/CancelationToken';
-import logger, { LogLevel } from '@/utils/Logger';
-import { randomHexStr, strmask, trim } from '@/utils/helpers';
-import { decode, encode } from 'cbor-x';
-import mqtt, { MqttClient, PacketCallback } from 'mqtt';
+import clientEmits from "@/comm/clientEmits";
+import ClientCloseEvent from "@/comm/events/ClientCloseEvent";
+import ClientDisconnectEvent from "@/comm/events/ClientDisconnectEvent";
+import ClientEndEvent from "@/comm/events/ClientEndEvent";
+import ClientMessageEvent from "@/comm/events/ClientMessageEvent";
+import ClientOfflineEvent from "@/comm/events/ClientOfflineEvent";
+import ClientPingEvent from "@/comm/events/ClientPingEvent";
+import ClientPongEvent from "@/comm/events/ClientPongEvent";
+import ClientPongMissedEvent from "@/comm/events/ClientPongMissedEvent";
+import ClientReadyEvent from "@/comm/events/ClientReadyEvent";
+import ClientReconnectEvent from "@/comm/events/ClientReconnectEvent";
+import { DeviceMessage, WebMessage } from "@/comm/msgs/Message";
+import ErrorDevMessage from "@/comm/msgs/dev/ErrorDevMessage";
+import PongDevMessage from "@/comm/msgs/dev/PongDevMessage";
+import PingWebMessage from "@/comm/msgs/web/PingWebMessage";
+import { CancelationToken, OperationCanceledError } from "@/utils/CancelationToken";
+import logger, { LogLevel } from "@/utils/Logger";
+import { randomHexStr, strmask, trim } from "@/utils/helpers";
+import { decode, encode } from "cbor-x";
+import mqtt, { MqttClient, PacketCallback } from "mqtt";
 
 export abstract class MessageTimeoutError extends Error { }
 

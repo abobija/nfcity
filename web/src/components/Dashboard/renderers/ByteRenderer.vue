@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import TargetByte from '@/components/Dashboard/TargetByte';
-import { hex } from '@/utils/helpers';
+import TargetByte from "@/components/Dashboard/TargetByte";
+import { hex } from "@/utils/helpers";
 
 defineProps<{
   byte: TargetByte;

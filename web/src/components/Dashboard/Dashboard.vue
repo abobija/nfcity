@@ -1,35 +1,36 @@
 <script setup lang="ts">
-import { onClientMessage, onClientOffline, onClientPongMissed, onClientReady } from '@/comm/hooks/ClientEmitHooks';
-import HelloDevMessage from '@/comm/msgs/dev/HelloDevMessage';
-import PiccDevMessage from '@/comm/msgs/dev/PiccDevMessage';
-import PiccStateChangedDevMessage from '@/comm/msgs/dev/PiccStateChangedDevMessage';
-import GetPiccWebMessage from '@/comm/msgs/web/GetPiccWebMessage';
+import onClientMessage from "@/comm/composables/onClientMessage";
+import onClientOffline from "@/comm/composables/onClientOffline";
+import onClientPongMissed from "@/comm/composables/onClientPongMissed";
+import onClientReady from "@/comm/composables/onClientReady";
+import HelloDevMessage from "@/comm/msgs/dev/HelloDevMessage";
+import PiccDevMessage from "@/comm/msgs/dev/PiccDevMessage";
+import PiccStateChangedDevMessage from "@/comm/msgs/dev/PiccStateChangedDevMessage";
+import GetPiccWebMessage from "@/comm/msgs/web/GetPiccWebMessage";
 import '@/components/Dashboard/Dashboard.scss';
-import BlockRenderer from '@/components/Dashboard/renderers/BlockRenderer.vue';
-import ByteRenderer from '@/components/Dashboard/renderers/ByteRenderer.vue';
-import GroupRenderer from '@/components/Dashboard/renderers/GroupRenderer.vue';
-import SectorRenderer from '@/components/Dashboard/renderers/SectorRenderer.vue';
-import TargetByte from '@/components/Dashboard/TargetByte';
-import Memory from '@/components/Memory/Memory.vue';
-import MemoryFocus from '@/components/Memory/MemoryFocus';
-import {
-  onMemoryByteMouseClick,
-  onMemoryByteMouseEnter,
-  onMemoryByteMouseLeave
-} from '@/components/MemoryByte/hooks/MemoryByteEmitHooks';
-import SystemInfo from '@/components/SystemInfo/SystemInfo.vue';
-import { useClient } from '@/hooks/useClient';
+import BlockRenderer from "@/components/Dashboard/renderers/BlockRenderer.vue";
+import ByteRenderer from "@/components/Dashboard/renderers/ByteRenderer.vue";
+import GroupRenderer from "@/components/Dashboard/renderers/GroupRenderer.vue";
+import SectorRenderer from "@/components/Dashboard/renderers/SectorRenderer.vue";
+import TargetByte from "@/components/Dashboard/TargetByte";
+import Memory from "@/components/Memory/Memory.vue";
+import MemoryFocus from "@/components/Memory/MemoryFocus";
+import onMemoryByteMouseClick from "@/components/MemoryByte/composables/onMemoryByteMouseClick";
+import onMemoryByteMouseEnter from "@/components/MemoryByte/composables/onMemoryByteMouseEnter";
+import onMemoryByteMouseLeave from "@/components/MemoryByte/composables/onMemoryByteMouseLeave";
+import SystemInfo from "@/components/SystemInfo/SystemInfo.vue";
+import useClient from "@/composables/useClient";
 import MifareClassic, {
   MifareClassicBlock,
   MifareClassicBlockGroup,
   MifareClassicMemory,
   MifareClassicSector
-} from '@/models/MifareClassic';
-import { PiccState, PiccType } from '@/models/Picc';
-import { CancelationToken, OperationCanceledError } from '@/utils/CancelationToken';
-import { hex } from '@/utils/helpers';
-import makeLogger from '@/utils/Logger';
-import { onMounted, onUnmounted, ref, watch } from 'vue';
+} from "@/models/MifareClassic";
+import { PiccState, PiccType } from "@/models/Picc";
+import { CancelationToken, OperationCanceledError } from "@/utils/CancelationToken";
+import { hex } from "@/utils/helpers";
+import makeLogger from "@/utils/Logger";
+import { onMounted, onUnmounted, ref, watch } from "vue";
 
 enum DashboardState {
   Undefined = 0,

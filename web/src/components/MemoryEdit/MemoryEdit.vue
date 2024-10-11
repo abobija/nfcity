@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { hex, hex2arr, isHex, removeWhitespace } from '@/utils/helpers';
-import { onMounted, ref, useTemplateRef, watch } from 'vue';
+import { hex, hex2arr, isHex, removeWhitespace } from "@/utils/helpers";
+import { onMounted, ref, useTemplateRef, watch } from "vue";
 
 const bytes = defineModel<Uint8Array>({ required: true });
 const maxlength = ref<number>();

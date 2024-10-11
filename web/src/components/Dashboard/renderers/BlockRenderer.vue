@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { MifareClassicBlock, MifareClassicBlockType } from '@/models/MifareClassic';
-import { hex } from '@/utils/helpers';
+import { MifareClassicBlock, MifareClassicBlockType } from "@/models/MifareClassic";
+import { hex } from "@/utils/helpers";
 
 defineProps<{
   block: MifareClassicBlock;

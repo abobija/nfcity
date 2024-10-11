@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import '@/components/MemoryBlock/MemoryBlock.scss';
-import memoryByteEmits from '@/components/MemoryByte/events/MemoryByteEmits';
 import '@/components/MemoryByte/MemoryByte.scss';
-import MemoryByteFocus from '@/components/MemoryByte/MemoryByteFocus';
-import { MifareClassicBlockGroup } from '@/models/MifareClassic';
-import { hex } from '@/utils/helpers';
-import { computed } from 'vue';
+import memoryByteEmits from "@/components/MemoryByte/memoryByteEmits";
+import MemoryByteFocus from "@/components/MemoryByte/MemoryByteFocus";
+import { MifareClassicBlockGroup } from "@/models/MifareClassic";
+import { hex } from "@/utils/helpers";
+import { computed } from "vue";
 
 const props = defineProps<{
   group: MifareClassicBlockGroup;

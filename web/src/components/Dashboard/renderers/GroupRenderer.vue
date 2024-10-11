@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import MemoryView from '@/components/MemoryViewer/MemoryView';
-import MemoryViewer from '@/components/MemoryViewer/MemoryViewer.vue';
-import { MifareClassicBlockGroup, MifareClassicBlockGroupType } from '@/models/MifareClassic';
-import { ref } from 'vue';
+import MemoryView from "@/components/MemoryViewer/MemoryView";
+import MemoryViewer from "@/components/MemoryViewer/MemoryViewer.vue";
+import { MifareClassicBlockGroup, MifareClassicBlockGroupType } from "@/models/MifareClassic";
+import { ref } from "vue";
 
 defineProps<{
   group: MifareClassicBlockGroup;

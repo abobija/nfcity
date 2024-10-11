@@ -1,5 +1,5 @@
+import MemoryByteEvent from "@/components/MemoryByte/events/MemoryByteEvent";
 import mitt from "mitt";
-import MemoryByteEvent from "./MemoryByteEvent";
 
 const memoryByteEmits = mitt<{
   mouseEnter: MemoryByteEvent;

@@ -1,22 +1,22 @@
 <script setup lang="ts">
-import ErrorDevMessage from '@/comm/msgs/dev/ErrorDevMessage';
-import PiccSectorDevMessage from '@/comm/msgs/dev/PiccSectorDevMessage';
-import ReadSectorWebMessage from '@/comm/msgs/web/ReadSectorWebMessage';
-import MemoryBlock from '@/components/MemoryBlock/MemoryBlock.vue';
+import ErrorDevMessage from "@/comm/msgs/dev/ErrorDevMessage";
+import PiccSectorDevMessage from "@/comm/msgs/dev/PiccSectorDevMessage";
+import ReadSectorWebMessage from "@/comm/msgs/web/ReadSectorWebMessage";
+import MemoryBlock from "@/components/MemoryBlock/MemoryBlock.vue";
 import '@/components/MemorySector/MemorySector.scss';
-import MemorySectorFocus from '@/components/MemorySector/MemorySectorFocus';
-import MemorySectorState from '@/components/MemorySector/MemorySectorState';
-import MemorySectorEmptyOverlay from '@/components/MemorySector/overlays/MemorySectorEmptyOverlay.vue';
-import MemorySectorUnlockOverlay from '@/components/MemorySector/overlays/MemorySectorUnlockOverlay.vue';
-import MemorySectorUnlockingOverlay from '@/components/MemorySector/overlays/MemorySectorUnlockingOverlay.vue';
-import { useClient } from '@/hooks/useClient';
+import MemorySectorFocus from "@/components/MemorySector/MemorySectorFocus";
+import MemorySectorState from "@/components/MemorySector/MemorySectorState";
+import MemorySectorEmptyOverlay from "@/components/MemorySector/overlays/MemorySectorEmptyOverlay.vue";
+import MemorySectorUnlockOverlay from "@/components/MemorySector/overlays/MemorySectorUnlockOverlay.vue";
+import MemorySectorUnlockingOverlay from "@/components/MemorySector/overlays/MemorySectorUnlockingOverlay.vue";
+import useClient from "@/composables/useClient";
 import {
   defaultKey,
   MifareClassicMemory,
   MifareClassicSector
-} from '@/models/MifareClassic';
-import { PiccKey } from '@/models/Picc';
-import { computed, onUpdated, ref } from 'vue';
+} from "@/models/MifareClassic";
+import { PiccKey } from "@/models/Picc";
+import { computed, onUpdated, ref } from "vue";
 
 const props = defineProps<{
   sector: MifareClassicSector;

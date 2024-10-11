@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ClientValidator } from '@/comm/Client';
+import { ClientValidator } from "@/comm/Client";
 import '@/components/ClientConfig/ClientConfig.scss';
-import { ClientStorage, validateClientStorage, ValidClientStorage } from '@/storage/ClientStorage';
-import { clone } from '@/utils/helpers';
-import { logd } from '@/utils/Logger';
-import { onMounted, ref, useTemplateRef } from 'vue';
+import { ClientStorage, validateClientStorage, ValidClientStorage } from "@/storage/ClientStorage";
+import { clone } from "@/utils/helpers";
+import { logd } from "@/utils/Logger";
+import { onMounted, ref, useTemplateRef } from "vue";
 
 const props = defineProps<{
   clientStorage: ClientStorage;

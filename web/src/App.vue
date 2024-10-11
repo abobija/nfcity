@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import '@/App.scss';
-import Client from '@/comm/Client';
-import { onClientReady } from '@/comm/hooks/ClientEmitHooks';
-import ClientConfig from '@/components/ClientConfig/ClientConfig.vue';
-import Dashboard from '@/components/Dashboard/Dashboard.vue';
-import { useClientMaybe } from '@/hooks/useClient';
-import { useClientStorage } from '@/hooks/useClientStorage';
-import { isValidClientStorage, ValidClientStorage } from '@/storage/ClientStorage';
-import makeLogger from '@/utils/Logger';
-import { onMounted, ref, watch } from 'vue';
+import Client from "@/comm/Client";
+import onClientReady from "@/comm/composables/onClientReady";
+import ClientConfig from "@/components/ClientConfig/ClientConfig.vue";
+import Dashboard from "@/components/Dashboard/Dashboard.vue";
+import { useClientMaybe } from "@/composables/useClient";
+import useClientStorage from "@/composables/useClientStorage";
+import { isValidClientStorage, ValidClientStorage } from "@/storage/ClientStorage";
+import makeLogger from "@/utils/Logger";
+import { onMounted, ref, watch } from "vue";
 
 const {
   VITE_APP_NAME,

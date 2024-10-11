@@ -1,5 +1,5 @@
+import MemoryBlockFocus from "@/components/MemoryBlock/MemoryBlockFocus";
 import { MifareClassicSector } from "@/models/MifareClassic";
-import MemoryBlockFocus from "../MemoryBlock/MemoryBlockFocus";
 
 export default class MemorySectorFocus {
   readonly sector: MifareClassicSector;

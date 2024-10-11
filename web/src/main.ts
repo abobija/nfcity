@@ -1,11 +1,11 @@
-import App from '@/App.vue';
+import App from "@/App.vue";
 import '@/form.scss';
-import { newClientInjection } from '@/ioc/ClientInjection';
-import { newClientStorageInjection } from '@/ioc/ClientStorageInjection';
-import { clientKey, clientStorageKey } from '@/ioc/keys';
+import { newClientInjection } from "@/ioc/ClientInjection";
+import { newClientStorageInjection } from "@/ioc/ClientStorageInjection";
+import { clientKey, clientStorageKey } from "@/ioc/keys";
 import '@/main.scss';
 import 'reset-css';
-import { createApp } from 'vue';
+import { createApp } from "vue";
 
 createApp(App)
   .provide(clientStorageKey, newClientStorageInjection())
