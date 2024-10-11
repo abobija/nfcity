@@ -15,8 +15,10 @@ export type DeviceMessageKind =
 
 interface Message { }
 
+type WebMessageId = string;
+
 export interface DeviceMessageContext {
-  readonly $id: string;
+  readonly $id: WebMessageId;
 }
 
 export interface DeviceMessage extends Message {
@@ -26,12 +28,12 @@ export interface DeviceMessage extends Message {
 
 export interface WebMessage extends Message {
   readonly $kind: WebMessageKind;
-  readonly $id: string;
+  readonly $id: WebMessageId;
 }
 
 export abstract class BaseWebMessage implements WebMessage {
   abstract $kind: WebMessageKind;
-  readonly $id: string = crypto.randomUUID();
+  readonly $id: WebMessageId = crypto.randomUUID();
 
   protected constructor() { }
 }
