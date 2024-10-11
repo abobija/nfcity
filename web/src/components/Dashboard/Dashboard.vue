@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onClientMessage, onClientPongMissed, onClientReady } from '@/comm/hooks/ClientEmitHooks';
+import { onClientMessage, onClientOffline, onClientPongMissed, onClientReady } from '@/comm/hooks/ClientEmitHooks';
 import HelloDevMessage from '@/comm/msgs/dev/HelloDevMessage';
 import PiccDevMessage from '@/comm/msgs/dev/PiccDevMessage';
 import PiccStateChangedDevMessage from '@/comm/msgs/dev/PiccStateChangedDevMessage';
@@ -31,11 +31,10 @@ import { hex } from '@/utils/helpers';
 import makeLogger from '@/utils/Logger';
 import { onMounted, onUnmounted, ref, watch } from 'vue';
 
-// TODO: client offline state
-
 enum DashboardState {
   Undefined = 0,
   Initialized,
+  ClientOffline,
   CheckingForReader,
   CeckingForPicc,
   PiccNotPresent,
@@ -120,6 +119,8 @@ watch(picc, (newPicc, oldPicc) => {
 onMounted(() => state.value = DashboardState.Initialized);
 
 onClientReady(() => state.value = DashboardState.Initialized);
+
+onClientOffline(() => state.value = DashboardState.ClientOffline);
 
 onUnmounted(() => {
   checkingForReaderCancelationToken.value?.cancel("dashboard unmounted");
@@ -319,7 +320,11 @@ onMemoryByteMouseClick(clickedByte => {
 
     <div class="full-screen center overlay" v-if="overlay">
       <Transition mode="out-in" :duration="100" appear>
-        <div v-if="state == DashboardState.CheckingForReader">
+        <div v-if="state == DashboardState.ClientOffline">
+          <p class="message">connection with the broker is lost</p>
+          <p class="sub message">hang tight, attempting to reconnect...</p>
+        </div>
+        <div v-else-if="state == DashboardState.CheckingForReader">
           <p class="message">checking for a reader...</p>
           <p class="sub message" v-if="retryCount > 0 && retryCount < retryMax">
             no response from device, retrying {{ retryCount }}
