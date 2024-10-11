@@ -280,6 +280,10 @@ export class MifareClassicSector implements PiccSector {
     return Array.from(this.blocks.values()).every(block => !block.loaded);
   }
 
+  get trailerOffset() {
+    return this.numberOfBlocks - 1;
+  }
+
   protected constructor(memory: MifareClassicMemory, offset: number, blocks: MifareClassicBlock[]) {
     this.memory = memory;
     this.offset = offset;
@@ -313,7 +317,10 @@ export class MifareClassicSector implements PiccSector {
 
     this.key = sector.key;
 
-    const trailer = MifareClassicSectorTrailerBlock.from(this, sector.blocks.at(-1)!); // FIXME: !
+    const trailer = MifareClassicSectorTrailerBlock.from(this, {
+      ...sector.blocks.at(-1)!,// FIXME: !
+      offset: this.trailerOffset,
+    });
 
     this.blocks[trailer.offset] = trailer;
 
@@ -323,16 +330,16 @@ export class MifareClassicSector implements PiccSector {
         const accessBits = trailer.accessBitsPool[accessPoolIndex];
 
         if (block.address === 0) {
-          this.blocks[offset] = MifareClassicManufacturerBlock.from(this, { ...block, accessBits });
+          this.blocks[offset] = MifareClassicManufacturerBlock.from(this, { ...block, offset, accessBits });
           return;
         }
 
         if (MifareClassicValueBlock.isValueBlock(accessBits)) {
-          this.blocks[offset] = MifareClassicValueBlock.from(this, { ...block, accessBits });
+          this.blocks[offset] = MifareClassicValueBlock.from(this, { ...block, offset, accessBits });
           return;
         }
 
-        this.blocks[offset] = MifareClassicDataBlock.from(this, { ...block, accessBits });
+        this.blocks[offset] = MifareClassicDataBlock.from(this, { ...block, offset, accessBits });
       });
   }
 }
