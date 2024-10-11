@@ -55,6 +55,12 @@ export interface PiccSector {
   block0Address: BlockAddress;
 }
 
+export interface UpdatablePiccBlock extends Pick<PiccBlock, 'address' | 'data' | 'offset'> { }
+
+export interface UpdatablePiccSector extends Pick<PiccSector, 'key'> {
+  blocks: UpdatablePiccBlock[];
+}
+
 export interface PiccMemory {
   sectors: PiccSector[];
 }

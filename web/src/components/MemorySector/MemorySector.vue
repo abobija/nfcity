@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import PiccSectorDto from "@/communication/dtos/PiccSectorDto";
 import { isErrorDeviceMessage } from "@/communication/messages/device/ErrorDeviceMessage";
 import { isPiccSectorDeviceMessage } from "@/communication/messages/device/PiccSectorDeviceMessage";
 import ReadSectorWebMessage from "@/communication/messages/web/ReadSectorWebMessage";
@@ -43,7 +42,7 @@ async function unlockAndLoadSector(key: PiccKey) {
   const msg = await client.value.transceive(ReadSectorWebMessage.from(props.sector.offset, key));
 
   if (isPiccSectorDeviceMessage(msg)) {
-    props.sector.updateWith(msg as PiccSectorDto);
+    props.sector.updateWith({ key, blocks: msg.blocks });
     emit('stateChange', MemorySectorState.UnlockedAndLoaded);
     return;
   }
