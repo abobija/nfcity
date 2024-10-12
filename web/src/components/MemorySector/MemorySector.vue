@@ -85,7 +85,7 @@ onUpdated(() => {
         <MemorySectorEmptyOverlay v-if="state == MemorySectorState.Empty"
           @click="$emit('stateChange', MemorySectorState.Unlock)" />
         <MemorySectorUnlockOverlay :piccKey :sector v-else-if="state == MemorySectorState.Unlock"
-          @unlock="unlockAndLoadSector" />
+          @unlock="unlockAndLoadSector" @cancel="$emit('stateChange', MemorySectorState.Empty)" />
         <MemorySectorUnlockingOverlay v-else-if="state == MemorySectorState.Unlocking" />
       </Transition>
     </div>

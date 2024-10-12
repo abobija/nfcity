@@ -12,6 +12,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'unlock', piccKeyProposal: PiccKey): void;
+  (e: 'cancel'): void;
 }>();
 
 const keyType = ref<KeyType>(props.piccKey.type);
@@ -47,16 +48,15 @@ onMounted(() => {
     <form class="form" @submit.prevent="onSubmit">
       <div class="row key">
         <label for="key-a" title="Use key A">
-          <input type="radio" name="key" value="A" id="key-a" v-model="keyType" />
-          A
+          <input type="radio" name="key" :value="keyA" id="key-a" v-model="keyType" /> A
         </label>
         <label for="key-b" title="Use key B">
-          <input type="radio" name="key" value="B" id="key-b" v-model="keyType" />
-          B
+          <input type="radio" name="key" :value="keyB" id="key-b" v-model="keyType" /> B
         </label>
         <input type="text" placeholder="Key (hex)" v-model.trim="keyValue" ref="key-input" title="Key (hex)"
           spellcheck="false" />
         <button class="primary" type="submit">Unlock</button>
+        <button class="secondary" @click.prevent="$emit('cancel')" type="button">Cancel</button>
       </div>
     </form>
   </div>
