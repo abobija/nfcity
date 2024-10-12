@@ -1,18 +1,14 @@
 type MSB = number;
 type LSB = number;
 
-function num2hex(num: number): string {
-  const hex = num.toString(16).toUpperCase();
-
-  return hex.length % 2 ? '0' + hex : hex;
-}
-
-function arr2hex(arr: Uint8Array, separator: string = ' '): string {
-  return Array.from(arr).map(num2hex).join(separator);
-}
-
-export function hex(bytes: number | Uint8Array, separator: string = ' '): string {
-  return bytes instanceof Uint8Array ? arr2hex(bytes, separator) : num2hex(bytes);
+export function hex(bytes: number | number[] | Uint8Array, separator: string = ' '): string {
+  return (typeof bytes === 'number'
+    ? [bytes]
+    : bytes instanceof Uint8Array
+      ? Array.from(bytes)
+      : bytes)
+    .map(number => number.toString(16).padStart(2, '0').toUpperCase())
+    .join(separator);
 }
 
 export function isHex(str: string): boolean {
