@@ -10,7 +10,6 @@ import ClientPongMissedEvent from "@/communication/events/ClientPongMissedEvent"
 import ClientReadyEvent from "@/communication/events/ClientReadyEvent";
 import ClientReconnectEvent from "@/communication/events/ClientReconnectEvent";
 import { DeviceMessage, WebMessage } from "@/communication/Message";
-import { isErrorDeviceMessage } from "@/communication/messages/device/ErrorDeviceMessage";
 import PongDeviceMessage, { isPongDeviceMessage } from "@/communication/messages/device/PongDeviceMessage";
 import PingWebMessage from "@/communication/messages/web/PingWebMessage";
 import { CancelationToken, OperationCanceledError } from "@/utils/CancelationToken";
@@ -211,8 +210,6 @@ class Client {
 
       if (isPongDeviceMessage(decodedMessage)) {
         logLevel = LogLevel.VERBOSE;
-      } else if (isErrorDeviceMessage(decodedMessage)) {
-        logLevel = LogLevel.WARNING;
       }
 
       this.logger.log(logLevel, 'message received', topic, decodedMessage);
