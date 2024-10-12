@@ -33,7 +33,7 @@ export const keyA = 0 as KeyA;
 export const keyB = 1 as KeyB;
 
 export interface PiccKey {
-  value: Uint8Array;
+  value: number[];
   type: KeyType;
 }
 

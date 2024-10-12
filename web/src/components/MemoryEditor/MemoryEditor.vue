@@ -64,7 +64,10 @@ async function onSubmit() {
     data: writeBlockData,
   };
 
-  const request = WriteBlockWebMessage.from(newBlock, props.block.sector.key);
+  const request = WriteBlockWebMessage.from(newBlock, {
+    type: props.block.sector.key.type,
+    value: Uint8Array.from(props.block.sector.key.value),
+  });
 
   try {
     saving.value = true;
