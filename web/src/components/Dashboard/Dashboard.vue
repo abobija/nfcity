@@ -311,7 +311,7 @@ onMemoryByteMouseClick(clickedByte => {
             <div v-if="tByte">
               <SectorRenderer :sector="tByte.group.block.sector as MifareClassicSector" />
               <BlockRenderer :block="tByte.group.block as MifareClassicBlock" />
-              <GroupRenderer :group="tByte.group as MifareClassicBlockGroup" />
+              <GroupRenderer v-model="tByte.group as MifareClassicBlockGroup" />
               <ByteRenderer :byte="tByte as TargetByte" />
             </div>
           </div>

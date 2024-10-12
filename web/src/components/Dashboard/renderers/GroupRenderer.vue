@@ -4,10 +4,7 @@ import MemoryViewer from "@/components/MemoryViewer/MemoryViewer.vue";
 import { MifareClassicBlockGroup, MifareClassicBlockGroupType } from "@/models/MifareClassic";
 import { ref } from "vue";
 
-defineProps<{
-  group: MifareClassicBlockGroup;
-}>();
-
+const group = defineModel<MifareClassicBlockGroup>({ required: true });
 const view = ref(MemoryView.Hexadecimal);
 </script>
 
