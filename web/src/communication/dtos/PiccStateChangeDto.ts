@@ -1,4 +1,4 @@
-import PiccDto from "./PiccDto";
+import PiccDto from "@/communication/dtos/PiccDto";
 
 export default interface PiccStateChangeDto {
   readonly old_state: number;

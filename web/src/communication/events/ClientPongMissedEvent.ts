@@ -1,5 +1,5 @@
-import Client from "../Client";
-import { ClientEvent } from "./ClientEvent";
+import Client from "@/communication/Client";
+import { ClientEvent } from "@/communication/events/ClientEvent";
 
 export default class ClientPongMissedEvent extends ClientEvent {
   lastPingTimestamp: number;

@@ -1,4 +1,4 @@
-import PiccKeyDto from "./dtos/PiccKeyDto";
+import PiccKeyDto from "@/communication/dtos/PiccKeyDto";
 
 export type WebMessageKind =
   | 'ping'
