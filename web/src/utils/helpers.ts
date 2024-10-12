@@ -98,14 +98,15 @@ export function arraysAreEqual(arr1: any[] | Uint8Array, arr2: any[] | Uint8Arra
   return arr1.every((el, i) => el === arr2[i]);
 }
 
-export interface StrMaskOptions {
-  char?: string;
-  side?: 'left' | 'right';
-  offset?: number;
-  ratio?: number;
-}
-
-export function strmask(str: string, opts?: StrMaskOptions): string {
+export function strmask(
+  str: string,
+  opts?: {
+    char?: string;
+    side?: 'left' | 'right';
+    offset?: number;
+    ratio?: number;
+  }
+): string {
   const char = opts?.char ?? '*';
   const side = opts?.side ?? 'right';
   const offset = opts?.offset ?? 1;
