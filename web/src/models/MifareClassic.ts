@@ -11,11 +11,11 @@ import Picc, {
   UpdatablePiccSector,
   keyA
 } from "@/models/Picc";
-import { arrEquals, hex2arr, nibbles } from "@/utils/helpers";
+import { arrEquals, nibbles, unhexToU8Array } from "@/utils/helpers";
 
 const defaultKey: PiccKey = {
   type: keyA,
-  value: hex2arr('FFFFFFFFFFFF'),
+  value: unhexToU8Array('FFFFFFFFFFFF'),
 };
 
 export enum MifareClassicBlockGroupType {

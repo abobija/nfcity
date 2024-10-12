@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { MifareClassicSector } from "@/models/MifareClassic";
 import { keyA, keyB, KeyType, PiccKey } from "@/models/Picc";
-import { hex, hex2arr, isHex } from "@/utils/helpers";
+import { hex, isHex, unhexToU8Array } from "@/utils/helpers";
 import { loge } from "@/utils/Logger";
 import { onMounted, ref, useTemplateRef } from "vue";
 
@@ -31,7 +31,7 @@ function onSubmit() {
 
   const piccKey: PiccKey = {
     type: keyType.value == keyA ? keyA : keyB,
-    value: hex2arr(keyValue.value),
+    value: unhexToU8Array(keyValue.value),
   };
 
   emit('unlock', piccKey);

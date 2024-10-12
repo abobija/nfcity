@@ -1,31 +1,36 @@
 type MSB = number;
 type LSB = number;
 
+export function isHex(str: string): boolean {
+  return /^[0-9A-Fa-f]*$/.test(str);
+}
+
 export function hex(bytes: number | number[] | Uint8Array, separator: string = ' '): string {
+  const hexNumber = (number: number) => {
+    const hex = number.toString(16).toUpperCase();
+    return hex.length % 2 === 0 ? hex : '0' + hex;
+  };
+
   return (typeof bytes === 'number'
     ? [bytes]
     : bytes instanceof Uint8Array
       ? Array.from(bytes)
       : bytes)
-    .map(number => number.toString(16).padStart(2, '0').toUpperCase())
+    .map(hexNumber)
     .join(separator);
 }
 
-export function isHex(str: string): boolean {
-  return /^[0-9A-Fa-f]*$/.test(str);
-}
-
-export function hex2arr(hex: string): Uint8Array {
-  if (!isHex(hex)) {
-    throw new Error('Invalid hex string');
+export function unhexToU8Array(str: string): Uint8Array {
+  if (!isHex(str)) {
+    throw new Error('invalid hex string');
   }
 
-  if (hex.length % 2 !== 0) {
-    hex = '0' + hex;
+  if (str.length % 2 !== 0) {
+    str = '0' + str;
   }
 
   return new Uint8Array(
-    Array.from({ length: hex.length / 2 }, (_, i) => parseInt(hex.slice(i * 2, i * 2 + 2), 16))
+    Array.from({ length: str.length / 2 }, (_, i) => parseInt(str.slice(i * 2, i * 2 + 2), 16))
   );
 }
 

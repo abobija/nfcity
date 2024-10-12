@@ -5,7 +5,7 @@ import WriteBlockWebMessage from "@/communication/messages/web/WriteBlockWebMess
 import useClient from "@/composables/useClient";
 import { MifareClassicBlock } from "@/models/MifareClassic";
 import { UpdatablePiccBlock } from "@/models/Picc";
-import { hex, hex2arr, isHex, removeWhitespace } from "@/utils/helpers";
+import { hex, isHex, removeWhitespace, unhexToU8Array } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";
 import { computed, onMounted, ref, useTemplateRef, watch } from "vue";
 
@@ -32,7 +32,7 @@ const saving = ref(false);
 
 onMounted(() => field.value?.focus());
 
-watch(value, v => editingBytes.value = hex2arr(removeWhitespace(v)));
+watch(value, v => editingBytes.value = unhexToU8Array(removeWhitespace(v)));
 
 watch(editingBytes, (bytes) => {
   saveable.value = editingBytes.value.length === bytesToEdit.value.length
