@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { MifareClassicSector } from "@/models/MifareClassic";
-import { PiccKey, PiccKeyType } from "@/models/Picc";
+import { keyA, keyB, KeyType, PiccKey } from "@/models/Picc";
 import { hex, hex2arr, isHex } from "@/utils/helpers";
 import { loge } from "@/utils/Logger";
 import { onMounted, ref, useTemplateRef } from "vue";
@@ -14,7 +14,7 @@ const emit = defineEmits<{
   (e: 'unlock', piccKeyProposal: PiccKey): void;
 }>();
 
-const keyType = ref<'A' | 'B'>(props.piccKey.type == PiccKeyType.A ? 'A' : 'B');
+const keyType = ref<KeyType>(props.piccKey.type);
 const keyInput = useTemplateRef('key-input');
 const keyValue = ref<string>(hex(props.piccKey.value, ''));
 
@@ -30,7 +30,7 @@ function onSubmit() {
   }
 
   const piccKey: PiccKey = {
-    type: keyType.value == 'A' ? PiccKeyType.A : PiccKeyType.B,
+    type: keyType.value == keyA ? keyA : keyB,
     value: hex2arr(keyValue.value),
   };
 

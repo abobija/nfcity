@@ -1,9 +1,6 @@
-export enum PiccKeyTypeDto {
-  A = 0,
-  B = 1,
-}
+import { KeyType } from "@/models/Picc";
 
 export default interface PiccKeyDto {
   value: Uint8Array;
-  type: PiccKeyTypeDto;
+  type: KeyType;
 }

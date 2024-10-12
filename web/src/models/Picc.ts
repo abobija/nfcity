@@ -22,17 +22,19 @@ export enum PiccType {
   Tnp3XXX,
 }
 
-export enum PiccKeyType {
-  A = 0,
-  B = 1,
-}
-
 type Bit = number;
 type BlockAddress = number;
 
+export type KeyA = 0;
+export type KeyB = 1;
+export type KeyType = KeyA | KeyB;
+
+export const keyA = 0 as KeyA;
+export const keyB = 1 as KeyB;
+
 export interface PiccKey {
   value: Uint8Array;
-  type: PiccKeyType;
+  type: KeyType;
 }
 
 export interface PiccBlockAccessBits {

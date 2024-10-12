@@ -1,9 +1,20 @@
 import PiccDto from "@/communication/dtos/PiccDto";
-import Picc, { PiccBlock, PiccBlockAccessBits, PiccKey, PiccKeyType, PiccMemory, PiccSector, PiccState, PiccType, UpdatablePiccBlock, UpdatablePiccSector } from "@/models/Picc";
+import Picc, {
+  PiccBlock,
+  PiccBlockAccessBits,
+  PiccKey,
+  PiccMemory,
+  PiccSector,
+  PiccState,
+  PiccType,
+  UpdatablePiccBlock,
+  UpdatablePiccSector,
+  keyA
+} from "@/models/Picc";
 import { arrEquals, hex2arr, nibbles } from "@/utils/helpers";
 
 const defaultKey: PiccKey = {
-  type: PiccKeyType.A,
+  type: keyA,
   value: hex2arr('FFFFFFFFFFFF'),
 };
 
