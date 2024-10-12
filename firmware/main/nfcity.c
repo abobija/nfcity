@@ -99,6 +99,8 @@ static const char *mqtt_event_name(esp_mqtt_event_id_t id);
 
 static esp_err_t read_sector(web_read_sector_msg_t *msg, rc522_mifare_sector_desc_t *sector_desc, uint8_t *buffer);
 
+static esp_err_t write_block(web_write_block_msg_t *msg, uint8_t *out_buffer);
+
 // TODO: Check for return values everywhere
 
 static inline char *mqtt_subtopic(const char *subtopic)
@@ -206,6 +208,13 @@ static void on_mqtt_data(void *arg, esp_event_base_t base, int32_t eid, void *da
                 enc_picc_sector_message(&web_msg, &root, &sector_desc, picc_mem_buffer);
             }
         } break;
+        case WEB_MSG_WRITE_BLOCK: {
+            web_write_block_msg_t write_block_msg = { 0 };
+            dec_write_block_msg((uint8_t *)event->data, event->data_len, &write_block_msg);
+            if ((err = write_block(&write_block_msg, picc_mem_buffer)) == ESP_OK) {
+                enc_picc_block_message(&web_msg, &root, write_block_msg.address, picc_mem_buffer);
+            }
+        } break;
         default: {
             ESP_LOGW(TAG, "Unsupported meessage kind: %d", web_msg.kind);
             err = ESP_ERR_NOT_SUPPORTED;
@@ -291,6 +300,44 @@ static esp_err_t read_sector(web_read_sector_msg_t *msg, rc522_mifare_sector_des
 
         ESP_GOTO_ON_ERROR(rc522_mifare_read(rc522_scanner, &picc, block_addr, buffer_ptr), _exit, TAG, "read failed");
     }
+_exit:
+    rc522_mifare_deauth(rc522_scanner, &picc);
+    xSemaphoreGive(rc522_task_mutex);
+
+    return ret;
+}
+
+static esp_err_t write_block(web_write_block_msg_t *msg, uint8_t *out_buffer)
+{
+    esp_err_t ret = ESP_OK;
+
+    if (picc.state != RC522_PICC_STATE_ACTIVE && picc.state != RC522_PICC_STATE_ACTIVE_H) {
+        ESP_LOGW(TAG, "cannot write memory. picc is not active");
+        return ESP_FAIL;
+    }
+    if (xSemaphoreTake(rc522_task_mutex, pdMS_TO_TICKS(rc522_task_mutex_take_timeout_ms)) != pdTRUE) {
+        ESP_LOGE(TAG, "Failed to take rc522_task_mutex");
+        return ESP_FAIL;
+    }
+    rc522_mifare_key_t key = {
+        .type = msg->key.type,
+    };
+    memcpy(key.value, msg->key.value, RC522_MIFARE_KEY_SIZE);
+
+    ESP_GOTO_ON_ERROR(rc522_mifare_auth(rc522_scanner, &picc, msg->address, &key), _exit, TAG, "auth failed");
+    ESP_GOTO_ON_ERROR(rc522_mifare_write(rc522_scanner, &picc, msg->address, msg->data), _exit, TAG, "write failed");
+    uint8_t verification_buffer[RC522_MIFARE_BLOCK_SIZE] = { 0 };
+    ESP_GOTO_ON_ERROR(rc522_mifare_read(rc522_scanner, &picc, msg->address, verification_buffer),
+        _exit,
+        TAG,
+        "read failed");
+    ESP_GOTO_ON_FALSE(memcmp(msg->data, verification_buffer, RC522_MIFARE_BLOCK_SIZE) == 0,
+        ESP_FAIL,
+        _exit,
+        TAG,
+        "write verification failed");
+    memcpy(out_buffer, verification_buffer, RC522_MIFARE_BLOCK_SIZE);
+
 _exit:
     rc522_mifare_deauth(rc522_scanner, &picc);
     xSemaphoreGive(rc522_task_mutex);

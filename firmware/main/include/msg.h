@@ -1,3 +1,5 @@
+#pragma once
+
 #include <inttypes.h>
 #include "esp_log.h"
 #include "cbor.h"
@@ -47,6 +49,7 @@ typedef enum
     WEB_MSG_PING,
     WEB_MSG_GET_PICC,
     WEB_MSG_READ_SECTOR,
+    WEB_MSG_WRITE_BLOCK,
 } web_msg_kind_t;
 
 typedef struct
@@ -61,9 +64,18 @@ typedef struct
     msg_picc_key_t key;
 } web_read_sector_msg_t;
 
+typedef struct
+{
+    uint8_t address;
+    uint8_t data[RC522_MIFARE_BLOCK_SIZE];
+    msg_picc_key_t key;
+} web_write_block_msg_t;
+
 CborError dec_msg(const uint8_t *buffer, size_t buffer_size, web_msg_t *out_msg);
 
 CborError dec_read_sector_msg(const uint8_t *buffer, size_t buffer_size, web_read_sector_msg_t *out_read_sector_msg);
+
+CborError dec_write_block_msg(const uint8_t *buffer, size_t buffer_size, web_write_block_msg_t *out_write_block_msg);
 
 // }} decoding
 
@@ -75,6 +87,7 @@ CborError dec_read_sector_msg(const uint8_t *buffer, size_t buffer_size, web_rea
 #define ENC_PICC_MSG_KIND               "picc"
 #define ENC_PICC_STATE_CHANGED_MSG_KIND "picc_state_changed"
 #define ENC_PICC_SECTOR_MSG_KIND        "picc_sector"
+#define ENC_PICC_BLOCK_MSG_KIND         "picc_block"
 
 #define ENC_BUFFER_SIZE                 (1024)
 
@@ -90,5 +103,7 @@ CborError enc_picc_state_changed_message(CborEncoder *encoder, rc522_picc_t *pic
 
 CborError enc_picc_sector_message(
     web_msg_t *ctx, CborEncoder *encoder, rc522_mifare_sector_desc_t *sector_desc, uint8_t *sector_data);
+
+CborError enc_picc_block_message(web_msg_t *ctx, CborEncoder *encoder, uint8_t address, uint8_t *data);
 
 // }} encoding

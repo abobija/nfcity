@@ -10,6 +10,7 @@ struct
     { "ping", WEB_MSG_PING },
     { "get_picc", WEB_MSG_GET_PICC },
     { "read_sector", WEB_MSG_READ_SECTOR },
+    { "write_block", WEB_MSG_WRITE_BLOCK },
 };
 
 static void dec_map_kind(const char *kind_str, web_msg_kind_t *out_kind)
@@ -98,6 +99,31 @@ CborError dec_read_sector_msg(const uint8_t *buffer, size_t buffer_size, web_rea
     CBOR_ERRCHECK(dec_picc_key(&value, &msg.key));
 
     memcpy(out_read_sector_msg, &msg, sizeof(msg));
+    return CborNoError;
+}
+
+CborError dec_write_block_msg(const uint8_t *buffer, size_t buffer_size, web_write_block_msg_t *out_write_block_msg)
+{
+    web_write_block_msg_t msg = { 0 };
+
+    CborParser parser;
+    CborValue it;
+    CBOR_ERRCHECK(cbor_parser_init(buffer, buffer_size, 0, &parser, &it));
+    CborValue value;
+    CBOR_ERRCHECK(cbor_value_map_find_value(&it, "address", &value));
+    CBOR_RETCHECK(cbor_value_is_unsigned_integer(&value), CborErrorIllegalType);
+    CBOR_ERRCHECK(cbor_value_get_uint8(&value, &msg.address));
+    CBOR_ERRCHECK(cbor_value_map_find_value(&it, "data", &value));
+    CBOR_RETCHECK(cbor_value_is_byte_string(&value), CborErrorIllegalType);
+    size_t len = 0;
+    CBOR_ERRCHECK(cbor_value_get_string_length(&value, &len));
+    CBOR_RETCHECK(len == RC522_MIFARE_BLOCK_SIZE, CborErrorUnknownLength);
+    CBOR_ERRCHECK(cbor_value_copy_byte_string(&value, msg.data, &len, NULL));
+    CBOR_ERRCHECK(cbor_value_map_find_value(&it, "key", &value));
+    CBOR_RETCHECK(cbor_value_is_map(&value), CborErrorIllegalType);
+    CBOR_ERRCHECK(dec_picc_key(&value, &msg.key));
+
+    memcpy(out_write_block_msg, &msg, sizeof(msg));
     return CborNoError;
 }
 
@@ -267,6 +293,19 @@ CborError enc_picc_sector_message(
     }
     CBOR_ERRCHECK(cbor_encoder_close_container(&message_map, &blocks_array));
     CBOR_ERRCHECK(cbor_encoder_close_container(root, &message_map));
+
+    return CborNoError;
+}
+
+CborError enc_picc_block_message(web_msg_t *ctx, CborEncoder *encoder, uint8_t address, uint8_t *data)
+{
+    CborEncoder message_map;
+
+    CBOR_ERRCHECK(cbor_encoder_create_map(encoder, &message_map, ENC_KIND_LEN + ENC_CTX_LEN + ENC_PICC_BLOCK_LEN));
+    CBOR_ERRCHECK(enc_kind(&message_map, ENC_PICC_BLOCK_MSG_KIND));
+    CBOR_ERRCHECK(enc_ctx(&message_map, ctx));
+    CBOR_ERRCHECK(enc_picc_block(&message_map, address, -1, data));
+    CBOR_ERRCHECK(cbor_encoder_close_container(encoder, &message_map));
 
     return CborNoError;
 }
