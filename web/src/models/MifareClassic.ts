@@ -407,6 +407,18 @@ export class MifareClassicMemory implements PiccMemory {
     return this.sectors.indexOf(sector);
   }
 
+  blockAtAddress(address: number): MifareClassicBlock | undefined {
+    for (const sector of this.sectors) {
+      for (const block of sector.blocks) {
+        if (block.address === address) {
+          return block;
+        }
+      }
+    }
+
+    return undefined;
+  }
+
   private static numberOfBlocksInSector(sectorOffset: number): number {
     if (sectorOffset < 32) {
       return 4;

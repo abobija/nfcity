@@ -22,30 +22,17 @@ const _offset = computed(() => props.offset ?? 0);
 const _length = computed(() => props.length ?? (props.block.data.length - _offset.value));
 const bytes = computed(() => props.block.data.slice(_offset.value, _offset.value + _length.value));
 const _view = computed(() => props.view || MemoryView.Hexadecimal);
-const editingBytes = ref<Uint8Array>();
+const editMode = ref(false);
 
 watch(
-  () => { props.block.address, props.offset, props.length },
-  () => editingBytes.value = undefined,
-  { deep: true }
+  () => [props.block.address, props.offset, props.length],
+  () => editMode.value = false
 );
-
-function onEdit() {
-  editingBytes.value = bytes.value;
-}
-
-function onEditCanceled() {
-  editingBytes.value = undefined;
-}
-
-function onEditDone() {
-  editingBytes.value = undefined;
-}
 </script>
 
 <template>
   <div class="memory-bytes-viewer component">
-    <div v-if="!editingBytes" class="toolbar">
+    <div v-if="!editMode" class="toolbar">
       <div class="view group">
         <div class="btn-group">
           <button class="btn secondary" :class="{ activated: _view === MemoryView.Hexadecimal }"
@@ -60,12 +47,12 @@ function onEditDone() {
       </div>
       <div class="modify group">
         <div class="btn-group">
-          <button class="btn secondary" :disabled="!edit" @click="onEdit">edit</button>
+          <button class="btn secondary" :disabled="!edit" @click="editMode = true">edit</button>
         </div>
       </div>
     </div>
-    <MemoryEditor v-if="editingBytes" v-model="editingBytes" :block :offset="_offset" :length="_length"
-      @cancel="onEditCanceled" @done="onEditDone" />
+    <MemoryEditor v-if="editMode" :block :offset="_offset" :length="_length" @cancel="editMode = false"
+      @done="editMode = false" />
     <div v-else-if="_view == MemoryView.Decimal" class="bytes">
       {{ bytes.join(' ') }}
     </div>

@@ -8,8 +8,6 @@ import { UpdatablePiccBlock } from "@/models/Picc";
 import { hex, hex2arr, isHex, removeWhitespace } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";
 import { computed, onMounted, ref, useTemplateRef, watch } from "vue";
-import MemoryBlockUpdatedEvent from "./events/MemoryBlockUpdatedEvent";
-import memoryEditorEmits from "./memoryEditorEmits";
 
 const props = defineProps<{
   block: MifareClassicBlock;
@@ -23,9 +21,9 @@ const emit = defineEmits<{
 }>();
 
 const logger = makeLogger('MemoryEditor');
-const modelBytes = defineModel<Uint8Array>({ required: true });
-const editingBytes = ref(Uint8Array.from(modelBytes.value));
-const maxlength = computed(() => modelBytes.value.length * 2);
+const bytesToEdit = computed(() => props.block.data.slice(props.offset, props.offset + props.length));
+const editingBytes = ref(bytesToEdit.value);
+const maxlength = computed(() => bytesToEdit.value.length * 2);
 const value = ref<string>(hex(editingBytes.value, ''));
 const field = useTemplateRef('field');
 const saveable = ref(false);
@@ -37,8 +35,8 @@ onMounted(() => field.value?.focus());
 watch(value, v => editingBytes.value = hex2arr(removeWhitespace(v)));
 
 watch(editingBytes, (bytes) => {
-  saveable.value = editingBytes.value.length === modelBytes.value.length
-    && bytes.some((b, i) => b !== modelBytes.value[i]) === true;
+  saveable.value = editingBytes.value.length === bytesToEdit.value.length
+    && bytes.some((b, i) => b !== bytesToEdit.value[i]) === true;
 });
 
 function validateKey(e: KeyboardEvent) {
@@ -95,10 +93,8 @@ async function onSubmit() {
       return;
     }
 
-    modelBytes.value = editingBytes.value;
     props.block.updateWith(updatableBlock);
     saving.value = false;
-    memoryEditorEmits.emit('memoryBlockUpdated', MemoryBlockUpdatedEvent.from(props.block));
     emit('done');
   } catch (e) {
     logger.error('write failed', e);
