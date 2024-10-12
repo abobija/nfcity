@@ -9,16 +9,6 @@ import { hex, hex2arr, isHex, removeWhitespace } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";
 import { computed, onMounted, ref, useTemplateRef, watch } from "vue";
 
-const logger = makeLogger('MemoryEditor');
-const bytes = defineModel<Uint8Array>({ required: true });
-const bytesOrigin = ref(Uint8Array.from(bytes.value));
-const maxlength = computed(() => bytesOrigin.value.length * 2);
-const value = ref<string>(hex(bytes.value, ''));
-const field = useTemplateRef('field');
-const saveable = ref(false);
-const { client } = useClient();
-const saving = ref(false);
-
 const props = defineProps<{
   block: MifareClassicBlock;
   offset: number;
@@ -27,14 +17,27 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'cancel'): void;
-  (e: 'done', updatedBlock: UpdatedPiccBlock): void;
+  (e: 'done'): void;
 }>();
+
+const logger = makeLogger('MemoryEditor');
+const modelBytes = defineModel<Uint8Array>({ required: true });
+const editingBytes = ref(Uint8Array.from(modelBytes.value));
+const maxlength = computed(() => modelBytes.value.length * 2);
+const value = ref<string>(hex(editingBytes.value, ''));
+const field = useTemplateRef('field');
+const saveable = ref(false);
+const { client } = useClient();
+const saving = ref(false);
 
 onMounted(() => field.value?.focus());
 
-watch(value, v => bytes.value = hex2arr(removeWhitespace(v)));
+watch(value, v => editingBytes.value = hex2arr(removeWhitespace(v)));
 
-watch(bytes, () => saveable.value = bytes.value.some((b, i) => b !== bytesOrigin.value[i]) === true);
+watch(editingBytes, (bytes) => {
+  saveable.value = editingBytes.value.length === modelBytes.value.length
+    && bytes.some((b, i) => b !== modelBytes.value[i]) === true;
+});
 
 function validateKey(e: KeyboardEvent) {
   if (e.key.length !== 1 || !isHex(e.key)) {
@@ -48,17 +51,17 @@ async function onSubmit() {
     return;
   }
 
-  // clone original bytes
-  const bytesToWrite = Uint8Array.from(props.block.data);
+  // clone block bytes
+  const writeBlockData = Uint8Array.from(props.block.data);
 
   // modify clone with edited bytes
-  bytes.value.forEach(
-    (b, i) => bytesToWrite[props.offset + i] = b
+  editingBytes.value.forEach(
+    (b, i) => writeBlockData[props.offset + i] = b
   );
 
   const newBlock: UpdatablePiccBlock = {
     address: props.block.address,
-    data: bytesToWrite,
+    data: writeBlockData,
   };
 
   const request = WriteBlockWebMessage.from(newBlock, props.block.sector.key);
@@ -90,8 +93,10 @@ async function onSubmit() {
       return;
     }
 
+    props.block.updateWith(updatedBlock);
+    modelBytes.value = editingBytes.value;
     saving.value = false;
-    emit('done', updatedBlock);
+    emit('done');
   } catch (e) {
     logger.error('write failed', e);
     saving.value = false;
