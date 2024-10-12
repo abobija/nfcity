@@ -11,7 +11,7 @@ import Picc, {
   UpdatablePiccSector,
   keyA
 } from "@/models/Picc";
-import { arrEquals, nibbles, unhexToArray } from "@/utils/helpers";
+import { arraysAreEqual, nibbles, unhexToArray } from "@/utils/helpers";
 
 const defaultKey: PiccKey = {
   type: keyA,
@@ -457,7 +457,7 @@ export default class MifareClassic implements Picc {
   state: PiccState;
   readonly atqa: number;
   readonly sak: number;
-  readonly uid: Uint8Array;
+  readonly uid: number[];
   readonly memory: MifareClassicMemory;
 
   protected constructor(picc: Picc) {
@@ -475,13 +475,13 @@ export default class MifareClassic implements Picc {
       state: piccDto.state,
       atqa: piccDto.atqa,
       sak: piccDto.sak,
-      uid: piccDto.uid,
+      uid: Array.from(piccDto.uid),
       memory: {} as PiccMemory
     });
   }
 
   hasUidOf(picc: Picc | PiccDto): boolean {
-    return arrEquals(this.uid, picc.uid);
+    return arraysAreEqual(this.uid, picc.uid);
   }
 
   static isMifareClassic(picc: Picc | PiccDto): boolean {

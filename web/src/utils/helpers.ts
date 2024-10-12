@@ -118,7 +118,7 @@ export function removeWhitespace(str: string) {
   return str.replace(/\s/g, '');
 }
 
-export function arrEquals(arr1: Uint8Array, arr2: Uint8Array): boolean {
+export function arraysAreEqual(arr1: any[] | Uint8Array, arr2: any[] | Uint8Array): boolean {
   if (arr1.length !== arr2.length) {
     return false;
   }

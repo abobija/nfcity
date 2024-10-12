@@ -70,6 +70,6 @@ export default interface Picc {
   state: PiccState;
   atqa: number;
   sak: number;
-  uid: Uint8Array;
+  uid: number[];
   memory: PiccMemory;
 }
