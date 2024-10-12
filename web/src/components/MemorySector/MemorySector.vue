@@ -47,10 +47,11 @@ async function unlockAndLoadSector(key: PiccKey) {
 
     if (isPiccSectorDeviceMessage(msg)) {
       props.sector.updateWith({
-        key, blocks: msg.blocks.map(b => ({
+        key,
+        blocks: msg.blocks.map(b => ({
           address: b.address,
           data: Array.from(b.data),
-        }))
+        })),
       });
       emit('stateChange', MemorySectorState.UnlockedAndLoaded);
       return;
