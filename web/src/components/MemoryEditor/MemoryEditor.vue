@@ -5,7 +5,7 @@ import WriteBlockWebMessage from "@/communication/messages/web/WriteBlockWebMess
 import useClient from "@/composables/useClient";
 import { MifareClassicBlock } from "@/models/MifareClassic";
 import { UpdatablePiccBlock } from "@/models/Picc";
-import { hex, isHex, removeWhitespace, unhexToArray } from "@/utils/helpers";
+import { hex, isHex, overwriteArraySegment, removeWhitespace, unhexToArray } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";
 import { computed, onMounted, ref, useTemplateRef, watch } from "vue";
 
@@ -51,25 +51,25 @@ async function onSubmit() {
     return;
   }
 
-  // clone block bytes
-  const writeBlockData = Array.from(props.block.data);
-
-  // modify clone with edited bytes
-  editingBytes.value.forEach(
-    (b, i) => writeBlockData[props.offset + i] = b
+  const dataToWrite = overwriteArraySegment(
+    Array.from(props.block.data),
+    editingBytes.value,
+    props.offset
   );
 
   const newBlock: UpdatablePiccBlock = {
     address: props.block.address,
-    data: writeBlockData,
+    data: dataToWrite,
   };
 
+  const { key } = props.block.sector;
+
   const request = WriteBlockWebMessage.from({
-    address: props.block.address,
-    data: Uint8Array.from(writeBlockData),
+    address: newBlock.address,
+    data: Uint8Array.from(newBlock.data),
   }, {
-    type: props.block.sector.key.type,
-    value: Uint8Array.from(props.block.sector.key.value),
+    type: key.type,
+    value: Uint8Array.from(key.value),
   });
 
   try {

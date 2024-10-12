@@ -121,3 +121,15 @@ export function strmask(str: string, opts?: StrMaskOptions): string {
 export function cloneObject<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
 }
+
+export function overwriteArraySegment(target: number[], source: number[], offset: number = 0): number[] {
+  if (target.length < offset + source.length) {
+    throw new Error('Source array is too large to fit at the given offset');
+  }
+
+  for (let i = 0; i < source.length; i++) {
+    target[offset + i] = source[i];
+  }
+
+  return target;
+}
