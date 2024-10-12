@@ -34,11 +34,11 @@ function onEdit() {
   editingBytes.value = Uint8Array.from(bytes.value); // clone
 }
 
-function onEditCancel() {
+function onEditCanceled() {
   editingBytes.value = undefined;
 }
 
-function onEditClose() {
+function oneEditDone() {
   editingBytes.value = undefined;
 }
 </script>
@@ -65,7 +65,7 @@ function onEditClose() {
       </div>
     </div>
     <MemoryEditor v-if="editingBytes" v-model="editingBytes" :block :offset="_offset" :length="_length"
-      @cancel="onEditCancel" @close="onEditClose" />
+      @cancel="onEditCanceled" @done="oneEditDone" />
     <div v-else-if="_view == MemoryView.Decimal" class="bytes">
       {{ bytes.join(' ') }}
     </div>

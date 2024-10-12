@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { isErrorDeviceMessage } from "@/communication/messages/device/ErrorDeviceMessage";
 import WriteBlockWebMessage from "@/communication/messages/web/WriteBlockWebMessage";
+import useClient from "@/composables/useClient";
 import { MifareClassicBlock } from "@/models/MifareClassic";
 import { UpdatablePiccBlock } from "@/models/Picc";
 import { hex, hex2arr, isHex, removeWhitespace } from "@/utils/helpers";
@@ -13,6 +15,8 @@ const maxlength = computed(() => bytesOrigin.value.length * 2);
 const value = ref<string>(hex(bytes.value, ''));
 const field = useTemplateRef('field');
 const saveable = ref(false);
+const { client } = useClient();
+const saving = ref(false);
 
 const props = defineProps<{
   block: MifareClassicBlock;
@@ -22,7 +26,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'cancel'): void;
-  (e: 'close'): void;
+  (e: 'done'): void;
 }>();
 
 onMounted(() => field.value?.focus());
@@ -37,7 +41,7 @@ function validateKey(e: KeyboardEvent) {
   }
 }
 
-function onSubmit() {
+async function onSubmit() {
   if (!saveable.value) {
     logger.debug('edited bytes are not saveable, skipping');
     return;
@@ -56,11 +60,24 @@ function onSubmit() {
     data: bytesToWrite,
   };
 
-  const message = WriteBlockWebMessage.from(newBlock, props.block.sector.key);
+  const request = WriteBlockWebMessage.from(newBlock, props.block.sector.key);
 
-  logger.info('TODO: send message to update block', message);
+  try {
+    saving.value = true;
+    const response = await client.value.transceive(request);
 
-  emit('close');
+    if (isErrorDeviceMessage(response)) {
+      logger.warning('write failed, error code', response.code);
+      saving.value = false;
+      return;
+    }
+
+    saving.value = false;
+    emit('done');
+  } catch (e) {
+    logger.error('write failed', e);
+    saving.value = false;
+  }
 }
 </script>
 
@@ -73,7 +90,7 @@ function onSubmit() {
           spellcheck="false"></textarea>
       </div>
       <div class="form-group">
-        <button type="submit" class="btn primary" :disabled="!saveable">save</button>
+        <button type="submit" class="btn primary" :disabled="!saveable || saving">save</button>
         <button type="button" class="btn secondary" @click="$emit('cancel')">cancel</button>
       </div>
     </form>
