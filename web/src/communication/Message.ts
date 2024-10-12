@@ -1,4 +1,4 @@
-import { PiccKey } from "@/models/Picc";
+import PiccKeyDto from "./dtos/PiccKeyDto";
 
 export type WebMessageKind =
   | 'ping'
@@ -41,9 +41,9 @@ export abstract class BaseWebMessage implements WebMessage {
 }
 
 export abstract class AuthorizedWebMessage extends BaseWebMessage {
-  readonly key: PiccKey;
+  readonly key: PiccKeyDto;
 
-  protected constructor(key: PiccKey) {
+  protected constructor(key: PiccKeyDto) {
     super();
     this.key = key;
   }
