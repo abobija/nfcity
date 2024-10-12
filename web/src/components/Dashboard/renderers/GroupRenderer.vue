@@ -33,7 +33,7 @@ const view = ref(MemoryView.Hexadecimal);
         <div class="name">Content</div>
         <div class="value">
           <MemoryViewer :view :block="group.block" :offset="group.offset" :length="group.length"
-            @view-change="v => view = v" :edit="group.type == MifareClassicBlockGroupType.Data" />
+            @view-change-proposal="v => view = v" :edit="group.type == MifareClassicBlockGroupType.Data" />
         </div>
       </li>
     </ul>
