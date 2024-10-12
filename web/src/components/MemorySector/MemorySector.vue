@@ -38,18 +38,22 @@ const sectorOffset = computed(() => props.sector.memory.offsetOfSector(props.sec
 async function unlockAndLoadSector(key: PiccKey) {
   piccKey.value = key;
 
-  emit('stateChange', MemorySectorState.Unlocking);
-  const msg = await client.value.transceive(ReadSectorWebMessage.from(sectorOffset.value, key));
+  try {
+    emit('stateChange', MemorySectorState.Unlocking);
+    const msg = await client.value.transceive(ReadSectorWebMessage.from(sectorOffset.value, key));
 
-  if (isPiccSectorDeviceMessage(msg)) {
-    props.sector.updateWith({ key, blocks: msg.blocks });
-    emit('stateChange', MemorySectorState.UnlockedAndLoaded);
-    return;
-  }
+    if (isPiccSectorDeviceMessage(msg)) {
+      props.sector.updateWith({ key, blocks: msg.blocks });
+      emit('stateChange', MemorySectorState.UnlockedAndLoaded);
+      return;
+    }
 
-  if (isErrorDeviceMessage(msg)) {
+    if (isErrorDeviceMessage(msg)) {
+      emit('stateChange', MemorySectorState.Unlock);
+      return;
+    }
+  } catch (e) {
     emit('stateChange', MemorySectorState.Unlock);
-    return;
   }
 }
 
