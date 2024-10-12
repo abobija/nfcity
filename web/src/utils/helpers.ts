@@ -20,7 +20,7 @@ export function hex(bytes: number | number[] | Uint8Array, separator: string = '
     .join(separator);
 }
 
-export function unhexToU8Array(str: string): Uint8Array {
+export function unhexToArray(str: string): number[] {
   if (!isHex(str)) {
     throw new Error('invalid hex string');
   }
@@ -29,9 +29,11 @@ export function unhexToU8Array(str: string): Uint8Array {
     str = '0' + str;
   }
 
-  return new Uint8Array(
-    Array.from({ length: str.length / 2 }, (_, i) => parseInt(str.slice(i * 2, i * 2 + 2), 16))
-  );
+  return Array.from({ length: str.length / 2 }, (_, i) => parseInt(str.slice(i * 2, i * 2 + 2), 16));
+}
+
+export function unhexToU8Array(str: string): Uint8Array {
+  return Uint8Array.from(unhexToArray(str));
 }
 
 export function randomHexStr(bytesLength: number): string {
