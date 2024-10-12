@@ -8,6 +8,8 @@ import { UpdatablePiccBlock } from "@/models/Picc";
 import { hex, hex2arr, isHex, removeWhitespace } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";
 import { computed, onMounted, ref, useTemplateRef, watch } from "vue";
+import MemoryBlockUpdatedEvent from "./events/MemoryBlockUpdatedEvent";
+import memoryEditorEmits from "./memoryEditorEmits";
 
 const props = defineProps<{
   block: MifareClassicBlock;
@@ -96,6 +98,7 @@ async function onSubmit() {
     modelBytes.value = editingBytes.value;
     props.block.updateWith(updatableBlock);
     saving.value = false;
+    memoryEditorEmits.emit('memoryBlockUpdated', MemoryBlockUpdatedEvent.from(props.block));
     emit('done');
   } catch (e) {
     logger.error('write failed', e);
