@@ -55,7 +55,7 @@ export interface PiccSector {
 
 export interface UpdatablePiccBlock extends Pick<PiccBlock, 'address' | 'data'> { }
 
-export interface UpdatedPiccBlock extends Pick<PiccBlock, 'address' | 'data'> { }
+export interface UpdatedPiccBlock extends UpdatablePiccBlock { }
 
 export interface UpdatablePiccSector extends Pick<PiccSector, 'key'> {
   blocks: UpdatablePiccBlock[];

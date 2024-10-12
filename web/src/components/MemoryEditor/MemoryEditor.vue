@@ -8,8 +8,6 @@ import { UpdatablePiccBlock, UpdatedPiccBlock } from "@/models/Picc";
 import { hex, hex2arr, isHex, removeWhitespace } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";
 import { computed, onMounted, ref, useTemplateRef, watch } from "vue";
-import MemoryBlockUpdatedEvent from "./events/MemoryBlockUpdatedEvent";
-import memoryEditorEmits from "./memoryEditorEmits";
 
 const logger = makeLogger('MemoryEditor');
 const bytes = defineModel<Uint8Array>({ required: true });
@@ -29,7 +27,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'cancel'): void;
-  (e: 'done'): void;
+  (e: 'done', updatedBlock: UpdatedPiccBlock): void;
 }>();
 
 onMounted(() => field.value?.focus());
@@ -86,9 +84,14 @@ async function onSubmit() {
       data: response.data,
     };
 
+    if (updatedBlock.address != newBlock.address) {
+      logger.warning('unexpected response, address mismatch, sent', newBlock.address, 'received', updatedBlock.address);
+      saving.value = false;
+      return;
+    }
+
     saving.value = false;
-    memoryEditorEmits.emit('blockUpdated', MemoryBlockUpdatedEvent.from(updatedBlock));
-    emit('done');
+    emit('done', updatedBlock);
   } catch (e) {
     logger.error('write failed', e);
     saving.value = false;

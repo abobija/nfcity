@@ -1,5 +1,5 @@
 import PiccDto from "@/communication/dtos/PiccDto";
-import Picc, { PiccBlock, PiccBlockAccessBits, PiccKey, PiccKeyType, PiccMemory, PiccSector, PiccState, PiccType, UpdatablePiccSector } from "@/models/Picc";
+import Picc, { PiccBlock, PiccBlockAccessBits, PiccKey, PiccKeyType, PiccMemory, PiccSector, PiccState, PiccType, UpdatablePiccBlock, UpdatablePiccSector } from "@/models/Picc";
 import { arrEquals, hex2arr, nibbles } from "@/utils/helpers";
 
 const defaultKey: PiccKey = {
@@ -128,6 +128,20 @@ export abstract class MifareClassicBlock implements PiccBlock {
 
   hasSameAddressAs(that: MifareClassicBlock): boolean {
     return this.address == that.address;
+  }
+
+  updateWith(block: UpdatablePiccBlock): MifareClassicBlock {
+    if (this.address != block.address) {
+      throw new Error('Invalid block address');
+    }
+
+    if (block.data.length != MifareClassicBlock.size) {
+      throw new Error('Invalid block data length');
+    }
+
+    block.data.forEach((byte, offset) => this.data[offset] = byte);
+
+    return this;
   }
 }
 
