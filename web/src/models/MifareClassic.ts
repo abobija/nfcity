@@ -99,9 +99,14 @@ export abstract class MifareClassicBlock implements PiccBlock {
   readonly type: MifareClassicBlockType;
   readonly sector: MifareClassicSector;
   readonly address: number;
-  readonly data: Uint8Array;
   readonly accessBits: PiccBlockAccessBits;
   readonly blockGroups: MifareClassicBlockGroup[];
+
+  private _data: Uint8Array;
+
+  get data(): Uint8Array {
+    return this._data;
+  }
 
   protected constructor(
     type: MifareClassicBlockType,
@@ -112,7 +117,7 @@ export abstract class MifareClassicBlock implements PiccBlock {
     this.type = type;
     this.sector = sector;
     this.address = block.address;
-    this.data = block.data;
+    this._data = block.data;
     this.accessBits = block.accessBits;
     bytesGroups.forEach(group => group.block = this);
     this.blockGroups = bytesGroups;
@@ -135,7 +140,7 @@ export abstract class MifareClassicBlock implements PiccBlock {
       throw new Error('Invalid block data length');
     }
 
-    block.data.forEach((byte, offset) => this.data[offset] = byte);
+    this._data = Uint8Array.from(block.data);
 
     return this;
   }
