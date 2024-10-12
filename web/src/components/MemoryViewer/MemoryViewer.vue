@@ -38,7 +38,7 @@ function onEditCanceled() {
   editingBytes.value = undefined;
 }
 
-function oneEditDone() {
+function onEditDone() {
   editingBytes.value = undefined;
 }
 </script>
@@ -65,7 +65,7 @@ function oneEditDone() {
       </div>
     </div>
     <MemoryEditor v-if="editingBytes" v-model="editingBytes" :block :offset="_offset" :length="_length"
-      @cancel="onEditCanceled" @done="oneEditDone" />
+      @cancel="onEditCanceled" @done="onEditDone" />
     <div v-else-if="_view == MemoryView.Decimal" class="bytes">
       {{ bytes.join(' ') }}
     </div>
