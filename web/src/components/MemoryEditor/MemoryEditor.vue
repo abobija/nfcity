@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { isErrorDeviceMessage } from "@/communication/messages/device/ErrorDeviceMessage";
+import { isPiccBlockDeviceMessage } from "@/communication/messages/device/PiccBlockDeviceMessage";
 import WriteBlockWebMessage from "@/communication/messages/web/WriteBlockWebMessage";
 import useClient from "@/composables/useClient";
 import { MifareClassicBlock } from "@/models/MifareClassic";
-import { UpdatablePiccBlock } from "@/models/Picc";
+import { UpdatablePiccBlock, UpdatedPiccBlock } from "@/models/Picc";
 import { hex, hex2arr, isHex, removeWhitespace } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";
 import { computed, onMounted, ref, useTemplateRef, watch } from "vue";
+import MemoryBlockUpdatedEvent from "./events/MemoryBlockUpdatedEvent";
+import memoryEditorEmits from "./memoryEditorEmits";
 
 const logger = makeLogger('MemoryEditor');
 const bytes = defineModel<Uint8Array>({ required: true });
@@ -72,7 +75,19 @@ async function onSubmit() {
       return;
     }
 
+    if (!isPiccBlockDeviceMessage(response)) {
+      logger.warning('unexpected response, expecting picc block, got', response);
+      saving.value = false;
+      return;
+    }
+
+    const updatedBlock: UpdatedPiccBlock = {
+      address: response.address,
+      data: response.data,
+    };
+
     saving.value = false;
+    memoryEditorEmits.emit('blockUpdated', MemoryBlockUpdatedEvent.from(updatedBlock));
     emit('done');
   } catch (e) {
     logger.error('write failed', e);

@@ -10,6 +10,7 @@ export type DeviceMessageKind =
   | 'pong'
   | 'picc'
   | 'picc_sector'
+  | 'picc_block'
   | 'hello'
   | 'picc_state_changed'
   | 'error';
