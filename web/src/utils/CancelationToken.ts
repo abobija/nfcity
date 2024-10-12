@@ -7,7 +7,7 @@ export class OperationCanceledError extends Error {
 }
 
 export class CancelationToken {
-  readonly id: string = randomHex(4);
+  readonly id: string = randomHex(4).toLowerCase();
   private _isCanceled = false;
   private readonly cancelHandlers: (() => void)[] = [];
   private _reason?: any;
