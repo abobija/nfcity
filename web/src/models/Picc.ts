@@ -23,14 +23,11 @@ export enum PiccType {
 }
 
 type Bit = number;
-type BlockAddress = number;
 
-export type KeyA = 0;
-export type KeyB = 1;
-export type KeyType = KeyA | KeyB;
+export type KeyType = 0 | 1;
 
-export const keyA = 0 as KeyA;
-export const keyB = 1 as KeyB;
+export const keyA = 0 as KeyType;
+export const keyB = 1 as KeyType;
 
 export interface PiccKey {
   value: number[];
@@ -44,7 +41,7 @@ export interface PiccBlockAccessBits {
 }
 
 export interface PiccBlock {
-  address: BlockAddress;
+  address: number;
   data: number[];
   accessBits: PiccBlockAccessBits;
 }
@@ -52,7 +49,7 @@ export interface PiccBlock {
 export interface PiccSector {
   key: PiccKey;
   blocks: PiccBlock[];
-  block0Address: BlockAddress;
+  block0Address: number;
 }
 
 export interface UpdatablePiccBlock extends Pick<PiccBlock, 'address' | 'data'> { }
