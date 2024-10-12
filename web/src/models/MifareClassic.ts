@@ -54,14 +54,11 @@ export enum MifareClassicBlockType {
 
 export class MifareClassicBlockGroup {
   private _block?: MifareClassicBlock;
-  readonly type: MifareClassicBlockGroupType;
-  readonly offset: number;
-  readonly length: number;
 
   protected constructor(
-    type: MifareClassicBlockGroupType,
-    offset: number,
-    length: number
+    readonly type: MifareClassicBlockGroupType,
+    readonly offset: number,
+    readonly length: number
   ) {
     this.type = type;
     this.offset = offset;
@@ -107,8 +104,6 @@ export class MifareClassicBlockGroup {
 export abstract class MifareClassicBlock implements PiccBlock {
   static readonly size: number = 16;
 
-  readonly type: MifareClassicBlockType;
-  readonly sector: MifareClassicSector;
   readonly address: number;
   private _data: number[];
   readonly accessBits: PiccBlockAccessBits;
@@ -119,8 +114,8 @@ export abstract class MifareClassicBlock implements PiccBlock {
   }
 
   protected constructor(
-    type: MifareClassicBlockType,
-    sector: MifareClassicSector,
+    readonly type: MifareClassicBlockType,
+    readonly sector: MifareClassicSector,
     block: PiccBlock,
     bytesGroups: MifareClassicBlockGroup[]
   ) {
@@ -173,9 +168,11 @@ class MifareClassicUndefinedBlock extends MifareClassicBlock {
 }
 
 class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
-  readonly accessBitsPool: Array<PiccBlockAccessBits>;
-
-  constructor(sector: MifareClassicSector, block: PiccBlock, accessBitsPool: Array<PiccBlockAccessBits>) {
+  constructor(
+    sector: MifareClassicSector,
+    block: PiccBlock,
+    readonly accessBitsPool: Array<PiccBlockAccessBits>
+  ) {
     if (accessBitsPool.length != 4) {
       throw new Error('Invalid access bits pool');
     }
@@ -288,8 +285,14 @@ class MifareClassicManufacturerBlock extends MifareClassicBlock {
 
 export class MifareClassicSector implements PiccSector {
   key: PiccKey = defaultKey;
-  readonly memory: MifareClassicMemory;
-  readonly blocks: MifareClassicBlock[];
+
+  protected constructor(
+    readonly memory: MifareClassicMemory,
+    readonly blocks: MifareClassicBlock[]
+  ) {
+    this.memory = memory;
+    this.blocks = blocks;
+  }
 
   get block0Address() {
     return this.blockAtOffset(0).address;
@@ -306,11 +309,6 @@ export class MifareClassicSector implements PiccSector {
 
   get trailerOffset() {
     return this.numberOfBlocks - 1;
-  }
-
-  protected constructor(memory: MifareClassicMemory, blocks: MifareClassicBlock[]) {
-    this.memory = memory;
-    this.blocks = blocks;
   }
 
   static from(memory: MifareClassicMemory, blocks: MifareClassicBlock[]) {
@@ -362,17 +360,12 @@ export class MifareClassicSector implements PiccSector {
 }
 
 export class MifareClassicMemory implements PiccMemory {
-  readonly picc: MifareClassic;
   readonly sectors: MifareClassicSector[];
   readonly numberOfSectors: number;
   readonly blockDistribution: Array<[number, number]>;
   readonly size: number;
 
-  get isEmpty() {
-    return this.sectors.every(sector => sector.isEmpty);
-  }
-
-  protected constructor(picc: MifareClassic, piccType: PiccType) {
+  protected constructor(readonly picc: MifareClassic, piccType: PiccType) {
     this.picc = picc;
     this.numberOfSectors = MifareClassicMemory.numberOfSectors(piccType);
 
@@ -403,6 +396,10 @@ export class MifareClassicMemory implements PiccMemory {
     }
 
     this.size = this.blockDistribution.reduce((acc, [n, m]) => acc + n * m, 0) * MifareClassicBlock.size;
+  }
+
+  get isEmpty() {
+    return this.sectors.every(sector => sector.isEmpty);
   }
 
   static from(picc: MifareClassic, piccType: PiccType) {
@@ -453,7 +450,7 @@ export class MifareClassicMemory implements PiccMemory {
 
 export default class MifareClassic implements Picc {
   readonly type: PiccType;
-  state: PiccState;
+  private _state: PiccState;
   readonly atqa: number;
   readonly sak: number;
   readonly uid: number[];
@@ -461,11 +458,19 @@ export default class MifareClassic implements Picc {
 
   protected constructor(picc: Picc) {
     this.type = picc.type;
-    this.state = picc.state;
+    this._state = picc.state;
     this.atqa = picc.atqa;
     this.sak = picc.sak;
     this.uid = picc.uid;
     this.memory = MifareClassicMemory.from(this, picc.type);
+  }
+
+  get state(): PiccState {
+    return this._state;
+  }
+
+  set state(state: PiccState) {
+    this._state = state;
   }
 
   static fromDto(piccDto: PiccDto): MifareClassic {
