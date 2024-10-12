@@ -3,45 +3,42 @@ import MemoryEditor from "@/components/MemoryEditor/MemoryEditor.vue";
 import MemoryView from "@/components/MemoryViewer/MemoryView";
 import '@/components/MemoryViewer/MemoryViewer.scss';
 import { MifareClassicBlock } from "@/models/MifareClassic";
-import { UpdatedPiccBlock } from "@/models/Picc";
 import { ascii, bin, hex, isAsciiPrintable } from "@/utils/helpers";
 import { computed, ref, watch } from "vue";
 
 const props = defineProps<{
+  block: MifareClassicBlock;
   offset?: number;
   length?: number;
   view?: MemoryView;
   edit?: boolean;
 }>();
 
-const block = defineModel<MifareClassicBlock>({ required: true });
-
 defineEmits<{
   (e: 'viewChangeProposal', viewProposal: MemoryView): void;
 }>();
 
 const _offset = computed(() => props.offset ?? 0);
-const _length = computed(() => props.length ?? (block.value.data.length - _offset.value));
-const bytes = computed(() => block.value.data.slice(_offset.value, _offset.value + _length.value));
+const _length = computed(() => props.length ?? (props.block.data.length - _offset.value));
+const bytes = computed(() => props.block.data.slice(_offset.value, _offset.value + _length.value));
 const _view = computed(() => props.view || MemoryView.Hexadecimal);
 const editingBytes = ref<Uint8Array>();
 
 watch(
-  () => { block.value.address, props.offset, props.length },
+  () => { props.block.address, props.offset, props.length },
   () => editingBytes.value = undefined,
   { deep: true }
 );
 
 function onEdit() {
-  editingBytes.value = Uint8Array.from(bytes.value); // clone
+  editingBytes.value = bytes.value;
 }
 
 function onEditCanceled() {
   editingBytes.value = undefined;
 }
 
-function oneEditDone(updatedBlock: UpdatedPiccBlock) {
-  block.value.updateWith(updatedBlock);
+function oneEditDone() {
   editingBytes.value = undefined;
 }
 </script>

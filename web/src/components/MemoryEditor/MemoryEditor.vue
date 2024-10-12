@@ -4,7 +4,7 @@ import { isPiccBlockDeviceMessage } from "@/communication/messages/device/PiccBl
 import WriteBlockWebMessage from "@/communication/messages/web/WriteBlockWebMessage";
 import useClient from "@/composables/useClient";
 import { MifareClassicBlock } from "@/models/MifareClassic";
-import { UpdatablePiccBlock, UpdatedPiccBlock } from "@/models/Picc";
+import { UpdatablePiccBlock } from "@/models/Picc";
 import { hex, hex2arr, isHex, removeWhitespace } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";
 import { computed, onMounted, ref, useTemplateRef, watch } from "vue";
@@ -82,19 +82,19 @@ async function onSubmit() {
       return;
     }
 
-    const updatedBlock: UpdatedPiccBlock = {
+    const updatableBlock: UpdatablePiccBlock = {
       address: response.address,
       data: response.data,
     };
 
-    if (updatedBlock.address != newBlock.address) {
-      logger.warning('unexpected response, address mismatch, sent', newBlock.address, 'received', updatedBlock.address);
+    if (updatableBlock.address != newBlock.address) {
+      logger.warning('unexpected response, address mismatch, sent', newBlock.address, 'received', updatableBlock.address);
       saving.value = false;
       return;
     }
 
-    props.block.updateWith(updatedBlock);
     modelBytes.value = editingBytes.value;
+    props.block.updateWith(updatableBlock);
     saving.value = false;
     emit('done');
   } catch (e) {
