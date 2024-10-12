@@ -16,7 +16,7 @@ const emit = defineEmits<{
 
 const keyType = ref<KeyType>(props.piccKey.type);
 const keyInput = useTemplateRef('key-input');
-const keyValue = ref<string>(hex(props.piccKey.value, ''));
+const keyValue = ref<string>(hex(props.piccKey.value));
 
 function onSubmit() {
   if (keyValue.value.length != 12) {

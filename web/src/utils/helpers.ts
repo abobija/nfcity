@@ -5,7 +5,7 @@ export function isHex(str: string): boolean {
   return /^[0-9A-Fa-f]*$/.test(str);
 }
 
-export function hex(bytes: number | number[], separator: string = ' '): string {
+export function hex(bytes: number | number[], separator: string = ''): string {
   const hexNumber = (number: number) => {
     const hex = number.toString(16).toUpperCase();
     return hex.length % 2 === 0 ? hex : '0' + hex;

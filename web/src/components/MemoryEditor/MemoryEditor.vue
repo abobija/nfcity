@@ -24,7 +24,7 @@ const logger = makeLogger('MemoryEditor');
 const bytesToEdit = computed(() => props.block.data.slice(props.offset, props.offset + props.length));
 const editingBytes = ref(bytesToEdit.value);
 const maxlength = computed(() => bytesToEdit.value.length * 2);
-const value = ref<string>(hex(editingBytes.value, ''));
+const value = ref<string>(hex(editingBytes.value));
 const field = useTemplateRef('field');
 const saveable = ref(false);
 const { client } = useClient();

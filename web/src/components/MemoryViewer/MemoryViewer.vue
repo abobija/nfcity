@@ -57,7 +57,7 @@ watch(
       {{ bytes.join(' ') }}
     </div>
     <div v-else-if="_view == MemoryView.Binary" class="bytes">
-      {{ bin(bytes) }}
+      {{ bin(bytes, ' ') }}
     </div>
     <div v-else-if="_view == MemoryView.Ascii" class="bytes">
       <span v-for="b in bytes" class="ascii" :class="{ 'non-printable': !isAsciiPrintable(b) }"
@@ -66,7 +66,7 @@ watch(
       </span>
     </div>
     <div v-else class="bytes">
-      {{ hex(bytes) }}
+      {{ hex(bytes, ' ') }}
     </div>
   </div>
 </template>

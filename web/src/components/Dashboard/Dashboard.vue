@@ -270,7 +270,7 @@ onMemoryByteMouseClick(clickedByte => {
             <ul class="metas">
               <li class="meta">
                 <span class="name">UID</span>
-                <span class="value">{{ hex(picc.uid) }}</span>
+                <span class="value">{{ hex(picc.uid, ' ') }}</span>
               </li>
               <li class="meta">
                 <span class="name">ATQA</span>
