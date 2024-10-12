@@ -1,7 +1,7 @@
 
 import Client, { ClientValidator } from "@/communication/Client";
 import { keys } from "@/keys";
-import { clone } from "@/utils/helpers";
+import { cloneObject } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";
 import { inject, readonly, ref, Ref, watch } from "vue";
 
@@ -48,7 +48,7 @@ export function newClientStorageInjection(): ClientStorageInjection {
   const lsItem = localStorage.getItem(key);
 
   function sanitize(storage: ClientStorage): ClientStorage {
-    const sanitizedStorage = clone(storage);
+    const sanitizedStorage = cloneObject(storage);
 
     validateClientStorage(storage).forEach(error => {
       delete sanitizedStorage[error.field];

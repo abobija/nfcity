@@ -13,7 +13,7 @@ import { DeviceMessage, WebMessage } from "@/communication/Message";
 import PongDeviceMessage, { isPongDeviceMessage } from "@/communication/messages/device/PongDeviceMessage";
 import PingWebMessage from "@/communication/messages/web/PingWebMessage";
 import { CancelationToken, OperationCanceledError } from "@/utils/CancelationToken";
-import { randomHexStr, strmask, trim } from "@/utils/helpers";
+import { randomHex, strmask, trim } from "@/utils/helpers";
 import logger, { LogLevel } from "@/utils/Logger";
 import { decode, encode } from "cbor-x";
 import mqtt, { MqttClient, PacketCallback } from "mqtt";
@@ -181,7 +181,7 @@ class Client {
     }
 
     this.mqttClient = mqtt.connect(this.brokerUrl.toString(), {
-      clientId: `nfcity_${randomHexStr(4)}`,
+      clientId: `nfcity_${randomHex(4)}`,
     });
 
     this.mqttClient.on('error', error => {

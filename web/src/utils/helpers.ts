@@ -5,17 +5,13 @@ export function isHex(str: string): boolean {
   return /^[0-9A-Fa-f]*$/.test(str);
 }
 
-export function hex(bytes: number | number[] | Uint8Array, separator: string = ' '): string {
+export function hex(bytes: number | number[], separator: string = ' '): string {
   const hexNumber = (number: number) => {
     const hex = number.toString(16).toUpperCase();
     return hex.length % 2 === 0 ? hex : '0' + hex;
   };
 
-  return (typeof bytes === 'number'
-    ? [bytes]
-    : bytes instanceof Uint8Array
-      ? Array.from(bytes)
-      : bytes)
+  return (typeof bytes === 'number' ? [bytes] : bytes)
     .map(hexNumber)
     .join(separator);
 }
@@ -32,15 +28,11 @@ export function unhexToArray(str: string): number[] {
   return Array.from({ length: str.length / 2 }, (_, i) => parseInt(str.slice(i * 2, i * 2 + 2), 16));
 }
 
-export function unhexToU8Array(str: string): Uint8Array {
-  return Uint8Array.from(unhexToArray(str));
+export function randomHex(bytesLength: number): string {
+  return hex(Array.from(crypto.getRandomValues(new Uint8Array(bytesLength))), '');
 }
 
-export function randomHexStr(bytesLength: number): string {
-  return hex(crypto.getRandomValues(new Uint8Array(bytesLength)), '');
-}
-
-export function bin(bytes: number | number[] | Uint8Array, separator: string = '', groupSeparator: string = '') {
+export function bin(bytes: number | number[], separator: string = '', groupSeparator: string = '') {
   const binNumber = (number: number) => {
     const binary = number.toString(2).padStart(8, '0');
 
@@ -51,42 +43,30 @@ export function bin(bytes: number | number[] | Uint8Array, separator: string = '
     return binary.slice(0, 4) + groupSeparator + binary.slice(4);
   };
 
-  return (typeof bytes === 'number'
-    ? [bytes]
-    : bytes instanceof Uint8Array
-      ? Array.from(bytes)
-      : bytes)
+  return (typeof bytes === 'number' ? [bytes] : bytes)
     .map(binNumber)
     .join(separator);
-}
-
-export function randomBytes(length: number) {
-  return new Uint8Array(
-    Array.from({ length }, () => Math.floor(Math.random() * 0xFF))
-  );
 }
 
 export function isAsciiPrintable(code: number): boolean {
   return code >= 32 && code <= 126;
 }
 
-function num2ascii(num: number): string {
-  return isAsciiPrintable(num) ? String.fromCharCode(num) : '.';
-}
+export function ascii(bytes: number | number[], separator: string = ''): string {
+  const asciiNumber = (number: number) => {
+    return isAsciiPrintable(number) ? String.fromCharCode(number) : '.';
+  };
 
-function arr2ascii(arr: Uint8Array, separator: string = ''): string {
-  return Array.from(arr).map(num2ascii).join(separator);
-}
-
-export function ascii(bytes: number | Uint8Array, separator: string = ''): string {
-  return bytes instanceof Uint8Array ? arr2ascii(bytes, separator) : num2ascii(bytes);
+  return (typeof bytes === 'number' ? [bytes] : bytes)
+    .map(asciiNumber)
+    .join(separator);
 }
 
 export function nibbles(byte: number): [MSB, LSB] {
   return [byte >> 4, byte & 0x0F];
 }
 
-export function trimStart(str: string, chr: string) {
+function trimStart(str: string, chr: string) {
   while (str.startsWith(chr)) {
     str = str.slice(1);
   }
@@ -94,20 +74,12 @@ export function trimStart(str: string, chr: string) {
   return str;
 }
 
-export function trimEnd(str: string, chr: string) {
+function trimEnd(str: string, chr: string) {
   while (str.endsWith(chr)) {
     str = str.slice(0, -1);
   }
 
   return str;
-}
-
-export function trimLeft(str: string, chr: string) {
-  return trimStart(str, chr);
-}
-
-export function trimRight(str: string, chr: string) {
-  return trimEnd(str, chr);
 }
 
 export function trim(str: string, chr: string) {
@@ -146,6 +118,6 @@ export function strmask(str: string, opts?: StrMaskOptions): string {
     : str.slice(0, -offset - length) + mask + str.slice(-offset);
 };
 
-export function clone<T>(obj: T): T {
+export function cloneObject<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
 }

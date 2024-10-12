@@ -1,4 +1,4 @@
-import { randomHexStr } from "@/utils/helpers";
+import { randomHex } from "@/utils/helpers";
 
 export class OperationCanceledError extends Error {
   constructor() {
@@ -7,7 +7,7 @@ export class OperationCanceledError extends Error {
 }
 
 export class CancelationToken {
-  readonly id: string = randomHexStr(4);
+  readonly id: string = randomHex(4);
   private _isCanceled = false;
   private readonly cancelHandlers: (() => void)[] = [];
   private _reason?: any;

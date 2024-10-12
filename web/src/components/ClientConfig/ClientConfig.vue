@@ -2,7 +2,7 @@
 import { ClientValidator } from "@/communication/Client";
 import '@/components/ClientConfig/ClientConfig.scss';
 import { ClientStorage, validateClientStorage, ValidClientStorage } from "@/composables/useClientStorage";
-import { clone } from "@/utils/helpers";
+import { cloneObject } from "@/utils/helpers";
 import { logd } from "@/utils/Logger";
 import { onMounted, ref, useTemplateRef } from "vue";
 
@@ -16,7 +16,7 @@ const emits = defineEmits<{
   (e: 'cancel'): void;
 }>();
 
-const localClientStorage = ref(clone(props.clientStorage));
+const localClientStorage = ref(cloneObject(props.clientStorage));
 const brokerUrlRef = useTemplateRef('broker-url');
 const rootTopicRef = useTemplateRef('root-topic');
 
