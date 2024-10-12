@@ -5,7 +5,7 @@ import WriteBlockWebMessage from "@/communication/messages/web/WriteBlockWebMess
 import useClient from "@/composables/useClient";
 import { MifareClassicBlock } from "@/models/MifareClassic";
 import { UpdatablePiccBlock } from "@/models/Picc";
-import { hex, isHex, removeWhitespace, unhexToU8Array } from "@/utils/helpers";
+import { hex, isHex, removeWhitespace, unhexToArray } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";
 import { computed, onMounted, ref, useTemplateRef, watch } from "vue";
 
@@ -32,7 +32,7 @@ const saving = ref(false);
 
 onMounted(() => field.value?.focus());
 
-watch(value, v => editingBytes.value = unhexToU8Array(removeWhitespace(v)));
+watch(value, v => editingBytes.value = unhexToArray(removeWhitespace(v)));
 
 watch(editingBytes, (bytes) => {
   saveable.value = editingBytes.value.length === bytesToEdit.value.length
@@ -52,7 +52,7 @@ async function onSubmit() {
   }
 
   // clone block bytes
-  const writeBlockData = Uint8Array.from(props.block.data);
+  const writeBlockData = Array.from(props.block.data);
 
   // modify clone with edited bytes
   editingBytes.value.forEach(
@@ -64,7 +64,10 @@ async function onSubmit() {
     data: writeBlockData,
   };
 
-  const request = WriteBlockWebMessage.from(newBlock, {
+  const request = WriteBlockWebMessage.from({
+    address: props.block.address,
+    data: Uint8Array.from(writeBlockData),
+  }, {
     type: props.block.sector.key.type,
     value: Uint8Array.from(props.block.sector.key.value),
   });
@@ -87,7 +90,7 @@ async function onSubmit() {
 
     const updatableBlock: UpdatablePiccBlock = {
       address: response.address,
-      data: response.data,
+      data: Array.from(response.data),
     };
 
     if (updatableBlock.address != newBlock.address) {

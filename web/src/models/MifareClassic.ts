@@ -110,12 +110,11 @@ export abstract class MifareClassicBlock implements PiccBlock {
   readonly type: MifareClassicBlockType;
   readonly sector: MifareClassicSector;
   readonly address: number;
+  private _data: number[];
   readonly accessBits: PiccBlockAccessBits;
   readonly blockGroups: MifareClassicBlockGroup[];
 
-  private _data: Uint8Array;
-
-  get data(): Uint8Array {
+  get data(): number[] {
     return this._data;
   }
 
@@ -151,7 +150,7 @@ export abstract class MifareClassicBlock implements PiccBlock {
       throw new Error('Invalid block data length');
     }
 
-    this._data = Uint8Array.from(block.data);
+    this._data = block.data;
 
     return this;
   }
@@ -164,7 +163,7 @@ class MifareClassicUndefinedBlock extends MifareClassicBlock {
       sector,
       {
         address,
-        data: new Uint8Array(0),
+        data: [],
         accessBits: { c1: 0, c2: 0, c3: 0 },
       },
       [
@@ -230,7 +229,7 @@ class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
     }
   }
 
-  private static checkAccessBitsIntegrityViolation(trailerData: Uint8Array): Boolean {
+  private static checkAccessBitsIntegrityViolation(trailerData: number[]): Boolean {
     const [c2_, c1_] = nibbles(trailerData[6]);
     const [c1, c3_] = nibbles(trailerData[7]);
     const [c3, c2] = nibbles(trailerData[8]);

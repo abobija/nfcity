@@ -40,24 +40,24 @@ export function randomHexStr(bytesLength: number): string {
   return hex(crypto.getRandomValues(new Uint8Array(bytesLength)), '');
 }
 
-// convert number to binary, and join groups of for bits with a separator
-// without tailing separator
-function num2bin(num: number, groupSeparator: string = '') {
-  const binary = num.toString(2).padStart(8, '0');
+export function bin(bytes: number | number[] | Uint8Array, separator: string = '', groupSeparator: string = '') {
+  const binNumber = (number: number) => {
+    const binary = number.toString(2).padStart(8, '0');
 
-  if (groupSeparator.length <= 0) {
-    return binary;
-  }
+    if (groupSeparator.length <= 0) {
+      return binary;
+    }
 
-  return binary.slice(0, 4) + groupSeparator + binary.slice(4);
-}
+    return binary.slice(0, 4) + groupSeparator + binary.slice(4);
+  };
 
-function arr2bin(arr: Uint8Array, groupSeparator: string = '') {
-  return Array.from(arr).map(el => num2bin(el, groupSeparator)).join(' ');
-}
-
-export function bin(bytes: number | Uint8Array, groupSeparator: string = '') {
-  return bytes instanceof Uint8Array ? arr2bin(bytes, groupSeparator) : num2bin(bytes, groupSeparator);
+  return (typeof bytes === 'number'
+    ? [bytes]
+    : bytes instanceof Uint8Array
+      ? Array.from(bytes)
+      : bytes)
+    .map(binNumber)
+    .join(separator);
 }
 
 export function randomBytes(length: number) {
