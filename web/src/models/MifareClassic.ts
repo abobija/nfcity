@@ -389,7 +389,7 @@ export class MifareClassicMemory implements PiccMemory {
   }
 
   offsetOfSector(sector: MifareClassicSector): number {
-    return this.sectors.indexOf(sector); // TODO: cache?
+    return this.sectors.indexOf(sector);
   }
 
   private static numberOfBlocksInSector(sectorOffset: number): number {
