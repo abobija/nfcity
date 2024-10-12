@@ -15,7 +15,7 @@ export function newClientInjection(): ClientInjection {
 
   watch(clientRef, (newClient, oldClient) => {
     logger.debug('client changed', 'from', oldClient, 'to', newClient);
-  });
+  }, { deep: false });
 
   return {
     client: shallowReadonly(clientRef),

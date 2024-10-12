@@ -115,7 +115,7 @@ watch(picc, (newPicc, oldPicc) => {
 
   memoryFocus.value = undefined;
   tByte.value = undefined;
-});
+}, { deep: false });
 
 onMounted(() => state.value = DashboardState.Initialized);
 
