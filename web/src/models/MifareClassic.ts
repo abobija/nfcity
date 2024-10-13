@@ -286,7 +286,7 @@ class MifareClassicManufacturerBlock extends MifareClassicBlock {
 }
 
 export class MifareClassicSector implements PiccSector {
-  key: PiccKey = defaultKey;
+  private _key: PiccKey = defaultKey;
 
   protected constructor(
     readonly memory: MifareClassicMemory,
@@ -294,6 +294,10 @@ export class MifareClassicSector implements PiccSector {
   ) {
     this.memory = memory;
     this.blocks = blocks;
+  }
+
+  get key(): PiccKey {
+    return this._key;
   }
 
   get block0Address() {
@@ -328,12 +332,14 @@ export class MifareClassicSector implements PiccSector {
     );
   }
 
+  authenticate(key: PiccKey): void {
+    this._key = key;
+  }
+
   updateWith(sector: UpdatablePiccSector): void {
     if (sector.blocks.length != this.numberOfBlocks) {
       throw new Error('Invalid number of blocks');
     }
-
-    this.key = sector.key;
 
     const trailer = MifareClassicSectorTrailerBlock.from(this,
       sector.blocks.at(-1)! // FIXME: !
@@ -358,6 +364,8 @@ export class MifareClassicSector implements PiccSector {
 
         this.blocks[offset] = MifareClassicDataBlock.from(this, { ...block, accessBits });
       });
+
+    this.authenticate(sector.key);
   }
 }
 
