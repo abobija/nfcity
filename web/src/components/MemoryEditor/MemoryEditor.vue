@@ -5,9 +5,10 @@ import WriteBlockWebMessage from "@/communication/messages/web/WriteBlockWebMess
 import useClient from "@/composables/useClient";
 import { MifareClassicBlock } from "@/models/MifareClassic";
 import { UpdatablePiccBlock } from "@/models/Picc";
-import { hex, isHex, overwriteArraySegment, removeWhitespace, unhexToArray } from "@/utils/helpers";
+import { overwriteArraySegment } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";
-import { computed, onMounted, ref, useTemplateRef, watch } from "vue";
+import { computed, ref, watch } from "vue";
+import BytesInput from "../BytesInput/BytesInput.vue";
 
 const props = defineProps<{
   block: MifareClassicBlock;
@@ -21,29 +22,17 @@ const emit = defineEmits<{
 }>();
 
 const logger = makeLogger('MemoryEditor');
+const { client } = useClient();
 const bytesToEdit = computed(() => props.block.data.slice(props.offset, props.offset + props.length));
 const editingBytes = ref(bytesToEdit.value);
-const maxlength = computed(() => bytesToEdit.value.length * 2);
-const value = ref<string>(hex(editingBytes.value));
-const field = useTemplateRef('field');
+const maxlength = computed(() => bytesToEdit.value.length);
 const saveable = ref(false);
-const { client } = useClient();
 const saving = ref(false);
-
-onMounted(() => field.value?.focus());
-
-watch(value, v => editingBytes.value = unhexToArray(removeWhitespace(v)));
 
 watch(editingBytes, (bytes) => {
   saveable.value = editingBytes.value.length === bytesToEdit.value.length
     && bytes.some((b, i) => b !== bytesToEdit.value[i]) === true;
 });
-
-function validateKey(e: KeyboardEvent) {
-  if (e.key.length !== 1 || !isHex(e.key)) {
-    e.preventDefault();
-  }
-}
 
 async function onSubmit() {
   if (!saveable.value) {
@@ -111,17 +100,14 @@ async function onSubmit() {
 
 <template>
   <div class="MemoryEditor">
-
     <form class="edit" @submit.prevent="onSubmit">
       <div class="form-group">
-        <textarea class="field" ref="field" v-model="value" @keypress="validateKey" :maxlength
-          spellcheck="false"></textarea>
+        <BytesInput v-model="editingBytes" :maxlength :autofocus="true" />
       </div>
       <div class="form-group">
         <button type="submit" class="btn primary" :disabled="!saveable || saving">save</button>
         <button type="button" class="btn secondary" @click="$emit('cancel')">cancel</button>
       </div>
     </form>
-
   </div>
 </template>
