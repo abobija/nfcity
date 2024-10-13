@@ -83,7 +83,7 @@ function onPaste(e: ClipboardEvent) {
     <textarea ref="bytesField" v-focus="autofocus === true" v-model="bytesFieldValue" spellcheck="false"
       :rows="multiline === true ? undefined : 1" :style="{
         resize: resizable === false ? 'none' : 'both',
-      }" @keydown="onKeyDown" @paste="onPaste"></textarea>
+      }" @keydown="onKeyDown" @paste="onPaste" name="bytes"></textarea>
   </div>
 </template>
 
