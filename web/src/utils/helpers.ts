@@ -1,3 +1,4 @@
+
 type MSB = number;
 type LSB = number;
 
@@ -21,12 +22,22 @@ export function hex(bytes: number | number[], separator: string = ''): string {
 }
 
 export function unhexToArray(str: string): number[] {
+  if (typeof str !== 'string') {
+    throw new Error('invalid input to unhexToArray');
+  }
+
+  str = removeWhitespace(str);
+
+  if (str.length <= 0) {
+    return [];
+  }
+
   if (!isHex(str)) {
     throw new Error('invalid hex string');
   }
 
   if (str.length % 2 !== 0) {
-    str = '0' + str;
+    str = str.slice(0, -1) + '0' + str.slice(-1);
   }
 
   return Array.from({ length: str.length / 2 }, (_, i) => parseInt(str.slice(i * 2, i * 2 + 2), 16));
