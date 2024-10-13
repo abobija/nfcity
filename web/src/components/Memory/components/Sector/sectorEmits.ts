@@ -1,5 +1,5 @@
+import SectorAuthFormShownEvent from "@Memory/components/Sector/events/SectorAuthFormShownEvent";
 import mitt from "mitt";
-import SectorAuthFormShownEvent from "./events/SectorAuthFormShownEvent";
 
 const sectorEmits = mitt<{
   sectorAuthFormShown: SectorAuthFormShownEvent;

@@ -9,14 +9,14 @@ import {
 } from "@/models/MifareClassic";
 import { keyTypeName, PiccKey } from "@/models/Picc";
 import Block from "@Memory/components/Block/Block.vue";
+import onSectorAuthFormShown from "@Memory/components/Sector/composables/onSectorAuthFormShown";
+import SectorAuthFormShownEvent from "@Memory/components/Sector/events/SectorAuthFormShownEvent";
 import AuthenticationFormSectorOverlay from "@Memory/components/Sector/overlays/AuthenticationFormSectorOverlay.vue";
 import AuthenticationInProgressSectorOverlay from "@Memory/components/Sector/overlays/AuthenticationInProgressSectorOverlay.vue";
 import LockedSectorOverlay from "@Memory/components/Sector/overlays/LockedSectorOverlay.vue";
+import sectorEmits from "@Memory/components/Sector/sectorEmits";
 import SectorFocus from "@Memory/components/Sector/SectorFocus";
 import { computed, ref, watch } from "vue";
-import onSectorAuthFormShown from "./composables/onSectorAuthFormShown";
-import SectorAuthFormShownEvent from "./events/SectorAuthFormShownEvent";
-import sectorEmits from "./sectorEmits";
 
 const enum SectorState {
   Locked,
