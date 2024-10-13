@@ -2,15 +2,15 @@
 import { isErrorDeviceMessage } from "@/communication/messages/device/ErrorDeviceMessage";
 import { isPiccSectorDeviceMessage } from "@/communication/messages/device/PiccSectorDeviceMessage";
 import ReadSectorWebMessage from "@/communication/messages/web/ReadSectorWebMessage";
-import AuthenticationFormSectorOverlay from "@/components/Memory/components/Sector/overlays/AuthenticationFormSectorOverlay.vue";
-import AuthenticationInProgressSectorOverlay from "@/components/Memory/components/Sector/overlays/AuthenticationInProgressSectorOverlay.vue";
-import LockedSectorOverlay from "@/components/Memory/components/Sector/overlays/LockedSectorOverlay.vue";
 import useClient from "@/composables/useClient";
 import {
   MifareClassicSector
 } from "@/models/MifareClassic";
 import { PiccKey } from "@/models/Picc";
 import Block from "@Memory/components/Block/Block.vue";
+import AuthenticationFormSectorOverlay from "@Memory/components/Sector/overlays/AuthenticationFormSectorOverlay.vue";
+import AuthenticationInProgressSectorOverlay from "@Memory/components/Sector/overlays/AuthenticationInProgressSectorOverlay.vue";
+import LockedSectorOverlay from "@Memory/components/Sector/overlays/LockedSectorOverlay.vue";
 import SectorFocus from "@Memory/components/Sector/SectorFocus";
 import { computed, ref } from "vue";
 
