@@ -209,6 +209,10 @@ onClientMessage(e => {
 });
 
 onByteMouseEnter(e => {
+  if (!e.group.block.loaded) {
+    return;
+  }
+
   if (tByte.value?.locked) {
     return;
   }
@@ -220,7 +224,11 @@ onByteMouseEnter(e => {
   };
 });
 
-onByteMouseLeave(() => {
+onByteMouseLeave((e) => {
+  if (!e.group.block.loaded) {
+    return;
+  }
+
   if (tByte.value?.locked) {
     return;
   }
@@ -229,6 +237,10 @@ onByteMouseLeave(() => {
 });
 
 onByteMouseClick(clickedByte => {
+  if (!clickedByte.group.block.loaded) {
+    return;
+  }
+
   if (!tByte.value) {
     return;
   }
