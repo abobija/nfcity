@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import '@/components/Memory/components/Byte/Byte.scss';
 import { MifareClassicBlockGroup } from "@/models/MifareClassic";
 import { hex } from "@/utils/helpers";
 import { computed } from "vue";
@@ -25,3 +24,42 @@ const classes = computed(() => ({
     {{ group.block.loaded ? hex(group.block.data[index]) : '..' }}
   </li>
 </template>
+
+<style lang="scss">
+@use 'sass:color';
+@import '@/theme.scss';
+
+.Byte {
+  cursor: pointer;
+  font-size: 0.8rem;
+  border-style: dashed;
+  border-width: 0px 1px 1px 0px;
+  border-color: color.adjust($color-bg, $lightness: +5%);
+  padding: 0.25rem;
+  transition: border-color .2s ease-in-out;
+
+  &.focused {
+    animation: byte-glows .5s infinite alternate;
+    z-index: 1;
+  }
+
+  &:hover,
+  &.focused {
+    background-color: color.adjust($color-bg, $lightness: +5%);
+    font-weight: 600;
+  }
+}
+
+@keyframes byte-glows {
+  $color: color.adjust($color-4, $lightness: -60%);
+
+  0%,
+  100% {
+    box-shadow: none;
+  }
+
+  50% {
+    box-shadow: 0 0 .6rem color.adjust($color, $lightness: +10%);
+  }
+}
+</style>

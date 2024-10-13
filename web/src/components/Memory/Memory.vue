@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import '@/components/Memory/Memory.scss';
 import MemoryFocus from "@/components/Memory/MemoryFocus";
 import Sector from "@/components/Memory/components/Sector/Sector.vue";
 import SectorState from "@/components/Memory/components/Sector/SectorState";
@@ -41,3 +40,10 @@ function changeSectorState(sectorOffset: number, state: SectorState) {
       @state-change="(newState) => changeSectorState(sectorOffset, newState)" />
   </div>
 </template>
+
+<style lang="scss">
+.Memory {
+  display: flex;
+  flex-direction: column-reverse;
+}
+</style>

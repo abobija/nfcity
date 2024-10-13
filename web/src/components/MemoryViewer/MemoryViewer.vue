@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import MemoryEditor from "@/components/MemoryEditor/MemoryEditor.vue";
-import '@/components/MemoryViewer/MemoryViewer.scss';
 import { MifareClassicBlock } from "@/models/MifareClassic";
 import { ascii, bin, hex, isAsciiPrintable } from "@/utils/helpers";
 import { computed, ref, watch } from "vue";
@@ -70,3 +69,27 @@ watch(
     </div>
   </div>
 </template>
+
+<style lang="scss">
+@use 'sass:color';
+@import '@/theme.scss';
+
+.MemoryViewer {
+  .toolbar {
+    display: flex;
+    justify-content: start;
+
+    &>.group:not(:first-child) {
+      margin-left: 1rem;
+    }
+  }
+
+  .bytes {
+    margin-top: .4rem;
+
+    .ascii.non-printable {
+      opacity: .3;
+    }
+  }
+}
+</style>

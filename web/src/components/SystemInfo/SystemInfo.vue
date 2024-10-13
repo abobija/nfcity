@@ -2,7 +2,6 @@
 import onClientPing from "@/communication/composables/onClientPing";
 import onClientPong from "@/communication/composables/onClientPong";
 import onClientPongMissed from "@/communication/composables/onClientPongMissed";
-import '@/components/SystemInfo/SystemInfo.scss';
 import useClient from "@/composables/useClient";
 import { ref } from "vue";
 
@@ -61,3 +60,50 @@ onClientPongMissed(() => {
     </div>
   </div>
 </template>
+
+<style lang="scss">
+@use 'sass:color';
+@import '@/theme.scss';
+
+.SystemInfo {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.6rem;
+  color: color.adjust($color-fg, $lightness: -40%);
+
+  >*:not(:first-child) {
+    margin-top: 0.2rem;
+  }
+
+  .ping {
+    display: flex;
+    justify-content: flex-end;
+
+    >*:not(:first-child):not(:last-child) {
+      margin: 0 0.3rem;
+    }
+
+    .status {
+      margin-left: 0.3rem;
+      display: inline-block;
+      line-height: 0.5rem;
+
+      &.undefined {
+        color: color.adjust($color-fg, $lightness: -40%);
+      }
+
+      &.pinged {
+        color: color.adjust($color-4, $lightness: -40%);
+      }
+
+      &.ponged {
+        color: $color-3;
+      }
+
+      &.miss {
+        color: color.adjust($color-5, $lightness: -20%);
+      }
+    }
+  }
+}
+</style>

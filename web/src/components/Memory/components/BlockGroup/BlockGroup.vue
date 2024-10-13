@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import '@/components/Memory/components/BlockGroup/BlockGroup.scss';
 import BlockGroupFocus from "@/components/Memory/components/BlockGroup/BlockGroupFocus";
 import {
   MifareClassicBlockGroup,
@@ -56,3 +55,17 @@ const classes = computed(() => {
       :focus="focus?.byteFocus" />
   </ul>
 </template>
+
+<style lang="scss">
+@use 'sass:color';
+@import '@/theme.scss';
+
+.BlockGroup {
+  display: flex;
+  flex-direction: row;
+
+  &:hover {
+    background-color: color.adjust($color-bg, $lightness: +1%);
+  }
+}
+</style>

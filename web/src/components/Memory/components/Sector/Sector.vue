@@ -2,7 +2,6 @@
 import { isErrorDeviceMessage } from "@/communication/messages/device/ErrorDeviceMessage";
 import { isPiccSectorDeviceMessage } from "@/communication/messages/device/PiccSectorDeviceMessage";
 import ReadSectorWebMessage from "@/communication/messages/web/ReadSectorWebMessage";
-import '@/components/Memory/components/Sector/Sector.scss';
 import SectorFocus from "@/components/Memory/components/Sector/SectorFocus";
 import SectorState from "@/components/Memory/components/Sector/SectorState";
 import useClient from "@/composables/useClient";
@@ -90,3 +89,97 @@ onUpdated(() => {
     </div>
   </div>
 </template>
+
+<style lang="scss">
+@use 'sass:color';
+@import '@/theme.scss';
+
+$transition: .3s ease-in-out;
+
+.Sector {
+  display: flex;
+  flex-direction: row;
+  justify-content: right;
+
+  >.meta {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: $color-4;
+    transition: color $transition;
+
+    .offset {
+      padding-right: 0.3rem;
+    }
+  }
+
+  >.blocks {
+    position: relative;
+    display: flex;
+    flex-direction: column-reverse;
+    border-style: solid;
+    border-color: rgba($color-fg, .2);
+    border-width: 2px 1px 1px 1px;
+    transition: border $transition, box-shadow $transition;
+  }
+
+  &:hover,
+  &.focused {
+    >.meta {
+      color: $color-fg;
+    }
+
+    >.blocks {
+      border-color: rgba($color-fg, .6) !important;
+      box-shadow: 0 0 1rem rgba($color-fg, .1);
+    }
+  }
+}
+
+.Sector:not(.empty) {
+  .Byte {
+    border-style: solid;
+  }
+
+  &:hover {
+    .Byte {
+      border-color: color.adjust($color-bg, $lightness: +12%);
+    }
+  }
+}
+
+.SectorOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.8rem;
+
+  &.v-enter-active {
+    animation: sector-overlay-in .2s;
+  }
+
+  &.v-leave-active {
+    animation: sector-overlay-in .1s reverse;
+  }
+
+  @keyframes sector-overlay-in {
+    0% {
+      opacity: 0;
+      transform: scale(.8);
+    }
+
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+}
+</style>

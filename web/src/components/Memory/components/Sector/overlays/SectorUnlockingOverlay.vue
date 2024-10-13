@@ -1,5 +1,5 @@
 <template>
-  <div class="memory-sector-overlay unlocking component">
+  <div class="SectorOverlay SectorUnlockingOverlay">
     Unlocking...
   </div>
 </template>

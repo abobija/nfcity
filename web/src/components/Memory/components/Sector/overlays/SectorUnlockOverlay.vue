@@ -29,7 +29,7 @@ function onSubmit() {
 </script>
 
 <template>
-  <div class="memory-sector-overlay unlock component">
+  <div class="SectorOverlay SectorUnlockOverlay">
     <form class="form" @submit.prevent="onSubmit">
       <div class="row key">
         <label for="key-a" title="Use key A">
@@ -45,3 +45,33 @@ function onSubmit() {
     </form>
   </div>
 </template>
+
+<style lang="scss">
+@use 'sass:color';
+@import '@/theme.scss';
+
+.SectorUnlockOverlay {
+  form {
+
+    label,
+    input,
+    button,
+    textarea {
+      font-size: 0.7rem;
+    }
+
+    textarea,
+    button {
+      padding: 0.4rem 0.5rem;
+    }
+
+    textarea {
+      width: 6rem;
+    }
+
+    button {
+      margin-left: 0.5rem;
+    }
+  }
+}
+</style>
