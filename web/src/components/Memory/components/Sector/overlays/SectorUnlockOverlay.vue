@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import BytesInput from "@/components/BytesInput/BytesInput.vue";
 import { keySize, MifareClassicSector } from "@/models/MifareClassic";
 import { keyA, keyB, KeyType, PiccKey } from "@/models/Picc";
 import { computed, ref } from "vue";
+import BytesInput from "../../BytesInput/BytesInput.vue";
 
 const props = defineProps<{
   sector: MifareClassicSector;
