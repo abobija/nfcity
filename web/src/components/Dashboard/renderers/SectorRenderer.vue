@@ -1,13 +1,10 @@
 <script setup lang="ts">
 import { MifareClassicSector } from "@/models/MifareClassic";
 import { keyTypeName } from "@/models/Picc";
-import { computed } from "vue";
 
-const props = defineProps<{
+defineProps<{
   sector: MifareClassicSector;
 }>();
-
-const sectorOffset = computed(() => props.sector.memory.offsetOfSector(props.sector));
 </script>
 
 <template>
@@ -18,7 +15,7 @@ const sectorOffset = computed(() => props.sector.memory.offsetOfSector(props.sec
     <ul class="props">
       <li class="prop">
         <div class="name">Offset</div>
-        <div class="value">{{ sectorOffset }}</div>
+        <div class="value">{{ sector.offset }}</div>
       </li>
       <li class="prop" v-if="sector.key">
         <div class="name">Key</div>

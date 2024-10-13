@@ -29,11 +29,11 @@ function onSubmit() {
   <div class="AuthenticationFormSectorOverlay">
     <form class="form" @submit.prevent="onSubmit">
       <div class="row key">
-        <label for="key-a" title="Use key A">
-          <input type="radio" name="key" :value="keyA" id="key-a" v-model="keyType" /> A
+        <label :for="`keya-s${sector.offset}`" title="Use key A">
+          <input type="radio" name="keya" :id="`keya-s${sector.offset}`" :value="keyA" v-model="keyType" /> A
         </label>
-        <label for="key-b" title="Use key B">
-          <input type="radio" name="key" :value="keyB" id="key-b" v-model="keyType" /> B
+        <label :for="`keyb-s${sector.offset}`" title="Use key B">
+          <input type="radio" name="keyb" :id="`keyb-s${sector.offset}`" :value="keyB" v-model="keyType" /> B
         </label>
         <BytesInput v-model="keyValue" :maxlength="keySize" autofocus />
         <button class="primary" type="submit" :disabled="!unlockable">Unlock</button>

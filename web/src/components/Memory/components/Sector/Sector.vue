@@ -30,7 +30,6 @@ const props = defineProps<{
 const { client } = useClient();
 const state = ref<SectorState>(SectorState.Locked);
 const key = ref(props.sector.key || defaultKey);
-const sectorOffset = computed(() => props.sector.memory.offsetOfSector(props.sector));
 const classes = computed(() => ({
   focused: props.focus?.sector === props.sector,
   empty: props.sector.isEmpty,
@@ -41,7 +40,7 @@ watch(key, newKey => authenticateAndLoadSector(newKey));
 async function authenticateAndLoadSector(key: PiccKey) {
   try {
     state.value = SectorState.AuthenticationInProgress;
-    const msg = await client.value.transceive(ReadSectorWebMessage.from(sectorOffset.value, {
+    const msg = await client.value.transceive(ReadSectorWebMessage.from(props.sector.offset, {
       type: key.type,
       value: Uint8Array.from(key.value),
     }));
@@ -72,7 +71,7 @@ async function authenticateAndLoadSector(key: PiccKey) {
   <div class="Sector" :class="classes">
     <div class="meta">
       <span class="offset" title="Sector offset">
-        {{ sectorOffset }}
+        {{ sector.offset }}
       </span>
       <span v-if="sector.key" title="Authentication key type">
         {{ keyTypeName(sector.key.type) }}

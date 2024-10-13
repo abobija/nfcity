@@ -287,6 +287,7 @@ class MifareClassicManufacturerBlock extends MifareClassicBlock {
 
 export class MifareClassicSector implements PiccSector {
   private _key?: PiccKey;
+  private _offset?: number;
 
   protected constructor(
     readonly memory: MifareClassicMemory,
@@ -298,6 +299,10 @@ export class MifareClassicSector implements PiccSector {
 
   get key(): PiccKey | undefined {
     return this._key;
+  }
+
+  get offset() {
+    return this._offset ?? (this._offset = this.memory.offsetOfSector(this));
   }
 
   get block0Address() {
