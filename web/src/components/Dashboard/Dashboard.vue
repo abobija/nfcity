@@ -109,9 +109,7 @@ watch(state, async (newState, oldState) => {
 });
 
 watch(picc, (newPicc, oldPicc) => {
-  if (newPicc && oldPicc && newPicc.hasUidOf(oldPicc)) {
-    return;
-  }
+  logger.debug('picc changed', 'from', oldPicc, 'to', newPicc);
 
   memoryFocus.value = undefined;
   tByte.value = undefined;
@@ -185,7 +183,7 @@ onClientMessage(e => {
     return;
   }
 
-  if (picc.value === undefined || !picc.value.hasUidOf(piccDto)) {
+  if (picc.value === undefined || (picc.value.id !== MifareClassic.calculateId(piccDto))) {
     picc.value = MifareClassic.fromDto(piccDto);
   } else { // Same card
     picc.value.state = piccDto.state;
@@ -276,7 +274,7 @@ onByteMouseClick(clickedByte => {
 
     <main v-if="picc">
       <div class="header">
-        <div class="picc">
+        <div class="picc" :key="picc.id">
           <div class="general">
             <h1 class="type">{{ PiccType[picc.type] }}</h1>
             <ul class="metas">
@@ -301,7 +299,7 @@ onByteMouseClick(clickedByte => {
         </div>
       </div>
 
-      <div class="main">
+      <div class="main" :key="picc.id">
         <div class="section memory">
           <Memory :memory="picc.memory as MifareClassicMemory" :focus="memoryFocus as MemoryFocus | undefined" />
         </div>

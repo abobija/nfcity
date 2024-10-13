@@ -11,7 +11,7 @@ import Picc, {
   UpdatablePiccSector,
   keyA
 } from "@/models/Picc";
-import { arraysAreEqual, nibbles, unhexToArray } from "@/utils/helpers";
+import { hex, nibbles, unhexToArray } from "@/utils/helpers";
 
 export const keySize = 6;
 
@@ -459,6 +459,7 @@ export class MifareClassicMemory implements PiccMemory {
 }
 
 export default class MifareClassic implements Picc {
+  private _id: string;
   readonly type: PiccType;
   private _state: PiccState;
   readonly atqa: number;
@@ -473,7 +474,12 @@ export default class MifareClassic implements Picc {
     this.sak = picc.sak;
     this.uid = picc.uid;
     this.memory = MifareClassicMemory.from(this, picc.type);
+    this._id = MifareClassic.calculateId(this);
   }
+
+  get id(): string {
+    return this._id;
+  };
 
   get state(): PiccState {
     return this._state;
@@ -494,8 +500,14 @@ export default class MifareClassic implements Picc {
     });
   }
 
-  hasUidOf(picc: Picc | PiccDto): boolean {
-    return arraysAreEqual(this.uid, picc.uid);
+  static calculateId(picc: Picc | PiccDto): string {
+    return hex(Math.abs(0
+      ^ 0xABCDEF
+      ^ ([...picc.uid].reduce((acc, byte) => acc ^ byte, 0x00) << (8 * 2))
+      ^ picc.atqa
+      ^ (picc.type.valueOf() << 8)
+      ^ picc.sak
+    )).toLowerCase();
   }
 
   static isMifareClassic(picc: Picc | PiccDto): boolean {
