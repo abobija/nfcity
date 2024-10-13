@@ -131,7 +131,7 @@ export abstract class MifareClassicBlock implements PiccBlock {
   }
 
   get loaded(): Boolean {
-    return this.data.length == MifareClassicBlock.size;
+    return this.data.length === MifareClassicBlock.size;
   }
 
   hasSameAddressAs(that: MifareClassicBlock): boolean {
