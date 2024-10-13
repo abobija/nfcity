@@ -1,5 +1,5 @@
 <template>
-  <div class="LockedSectorOverlay">
+  <div class="LockedSectorOverlay unselectable">
     <p>This sector has not been loaded</p>
     <p>Click to unlock</p>
   </div>

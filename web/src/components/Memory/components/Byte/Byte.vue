@@ -18,7 +18,8 @@ const classes = computed(() => ({
 </script>
 
 <template>
-  <li class="Byte" :class="classes" :data-index="index" @mouseenter="byteEmits.emit('mouseEnter', { index, group })"
+  <li class="Byte unselectable" :class="classes" :data-index="index"
+    @mouseenter="byteEmits.emit('mouseEnter', { index, group })"
     @mouseleave="byteEmits.emit('mouseLeave', { index, group })"
     @click="byteEmits.emit('mouseClick', { index, group })">
     {{ group.block.loaded ? hex(group.block.data[index]) : '..' }}
