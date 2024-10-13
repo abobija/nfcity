@@ -1,7 +1,3 @@
-
-type MSB = number;
-type LSB = number;
-
 export function isHex(str: string): boolean {
   return /^[0-9A-Fa-f]*$/.test(str);
 }
@@ -77,7 +73,7 @@ export function ascii(bytes: number | number[], separator: string = ''): string 
     .join(separator);
 }
 
-export function nibbles(byte: number): [MSB, LSB] {
+export function nibbles(byte: number): [msb: number, lsb: number] {
   return [byte >> 4, byte & 0x0F];
 }
 
