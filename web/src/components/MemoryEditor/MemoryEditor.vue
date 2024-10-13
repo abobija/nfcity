@@ -102,7 +102,7 @@ async function onSubmit() {
   <div class="MemoryEditor">
     <form class="edit" @submit.prevent="onSubmit">
       <div class="form-group">
-        <BytesInput v-model="editingBytes" :maxlength :autofocus="true" />
+        <BytesInput v-model="editingBytes" :maxlength autofocus />
       </div>
       <div class="form-group">
         <button type="submit" class="btn primary" :disabled="!saveable || saving">save</button>
