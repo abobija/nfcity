@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ClientValidator } from "@/communication/Client";
-import '@/components/ClientConfig/ClientConfig.scss';
 import { ClientStorage, validateClientStorage, ValidClientStorage } from "@/composables/useClientStorage";
+import vFocus from "@/directives/vFocus";
 import { cloneObject } from "@/utils/helpers";
 import { logd } from "@/utils/Logger";
-import { onMounted, ref, useTemplateRef } from "vue";
+import { ref, useTemplateRef } from "vue";
 
 const props = defineProps<{
   clientStorage: ClientStorage;
@@ -19,10 +19,6 @@ const emits = defineEmits<{
 const localClientStorage = ref(cloneObject(props.clientStorage));
 const brokerUrlRef = useTemplateRef('broker-url');
 const rootTopicRef = useTemplateRef('root-topic');
-
-onMounted(() => {
-  rootTopicRef.value?.focus();
-});
 
 function onSubmit() {
   const errors = validateClientStorage(localClientStorage.value);
@@ -54,7 +50,7 @@ function onSubmit() {
           spellcheck="false" required name="brokerUrl" />
       </div>
       <div class="form-group">
-        <input type="text" placeholder="Root Topic" v-model.trim="localClientStorage.rootTopic" ref="root-topic"
+        <input v-focus type="text" placeholder="Root Topic" v-model.trim="localClientStorage.rootTopic" ref="root-topic"
           spellcheck="false" :maxlength="ClientValidator.RootTopicLength" required name="rootTopic" />
       </div>
       <div class="form-group">
@@ -64,3 +60,22 @@ function onSubmit() {
     </form>
   </div>
 </template>
+
+<style lang="scss">
+.ClientConfig {
+  form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    input[type="text"] {
+      font-size: .8rem;
+      width: 16rem;
+    }
+
+    button[type="submit"] {
+      margin-top: 1rem;
+    }
+  }
+}
+</style>
