@@ -96,16 +96,17 @@ $transition: .3s ease-in-out;
 
     label,
     input,
-    button {
+    button,
+    textarea {
       font-size: 0.7rem;
     }
 
-    input[type=text],
+    textarea,
     button {
       padding: 0.4rem 0.5rem;
     }
 
-    input[type=text] {
+    textarea {
       width: 6rem;
     }
 

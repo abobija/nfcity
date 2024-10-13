@@ -13,6 +13,8 @@ import Picc, {
 } from "@/models/Picc";
 import { arraysAreEqual, nibbles, unhexToArray } from "@/utils/helpers";
 
+export const keySize = 6;
+
 const defaultKey: PiccKey = {
   type: keyA,
   value: unhexToArray('FFFFFFFFFFFF'),

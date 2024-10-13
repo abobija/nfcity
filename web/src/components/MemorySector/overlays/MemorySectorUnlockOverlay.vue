@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { MifareClassicSector } from "@/models/MifareClassic";
+import BytesInput from "@/components/BytesInput/BytesInput.vue";
+import { keySize, MifareClassicSector } from "@/models/MifareClassic";
 import { keyA, keyB, KeyType, PiccKey } from "@/models/Picc";
-import { hex, isHex, unhexToArray } from "@/utils/helpers";
-import { loge } from "@/utils/Logger";
-import { onMounted, ref, useTemplateRef } from "vue";
+import { computed, ref } from "vue";
 
 const props = defineProps<{
   sector: MifareClassicSector;
@@ -16,31 +15,17 @@ const emit = defineEmits<{
 }>();
 
 const keyType = ref<KeyType>(props.piccKey.type);
-const keyInput = useTemplateRef('key-input');
-const keyValue = ref<string>(hex(props.piccKey.value));
+const keyValue = ref(Array.from(props.piccKey.value));
+const unlockable = computed(() => keyValue.value.length === keySize);
 
 function onSubmit() {
-  if (keyValue.value.length != 12) {
-    loge('Key must be 6 bytes (12 characters)');
-    return;
-  }
-
-  if (!isHex(keyValue.value)) {
-    loge('Key must be a valid hex string');
-    return;
-  }
-
-  const piccKey: PiccKey = {
+  const key: PiccKey = {
     type: keyType.value == keyA ? keyA : keyB,
-    value: unhexToArray(keyValue.value),
+    value: keyValue.value,
   };
 
-  emit('unlock', piccKey);
+  emit('unlock', key);
 }
-
-onMounted(() => {
-  keyInput.value?.focus();
-});
 </script>
 
 <template>
@@ -53,9 +38,8 @@ onMounted(() => {
         <label for="key-b" title="Use key B">
           <input type="radio" name="key" :value="keyB" id="key-b" v-model="keyType" /> B
         </label>
-        <input type="text" placeholder="Key (hex)" v-model.trim="keyValue" ref="key-input" title="Key (hex)"
-          spellcheck="false" />
-        <button class="primary" type="submit">Unlock</button>
+        <BytesInput v-model="keyValue" :maxlength="keySize" autofocus />
+        <button class="primary" type="submit" :disabled="!unlockable">Unlock</button>
         <button class="secondary" @click.prevent="$emit('cancel')" type="button">Cancel</button>
       </div>
     </form>
