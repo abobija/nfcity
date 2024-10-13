@@ -1,3 +1,4 @@
+import Dto from "@/communication/Dto";
 import PiccKeyDto from "@/communication/dtos/PiccKeyDto";
 
 export type WebMessageKind =
@@ -15,11 +16,11 @@ export type DeviceMessageKind =
   | 'picc_state_changed'
   | 'error';
 
-interface Message { }
-
 type WebMessageId = string;
 
-export interface DeviceMessageContext {
+interface Message extends Dto { }
+
+export interface DeviceMessageContext extends Dto {
   readonly $id: WebMessageId;
 }
 
