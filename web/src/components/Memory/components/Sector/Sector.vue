@@ -14,6 +14,9 @@ import AuthenticationInProgressSectorOverlay from "@Memory/components/Sector/ove
 import LockedSectorOverlay from "@Memory/components/Sector/overlays/LockedSectorOverlay.vue";
 import SectorFocus from "@Memory/components/Sector/SectorFocus";
 import { computed, ref, watch } from "vue";
+import onSectorAuthFormShown from "./composables/onSectorAuthFormShown";
+import SectorAuthFormShownEvent from "./events/SectorAuthFormShownEvent";
+import sectorEmits from "./sectorEmits";
 
 const enum SectorState {
   Locked,
@@ -34,6 +37,21 @@ const classes = computed(() => ({
   focused: props.focus?.sector === props.sector,
   empty: props.sector.isEmpty,
 }));
+
+watch(state, newState => {
+  if (newState === SectorState.AuthenticationForm) {
+    sectorEmits.emit(
+      'sectorAuthFormShown',
+      new SectorAuthFormShownEvent(props.sector)
+    );
+  }
+});
+
+onSectorAuthFormShown(e => {
+  if (e.sector !== props.sector && state.value === SectorState.AuthenticationForm) {
+    state.value = SectorState.Locked;
+  }
+});
 
 watch(key, newKey => authenticateAndLoadSector(newKey));
 
