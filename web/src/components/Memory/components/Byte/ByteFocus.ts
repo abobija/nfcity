@@ -1,6 +1,6 @@
 import { MifareClassicBlockGroup } from "@/models/MifareClassic";
 
-export default class MemoryByteFocus {
+export default class ByteFocus {
   readonly group: MifareClassicBlockGroup;
   readonly index: number; // Index withing the block
 
@@ -9,7 +9,7 @@ export default class MemoryByteFocus {
     this.index = index;
   }
 
-  static from(group: MifareClassicBlockGroup, index: number): MemoryByteFocus {
-    return new MemoryByteFocus(group, index);
+  static from(group: MifareClassicBlockGroup, index: number): ByteFocus {
+    return new ByteFocus(group, index);
   }
 }

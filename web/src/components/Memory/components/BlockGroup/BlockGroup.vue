@@ -1,17 +1,16 @@
 <script setup lang="ts">
-import '@/components/MemoryBlock/MemoryBlock.scss';
-import '@/components/MemoryBlockGroup/MemoryBlockGroup.scss';
-import MemoryBlockGroupFocus from "@/components/MemoryBlockGroup/MemoryBlockGroupFocus";
-import MemoryByte from "@/components/MemoryByte/MemoryByte.vue";
+import '@/components/Memory/components/BlockGroup/BlockGroup.scss';
+import BlockGroupFocus from "@/components/Memory/components/BlockGroup/BlockGroupFocus";
 import {
   MifareClassicBlockGroup,
   MifareClassicBlockGroupType
 } from "@/models/MifareClassic";
 import { computed } from "vue";
+import Byte from '../Byte/Byte.vue';
 
 const props = defineProps<{
   group: MifareClassicBlockGroup;
-  focus?: MemoryBlockGroupFocus;
+  focus?: BlockGroupFocus;
 }>();
 
 const groupClass: Map<MifareClassicBlockGroupType, string> = new Map([
@@ -52,8 +51,8 @@ const classes = computed(() => {
 </script>
 
 <template>
-  <ul class="MemoryBlockGroup" :class="classes">
-    <MemoryByte :group="group" :index="group.offset + index" v-for="(_, index) in Array.from({ length: group.length })"
+  <ul class="BlockGroup" :class="classes">
+    <Byte :group="group" :index="group.offset + index" v-for="(_, index) in Array.from({ length: group.length })"
       :focus="focus?.byteFocus" />
   </ul>
 </template>

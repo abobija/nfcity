@@ -13,11 +13,11 @@ import ByteRenderer from "@/components/Dashboard/renderers/ByteRenderer.vue";
 import GroupRenderer from "@/components/Dashboard/renderers/GroupRenderer.vue";
 import SectorRenderer from "@/components/Dashboard/renderers/SectorRenderer.vue";
 import TargetByte from "@/components/Dashboard/TargetByte";
+import onByteMouseClick from "@/components/Memory/components/Byte/composables/onByteMouseClick";
+import onByteMouseEnter from "@/components/Memory/components/Byte/composables/onByteMouseEnter";
+import onByteMouseLeave from "@/components/Memory/components/Byte/composables/onByteMouseLeave";
 import Memory from "@/components/Memory/Memory.vue";
 import MemoryFocus from "@/components/Memory/MemoryFocus";
-import onMemoryByteMouseClick from "@/components/MemoryByte/composables/onMemoryByteMouseClick";
-import onMemoryByteMouseEnter from "@/components/MemoryByte/composables/onMemoryByteMouseEnter";
-import onMemoryByteMouseLeave from "@/components/MemoryByte/composables/onMemoryByteMouseLeave";
 import SystemInfo from "@/components/SystemInfo/SystemInfo.vue";
 import useClient from "@/composables/useClient";
 import MifareClassic, {
@@ -208,7 +208,7 @@ onClientMessage(e => {
   }
 });
 
-onMemoryByteMouseEnter(e => {
+onByteMouseEnter(e => {
   if (tByte.value?.locked) {
     return;
   }
@@ -220,7 +220,7 @@ onMemoryByteMouseEnter(e => {
   };
 });
 
-onMemoryByteMouseLeave(() => {
+onByteMouseLeave(() => {
   if (tByte.value?.locked) {
     return;
   }
@@ -228,7 +228,7 @@ onMemoryByteMouseLeave(() => {
   tByte.value = undefined;
 });
 
-onMemoryByteMouseClick(clickedByte => {
+onByteMouseClick(clickedByte => {
   if (!tByte.value) {
     return;
   }

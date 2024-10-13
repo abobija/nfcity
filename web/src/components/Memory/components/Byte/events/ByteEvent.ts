@@ -1,6 +1,6 @@
 import { MifareClassicBlockGroup } from "@/models/MifareClassic";
 
-export default class MemoryByteEvent {
+export default class ByteEvent {
   readonly index: number;
   readonly group: MifareClassicBlockGroup;
 
@@ -9,7 +9,7 @@ export default class MemoryByteEvent {
     this.group = group;
   }
 
-  static from(index: number, group: MifareClassicBlockGroup): MemoryByteEvent {
-    return new MemoryByteEvent(index, group);
+  static from(index: number, group: MifareClassicBlockGroup): ByteEvent {
+    return new ByteEvent(index, group);
   }
 }

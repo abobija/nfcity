@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import '@/components/Memory/Memory.scss';
 import MemoryFocus from "@/components/Memory/MemoryFocus";
-import MemorySector from "@/components/MemorySector/MemorySector.vue";
-import MemorySectorState from "@/components/MemorySector/MemorySectorState";
+import Sector from "@/components/Memory/components/Sector/Sector.vue";
+import SectorState from "@/components/Memory/components/Sector/SectorState";
 import { MifareClassicMemory } from "@/models/MifareClassic";
 import { computed, ref } from "vue";
 
@@ -15,18 +15,18 @@ const classes = computed(() => ({
   focused: focus !== undefined,
 }));
 
-const sectorStates = ref<Map<number, MemorySectorState>>(new Map());
+const sectorStates = ref<Map<number, SectorState>>(new Map());
 
-function sectorState(sectorOffset: number): MemorySectorState {
+function sectorState(sectorOffset: number): SectorState {
   return !props.memory.sectorAtOffset(sectorOffset).isEmpty
-    ? MemorySectorState.UnlockedAndLoaded
-    : sectorStates.value.get(sectorOffset) ?? MemorySectorState.Empty;
+    ? SectorState.UnlockedAndLoaded
+    : sectorStates.value.get(sectorOffset) ?? SectorState.Empty;
 }
 
-function changeSectorState(sectorOffset: number, state: MemorySectorState) {
+function changeSectorState(sectorOffset: number, state: SectorState) {
   for (const [offset, s] of sectorStates.value) {
-    if (s === MemorySectorState.Unlock) {
-      sectorStates.value.set(offset, MemorySectorState.Empty);
+    if (s === SectorState.Unlock) {
+      sectorStates.value.set(offset, SectorState.Empty);
     }
   }
 
@@ -36,7 +36,7 @@ function changeSectorState(sectorOffset: number, state: MemorySectorState) {
 
 <template>
   <div class="Memory" :class="classes">
-    <MemorySector v-for="(sector, sectorOffset) in memory.sectors" :key="sectorOffset" :sector
+    <Sector v-for="(sector, sectorOffset) in memory.sectors" :key="sectorOffset" :sector
       :state="sectorState(sectorOffset)" :focus="focus?.sectorFocus"
       @state-change="(newState) => changeSectorState(sectorOffset, newState)" />
   </div>

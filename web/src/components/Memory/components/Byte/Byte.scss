@@ -1,7 +1,7 @@
 @use 'sass:color';
 @import '@/theme.scss';
 
-.MemoryByte {
+.Byte {
   cursor: pointer;
   font-size: 0.8rem;
   border-style: dashed;
@@ -10,19 +10,19 @@
   transition: border-color .2s ease-in-out;
 }
 
-.MemorySector:not(.empty) {
-  .MemoryByte {
+.Sector:not(.empty) {
+  .Byte {
     border-style: solid;
   }
 
   &:hover {
-    .MemoryByte {
+    .Byte {
       border-color: color.adjust($color-bg, $lightness: +12%);
     }
   }
 }
 
-.MemoryByte {
+.Byte {
   border-color: color.adjust($color-bg, $lightness: +5%);
 
   &.focused {

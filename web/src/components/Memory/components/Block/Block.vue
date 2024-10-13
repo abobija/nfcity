@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import '@/components/MemoryBlock/MemoryBlock.scss';
-import MemoryBlockFocus from "@/components/MemoryBlock/MemoryBlockFocus";
-import MemoryBlockGroup from "@/components/MemoryBlockGroup/MemoryBlockGroup.vue";
+import '@/components/Memory/components/Block/Block.scss';
+import BlockFocus from "@/components/Memory/components/Block/BlockFocus";
+import BlockGroup from "@/components/Memory/components/BlockGroup/BlockGroup.vue";
 import {
   MifareClassicBlock,
   MifareClassicBlockType
@@ -10,7 +10,7 @@ import { computed } from "vue";
 
 const props = defineProps<{
   block: MifareClassicBlock;
-  focus?: MemoryBlockFocus;
+  focus?: BlockFocus;
 }>();
 
 const classes = computed(() => ({
@@ -25,7 +25,7 @@ const classes = computed(() => ({
 </script>
 
 <template>
-  <div class="MemoryBlock" :class="classes">
-    <MemoryBlockGroup :group="group" v-for="group in block.blockGroups" :focus="focus?.groupFocus" />
+  <div class="Block" :class="classes">
+    <BlockGroup :group="group" v-for="group in block.blockGroups" :focus="focus?.groupFocus" />
   </div>
 </template>

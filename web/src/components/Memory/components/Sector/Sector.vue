@@ -2,28 +2,28 @@
 import { isErrorDeviceMessage } from "@/communication/messages/device/ErrorDeviceMessage";
 import { isPiccSectorDeviceMessage } from "@/communication/messages/device/PiccSectorDeviceMessage";
 import ReadSectorWebMessage from "@/communication/messages/web/ReadSectorWebMessage";
-import MemoryBlock from "@/components/MemoryBlock/MemoryBlock.vue";
-import '@/components/MemorySector/MemorySector.scss';
-import MemorySectorFocus from "@/components/MemorySector/MemorySectorFocus";
-import MemorySectorState from "@/components/MemorySector/MemorySectorState";
-import MemorySectorEmptyOverlay from "@/components/MemorySector/overlays/MemorySectorEmptyOverlay.vue";
-import MemorySectorUnlockOverlay from "@/components/MemorySector/overlays/MemorySectorUnlockOverlay.vue";
-import MemorySectorUnlockingOverlay from "@/components/MemorySector/overlays/MemorySectorUnlockingOverlay.vue";
+import '@/components/Memory/components/Sector/Sector.scss';
+import SectorFocus from "@/components/Memory/components/Sector/SectorFocus";
+import SectorState from "@/components/Memory/components/Sector/SectorState";
 import useClient from "@/composables/useClient";
 import {
   MifareClassicSector
 } from "@/models/MifareClassic";
 import { PiccKey } from "@/models/Picc";
 import { computed, onUpdated, ref } from "vue";
+import Block from "../Block/Block.vue";
+import SectorEmptyOverlay from "./overlays/SectorEmptyOverlay.vue";
+import SectorUnlockOverlay from "./overlays/SectorUnlockOverlay.vue";
+import SectorUnlockingOverlay from "./overlays/SectorUnlockingOverlay.vue";
 
 const props = defineProps<{
   sector: MifareClassicSector;
-  state: MemorySectorState;
-  focus?: MemorySectorFocus;
+  state: SectorState;
+  focus?: SectorFocus;
 }>();
 
 const emit = defineEmits<{
-  (e: 'stateChange', state: MemorySectorState): void;
+  (e: 'stateChange', state: SectorState): void;
 }>();
 
 const classes = computed(() => ({
@@ -39,7 +39,7 @@ async function unlockAndLoadSector(key: PiccKey) {
   piccKey.value = key;
 
   try {
-    emit('stateChange', MemorySectorState.Unlocking);
+    emit('stateChange', SectorState.Unlocking);
     const msg = await client.value.transceive(ReadSectorWebMessage.from(sectorOffset.value, {
       type: key.type,
       value: Uint8Array.from(key.value),
@@ -53,40 +53,39 @@ async function unlockAndLoadSector(key: PiccKey) {
           data: Array.from(b.data),
         })),
       });
-      emit('stateChange', MemorySectorState.UnlockedAndLoaded);
+      emit('stateChange', SectorState.UnlockedAndLoaded);
       return;
     }
 
     if (isErrorDeviceMessage(msg)) {
-      emit('stateChange', MemorySectorState.Unlock);
+      emit('stateChange', SectorState.Unlock);
       return;
     }
   } catch (e) {
-    emit('stateChange', MemorySectorState.Unlock);
+    emit('stateChange', SectorState.Unlock);
   }
 }
 
 onUpdated(() => {
-  if (props.state == MemorySectorState.Empty) {
+  if (props.state == SectorState.Empty) {
     piccKey.value = props.sector.key;
   }
 });
 </script>
 
 <template>
-  <div class="MemorySector" :class="classes">
+  <div class="Sector" :class="classes">
     <div class="meta">
       <span class="offset">{{ sectorOffset }}</span>
     </div>
     <div class="blocks">
-      <MemoryBlock :block v-for="block in sector.blocks" :key="block.address" :focus="focus?.blockFocus" />
+      <Block :block v-for="block in sector.blocks" :key="block.address" :focus="focus?.blockFocus" />
 
       <Transition>
-        <MemorySectorEmptyOverlay v-if="state == MemorySectorState.Empty"
-          @click="$emit('stateChange', MemorySectorState.Unlock)" />
-        <MemorySectorUnlockOverlay :piccKey :sector v-else-if="state == MemorySectorState.Unlock"
-          @unlock="unlockAndLoadSector" @cancel="$emit('stateChange', MemorySectorState.Empty)" />
-        <MemorySectorUnlockingOverlay v-else-if="state == MemorySectorState.Unlocking" />
+        <SectorEmptyOverlay v-if="state == SectorState.Empty" @click="$emit('stateChange', SectorState.Unlock)" />
+        <SectorUnlockOverlay :piccKey :sector v-else-if="state == SectorState.Unlock" @unlock="unlockAndLoadSector"
+          @cancel="$emit('stateChange', SectorState.Empty)" />
+        <SectorUnlockingOverlay v-else-if="state == SectorState.Unlocking" />
       </Transition>
     </div>
   </div>

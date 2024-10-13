@@ -1,16 +1,15 @@
 <script setup lang="ts">
-import '@/components/MemoryBlock/MemoryBlock.scss';
-import '@/components/MemoryByte/MemoryByte.scss';
-import memoryByteEmits from "@/components/MemoryByte/memoryByteEmits";
-import MemoryByteFocus from "@/components/MemoryByte/MemoryByteFocus";
+import '@/components/Memory/components/Byte/Byte.scss';
 import { MifareClassicBlockGroup } from "@/models/MifareClassic";
 import { hex } from "@/utils/helpers";
 import { computed } from "vue";
+import ByteFocus from './ByteFocus';
+import byteEmits from './byteEmits';
 
 const props = defineProps<{
   group: MifareClassicBlockGroup;
   index: number; // Index of the byte within the block
-  focus?: MemoryByteFocus;
+  focus?: ByteFocus;
 }>();
 
 const classes = computed(() => ({
@@ -20,10 +19,9 @@ const classes = computed(() => ({
 </script>
 
 <template>
-  <li class="MemoryByte" :class="classes" :data-index="index"
-    @mouseenter="memoryByteEmits.emit('mouseEnter', { index, group })"
-    @mouseleave="memoryByteEmits.emit('mouseLeave', { index, group })"
-    @click="memoryByteEmits.emit('mouseClick', { index, group })">
+  <li class="Byte" :class="classes" :data-index="index" @mouseenter="byteEmits.emit('mouseEnter', { index, group })"
+    @mouseleave="byteEmits.emit('mouseLeave', { index, group })"
+    @click="byteEmits.emit('mouseClick', { index, group })">
     {{ group.block.loaded ? hex(group.block.data[index]) : '..' }}
   </li>
 </template>

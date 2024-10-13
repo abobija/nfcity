@@ -2,7 +2,6 @@
 import onClientPing from "@/communication/composables/onClientPing";
 import onClientPong from "@/communication/composables/onClientPong";
 import onClientPongMissed from "@/communication/composables/onClientPongMissed";
-import '@/components/MemoryBlock/MemoryBlock.scss';
 import '@/components/SystemInfo/SystemInfo.scss';
 import useClient from "@/composables/useClient";
 import { ref } from "vue";
