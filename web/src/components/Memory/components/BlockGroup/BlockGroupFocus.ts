@@ -1,5 +1,5 @@
 import { MifareClassicBlockGroup } from "@/models/MifareClassic";
-import ByteFocus from "../Byte/ByteFocus";
+import ByteFocus from "@Memory/components/Byte/ByteFocus";
 
 export default class BlockGroupFocus {
   readonly group: MifareClassicBlockGroup;

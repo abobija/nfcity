@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import ByteRepresentation from "@/components/Memory/ByteRepresentation";
 import MemoryViewer from "@/components/MemoryViewer/MemoryViewer.vue";
 import { MifareClassicBlockGroup, MifareClassicBlockGroupType } from "@/models/MifareClassic";
+import ByteRepresentation from "@Memory/ByteRepresentation";
 import { ref } from "vue";
 
 const group = defineModel<MifareClassicBlockGroup>({ required: true });

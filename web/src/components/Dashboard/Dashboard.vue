@@ -13,11 +13,6 @@ import ByteRenderer from "@/components/Dashboard/renderers/ByteRenderer.vue";
 import GroupRenderer from "@/components/Dashboard/renderers/GroupRenderer.vue";
 import SectorRenderer from "@/components/Dashboard/renderers/SectorRenderer.vue";
 import TargetByte from "@/components/Dashboard/TargetByte";
-import onByteMouseClick from "@/components/Memory/components/Byte/composables/onByteMouseClick";
-import onByteMouseEnter from "@/components/Memory/components/Byte/composables/onByteMouseEnter";
-import onByteMouseLeave from "@/components/Memory/components/Byte/composables/onByteMouseLeave";
-import Memory from "@/components/Memory/Memory.vue";
-import MemoryFocus from "@/components/Memory/MemoryFocus";
 import SystemInfo from "@/components/SystemInfo/SystemInfo.vue";
 import useClient from "@/composables/useClient";
 import MifareClassic, {
@@ -30,6 +25,11 @@ import { PiccState, PiccType } from "@/models/Picc";
 import { CancelationToken, OperationCanceledError } from "@/utils/CancelationToken";
 import { hex } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";
+import onByteMouseClick from "@Memory/components/Byte/composables/onByteMouseClick";
+import onByteMouseEnter from "@Memory/components/Byte/composables/onByteMouseEnter";
+import onByteMouseLeave from "@Memory/components/Byte/composables/onByteMouseLeave";
+import Memory from "@Memory/Memory.vue";
+import MemoryFocus from "@Memory/MemoryFocus";
 import { onMounted, onUnmounted, ref, watch } from "vue";
 
 enum DashboardState {

@@ -1,6 +1,6 @@
 
 import { MifareClassicBlock } from "@/models/MifareClassic";
-import BlockGroupFocus from "../BlockGroup/BlockGroupFocus";
+import BlockGroupFocus from "@Memory/components/BlockGroup/BlockGroupFocus";
 
 export default class BlockFocus {
   readonly block: MifareClassicBlock;

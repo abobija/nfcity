@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import BlockFocus from "@/components/Memory/components/Block/BlockFocus";
-import BlockGroup from "@/components/Memory/components/BlockGroup/BlockGroup.vue";
 import {
   MifareClassicBlock,
   MifareClassicBlockType
 } from "@/models/MifareClassic";
+import BlockFocus from "@Memory/components/Block/BlockFocus";
+import BlockGroup from "@Memory/components/BlockGroup/BlockGroup.vue";
 import { computed } from "vue";
 
 const props = defineProps<{

@@ -7,8 +7,8 @@ import { MifareClassicBlock } from "@/models/MifareClassic";
 import { UpdatablePiccBlock } from "@/models/Picc";
 import { overwriteArraySegment } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";
+import BytesInput from "@Memory/components/BytesInput/BytesInput.vue";
 import { computed, ref, watch } from "vue";
-import BytesInput from "../Memory/components/BytesInput/BytesInput.vue";
 
 const props = defineProps<{
   block: MifareClassicBlock;

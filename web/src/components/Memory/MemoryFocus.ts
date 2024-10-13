@@ -1,8 +1,8 @@
-import SectorFocus from "@/components/Memory/components/Sector/SectorFocus";
 import { MifareClassicBlockGroup } from "@/models/MifareClassic";
-import BlockFocus from "./components/Block/BlockFocus";
-import BlockGroupFocus from "./components/BlockGroup/BlockGroupFocus";
-import ByteFocus from "./components/Byte/ByteFocus";
+import BlockFocus from "@Memory/components/Block/BlockFocus";
+import BlockGroupFocus from "@Memory/components/BlockGroup/BlockGroupFocus";
+import ByteFocus from "@Memory/components/Byte/ByteFocus";
+import SectorFocus from "@Memory/components/Sector/SectorFocus";
 
 export default class MemoryFocus {
   readonly sectorFocus: SectorFocus;

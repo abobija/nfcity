@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import MemoryFocus from "@/components/Memory/MemoryFocus";
-import Sector from "@/components/Memory/components/Sector/Sector.vue";
-import SectorState from "@/components/Memory/components/Sector/SectorState";
 import { MifareClassicMemory } from "@/models/MifareClassic";
+import MemoryFocus from "@Memory/MemoryFocus";
+import Sector from "@Memory/components/Sector/Sector.vue";
+import SectorState from "@Memory/components/Sector/SectorState";
 import { computed, ref } from "vue";
 
 const props = defineProps<{

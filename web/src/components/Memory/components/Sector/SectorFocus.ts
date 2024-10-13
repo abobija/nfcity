@@ -1,6 +1,6 @@
 
 import { MifareClassicSector } from "@/models/MifareClassic";
-import BlockFocus from "../Block/BlockFocus";
+import BlockFocus from "@Memory/components/Block/BlockFocus";
 
 export default class SectorFocus {
   readonly sector: MifareClassicSector;

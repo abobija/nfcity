@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { MifareClassicBlockGroup } from "@/models/MifareClassic";
 import { hex } from "@/utils/helpers";
+import ByteFocus from "@Memory/components/Byte/ByteFocus";
+import byteEmits from "@Memory/components/Byte/byteEmits";
 import { computed } from "vue";
-import ByteFocus from './ByteFocus';
-import byteEmits from './byteEmits';
 
 const props = defineProps<{
   group: MifareClassicBlockGroup;

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import vFocus from "@/directives/vFocus";
-import { hex, isHex, removeWhitespace, unhexToArray } from '@/utils/helpers';
-import { ref, useTemplateRef, watch } from 'vue';
-import ByteRepresentation, { byteRepresentationSingleChar } from "../../ByteRepresentation";
+import { hex, isHex, removeWhitespace, unhexToArray } from "@/utils/helpers";
+import ByteRepresentation, { byteRepresentationSingleChar } from "@Memory/ByteRepresentation";
+import { ref, useTemplateRef, watch } from "vue";
 
 const props = defineProps<{
   maxlength?: number; // max number of bytes (not chars!) that can be entered

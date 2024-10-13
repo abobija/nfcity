@@ -8,6 +8,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "@Memory": path.resolve(__dirname, "./src/components/Memory"),
     }
   },
   css: {

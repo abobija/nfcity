@@ -2,8 +2,8 @@
 import MemoryEditor from "@/components/MemoryEditor/MemoryEditor.vue";
 import { MifareClassicBlock } from "@/models/MifareClassic";
 import { ascii, bin, hex, isAsciiPrintable } from "@/utils/helpers";
+import ByteRepresentation from "@Memory/ByteRepresentation";
 import { computed, ref, watch } from "vue";
-import ByteRepresentation from "../Memory/ByteRepresentation";
 
 const props = defineProps<{
   block: MifareClassicBlock;

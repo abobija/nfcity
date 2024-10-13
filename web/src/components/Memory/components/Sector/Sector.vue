@@ -2,18 +2,18 @@
 import { isErrorDeviceMessage } from "@/communication/messages/device/ErrorDeviceMessage";
 import { isPiccSectorDeviceMessage } from "@/communication/messages/device/PiccSectorDeviceMessage";
 import ReadSectorWebMessage from "@/communication/messages/web/ReadSectorWebMessage";
-import SectorFocus from "@/components/Memory/components/Sector/SectorFocus";
-import SectorState from "@/components/Memory/components/Sector/SectorState";
 import useClient from "@/composables/useClient";
 import {
   MifareClassicSector
 } from "@/models/MifareClassic";
 import { PiccKey } from "@/models/Picc";
+import Block from "@Memory/components/Block/Block.vue";
+import SectorFocus from "@Memory/components/Sector/SectorFocus";
+import SectorState from "@Memory/components/Sector/SectorState";
+import SectorEmptyOverlay from "@Memory/components/Sector/overlays/SectorEmptyOverlay.vue";
+import SectorUnlockOverlay from "@Memory/components/Sector/overlays/SectorUnlockOverlay.vue";
+import SectorUnlockingOverlay from "@Memory/components/Sector/overlays/SectorUnlockingOverlay.vue";
 import { computed, onUpdated, ref } from "vue";
-import Block from "../Block/Block.vue";
-import SectorEmptyOverlay from "./overlays/SectorEmptyOverlay.vue";
-import SectorUnlockOverlay from "./overlays/SectorUnlockOverlay.vue";
-import SectorUnlockingOverlay from "./overlays/SectorUnlockingOverlay.vue";
 
 const props = defineProps<{
   sector: MifareClassicSector;

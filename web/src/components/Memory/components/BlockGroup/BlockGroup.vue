@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import BlockGroupFocus from "@/components/Memory/components/BlockGroup/BlockGroupFocus";
 import {
   MifareClassicBlockGroup,
   MifareClassicBlockGroupType
 } from "@/models/MifareClassic";
+import BlockGroupFocus from "@Memory/components/BlockGroup/BlockGroupFocus";
+import Byte from "@Memory/components/Byte/Byte.vue";
 import { computed } from "vue";
-import Byte from '../Byte/Byte.vue';
 
 const props = defineProps<{
   group: MifareClassicBlockGroup;
