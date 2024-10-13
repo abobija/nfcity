@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import MemoryView from "@/components/MemoryViewer/MemoryView";
+import ByteRepresentation from "@/components/Memory/ByteRepresentation";
 import MemoryViewer from "@/components/MemoryViewer/MemoryViewer.vue";
 import { MifareClassicBlockGroup, MifareClassicBlockGroupType } from "@/models/MifareClassic";
 import { ref } from "vue";
 
 const group = defineModel<MifareClassicBlockGroup>({ required: true });
-const view = ref(MemoryView.Hexadecimal);
+const view = ref(ByteRepresentation.Hexadecimal);
 </script>
 
 <template>
