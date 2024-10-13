@@ -15,7 +15,7 @@ import { arraysAreEqual, nibbles, unhexToArray } from "@/utils/helpers";
 
 export const keySize = 6;
 
-const defaultKey: PiccKey = {
+export const defaultKey: PiccKey = {
   type: keyA,
   value: unhexToArray('FFFFFFFFFFFF'),
 };
@@ -286,7 +286,7 @@ class MifareClassicManufacturerBlock extends MifareClassicBlock {
 }
 
 export class MifareClassicSector implements PiccSector {
-  private _key: PiccKey = defaultKey;
+  private _key?: PiccKey;
 
   protected constructor(
     readonly memory: MifareClassicMemory,
@@ -296,7 +296,7 @@ export class MifareClassicSector implements PiccSector {
     this.blocks = blocks;
   }
 
-  get key(): PiccKey {
+  get key(): PiccKey | undefined {
     return this._key;
   }
 

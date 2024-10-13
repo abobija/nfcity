@@ -29,6 +29,10 @@ export type KeyType = 0 | 1;
 export const keyA = 0 as KeyType;
 export const keyB = 1 as KeyType;
 
+export function keyTypeName(keyType: KeyType): string {
+  return keyType === keyA ? 'A' : 'B';
+}
+
 export interface PiccKey {
   value: number[];
   type: KeyType;
@@ -47,7 +51,7 @@ export interface PiccBlock {
 }
 
 export interface PiccSector {
-  key: PiccKey;
+  key?: PiccKey;
   blocks: PiccBlock[];
   block0Address: number;
 }
@@ -55,6 +59,7 @@ export interface PiccSector {
 export interface UpdatablePiccBlock extends Pick<PiccBlock, 'address' | 'data'> { }
 
 export interface UpdatablePiccSector extends Pick<PiccSector, 'key'> {
+  key: PiccKey;
   blocks: UpdatablePiccBlock[];
 }
 

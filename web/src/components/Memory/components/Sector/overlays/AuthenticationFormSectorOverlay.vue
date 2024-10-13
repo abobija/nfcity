@@ -4,27 +4,24 @@ import { keyA, keyB, KeyType, PiccKey } from "@/models/Picc";
 import BytesInput from "@Memory/components/BytesInput/BytesInput.vue";
 import { computed, ref } from "vue";
 
-const props = defineProps<{
+defineProps<{
   sector: MifareClassicSector;
-  piccKey: PiccKey;
 }>();
 
-const emit = defineEmits<{
-  (e: 'unlockProposal', key: PiccKey): void;
+defineEmits<{
   (e: 'cancel'): void;
 }>();
 
-const keyType = ref<KeyType>(props.piccKey.type);
-const keyValue = ref(Array.from(props.piccKey.value));
+const key = defineModel<PiccKey>({ required: true });
+const keyType = ref<KeyType>(key.value.type);
+const keyValue = ref(Array.from(key.value.value));
 const unlockable = computed(() => keyValue.value.length === keySize);
 
 function onSubmit() {
-  const key: PiccKey = {
+  key.value = {
     type: keyType.value == keyA ? keyA : keyB,
     value: keyValue.value,
   };
-
-  emit('unlockProposal', key);
 }
 </script>
 

@@ -4,15 +4,16 @@ import { isPiccSectorDeviceMessage } from "@/communication/messages/device/PiccS
 import ReadSectorWebMessage from "@/communication/messages/web/ReadSectorWebMessage";
 import useClient from "@/composables/useClient";
 import {
+  defaultKey,
   MifareClassicSector
 } from "@/models/MifareClassic";
-import { PiccKey } from "@/models/Picc";
+import { keyTypeName, PiccKey } from "@/models/Picc";
 import Block from "@Memory/components/Block/Block.vue";
 import AuthenticationFormSectorOverlay from "@Memory/components/Sector/overlays/AuthenticationFormSectorOverlay.vue";
 import AuthenticationInProgressSectorOverlay from "@Memory/components/Sector/overlays/AuthenticationInProgressSectorOverlay.vue";
 import LockedSectorOverlay from "@Memory/components/Sector/overlays/LockedSectorOverlay.vue";
 import SectorFocus from "@Memory/components/Sector/SectorFocus";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 
 const enum SectorState {
   Locked,
@@ -28,16 +29,16 @@ const props = defineProps<{
 
 const { client } = useClient();
 const state = ref<SectorState>(SectorState.Locked);
-const piccKey = ref<PiccKey>(props.sector.key);
+const key = ref(props.sector.key || defaultKey);
 const sectorOffset = computed(() => props.sector.memory.offsetOfSector(props.sector));
 const classes = computed(() => ({
   focused: props.focus?.sector === props.sector,
   empty: props.sector.isEmpty,
 }));
 
-async function authenticateAndLoadSector(key: PiccKey) {
-  piccKey.value = key;
+watch(key, newKey => authenticateAndLoadSector(newKey));
 
+async function authenticateAndLoadSector(key: PiccKey) {
   try {
     state.value = SectorState.AuthenticationInProgress;
     const msg = await client.value.transceive(ReadSectorWebMessage.from(sectorOffset.value, {
@@ -70,7 +71,12 @@ async function authenticateAndLoadSector(key: PiccKey) {
 <template>
   <div class="Sector" :class="classes">
     <div class="meta">
-      <span class="offset">{{ sectorOffset }}</span>
+      <span class="offset" title="Sector offset">
+        {{ sectorOffset }}
+      </span>
+      <span v-if="sector.key" title="Authentication key type">
+        {{ keyTypeName(sector.key.type) }}
+      </span>
     </div>
     <div class="blocks">
       <Block :block v-for="block in sector.blocks" :key="block.address" :focus="focus?.blockFocus" />
@@ -78,9 +84,8 @@ async function authenticateAndLoadSector(key: PiccKey) {
       <Transition>
         <LockedSectorOverlay class="SectorOverlay" v-if="state == SectorState.Locked"
           @click="() => state = SectorState.AuthenticationForm" />
-        <AuthenticationFormSectorOverlay class="SectorOverlay" :piccKey :sector
-          v-else-if="state == SectorState.AuthenticationForm" @unlockProposal="authenticateAndLoadSector"
-          @cancel="() => state = SectorState.Locked" />
+        <AuthenticationFormSectorOverlay class="SectorOverlay" v-model="key" :sector
+          v-else-if="state == SectorState.AuthenticationForm" @cancel="() => state = SectorState.Locked" />
         <AuthenticationInProgressSectorOverlay class="SectorOverlay"
           v-else-if="state == SectorState.AuthenticationInProgress" />
       </Transition>
@@ -106,10 +111,8 @@ $transition: .3s ease-in-out;
     font-weight: 600;
     color: $color-4;
     transition: color $transition;
-
-    .offset {
-      padding-right: 0.3rem;
-    }
+    margin-right: .3rem;
+    text-align: right;
   }
 
   >.blocks {
