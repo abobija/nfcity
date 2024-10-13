@@ -77,10 +77,11 @@ async function unlockAndLoadSector(key: PiccKey) {
       <Block :block v-for="block in sector.blocks" :key="block.address" :focus="focus?.blockFocus" />
 
       <Transition>
-        <SectorEmptyOverlay v-if="state == SectorState.Locked" @click="() => state = SectorState.Unlock" />
-        <SectorUnlockOverlay :piccKey :sector v-else-if="state == SectorState.Unlock" @unlock="unlockAndLoadSector"
-          @cancel="$emit('stateChange', SectorState.Locked)" />
-        <SectorUnlockingOverlay v-else-if="state == SectorState.Unlocking" />
+        <SectorEmptyOverlay class="SectorOverlay" v-if="state == SectorState.Locked"
+          @click="() => state = SectorState.Unlock" />
+        <SectorUnlockOverlay class="SectorOverlay" :piccKey :sector v-else-if="state == SectorState.Unlock"
+          @unlock="unlockAndLoadSector" @cancel="$emit('stateChange', SectorState.Locked)" />
+        <SectorUnlockingOverlay class="SectorOverlay" v-else-if="state == SectorState.Unlocking" />
       </Transition>
     </div>
   </div>

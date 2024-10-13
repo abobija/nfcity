@@ -29,7 +29,7 @@ function onSubmit() {
 </script>
 
 <template>
-  <div class="SectorOverlay SectorUnlockOverlay">
+  <div class="SectorUnlockOverlay">
     <form class="form" @submit.prevent="onSubmit">
       <div class="row key">
         <label for="key-a" title="Use key A">

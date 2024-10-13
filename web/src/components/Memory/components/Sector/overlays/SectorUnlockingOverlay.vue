@@ -1,5 +1,5 @@
 <template>
-  <div class="SectorOverlay SectorUnlockingOverlay">
+  <div class="SectorUnlockingOverlay">
     Unlocking...
   </div>
 </template>
