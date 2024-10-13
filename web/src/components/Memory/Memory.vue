@@ -35,7 +35,7 @@ function changeSectorState(sectorOffset: number, state: MemorySectorState) {
 </script>
 
 <template>
-  <div class="memory component" :class="classes">
+  <div class="Memory" :class="classes">
     <MemorySector v-for="(sector, sectorOffset) in memory.sectors" :key="sectorOffset" :sector
       :state="sectorState(sectorOffset)" :focus="focus?.sectorFocus"
       @state-change="(newState) => changeSectorState(sectorOffset, newState)" />

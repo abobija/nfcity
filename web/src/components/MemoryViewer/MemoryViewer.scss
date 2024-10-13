@@ -1,7 +1,7 @@
 @use 'sass:color';
 @import '@/theme.scss';
 
-.memory-bytes-viewer.component {
+.MemoryViewer {
   .toolbar {
     display: flex;
     justify-content: start;

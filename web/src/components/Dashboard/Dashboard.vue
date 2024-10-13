@@ -260,7 +260,7 @@ onMemoryByteMouseClick(clickedByte => {
 </script>
 
 <template>
-  <div class="dashboard component">
+  <div class="Dashboard">
 
     <main v-if="picc">
       <div class="header">

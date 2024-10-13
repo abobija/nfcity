@@ -47,7 +47,7 @@ function onSubmit() {
 </script>
 
 <template>
-  <div class="client-config component">
+  <div class="ClientConfig">
     <form @submit.prevent="onSubmit">
       <div class="form-group">
         <input type="text" placeholder="Broker" v-model.trim="localClientStorage.brokerUrl" ref="broker-url"

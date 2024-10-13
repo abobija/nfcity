@@ -52,7 +52,7 @@ const classes = computed(() => {
 </script>
 
 <template>
-  <ul class="memory-block-group component" :class="classes">
+  <ul class="MemoryBlockGroup" :class="classes">
     <MemoryByte :group="group" :index="group.offset + index" v-for="(_, index) in Array.from({ length: group.length })"
       :focus="focus?.byteFocus" />
   </ul>

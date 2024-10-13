@@ -1,7 +1,7 @@
 @use 'sass:color';
 @import '@/theme.scss';
 
-.dashboard.component>main {
+.Dashboard>main {
   margin: 1rem;
 
   >.header {
@@ -82,10 +82,10 @@
   }
 }
 
-.dashboard.component .renderer.component {
+.Dashboard .renderer.component {
   font-size: .9rem;
 
-  .memory-bytes-viewer.component {
+  .MemoryViewer {
     .toolbar {
       button {
         padding: .2rem .3rem;
@@ -137,7 +137,7 @@
   }
 }
 
-.dashboard.component .overlay {
+.Dashboard .overlay {
   background-color: rgba($color-bg, .6);
 
   .content {

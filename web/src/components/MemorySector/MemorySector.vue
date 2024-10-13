@@ -74,7 +74,7 @@ onUpdated(() => {
 </script>
 
 <template>
-  <div class="memory-sector component" :class="classes">
+  <div class="MemorySector" :class="classes">
     <div class="meta">
       <span class="offset">{{ sectorOffset }}</span>
     </div>

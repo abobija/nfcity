@@ -1,7 +1,7 @@
 @use 'sass:color';
 @import '@/theme.scss';
 
-.memory-block-group.component {
+.MemoryBlockGroup {
   display: flex;
   flex-direction: row;
 
@@ -10,13 +10,13 @@
   }
 }
 
-.memory-block.component:not(.undefined) {
+.MemoryBlock:not(.undefined) {
   $highlight-color: $color-1;
   $lightness: -30%;
 
-  .memory-block-group.component:hover,
-  .memory-block-group.component.focused {
-    .memory-byte.component {
+  .MemoryBlockGroup:hover,
+  .MemoryBlockGroup.focused {
+    .MemoryByte {
       border-bottom-color: color.adjust($highlight-color, $lightness: $lightness) !important;
 
       &:not(:last-child) {
@@ -26,7 +26,7 @@
   }
 }
 
-.memory-block.component.trailer {
+.MemoryBlock.trailer {
   .key-a {
     color: color.adjust($color-3, $hue: -35deg);
   }
@@ -44,7 +44,7 @@
   }
 }
 
-.memory-block.component.value {
+.MemoryBlock.value {
   .value {
     color: $color-1;
   }
@@ -62,11 +62,11 @@
   }
 }
 
-.memory-block.component.data {
+.MemoryBlock.data {
   color: $color-4;
 }
 
-.memory-block.component.manufacturer {
+.MemoryBlock.manufacturer {
   .uid {
     color: $color-5;
   }

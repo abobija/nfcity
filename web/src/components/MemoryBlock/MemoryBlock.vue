@@ -25,7 +25,7 @@ const classes = computed(() => ({
 </script>
 
 <template>
-  <div class="memory-block component" :class="classes">
+  <div class="MemoryBlock" :class="classes">
     <MemoryBlockGroup :group="group" v-for="group in block.blockGroups" :focus="focus?.groupFocus" />
   </div>
 </template>

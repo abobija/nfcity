@@ -3,7 +3,7 @@
 
 $transition: .3s ease-in-out;
 
-.memory-sector.component {
+.MemorySector {
   display: flex;
   flex-direction: row;
   justify-content: right;
@@ -43,11 +43,11 @@ $transition: .3s ease-in-out;
   }
 }
 
-.memory-sector.component>.blocks {
+.MemorySector>.blocks {
   position: relative;
 }
 
-.memory-sector.component>.blocks .memory-sector-overlay.component {
+.MemorySector>.blocks .memory-sector-overlay.component {
   position: absolute;
   top: 0;
   left: 0;

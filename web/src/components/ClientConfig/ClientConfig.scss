@@ -1,7 +1,7 @@
 @use 'sass:color';
 @import '@/theme.scss';
 
-.client-config.component {
+.ClientConfig {
   form {
     display: flex;
     flex-direction: column;

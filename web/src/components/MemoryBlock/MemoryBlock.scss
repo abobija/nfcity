@@ -1,12 +1,12 @@
 @use 'sass:color';
 @import '@/theme.scss';
 
-.memory-block.component {
+.MemoryBlock {
   display: flex;
   color: color.adjust($color-bg, $lightness: +40%);
 }
 
-.memory-block.component.undefined {
+.MemoryBlock.undefined {
   color: transparent;
   user-select: none;
   -webkit-user-select: none;

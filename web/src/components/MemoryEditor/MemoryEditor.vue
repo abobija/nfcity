@@ -110,7 +110,7 @@ async function onSubmit() {
 </script>
 
 <template>
-  <div class="memory-editor component">
+  <div class="MemoryEditor">
 
     <form class="edit" @submit.prevent="onSubmit">
       <div class="form-group">

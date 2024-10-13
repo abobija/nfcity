@@ -34,7 +34,7 @@ onClientPongMissed(() => {
 </script>
 
 <template>
-  <div class="component system-info">
+  <div class="SystemInfo">
     <div class="ping">
       <span class="root-topic">
         {{ client.rootTopicMasked }} @ {{ client.brokerUrl.hostname }}

@@ -31,7 +31,7 @@ watch(
 </script>
 
 <template>
-  <div class="memory-bytes-viewer component">
+  <div class="MemoryViewer">
     <div v-if="!editMode" class="toolbar">
       <div class="view group">
         <div class="btn-group">

@@ -20,7 +20,7 @@ const classes = computed(() => ({
 </script>
 
 <template>
-  <li class="memory-byte component" :class="classes" :data-index="index"
+  <li class="MemoryByte" :class="classes" :data-index="index"
     @mouseenter="memoryByteEmits.emit('mouseEnter', { index, group })"
     @mouseleave="memoryByteEmits.emit('mouseLeave', { index, group })"
     @click="memoryByteEmits.emit('mouseClick', { index, group })">
