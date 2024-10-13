@@ -4,10 +4,14 @@ export function isHex(str: string): boolean {
 
 export function hex(bytes: number | number[], separator: string = ''): string {
   if (!Number.isInteger(bytes) && !Array.isArray(bytes)) {
-    throw new Error('invalid input to hex');
+    throw new Error('invalid input type to hex');
   }
 
   const hexNumber = (number: number) => {
+    if (number < 0) {
+      throw new Error('can hex only positive numbers');
+    }
+
     const hex = number.toString(16).toUpperCase();
     return hex.length % 2 === 0 ? hex : '0' + hex;
   };
