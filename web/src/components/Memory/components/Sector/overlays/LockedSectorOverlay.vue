@@ -1,5 +1,5 @@
 <template>
-  <div class="SectorEmptyOverlay">
+  <div class="LockedSectorOverlay">
     <p>This sector has not been loaded</p>
     <p>Click to unlock</p>
   </div>
@@ -9,7 +9,7 @@
 @use 'sass:color';
 @import '@/theme.scss';
 
-.SectorEmptyOverlay {
+.LockedSectorOverlay {
   cursor: pointer;
   color: color.adjust($color-fg, $blackness: +50%, $alpha: -0.8);
   transition: color .3s ease-in-out;

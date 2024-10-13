@@ -10,7 +10,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'unlock', piccKeyProposal: PiccKey): void;
+  (e: 'unlockProposal', key: PiccKey): void;
   (e: 'cancel'): void;
 }>();
 
@@ -24,12 +24,12 @@ function onSubmit() {
     value: keyValue.value,
   };
 
-  emit('unlock', key);
+  emit('unlockProposal', key);
 }
 </script>
 
 <template>
-  <div class="SectorUnlockOverlay">
+  <div class="AuthenticationFormSectorOverlay">
     <form class="form" @submit.prevent="onSubmit">
       <div class="row key">
         <label for="key-a" title="Use key A">
@@ -50,7 +50,7 @@ function onSubmit() {
 @use 'sass:color';
 @import '@/theme.scss';
 
-.SectorUnlockOverlay {
+.AuthenticationFormSectorOverlay {
   form {
 
     label,

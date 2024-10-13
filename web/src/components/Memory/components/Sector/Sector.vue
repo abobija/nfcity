@@ -2,6 +2,9 @@
 import { isErrorDeviceMessage } from "@/communication/messages/device/ErrorDeviceMessage";
 import { isPiccSectorDeviceMessage } from "@/communication/messages/device/PiccSectorDeviceMessage";
 import ReadSectorWebMessage from "@/communication/messages/web/ReadSectorWebMessage";
+import AuthenticationFormSectorOverlay from "@/components/Memory/components/Sector/overlays/AuthenticationFormSectorOverlay.vue";
+import AuthenticationInProgressSectorOverlay from "@/components/Memory/components/Sector/overlays/AuthenticationInProgressSectorOverlay.vue";
+import LockedSectorOverlay from "@/components/Memory/components/Sector/overlays/LockedSectorOverlay.vue";
 import useClient from "@/composables/useClient";
 import {
   MifareClassicSector
@@ -9,16 +12,13 @@ import {
 import { PiccKey } from "@/models/Picc";
 import Block from "@Memory/components/Block/Block.vue";
 import SectorFocus from "@Memory/components/Sector/SectorFocus";
-import SectorEmptyOverlay from "@Memory/components/Sector/overlays/SectorEmptyOverlay.vue";
-import SectorUnlockOverlay from "@Memory/components/Sector/overlays/SectorUnlockOverlay.vue";
-import SectorUnlockingOverlay from "@Memory/components/Sector/overlays/SectorUnlockingOverlay.vue";
 import { computed, ref } from "vue";
 
 const enum SectorState {
   Locked,
-  Unlock,
-  Unlocking,
-  UnlockedAndLoaded,
+  AuthenticationForm,
+  AuthenticationInProgress,
+  Authenticated,
 }
 
 const props = defineProps<{
@@ -35,12 +35,11 @@ const classes = computed(() => ({
   empty: props.sector.isEmpty,
 }));
 
-async function unlockAndLoadSector(key: PiccKey) {
+async function authenticateAndLoadSector(key: PiccKey) {
   piccKey.value = key;
 
   try {
-
-    state.value = SectorState.Unlocking;
+    state.value = SectorState.AuthenticationInProgress;
     const msg = await client.value.transceive(ReadSectorWebMessage.from(sectorOffset.value, {
       type: key.type,
       value: Uint8Array.from(key.value),
@@ -54,16 +53,16 @@ async function unlockAndLoadSector(key: PiccKey) {
           data: Array.from(b.data),
         })),
       });
-      state.value = SectorState.UnlockedAndLoaded;
+      state.value = SectorState.Authenticated;
       return;
     }
 
     if (isErrorDeviceMessage(msg)) {
-      state.value = SectorState.Unlock;
+      state.value = SectorState.AuthenticationForm;
       return;
     }
   } catch (e) {
-    state.value = SectorState.Unlock;
+    state.value = SectorState.AuthenticationForm;
   }
 }
 </script>
@@ -77,11 +76,13 @@ async function unlockAndLoadSector(key: PiccKey) {
       <Block :block v-for="block in sector.blocks" :key="block.address" :focus="focus?.blockFocus" />
 
       <Transition>
-        <SectorEmptyOverlay class="SectorOverlay" v-if="state == SectorState.Locked"
-          @click="() => state = SectorState.Unlock" />
-        <SectorUnlockOverlay class="SectorOverlay" :piccKey :sector v-else-if="state == SectorState.Unlock"
-          @unlock="unlockAndLoadSector" @cancel="() => state = SectorState.Locked" />
-        <SectorUnlockingOverlay class="SectorOverlay" v-else-if="state == SectorState.Unlocking" />
+        <LockedSectorOverlay class="SectorOverlay" v-if="state == SectorState.Locked"
+          @click="() => state = SectorState.AuthenticationForm" />
+        <AuthenticationFormSectorOverlay class="SectorOverlay" :piccKey :sector
+          v-else-if="state == SectorState.AuthenticationForm" @unlockProposal="authenticateAndLoadSector"
+          @cancel="() => state = SectorState.Locked" />
+        <AuthenticationInProgressSectorOverlay class="SectorOverlay"
+          v-else-if="state == SectorState.AuthenticationInProgress" />
       </Transition>
     </div>
   </div>
