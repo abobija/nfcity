@@ -9,36 +9,38 @@ import {
 import { PiccKey } from "@/models/Picc";
 import Block from "@Memory/components/Block/Block.vue";
 import SectorFocus from "@Memory/components/Sector/SectorFocus";
-import SectorState from "@Memory/components/Sector/SectorState";
 import SectorEmptyOverlay from "@Memory/components/Sector/overlays/SectorEmptyOverlay.vue";
 import SectorUnlockOverlay from "@Memory/components/Sector/overlays/SectorUnlockOverlay.vue";
 import SectorUnlockingOverlay from "@Memory/components/Sector/overlays/SectorUnlockingOverlay.vue";
-import { computed, onUpdated, ref } from "vue";
+import { computed, ref } from "vue";
+
+const enum SectorState {
+  Locked,
+  Unlock,
+  Unlocking,
+  UnlockedAndLoaded,
+}
 
 const props = defineProps<{
   sector: MifareClassicSector;
-  state: SectorState;
   focus?: SectorFocus;
 }>();
 
-const emit = defineEmits<{
-  (e: 'stateChange', state: SectorState): void;
-}>();
-
+const { client } = useClient();
+const state = ref<SectorState>(SectorState.Locked);
+const piccKey = ref<PiccKey>(props.sector.key);
+const sectorOffset = computed(() => props.sector.memory.offsetOfSector(props.sector));
 const classes = computed(() => ({
   focused: props.focus?.sector === props.sector,
   empty: props.sector.isEmpty,
 }));
 
-const { client } = useClient();
-const piccKey = ref<PiccKey>(props.sector.key);
-const sectorOffset = computed(() => props.sector.memory.offsetOfSector(props.sector));
-
 async function unlockAndLoadSector(key: PiccKey) {
   piccKey.value = key;
 
   try {
-    emit('stateChange', SectorState.Unlocking);
+
+    state.value = SectorState.Unlocking;
     const msg = await client.value.transceive(ReadSectorWebMessage.from(sectorOffset.value, {
       type: key.type,
       value: Uint8Array.from(key.value),
@@ -52,24 +54,18 @@ async function unlockAndLoadSector(key: PiccKey) {
           data: Array.from(b.data),
         })),
       });
-      emit('stateChange', SectorState.UnlockedAndLoaded);
+      state.value = SectorState.UnlockedAndLoaded;
       return;
     }
 
     if (isErrorDeviceMessage(msg)) {
-      emit('stateChange', SectorState.Unlock);
+      state.value = SectorState.Unlock;
       return;
     }
   } catch (e) {
-    emit('stateChange', SectorState.Unlock);
+    state.value = SectorState.Unlock;
   }
 }
-
-onUpdated(() => {
-  if (props.state == SectorState.Empty) {
-    piccKey.value = props.sector.key;
-  }
-});
 </script>
 
 <template>
@@ -81,9 +77,9 @@ onUpdated(() => {
       <Block :block v-for="block in sector.blocks" :key="block.address" :focus="focus?.blockFocus" />
 
       <Transition>
-        <SectorEmptyOverlay v-if="state == SectorState.Empty" @click="$emit('stateChange', SectorState.Unlock)" />
+        <SectorEmptyOverlay v-if="state == SectorState.Locked" @click="() => state = SectorState.Unlock" />
         <SectorUnlockOverlay :piccKey :sector v-else-if="state == SectorState.Unlock" @unlock="unlockAndLoadSector"
-          @cancel="$emit('stateChange', SectorState.Empty)" />
+          @cancel="$emit('stateChange', SectorState.Locked)" />
         <SectorUnlockingOverlay v-else-if="state == SectorState.Unlocking" />
       </Transition>
     </div>
