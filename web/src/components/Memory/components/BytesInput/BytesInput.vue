@@ -2,6 +2,7 @@
 import vFocus from "@/directives/vFocus";
 import { hex, isHex, removeWhitespace, unhexToArray } from '@/utils/helpers';
 import { ref, useTemplateRef, watch } from 'vue';
+import ByteRepresentation, { byteRepresentationSingleChar } from "../../ByteRepresentation";
 
 const props = defineProps<{
   maxlength?: number; // max number of bytes (not chars!) that can be entered
@@ -10,6 +11,7 @@ const props = defineProps<{
   multiline?: boolean;
 }>();
 
+const byteRepresentation = ByteRepresentation.Hexadecimal;
 const modelBytes = defineModel<number[]>({ required: true });
 const bytesField = useTemplateRef('bytesField');
 const bytesFieldValue = ref(hex(modelBytes.value));
@@ -80,6 +82,9 @@ function onPaste(e: ClipboardEvent) {
 
 <template>
   <div class="BytesInput">
+    <abbr class="byte-representation unselectable" :title="ByteRepresentation[byteRepresentation]">
+      {{ byteRepresentationSingleChar(byteRepresentation) }}
+    </abbr>
     <textarea ref="bytesField" v-focus="autofocus === true" v-model="bytesFieldValue" spellcheck="false"
       :rows="multiline === true ? undefined : 1" :style="{
         resize: resizable === false ? 'none' : 'both',
@@ -87,8 +92,12 @@ function onPaste(e: ClipboardEvent) {
   </div>
 </template>
 
-<style>
+<style lang="scss">
+@use 'sass:color';
+@import '@/theme.scss';
+
 .BytesInput {
+  position: relative;
   display: inline-block;
   vertical-align: top;
   font-weight: normal;
@@ -96,6 +105,19 @@ function onPaste(e: ClipboardEvent) {
 
   textarea {
     display: inline-block;
+    padding: .3rem .4rem;
+  }
+
+  .byte-representation {
+    position: absolute;
+    top: .1rem;
+    right: .2rem;
+    text-decoration: none;
+    border-style: solid;
+    border-color: color.adjust($color-bg, $lightness: +20%);
+    font-size: .5rem;
+    font-weight: 600;
+    color: color.adjust($color-bg, $lightness: +40%);
   }
 }
 </style>

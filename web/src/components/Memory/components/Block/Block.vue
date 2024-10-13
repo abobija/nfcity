@@ -40,10 +40,6 @@ const classes = computed(() => ({
 
 .Block.undefined {
   color: transparent;
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
 }
 
 .Block:not(.undefined) {
