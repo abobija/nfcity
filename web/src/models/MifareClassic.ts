@@ -56,7 +56,7 @@ export enum MifareClassicBlockType {
   Manufacturer,
 }
 
-type Operation =
+type MifareClassicBlockOperation =
   | 'read'
   | 'write'
   | 'increment'
@@ -64,8 +64,8 @@ type Operation =
   | 'transfer'
   | 'restore';
 
-type KeyPermissions = {
-  [key in Operation]: {
+type MifareClassicKeyPermissions = {
+  [key in MifareClassicBlockOperation]: {
     keyA: AccessBitsNumber[];
     keyB: AccessBitsNumber[];
   }
@@ -78,7 +78,7 @@ export class MifareClassicBlockGroup {
     readonly type: MifareClassicBlockGroupType,
     readonly offset: number,
     readonly length: number,
-    private readonly accessConditions: Partial<KeyPermissions> = {},
+    private readonly accessConditions: Partial<MifareClassicKeyPermissions> = {},
   ) {
     this.type = type;
     this.offset = offset;
@@ -102,15 +102,15 @@ export class MifareClassicBlockGroup {
     this._block = block;
   }
 
-  allowedOperationsFor(key: PiccKey): Operation[] {
-    return (Object.keys(this.accessConditions) as Operation[]).filter(op =>
+  allowedOperationsFor(key: PiccKey): MifareClassicBlockOperation[] {
+    return (Object.keys(this.accessConditions) as MifareClassicBlockOperation[]).filter(op =>
       this.accessConditions[op]
         ?.[key.type == keyA ? 'keyA' : 'keyB']
         .includes(this.block.accessBitsNumber)
     );
   }
 
-  keyCan(key: PiccKey, operation: Operation): boolean {
+  keyCan(key: PiccKey, operation: MifareClassicBlockOperation): boolean {
     return this.accessConditions[operation]
       ?.[key.type == keyA ? 'keyA' : 'keyB']
       ?.includes(this.block.accessBitsNumber)
@@ -218,6 +218,18 @@ class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
       _accessBitsPool[i] = MifareClassicSectorTrailerBlock.nibblesToAccessBits(c1, c2, c3, i);
     }
 
+    // access conditionsof access-bits group are shared with user-byte group
+    const accessBitsAccessConditions: Partial<MifareClassicKeyPermissions> = {
+      read: {
+        keyA: [0b000, 0b010, 0b100, 0b110, 0b001, 0b011, 0b101, 0b111],
+        keyB: [0b100, 0b110, 0b011, 0b101, 0b111],
+      },
+      write: {
+        keyA: [0b001],
+        keyB: [0b011, 0b101],
+      },
+    };
+
     super(
       MifareClassicBlockType.SectorTrailer,
       sector,
@@ -233,19 +245,8 @@ class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
             keyB: [0b100, 0b011],
           },
         }),
-        new MifareClassicBlockGroup(MifareClassicBlockGroupType.AccessBits, 6, 3, {
-          read: {
-            keyA: [0b000, 0b010, 0b100, 0b110, 0b001, 0b011, 0b101, 0b111],
-            keyB: [0b100, 0b110, 0b011, 0b101, 0b111],
-          },
-          write: {
-            keyA: [0b001],
-            keyB: [0b011, 0b101],
-          },
-        }),
-        new MifareClassicBlockGroup(MifareClassicBlockGroupType.UserByte, 9, 1, {
-          // TODO:
-        }),
+        new MifareClassicBlockGroup(MifareClassicBlockGroupType.AccessBits, 6, 3, accessBitsAccessConditions),
+        new MifareClassicBlockGroup(MifareClassicBlockGroupType.UserByte, 9, 1, accessBitsAccessConditions),
         new MifareClassicBlockGroup(MifareClassicBlockGroupType.KeyB, 10, 6, {
           read: {
             keyA: [0b000, 0b010, 0b001],
@@ -550,16 +551,17 @@ export default class MifareClassic implements Picc {
 
   static calculateId(picc: Picc | PiccDto): string {
     return hex(Math.abs(0
-      ^ 0xABCDEF
+      ^ (0xABCDEF)
       ^ ([...picc.uid].reduce((acc, byte) => acc ^ byte, 0x00) << (8 * 2))
-      ^ picc.atqa
+      ^ (picc.atqa)
       ^ (picc.type.valueOf() << 8)
-      ^ picc.sak
+      ^ (picc.sak)
     )).toLowerCase();
   }
 
   static isMifareClassic(picc: Picc | PiccDto): boolean {
-    return picc.type === PiccType.Mifare1K || picc.type === PiccType.Mifare4K
+    return picc.type === PiccType.Mifare1K
+      || picc.type === PiccType.Mifare4K
       || picc.type === PiccType.MifareMini;
   }
 }
