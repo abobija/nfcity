@@ -33,13 +33,13 @@ watch(() => props.group, () => editMode.value = false);
     <div v-if="!editMode" class="toolbar">
       <div class="view group">
         <div class="btn-group">
-          <button class="btn secondary" :class="{ activated: computedView === ByteRepresentation.Hexadecimal }"
+          <button class="btn primary" :class="{ activated: computedView === ByteRepresentation.Hexadecimal }"
             @click="$emit('viewChangeProposal', ByteRepresentation.Hexadecimal)">hex</button>
-          <button class="btn secondary" :class="{ activated: computedView === ByteRepresentation.Binary }"
+          <button class="btn primary" :class="{ activated: computedView === ByteRepresentation.Binary }"
             @click="$emit('viewChangeProposal', ByteRepresentation.Binary)">bin</button>
-          <button class="btn secondary" :class="{ activated: computedView === ByteRepresentation.Decimal }"
+          <button class="btn primary" :class="{ activated: computedView === ByteRepresentation.Decimal }"
             @click="$emit('viewChangeProposal', ByteRepresentation.Decimal)">dec</button>
-          <button class="btn secondary" :class="{ activated: computedView === ByteRepresentation.Ascii }"
+          <button class="btn primary" :class="{ activated: computedView === ByteRepresentation.Ascii }"
             @click="$emit('viewChangeProposal', ByteRepresentation.Ascii)">ascii</button>
         </div>
       </div>
