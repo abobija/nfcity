@@ -288,15 +288,15 @@ onByteMouseClick(clickedByte => {
             <ul class="metas">
               <li class="meta">
                 <span class="name">UID</span>
-                <span class="value">{{ hex(picc.uid, ' ') }}</span>
+                <var class="value">{{ hex(picc.uid, ' ') }}</var>
               </li>
               <li class="meta">
                 <span class="name">ATQA</span>
-                <span class="value">{{ hex(picc.atqa) }}</span>
+                <var class="value">{{ hex(picc.atqa) }}</var>
               </li>
               <li class="meta">
                 <span class="name">SAK</span>
-                <span class="value">{{ hex(picc.sak) }}</span>
+                <var class="value">{{ hex(picc.sak) }}</var>
               </li>
             </ul>
           </div>
