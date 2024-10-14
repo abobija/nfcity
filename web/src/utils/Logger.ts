@@ -86,20 +86,12 @@ const envLevel = LogLevel[import.meta.env.VITE_APP_LOG_LEVEL as keyof typeof Log
   || LogLevel.ERROR;
 
 class Logger {
-  readonly level: LogLevel;
-  readonly name?: string;
-
-  protected constructor(level: LogLevel, name?: string) {
+  constructor(
+    readonly level: LogLevel,
+    readonly name?: string,
+  ) {
     this.level = level;
     this.name = name;
-  }
-
-  static from(level: LogLevel, name?: string): Logger {
-    return new Logger(level, name);
-  }
-
-  static fromName(name: string): Logger {
-    return new Logger(envLevel, name);
   }
 
   error(message?: any, ...optionalParams: any[]): void {
@@ -151,7 +143,7 @@ class Logger {
   }
 }
 
-const defaultLogger = Logger.from(envLevel);
+const defaultLogger = new Logger(envLevel);
 
 export const log = defaultLogger.log.bind(defaultLogger);
 export const loge = defaultLogger.error.bind(defaultLogger);
@@ -161,5 +153,5 @@ export const logd = defaultLogger.debug.bind(defaultLogger);
 export const logv = defaultLogger.verbose.bind(defaultLogger);
 
 export default function makeLogger(name: string): Logger {
-  return Logger.from(envLevel, name);
+  return new Logger(envLevel, name);
 }

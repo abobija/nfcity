@@ -33,15 +33,7 @@ export class MessageReceiveTimeoutError extends MessageTimeoutError {
 }
 
 class SendContext {
-  readonly message: WebMessage;
-
-  protected constructor(message: WebMessage) {
-    this.message = message;
-  }
-
-  static from(message: WebMessage): SendContext {
-    return new SendContext(message);
-  }
+  constructor(readonly message: WebMessage) { }
 }
 
 class Client {
@@ -126,7 +118,7 @@ class Client {
         this.logger.log(logLevel, 'message sent', topic, message);
         this.logger.verbose('encoded sent message:', encodedMessage);
 
-        resolve(SendContext.from(message));
+        resolve(new SendContext(message));
       };
 
       this.mqttClient!.publish(topic, encodedMessage, { qos: 0 }, _onMessagePublished);

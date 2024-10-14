@@ -4,6 +4,7 @@ import { hex } from "@/utils/helpers";
 import ByteFocus from "@Memory/components/Byte/ByteFocus";
 import byteEmits from "@Memory/components/Byte/byteEmits";
 import { computed } from "vue";
+import ByteEvent from "./events/ByteEvent";
 
 const props = defineProps<{
   group: MifareClassicBlockGroup;
@@ -19,9 +20,9 @@ const classes = computed(() => ({
 
 <template>
   <li class="Byte unselectable" :class="classes" :data-index="index"
-    @mouseenter="byteEmits.emit('mouseEnter', { index, group })"
-    @mouseleave="byteEmits.emit('mouseLeave', { index, group })"
-    @click="byteEmits.emit('mouseClick', { index, group })">
+    @mouseenter="byteEmits.emit('mouseEnter', new ByteEvent(index, group))"
+    @mouseleave="byteEmits.emit('mouseLeave', new ByteEvent(index, group))"
+    @click="byteEmits.emit('mouseClick', new ByteEvent(index, group))">
     {{ group.block.loaded ? hex(group.block.data[index]) : '..' }}
   </li>
 </template>

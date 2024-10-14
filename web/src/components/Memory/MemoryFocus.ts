@@ -12,10 +12,10 @@ export default class MemoryFocus {
   }
 
   static byte(group: MifareClassicBlockGroup, index: number): MemoryFocus {
-    const byf = ByteFocus.from(group, index);
-    const gf = BlockGroupFocus.from(group, byf);
-    const bf = BlockFocus.from(group.block, gf);
-    const sf = SectorFocus.from(group.block.sector, bf);
+    const byf = new ByteFocus(group, index);
+    const gf = new BlockGroupFocus(group, byf);
+    const bf = new BlockFocus(group.block, gf);
+    const sf = new SectorFocus(group.block.sector, bf);
 
     return new MemoryFocus(sf);
   }
