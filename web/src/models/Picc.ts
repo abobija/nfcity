@@ -75,3 +75,7 @@ export default interface Picc {
   uid: number[];
   memory: PiccMemory;
 }
+
+export function accessBitsToNumber(accessBits: PiccBlockAccessBits): number {
+  return (accessBits.c1 << 2) | (accessBits.c2 << 1) | (accessBits.c3 << 0);
+}
