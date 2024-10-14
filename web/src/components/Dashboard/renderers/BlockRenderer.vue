@@ -24,9 +24,7 @@ defineProps<{
       <li class="prop">
         <div class="name" title="Access Bits">Access</div>
         <div class="value">
-          c1({{ block.accessBits.c1 }})
-          c2({{ block.accessBits.c2 }})
-          c3({{ block.accessBits.c3 }})
+          Bits {{ block.accessBits.c1 }}{{ block.accessBits.c2 }}{{ block.accessBits.c3 }}
         </div>
       </li>
     </ul>
