@@ -93,17 +93,14 @@
       }
     }
 
-    form.edit {
+    button,
+    textarea {
+      font-size: .9rem;
+      padding: .3rem .5rem;
+    }
 
-      button,
-      textarea {
-        font-size: .9rem;
-        padding: .3rem .5rem;
-      }
-
-      textarea {
-        width: 18rem;
-      }
+    textarea {
+      width: 18rem;
     }
   }
 

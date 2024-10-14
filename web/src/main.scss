@@ -29,6 +29,11 @@ a {
   }
 }
 
+var {
+  font-weight: 600 !important;
+  color: $color-5;
+}
+
 @mixin unselectable {
   user-select: none;
   -webkit-user-select: none;

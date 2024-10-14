@@ -19,8 +19,8 @@ form {
   display: block;
 }
 
-form .form-group,
-.form .form-group {
+.form-group,
+.form-group {
   &:not(:first-child) {
     margin-top: 0.5rem;
   }
@@ -68,11 +68,15 @@ textarea {
   border-color: $input-border-color;
   background-color: $input-bg-color;
 
-  &:not(:disabled) {
+  &:focus,
+  &:focus-visible {
+    outline: none !important;
+  }
+
+  &:not(:disabled):not(:read-only) {
 
     &:hover,
     &:focus {
-      outline: none;
       box-shadow: 0 0 0.4rem $input-focus-color;
     }
   }
@@ -80,6 +84,10 @@ textarea {
   &:disabled {
     color: $input-disabled-color;
     border-color: $input-disabled-border-color;
+  }
+
+  &:read-only {
+    border-color: color.adjust($input-border-color, $alpha: $disabled-border-alpha);
   }
 }
 

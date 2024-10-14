@@ -9,6 +9,7 @@ const props = defineProps<{
   autofocus?: boolean;
   resizable?: boolean;
   multiline?: boolean;
+  readonly?: boolean;
 }>();
 
 const byteRepresentation = ByteRepresentation.Hexadecimal;
@@ -86,9 +87,11 @@ function onPaste(e: ClipboardEvent) {
       {{ byteRepresentationSingleChar(byteRepresentation) }}
     </abbr>
     <textarea ref="bytesField" v-focus="autofocus === true" v-model="bytesFieldValue" spellcheck="false"
-      :rows="multiline === true ? undefined : 1" :style="{
+      :rows="multiline === true ? undefined : 1" :class="{
+        readonly: readonly === true,
+      }" :style="{
         resize: resizable === false ? 'none' : 'both',
-      }" @keydown="onKeyDown" @paste="onPaste" name="bytes"></textarea>
+      }" @keydown="onKeyDown" @paste="onPaste" name="bytes" :readonly="readonly"></textarea>
   </div>
 </template>
 
