@@ -76,6 +76,12 @@ export default interface Picc {
   memory: PiccMemory;
 }
 
-export function accessBitsToNumber(accessBits: PiccBlockAccessBits): number {
-  return (accessBits.c1 << 2) | (accessBits.c2 << 1) | (accessBits.c3 << 0);
+export type AccessBitsNumber = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+
+export function accessBitsToNumber(accessBits: PiccBlockAccessBits): AccessBitsNumber {
+  return ((
+    (accessBits.c1 << 2)
+    | (accessBits.c2 << 1)
+    | (accessBits.c3 << 0)
+  ) & 0b111) as AccessBitsNumber;
 }
