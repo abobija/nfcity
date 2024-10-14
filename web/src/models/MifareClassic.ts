@@ -1,5 +1,7 @@
 import PiccDto from "@/communication/dtos/PiccDto";
 import Picc, {
+  AccessBitsNumber,
+  KeyType,
   PiccBlock,
   PiccBlockAccessBits,
   PiccKey,
@@ -9,6 +11,7 @@ import Picc, {
   PiccType,
   UpdatablePiccBlock,
   UpdatablePiccSector,
+  accessBitsToNumber,
   keyA
 } from "@/models/Picc";
 import { hex, nibbles, unhexToArray } from "@/utils/helpers";
@@ -101,6 +104,7 @@ export abstract class MifareClassicBlock implements PiccBlock {
   readonly address: number;
   private _data: number[];
   readonly accessBits: PiccBlockAccessBits;
+  readonly accessBitsNumber: AccessBitsNumber;
   readonly blockGroups: MifareClassicBlockGroup[];
 
   get data(): number[] {
@@ -118,6 +122,7 @@ export abstract class MifareClassicBlock implements PiccBlock {
     this.address = block.address;
     this._data = block.data;
     this.accessBits = block.accessBits;
+    this.accessBitsNumber = accessBitsToNumber(this.accessBits);
     bytesGroups.forEach(group => group.block = this);
     this.blockGroups = bytesGroups;
   }
@@ -161,8 +166,82 @@ class MifareClassicUndefinedBlock extends MifareClassicBlock {
   }
 }
 
+type BlockGroupOperation =
+  | 'read'
+  | 'write'
+  | 'increment'
+  | 'decrement'
+  | 'transfer'
+  | 'restore';
+
+type BlockGroupPermissions = {
+  [key in BlockGroupOperation]: AccessBitsNumber[];
+};
+
+type SectorTrailerBlockGroupOperation = 'read' | 'write';
+
+interface SectorTrailerBlockGroupPermissions extends Pick<BlockGroupPermissions, SectorTrailerBlockGroupOperation> { }
+
+interface SectorTrailerBlockGroupKeysPermissions {
+  keyA: SectorTrailerBlockGroupPermissions;
+  keyB: SectorTrailerBlockGroupPermissions;
+};
+
+type SectorTrailerBlockGroup =
+  | MifareClassicBlockGroupType.KeyA
+  | MifareClassicBlockGroupType.AccessBits
+  | MifareClassicBlockGroupType.UserByte
+  | MifareClassicBlockGroupType.KeyB;
+
+type SectorTrailerAccessConditions = {
+  [keyof in SectorTrailerBlockGroup]: SectorTrailerBlockGroupKeysPermissions;
+}
+
 class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
   readonly accessBitsPool: ReadonlyArray<PiccBlockAccessBits>;
+
+  private accessConditions: SectorTrailerAccessConditions = {
+    [MifareClassicBlockGroupType.KeyA]: {
+      keyA: {
+        read: [],
+        write: [0b000, 0b001],
+      },
+      keyB: {
+        read: [],
+        write: [0b100, 0b011],
+      },
+    },
+    [MifareClassicBlockGroupType.AccessBits]: {
+      keyA: {
+        read: [0b000, 0b010, 0b100, 0b110, 0b001, 0b011, 0b101, 0b111],
+        write: [0b001],
+      },
+      keyB: {
+        read: [0b100, 0b110, 0b011, 0b101, 0b111],
+        write: [0b011, 0b101],
+      },
+    },
+    [MifareClassicBlockGroupType.UserByte]: { // TODO:
+      keyA: {
+        read: [],
+        write: [],
+      },
+      keyB: {
+        read: [],
+        write: [],
+      },
+    },
+    [MifareClassicBlockGroupType.KeyB]: {
+      keyA: {
+        read: [0b000, 0b010, 0b001],
+        write: [0b000, 0b001],
+      },
+      keyB: {
+        read: [],
+        write: [0b100, 0b011],
+      },
+    },
+  };
 
   constructor(
     sector: MifareClassicSector,
@@ -198,6 +277,14 @@ class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
     this.accessBitsPool = _accessBitsPool;
   }
 
+  keyTypeCan(keyType: KeyType, operation: SectorTrailerBlockGroupOperation, group: SectorTrailerBlockGroup): boolean {
+    return this.accessConditions[group]
+      ?.[keyType === keyA ? 'keyA' : 'keyB']
+      ?.[operation]
+      ?.includes(this.accessBitsNumber)
+      ?? false;
+  }
+
   static calculateBlockAccessBitsPoolIndex(blockOffset: number, numberOfBlocks: number): number {
     if (numberOfBlocks > 4) {
       return Math.floor(blockOffset / 5);
@@ -223,11 +310,45 @@ class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
   }
 }
 
+type DataBlockGroupOperation = 'read' | 'write';
+
+interface DataBlockGroupPermissions extends Pick<BlockGroupPermissions, DataBlockGroupOperation> { }
+
+interface DataBlockGroupKeysPermissions {
+  keyA: DataBlockGroupPermissions;
+  keyB: DataBlockGroupPermissions;
+};
+
+type DataBlockAccessConditions = {
+  [MifareClassicBlockGroupType.Data]: DataBlockGroupKeysPermissions;
+}
+
 class MifareClassicDataBlock extends MifareClassicBlock {
+  private accessConditions: DataBlockAccessConditions = {
+    [MifareClassicBlockGroupType.Data]: {
+      keyA: {
+        read: [0b000, 0b010, 0b100, 0b110, 0b001],
+        write: [0b000],
+      },
+      keyB: {
+        read: [0b000, 0b010, 0b100, 0b110, 0b001, 0b011, 0b101],
+        write: [0b000, 0b100, 0b110, 0b011],
+      },
+    },
+  };
+
   constructor(sector: MifareClassicSector, block: PiccBlock) {
     super(MifareClassicBlockType.Data, sector, block, [
       new MifareClassicBlockGroup(MifareClassicBlockGroupType.Data, 0, MifareClassicBlock.size),
     ]);
+  }
+
+  keyTypeCan(keyType: KeyType, operation: DataBlockGroupOperation): boolean {
+    return this.accessConditions[MifareClassicBlockGroupType.Data]
+      ?.[keyType === keyA ? 'keyA' : 'keyB']
+      ?.[operation]
+      ?.includes(this.accessBitsNumber)
+      ?? false;
   }
 }
 
@@ -245,12 +366,10 @@ class MifareClassicValueBlock extends MifareClassicBlock {
       new MifareClassicBlockGroup(MifareClassicBlockGroupType.AddressInverted, 15, 1),
     ]);
   }
+}
 
-  static isValueBlock(accessBits: PiccBlockAccessBits): Boolean {
-    const bits = (accessBits.c1 << 2) | (accessBits.c2 << 1) | (accessBits.c3 << 0);
-
-    return bits == 0b110 || bits == 0b001;
-  }
+function isValueBlock(accessBits: PiccBlockAccessBits): boolean {
+  return [0b110, 0b001].includes(accessBitsToNumber(accessBits));
 }
 
 class MifareClassicManufacturerBlock extends MifareClassicBlock {
@@ -344,7 +463,7 @@ export class MifareClassicSector implements PiccSector {
           return;
         }
 
-        if (MifareClassicValueBlock.isValueBlock(accessBits)) {
+        if (isValueBlock(accessBits)) {
           this.blocks[offset] = new MifareClassicValueBlock(this, { ...block, accessBits });
           return;
         }
