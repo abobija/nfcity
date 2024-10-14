@@ -66,9 +66,9 @@ type MifareClassicBlockOperation =
   | 'restore';
 
 type MifareClassicKeyPermissions = {
-  [key in MifareClassicBlockOperation]: {
-    keyA: AccessBitsCombo[];
-    keyB: AccessBitsCombo[];
+  readonly [key in MifareClassicBlockOperation]: {
+    readonly keyA: ReadonlyArray<AccessBitsCombo>;
+    readonly keyB: ReadonlyArray<AccessBitsCombo>;
   }
 }
 
