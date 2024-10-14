@@ -40,6 +40,13 @@ async function onSubmit() {
     return;
   }
 
+  const { key } = props.block.sector;
+
+  if (!key) {
+    logger.warning('sector has not been authenticated, skipping');
+    return;
+  }
+
   const dataToWrite = overwriteArraySegment(
     Array.from(props.block.data),
     editingBytes.value,
@@ -51,15 +58,14 @@ async function onSubmit() {
     data: dataToWrite,
   };
 
-  const { key } = props.block.sector;
-
-  const request = WriteBlockWebMessage.from({
-    address: newBlock.address,
-    data: Uint8Array.from(newBlock.data),
-  }, {
-    type: key.type,
-    value: Uint8Array.from(key.value),
-  });
+  const request = new WriteBlockWebMessage(
+    newBlock.address,
+    Uint8Array.from(newBlock.data),
+    {
+      type: key.type,
+      value: Uint8Array.from(key.value),
+    }
+  );
 
   try {
     saving.value = true;

@@ -253,13 +253,13 @@ class Client {
   async ping(cancelationToken?: CancelationToken): Promise<ClientPingContext> {
     this.logger.verbose('ping');
 
-    const context = ClientPingContext.create(Date.now());
+    const context = new ClientPingContext(Date.now());
 
     clientEmits.emit('ping', new ClientPingEvent(this, context.pingTimestamp));
     cancelationToken?.throwIfCanceled();
 
     try {
-      const pong = await this.transceive(PingWebMessage.create(), cancelationToken);
+      const pong = await this.transceive(new PingWebMessage(), cancelationToken);
       cancelationToken?.throwIfCanceled();
 
       if (isPongDeviceMessage(pong)) {
@@ -342,12 +342,8 @@ export class ClientPingContext {
     return this._pongTimestamp;
   }
 
-  protected constructor(pingTimestamp: number) {
+  constructor(pingTimestamp: number) {
     this.pingTimestamp = pingTimestamp;
-  }
-
-  static create(pingTimestamp: number): ClientPingContext {
-    return new ClientPingContext(pingTimestamp);
   }
 }
 

@@ -58,7 +58,7 @@ watch(key, newKey => authenticateAndLoadSector(newKey));
 async function authenticateAndLoadSector(key: PiccKey) {
   try {
     state.value = SectorState.AuthenticationInProgress;
-    const msg = await client.value.transceive(ReadSectorWebMessage.from(props.sector.offset, {
+    const msg = await client.value.transceive(new ReadSectorWebMessage(props.sector.offset, {
       type: key.type,
       value: Uint8Array.from(key.value),
     }));

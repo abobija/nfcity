@@ -37,14 +37,10 @@ export interface WebMessage extends Message {
 export abstract class BaseWebMessage implements WebMessage {
   abstract $kind: WebMessageKind;
   readonly $id: WebMessageId = crypto.randomUUID();
-
-  protected constructor() { }
 }
 
 export abstract class AuthorizedWebMessage extends BaseWebMessage {
-  readonly key: PiccKeyDto;
-
-  protected constructor(key: PiccKeyDto) {
+  constructor(readonly key: PiccKeyDto) {
     super();
     this.key = key;
   }

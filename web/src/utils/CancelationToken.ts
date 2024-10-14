@@ -20,12 +20,6 @@ export class CancelationToken {
     return this._reason;
   }
 
-  protected constructor() { }
-
-  static create(): CancelationToken {
-    return new CancelationToken();
-  }
-
   cancel(reason?: any): CancelationToken {
     if (this._isCanceled) {
       return this;

@@ -74,7 +74,7 @@ watch(state, async (newState, oldState) => {
     case DashboardState.CheckingForReader: {
       retryMax.value = retryCount.value = 5;
       checkingForReaderCancelationToken.value?.cancel("state changed to CheckingForReader");
-      checkingForReaderCancelationToken.value = CancelationToken.create();
+      checkingForReaderCancelationToken.value = new CancelationToken();
       do {
         try {
           await client.value.ping(checkingForReaderCancelationToken.value as CancelationToken);
@@ -103,7 +103,7 @@ watch(state, async (newState, oldState) => {
       }
     } break;
     case DashboardState.CeckingForPicc: {
-      client.value.send(GetPiccWebMessage.create());
+      client.value.send(new GetPiccWebMessage());
     } break;
   }
 });
@@ -145,7 +145,7 @@ onClientMessage(e => {
 
   // start pinging on first message from device
   if (!pingCancelationToken.value || pingCancelationToken.value.isCanceled) {
-    pingCancelationToken.value = CancelationToken.create();
+    pingCancelationToken.value = new CancelationToken();
     client.value.pingLoop(2500, pingCancelationToken.value);
   }
 
@@ -154,7 +154,7 @@ onClientMessage(e => {
   }
 
   if (state.value >= DashboardState.PiccPaired) {
-    client.value.send(GetPiccWebMessage.create());
+    client.value.send(new GetPiccWebMessage());
   }
   else if (state.value > DashboardState.CeckingForPicc) {
     state.value = DashboardState.CeckingForPicc;
