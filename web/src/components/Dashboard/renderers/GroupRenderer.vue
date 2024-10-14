@@ -6,7 +6,8 @@ import { computed, ref } from "vue";
 
 const group = defineModel<MifareClassicBlockGroup>({ required: true });
 const view = ref(ByteRepresentation.Hexadecimal);
-const key = computed(() => group.value.block.sector.key!);
+const key = computed(() => group.value.block.sector.key);
+const permissions = computed(() => key.value ? group.value.allowedOperationsFor(key.value) : []);
 </script>
 
 <template>
@@ -28,15 +29,13 @@ const key = computed(() => group.value.block.sector.key!);
         <div class="name">Access</div>
         <div class="value">
           Permissions
-          [ {{ group.allowedOperationsFor(key).join(', ') }} ]
+          [ {{ permissions.join(', ') }} ]
         </div>
       </li>
       <li class="prop memory">
         <div class="name">Content</div>
         <div class="value">
-          <MemoryViewer :view :block="group.block" :offset="group.offset" :length="group.length"
-            @view-change-proposal="v => view = v"
-            :edit="group.type == MifareClassicBlockGroupType.Data && group.keyCan(key, 'write')" />
+          <MemoryViewer :view :group @view-change-proposal="v => view = v" />
         </div>
       </li>
     </ul>

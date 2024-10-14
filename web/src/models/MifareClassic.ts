@@ -178,14 +178,18 @@ export class MifareClassicBlockGroup {
       ?? false;
   }
 
-  public hasSameTypeAs(that: MifareClassicBlockGroup): boolean {
+  hasSameTypeAs(that: MifareClassicBlockGroup): boolean {
     return this.type === that.type;
   }
 
-  public isSameAs(that: MifareClassicBlockGroup): boolean {
+  isSameAs(that: MifareClassicBlockGroup): boolean {
     return this.block.hasSameAddressAs(that.block)
       && this.offset === that.offset
       && this.length === that.length;
+  }
+
+  data(): number[] {
+    return this.block.data.slice(this.offset, this.offset + this.length);
   }
 };
 
