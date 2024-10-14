@@ -2,16 +2,13 @@ import Client from "@/communication/Client";
 import { ClientEvent } from "@/communication/events/ClientEvent";
 
 export default class ClientPongMissedEvent extends ClientEvent {
-  lastPingTimestamp: number;
-  lastPongTimestamp?: number;
-
-  protected constructor(client: Client, lastPingTimestamp: number, lastPongTimestamp?: number) {
+  constructor(
+    readonly client: Client,
+    readonly lastPingTimestamp: number,
+    readonly lastPongTimestamp?: number,
+  ) {
     super(client);
     this.lastPingTimestamp = lastPingTimestamp;
     this.lastPongTimestamp = lastPongTimestamp;
-  }
-
-  static from(client: Client, lastPingTimestamp: number, lastPongTimestamp?: number): ClientPongMissedEvent {
-    return new ClientPongMissedEvent(client, lastPingTimestamp, lastPongTimestamp);
   }
 }

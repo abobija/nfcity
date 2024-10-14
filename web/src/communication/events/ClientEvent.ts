@@ -1,9 +1,5 @@
 import Client from "@/communication/Client";
 
 export abstract class ClientEvent {
-  readonly client: Client;
-
-  protected constructor(client: Client) {
-    this.client = client;
-  }
+  constructor(readonly client: Client) { }
 }

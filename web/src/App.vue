@@ -48,7 +48,7 @@ watch(state, (newState, oldState) => {
 
 onMounted(() => {
   if (isValidClientStorage(clientStorage.value)) {
-    updateClient(Client.from(
+    updateClient(new Client(
       clientStorage.value.brokerUrl,
       clientStorage.value.rootTopic,
     ));
@@ -68,7 +68,7 @@ watch(clientStorage, (newClientStorage) => {
 function onClientConfigSave(clientStorageProposal: ValidClientStorage) {
   updateClientStorage(clientStorageProposal);
 
-  updateClient(Client.from(
+  updateClient(new Client(
     clientStorageProposal.brokerUrl,
     clientStorageProposal.rootTopic,
   ));

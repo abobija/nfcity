@@ -59,7 +59,7 @@ class Client {
     return strmask(this.rootTopic, { side: 'right', offset: 2, ratio: .65 });
   }
 
-  protected constructor(brokerUrl: string, rootTopic: string) {
+  constructor(brokerUrl: string, rootTopic: string) {
     ClientValidator.validateBrokerUrl(brokerUrl);
     ClientValidator.validateRootTopic(rootTopic);
 
@@ -69,10 +69,6 @@ class Client {
     this.devTopic = 'dev';
     this.sendTimeoutMs = 2000;
     this.receiveTimeoutMs = 3000;
-  }
-
-  static from(brokerUrl: string, rootTopic: string): Client {
-    return new Client(brokerUrl, rootTopic);
   }
 
   get connected(): boolean {
@@ -199,7 +195,7 @@ class Client {
         }
 
         this.logger.debug('subscribed to', topic);
-        clientEmits.emit('ready', ClientReadyEvent.from(this));
+        clientEmits.emit('ready', new ClientReadyEvent(this));
       });
     });
 
@@ -215,32 +211,32 @@ class Client {
       this.logger.log(logLevel, 'message received', topic, decodedMessage);
       this.logger.verbose('encoded received message:', encodedMessage);
 
-      clientEmits.emit('message', ClientMessageEvent.from(this, decodedMessage));
+      clientEmits.emit('message', new ClientMessageEvent(this, decodedMessage));
     });
 
     this.mqttClient.on('reconnect', () => {
       this.logger.debug('reconnect');
-      clientEmits.emit('reconnect', ClientReconnectEvent.from(this));
+      clientEmits.emit('reconnect', new ClientReconnectEvent(this));
     });
 
     this.mqttClient.on('close', () => {
       this.logger.debug('close');
-      clientEmits.emit('close', ClientCloseEvent.from(this));
+      clientEmits.emit('close', new ClientCloseEvent(this));
     });
 
     this.mqttClient.on('disconnect', () => {
       this.logger.debug('disconnected');
-      clientEmits.emit('disconnect', ClientDisconnectEvent.from(this));
+      clientEmits.emit('disconnect', new ClientDisconnectEvent(this));
     });
 
     this.mqttClient.on('offline', () => {
       this.logger.debug('offline');
-      clientEmits.emit('offline', ClientOfflineEvent.from(this));
+      clientEmits.emit('offline', new ClientOfflineEvent(this));
     });
 
     this.mqttClient.on('end', () => {
       this.logger.debug('end');
-      clientEmits.emit('end', ClientEndEvent.from(this));
+      clientEmits.emit('end', new ClientEndEvent(this));
     });
 
     return this;
@@ -259,7 +255,7 @@ class Client {
 
     const context = ClientPingContext.create(Date.now());
 
-    clientEmits.emit('ping', ClientPingEvent.from(this, context.pingTimestamp));
+    clientEmits.emit('ping', new ClientPingEvent(this, context.pingTimestamp));
     cancelationToken?.throwIfCanceled();
 
     try {
@@ -269,7 +265,7 @@ class Client {
       if (isPongDeviceMessage(pong)) {
         this.logger.verbose('pong');
         context.pong = pong;
-        clientEmits.emit('pong', ClientPongEvent.from(
+        clientEmits.emit('pong', new ClientPongEvent(
           this, context.pingTimestamp, context.pongTimestamp!
         ));
         cancelationToken?.throwIfCanceled();
@@ -282,7 +278,7 @@ class Client {
       if (e instanceof MessageTimeoutError) {
         this.logger.verbose('pong miss,', 'reason', e);
 
-        clientEmits.emit('pongMissed', ClientPongMissedEvent.from(
+        clientEmits.emit('pongMissed', new ClientPongMissedEvent(
           this,
           context.pingTimestamp,
           context.pongTimestamp
