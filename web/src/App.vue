@@ -75,8 +75,12 @@ function onClientConfigSave(clientStorageProposal: ValidClientStorage) {
 }
 
 function connect() {
-  state.value = AppState.Connecting;
-  client.value?.connect();
+  if (client.value?.connected === true) {
+    state.value = AppState.ClientReady;
+  } else {
+    state.value = AppState.Connecting;
+    client.value?.connect();
+  }
 }
 
 onClientReady(() => {
@@ -127,7 +131,7 @@ onClientReady(() => {
         </div>
       </div>
     </div>
-    <Dashboard v-else />
+    <Dashboard v-else @exit="() => state = AppState.Initialized" />
   </div>
 </template>
 

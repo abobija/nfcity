@@ -33,6 +33,7 @@ import MemoryFocus from "@Memory/MemoryFocus";
 import { onMounted, onUnmounted, ref, watch } from "vue";
 
 enum DashboardState {
+  Exit = -1,
   Undefined = 0,
   Initialized,
   ClientOffline, // TODO: implement timeout for reconnection
@@ -43,6 +44,10 @@ enum DashboardState {
   PongMissed,
   PiccPaired,
 }
+
+const emit = defineEmits<{
+  (e: 'exit'): void;
+}>();
 
 const logger = makeLogger('Dashboard');
 const { client } = useClient();
@@ -66,6 +71,9 @@ watch(state, async (newState, oldState) => {
   overlay.value = newState < DashboardState.PiccPaired;
 
   switch (newState) {
+    case DashboardState.Exit: {
+      emit('exit');
+    } break;
     case DashboardState.Initialized: {
       checkingForReaderCancelationToken.value?.cancel("state changed to Initialized");
       pingCancelationToken.value?.cancel("state changed to Initialized");
@@ -94,7 +102,7 @@ watch(state, async (newState, oldState) => {
 
       if (retryCount.value === 0) {
         logger.error('failed to ping device after', retryMax.value, 'retries');
-        client.value.disconnect();
+        state.value = DashboardState.Exit;
         return;
       }
 
@@ -179,7 +187,7 @@ onClientMessage(e => {
 
   if (!MifareClassic.isMifareClassic(piccDto)) {
     logger.error('unsupported PICC type', PiccType[piccDto.type]);
-    client.value.disconnect();
+    state.value = DashboardState.Exit;
     return;
   }
 
