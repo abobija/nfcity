@@ -1,6 +1,6 @@
 import PiccDto from "@/communication/dtos/PiccDto";
 import Picc, {
-  AccessBitsNumber,
+  AccessBitsCombo,
   PiccBlock,
   PiccBlockAccessBits,
   PiccKey,
@@ -10,7 +10,8 @@ import Picc, {
   PiccType,
   UpdatablePiccBlock,
   UpdatablePiccSector,
-  accessBitsToNumber,
+  calculateAccessBitsCombo,
+  everyAccessBitCombo,
   keyA
 } from "@/models/Picc";
 import { hex, nibbles, unhexToArray } from "@/utils/helpers";
@@ -66,9 +67,69 @@ type MifareClassicBlockOperation =
 
 type MifareClassicKeyPermissions = {
   [key in MifareClassicBlockOperation]: {
-    keyA: AccessBitsNumber[];
-    keyB: AccessBitsNumber[];
+    keyA: AccessBitsCombo[];
+    keyB: AccessBitsCombo[];
   }
+}
+
+const keyAAccessConditions: Partial<MifareClassicKeyPermissions> =
+{
+  read: {
+    keyA: [],
+    keyB: [],
+  },
+  write: {
+    keyA: [0b000, 0b001],
+    keyB: [0b100, 0b011],
+  },
+};
+
+const accessBitsAccessConditions: Partial<MifareClassicKeyPermissions> = {
+  read: {
+    keyA: [0b000, 0b010, 0b100, 0b110, 0b001, 0b011, 0b101, 0b111],
+    keyB: [0b100, 0b110, 0b011, 0b101, 0b111],
+  },
+  write: {
+    keyA: [0b001],
+    keyB: [0b011, 0b101],
+  },
+};
+
+const keyBAccessConditions: Partial<MifareClassicKeyPermissions> = {
+  read: {
+    keyA: [0b000, 0b010, 0b001],
+    keyB: [],
+  },
+  write: {
+    keyA: [0b000, 0b001],
+    keyB: [0b100, 0b011],
+  },
+};
+
+const dataBlockAccessConditions: Partial<MifareClassicKeyPermissions> = {
+  read: {
+    keyA: [0b000, 0b010, 0b100, 0b110, 0b001],
+    keyB: [0b000, 0b010, 0b100, 0b110, 0b001, 0b011, 0b101],
+  },
+  write: {
+    keyA: [0b000],
+    keyB: [0b000, 0b100, 0b110, 0b011],
+  }
+};
+
+const manufacturerBlockAccessConditions: Partial<MifareClassicKeyPermissions> = {
+  read: {
+    keyA: Array.from(everyAccessBitCombo),
+    keyB: Array.from(everyAccessBitCombo),
+  },
+  write: {
+    keyA: [],
+    keyB: [],
+  }
+};
+
+function isValueBlock(accessBits: PiccBlockAccessBits): boolean {
+  return [0b110, 0b001].includes(calculateAccessBitsCombo(accessBits));
 }
 
 export class MifareClassicBlockGroup {
@@ -106,14 +167,14 @@ export class MifareClassicBlockGroup {
     return (Object.keys(this.accessConditions) as MifareClassicBlockOperation[]).filter(op =>
       this.accessConditions[op]
         ?.[key.type == keyA ? 'keyA' : 'keyB']
-        .includes(this.block.accessBitsNumber)
+        .includes(this.block.accessBitsCombo)
     );
   }
 
   keyCan(key: PiccKey, operation: MifareClassicBlockOperation): boolean {
     return this.accessConditions[operation]
       ?.[key.type == keyA ? 'keyA' : 'keyB']
-      ?.includes(this.block.accessBitsNumber)
+      ?.includes(this.block.accessBitsCombo)
       ?? false;
   }
 
@@ -134,7 +195,7 @@ export abstract class MifareClassicBlock implements PiccBlock {
   readonly address: number;
   private _data: number[];
   readonly accessBits: PiccBlockAccessBits;
-  readonly accessBitsNumber: AccessBitsNumber;
+  readonly accessBitsCombo: AccessBitsCombo;
   readonly blockGroups: MifareClassicBlockGroup[];
 
   get data(): number[] {
@@ -152,7 +213,7 @@ export abstract class MifareClassicBlock implements PiccBlock {
     this.address = block.address;
     this._data = block.data;
     this.accessBits = block.accessBits;
-    this.accessBitsNumber = accessBitsToNumber(this.accessBits);
+    this.accessBitsCombo = calculateAccessBitsCombo(this.accessBits);
     bytesGroups.forEach(group => group.block = this);
     this.blockGroups = bytesGroups;
   }
@@ -210,7 +271,7 @@ class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
     }
 
     const [c1] = nibbles(data[7]);
-    const [c3, c2] = nibbles(data[8])
+    const [c3, c2] = nibbles(data[8]);
 
     const _accessBitsPool = Array<PiccBlockAccessBits>(4);
 
@@ -218,45 +279,15 @@ class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
       _accessBitsPool[i] = MifareClassicSectorTrailerBlock.nibblesToAccessBits(c1, c2, c3, i);
     }
 
-    // access conditionsof access-bits group are shared with user-byte group
-    const accessBitsAccessConditions: Partial<MifareClassicKeyPermissions> = {
-      read: {
-        keyA: [0b000, 0b010, 0b100, 0b110, 0b001, 0b011, 0b101, 0b111],
-        keyB: [0b100, 0b110, 0b011, 0b101, 0b111],
-      },
-      write: {
-        keyA: [0b001],
-        keyB: [0b011, 0b101],
-      },
-    };
-
     super(
       MifareClassicBlockType.SectorTrailer,
       sector,
       { ...block, accessBits: _accessBitsPool[3] },
       [
-        new MifareClassicBlockGroup(MifareClassicBlockGroupType.KeyA, 0, 6, {
-          read: {
-            keyA: [],
-            keyB: [],
-          },
-          write: {
-            keyA: [0b000, 0b001],
-            keyB: [0b100, 0b011],
-          },
-        }),
+        new MifareClassicBlockGroup(MifareClassicBlockGroupType.KeyA, 0, 6, keyAAccessConditions),
         new MifareClassicBlockGroup(MifareClassicBlockGroupType.AccessBits, 6, 3, accessBitsAccessConditions),
         new MifareClassicBlockGroup(MifareClassicBlockGroupType.UserByte, 9, 1, accessBitsAccessConditions),
-        new MifareClassicBlockGroup(MifareClassicBlockGroupType.KeyB, 10, 6, {
-          read: {
-            keyA: [0b000, 0b010, 0b001],
-            keyB: [],
-          },
-          write: {
-            keyA: [0b000, 0b001],
-            keyB: [0b100, 0b011],
-          },
-        }),
+        new MifareClassicBlockGroup(MifareClassicBlockGroupType.KeyB, 10, 6, keyBAccessConditions),
       ]
     );
 
@@ -291,16 +322,7 @@ class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
 class MifareClassicDataBlock extends MifareClassicBlock {
   constructor(sector: MifareClassicSector, block: PiccBlock) {
     super(MifareClassicBlockType.Data, sector, block, [
-      new MifareClassicBlockGroup(MifareClassicBlockGroupType.Data, 0, MifareClassicBlock.size, {
-        read: {
-          keyA: [0b000, 0b010, 0b100, 0b110, 0b001],
-          keyB: [0b000, 0b010, 0b100, 0b110, 0b001, 0b011, 0b101],
-        },
-        write: {
-          keyA: [0b000],
-          keyB: [0b000, 0b100, 0b110, 0b011],
-        }
-      }),
+      new MifareClassicBlockGroup(MifareClassicBlockGroupType.Data, 0, MifareClassicBlock.size, dataBlockAccessConditions),
     ]);
   }
 }
@@ -321,23 +343,20 @@ class MifareClassicValueBlock extends MifareClassicBlock {
   }
 }
 
-function isValueBlock(accessBits: PiccBlockAccessBits): boolean {
-  return [0b110, 0b001].includes(accessBitsToNumber(accessBits));
-}
-
 class MifareClassicManufacturerBlock extends MifareClassicBlock {
   constructor(sector: MifareClassicSector, block: PiccBlock) {
     const { uid } = sector.memory.picc;
 
     super(MifareClassicBlockType.Manufacturer, sector, block, [
-      new MifareClassicBlockGroup(MifareClassicBlockGroupType.UID, 0, uid.length),
-      new MifareClassicBlockGroup(MifareClassicBlockGroupType.BCC, uid.length, 1),
-      new MifareClassicBlockGroup(MifareClassicBlockGroupType.SAK, uid.length + 1, 1),
-      new MifareClassicBlockGroup(MifareClassicBlockGroupType.ATQA, uid.length + 2, 2),
+      new MifareClassicBlockGroup(MifareClassicBlockGroupType.UID, 0, uid.length, manufacturerBlockAccessConditions),
+      new MifareClassicBlockGroup(MifareClassicBlockGroupType.BCC, uid.length, 1, manufacturerBlockAccessConditions),
+      new MifareClassicBlockGroup(MifareClassicBlockGroupType.SAK, uid.length + 1, 1, manufacturerBlockAccessConditions),
+      new MifareClassicBlockGroup(MifareClassicBlockGroupType.ATQA, uid.length + 2, 2, manufacturerBlockAccessConditions),
       new MifareClassicBlockGroup(
         MifareClassicBlockGroupType.ManufacturerData,
         uid.length + 4,
-        MifareClassicBlock.size - uid.length - 4
+        MifareClassicBlock.size - uid.length - 4,
+        manufacturerBlockAccessConditions
       ),
     ]);
   }

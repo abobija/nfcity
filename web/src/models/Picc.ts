@@ -76,12 +76,14 @@ export default interface Picc {
   memory: PiccMemory;
 }
 
-export type AccessBitsNumber = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+export const everyAccessBitCombo = [0, 1, 2, 3, 4, 5, 6, 7] as const;
 
-export function accessBitsToNumber(accessBits: PiccBlockAccessBits): AccessBitsNumber {
+export type AccessBitsCombo = typeof everyAccessBitCombo[number];
+
+export function calculateAccessBitsCombo(accessBits: PiccBlockAccessBits): AccessBitsCombo {
   return ((
     (accessBits.c1 << 2)
     | (accessBits.c2 << 1)
     | (accessBits.c3 << 0)
-  ) & 0b111) as AccessBitsNumber;
+  ) & 0b111) as AccessBitsCombo;
 }
