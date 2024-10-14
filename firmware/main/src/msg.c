@@ -256,13 +256,11 @@ CborError enc_picc_state_changed_message(CborEncoder *root, rc522_picc_t *picc, 
     return CborNoError;
 }
 
-#define ENC_PICC_BLOCK_LEN 3
-static CborError enc_picc_block(CborEncoder *encoder, uint8_t address, uint8_t offset, uint8_t *data)
+#define ENC_PICC_BLOCK_LEN 2
+static CborError enc_picc_block(CborEncoder *encoder, uint8_t address, uint8_t *data)
 {
     CBOR_ERRCHECK(cbor_encode_text_stringz(encoder, "address"));
     CBOR_ERRCHECK(cbor_encode_uint(encoder, address));
-    CBOR_ERRCHECK(cbor_encode_text_stringz(encoder, "offset"));
-    CBOR_ERRCHECK(cbor_encode_uint(encoder, offset));
     CBOR_ERRCHECK(cbor_encode_text_stringz(encoder, "data"));
     CBOR_ERRCHECK(cbor_encode_byte_string(encoder, data, RC522_MIFARE_BLOCK_SIZE));
 
@@ -285,10 +283,8 @@ CborError enc_picc_sector_message(
     for (uint8_t i = 0; i < sector_desc->number_of_blocks; i++) {
         CborEncoder block_map;
         CBOR_ERRCHECK(cbor_encoder_create_map(&blocks_array, &block_map, ENC_PICC_BLOCK_LEN));
-        CBOR_ERRCHECK(enc_picc_block(&block_map,
-            sector_desc->block_0_address + i,
-            i,
-            sector_data + (i * RC522_MIFARE_BLOCK_SIZE)));
+        CBOR_ERRCHECK(
+            enc_picc_block(&block_map, sector_desc->block_0_address + i, sector_data + (i * RC522_MIFARE_BLOCK_SIZE)));
         CBOR_ERRCHECK(cbor_encoder_close_container(&blocks_array, &block_map));
     }
     CBOR_ERRCHECK(cbor_encoder_close_container(&message_map, &blocks_array));
@@ -304,7 +300,7 @@ CborError enc_picc_block_message(web_msg_t *ctx, CborEncoder *encoder, uint8_t a
     CBOR_ERRCHECK(cbor_encoder_create_map(encoder, &message_map, ENC_KIND_LEN + ENC_CTX_LEN + ENC_PICC_BLOCK_LEN));
     CBOR_ERRCHECK(enc_kind(&message_map, ENC_PICC_BLOCK_MSG_KIND));
     CBOR_ERRCHECK(enc_ctx(&message_map, ctx));
-    CBOR_ERRCHECK(enc_picc_block(&message_map, address, -1, data));
+    CBOR_ERRCHECK(enc_picc_block(&message_map, address, data));
     CBOR_ERRCHECK(cbor_encoder_close_container(encoder, &message_map));
 
     return CborNoError;
