@@ -3,17 +3,15 @@ import { isErrorDeviceMessage } from "@/communication/messages/device/ErrorDevic
 import { isPiccBlockDeviceMessage } from "@/communication/messages/device/PiccBlockDeviceMessage";
 import WriteBlockWebMessage from "@/communication/messages/web/WriteBlockWebMessage";
 import useClient from "@/composables/useClient";
-import { MifareClassicBlock } from "@/models/MifareClassic";
+import { MifareClassicBlockGroup } from "@/models/MifareClassic";
 import { UpdatablePiccBlock } from "@/models/Picc";
 import { overwriteArraySegment } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";
 import BytesInput from "@Memory/components/BytesInput/BytesInput.vue";
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 
 const props = defineProps<{
-  block: MifareClassicBlock;
-  offset: number;
-  length: number;
+  group: MifareClassicBlockGroup;
 }>();
 
 const emit = defineEmits<{
@@ -23,11 +21,20 @@ const emit = defineEmits<{
 
 const logger = makeLogger('MemoryEditor');
 const { client } = useClient();
-const bytesToEdit = computed(() => props.block.data.slice(props.offset, props.offset + props.length));
+const block = computed(() => props.group.block);
+const key = computed(() => block.value.sector.key);
+const bytesToEdit = computed(() => props.group.data());
 const editingBytes = ref(bytesToEdit.value);
 const maxlength = computed(() => bytesToEdit.value.length);
 const saveable = ref(false);
 const saving = ref(false);
+
+onMounted(() => {
+  if (!key.value) {
+    logger.warning('sector has not been authenticated, cannot write');
+    emit('cancel');
+  }
+});
 
 watch(editingBytes, (bytes) => {
   saveable.value = editingBytes.value.length === bytesToEdit.value.length
@@ -40,21 +47,18 @@ async function onSubmit() {
     return;
   }
 
-  const { key } = props.block.sector;
-
-  if (!key) {
-    logger.warning('sector has not been authenticated, skipping');
-    return;
+  if (!key.value) {
+    throw new Error('key missing');
   }
 
   const dataToWrite = overwriteArraySegment(
-    Array.from(props.block.data),
+    Array.from(block.value.data),
     editingBytes.value,
-    props.offset
+    props.group.offset
   );
 
   const newBlock: UpdatablePiccBlock = {
-    address: props.block.address,
+    address: block.value.address,
     data: dataToWrite,
   };
 
@@ -62,8 +66,8 @@ async function onSubmit() {
     newBlock.address,
     Uint8Array.from(newBlock.data),
     {
-      type: key.type,
-      value: Uint8Array.from(key.value),
+      type: key.value.type,
+      value: Uint8Array.from(key.value.value),
     }
   );
 
@@ -94,7 +98,7 @@ async function onSubmit() {
       return;
     }
 
-    props.block.updateWith(updatableBlock);
+    block.value.updateWith(updatableBlock);
     saving.value = false;
     emit('done');
   } catch (e) {

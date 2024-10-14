@@ -49,8 +49,7 @@ watch(() => props.group, () => editMode.value = false);
         </div>
       </div>
     </div>
-    <MemoryEditor v-if="editMode" :block :offset="group.offset" :length="group.length" @cancel="editMode = false"
-      @done="editMode = false" />
+    <MemoryEditor v-if="editMode" :group @cancel="editMode = false" @done="editMode = false" />
     <div v-else-if="computedView == ByteRepresentation.Decimal" class="bytes">
       {{ bytes.join(' ') }}
     </div>
