@@ -116,14 +116,12 @@
     color: $color-3;
   }
 
-  .props {
-    .prop {
-      display: flex;
+  .prop {
+    display: flex;
 
-      .value {
-        flex-grow: 1;
-        color: $color-fg;
-      }
+    .value {
+      flex-grow: 1;
+      color: $color-fg;
     }
   }
 

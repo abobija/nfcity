@@ -9,14 +9,11 @@ defineProps<{
 
 <template>
   <div class="block renderer component">
-    <div class="header">
-      Block
+    <div class="header prop">
+      <div class="name">Block</div>
+      <div class="value">{{ hex(block.address) }}</div>
     </div>
     <ul class="props">
-      <li class="prop">
-        <div class="name">Address</div>
-        <div class="value">{{ hex(block.address) }}</div>
-      </li>
       <li class="prop">
         <div class="name">Type</div>
         <div class="value">{{ MifareClassicBlockType[block.type] }}</div>

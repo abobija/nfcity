@@ -9,14 +9,11 @@ defineProps<{
 
 <template>
   <div class="sector renderer component">
-    <div class="header">
-      Sector
+    <div class="header prop">
+      <div class="name">Sector</div>
+      <div class="value">{{ sector.offset }}</div>
     </div>
     <ul class="props">
-      <li class="prop">
-        <div class="name">Offset</div>
-        <div class="value">{{ sector.offset }}</div>
-      </li>
       <li class="prop" v-if="sector.key">
         <div class="name">Key</div>
         <div class="value">{{ keyTypeName(sector.key.type) }}</div>

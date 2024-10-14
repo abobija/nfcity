@@ -9,14 +9,11 @@ defineProps<{
 
 <template>
   <div class="byte renderer component">
-    <div class="header">
-      Byte
+    <div class="header prop">
+      <div class="name">Byte</div>
+      <div class="value">{{ byte.index }}</div>
     </div>
     <ul class="props">
-      <li class="prop">
-        <div class="name">Index</div>
-        <div class="value">{{ byte.index }}</div>
-      </li>
       <li class="prop">
         <div class="name">Value</div>
         <div class="value">{{ hex(byte.group.block.data[byte.index]) }}</div>
