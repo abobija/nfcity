@@ -6,16 +6,10 @@ import { assert, bin, hex, unhexToArray } from "./utils/helpers";
 import { logi } from "./utils/Logger";
 
 const {
-  DEV
+  DEV,
 } = import.meta.env;
 
-/**
- * Window Namespace
- *
- * Functions that are exposed to the window object,
- * and can be called from the browser console.
- */
-class WNS {
+class Console {
   private _client?: Client;
 
   constructor() {
@@ -55,11 +49,11 @@ class WNS {
   }
 }
 
-const wns = new WNS();
+const console = new Console();
 
 if (DEV) {
-  (window as any).nfcity = wns;
-  logi('WNS mounted');
+  (window as any).nfcity = console;
+  logi('Console mounted');
 }
 
-export default wns;
+export default console;

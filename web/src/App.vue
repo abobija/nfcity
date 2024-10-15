@@ -7,7 +7,7 @@ import { useClientMaybe } from "@/composables/useClient";
 import useClientStorage, { isValidClientStorage, ValidClientStorage } from "@/composables/useClientStorage";
 import makeLogger from "@/utils/Logger";
 import { onMounted, ref, watch } from "vue";
-import wns from "./WNS";
+import console from "./console";
 import { assert } from "./utils/helpers";
 
 const {
@@ -92,7 +92,7 @@ onClientReady(() => {
 
   assert(client.value);
 
-  wns.client = client.value;
+  console.client = client.value;
 });
 </script>
 
