@@ -10,6 +10,7 @@ import { onMounted, ref, watch } from "vue";
 import NFCityWNS from "./utils/NFCityWNS";
 
 const {
+  DEV,
   VITE_APP_NAME,
   VITE_APP_DESCRIPTION,
   VITE_APP_AUTHOR,
@@ -89,8 +90,10 @@ onClientReady(() => {
     state.value = AppState.ClientReady;
   }
 
-  (window as any).nfcity = new NFCityWNS(client.value!);
-  logger.info('nfcity window namespace has been mounted');
+  if (DEV) {
+    (window as any).nfcity = new NFCityWNS(client.value!);
+    logger.info('nfcity Window namespace has been mounted');
+  }
 });
 </script>
 
