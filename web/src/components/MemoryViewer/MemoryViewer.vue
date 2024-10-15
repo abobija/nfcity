@@ -3,14 +3,22 @@ import MemoryEditor from "@/components/MemoryEditor/MemoryEditor.vue";
 import { MifareClassicBlockGroup, MifareClassicBlockGroupType } from "@/models/MifareClassic";
 import { keyTypeName } from "@/models/Picc";
 import { ascii, bin, hex, isAsciiPrintable } from "@/utils/helpers";
-import ByteRepresentation from "@Memory/ByteRepresentation";
+import ByteRepresentation, { byteRepresentationShortName } from "@Memory/ByteRepresentation";
 import { computed, ref, watch } from "vue";
 
 const props = defineProps<{
   group: MifareClassicBlockGroup;
 }>();
 
+const representations = [
+  ByteRepresentation.Hexadecimal,
+  ByteRepresentation.Decimal,
+  ByteRepresentation.Binary,
+  ByteRepresentation.Ascii,
+];
+
 const representation = ref(ByteRepresentation.Hexadecimal);
+const showIndexes = ref(false);
 const block = computed(() => props.group.block);
 const key = computed(() => block.value.sector.key);
 const bytes = computed(() => props.group.data());
@@ -30,14 +38,14 @@ watch(() => props.group, () => editMode.value = false);
       <div v-if="!editMode" class="toolbar">
         <div class="view group">
           <div class="btn-group">
-            <button class="btn primary" :class="{ activated: representation === ByteRepresentation.Hexadecimal }"
-              @click="representation = ByteRepresentation.Hexadecimal">hex</button>
-            <button class="btn primary" :class="{ activated: representation === ByteRepresentation.Binary }"
-              @click="representation = ByteRepresentation.Binary">bin</button>
-            <button class="btn primary" :class="{ activated: representation === ByteRepresentation.Decimal }"
-              @click="representation = ByteRepresentation.Decimal">dec</button>
-            <button class="btn primary" :class="{ activated: representation === ByteRepresentation.Ascii }"
-              @click="representation = ByteRepresentation.Ascii">ascii</button>
+            <button class="btn primary" v-for="r in representations" :class="{ activated: r === representation }"
+              @click="representation = r">{{ byteRepresentationShortName(r) }}</button>
+          </div>
+        </div>
+        <div class="display group">
+          <div class="btn-group">
+            <button class="btn secondary" :class="{ activated: showIndexes }"
+              @click="showIndexes = !showIndexes">[i]</button>
           </div>
         </div>
         <div class="modify group">
@@ -48,22 +56,23 @@ watch(() => props.group, () => editMode.value = false);
       </div>
     </header>
     <main>
-      <MemoryEditor v-if="editMode" :group @cancel="editMode = false" @done="editMode = false" />
-      <div v-else-if="representation == ByteRepresentation.Decimal" class="bytes">
-        {{ bytes.join(' ') }}
-      </div>
-      <div v-else-if="representation == ByteRepresentation.Binary" class="bytes">
-        {{ bin(bytes, ' ') }}
-      </div>
-      <div v-else-if="representation == ByteRepresentation.Ascii" class="bytes">
-        <span v-for="b in bytes" class="ascii" :class="{ 'non-printable': !isAsciiPrintable(b) }"
-          :title="!isAsciiPrintable(b) ? `0x${hex(b)}` : ''">
-          {{ ascii(b) }}
+      <div class="bytes" v-if="!editMode">
+        <span v-for="(byte, index) in bytes" class="byte" :class="{
+          indexed: showIndexes,
+          unprintable: representation === ByteRepresentation.Ascii && !isAsciiPrintable(byte),
+        }" :data-index="String(group.offset + index).padStart(2, '0')">
+          {{
+            representation === ByteRepresentation.Decimal
+              ? byte
+              : representation === ByteRepresentation.Binary
+                ? bin(byte)
+                : representation === ByteRepresentation.Ascii
+                  ? ascii(byte)
+                  : hex(byte)
+          }}
         </span>
       </div>
-      <div v-else class="bytes">
-        {{ hex(bytes, ' ') }}
-      </div>
+      <MemoryEditor v-if="editMode" :group @cancel="editMode = false" @done="editMode = false" />
     </main>
     <footer>
       <div v-if="key && !group.keyCan(key, 'read')">
@@ -92,8 +101,25 @@ watch(() => props.group, () => editMode.value = false);
   }
 
   .bytes {
-    .ascii.non-printable {
-      opacity: .3;
+    .byte {
+      display: inline-block;
+
+      &:not(:last-child) {
+        margin-right: .5rem;
+      }
+
+      &.unprintable {
+        color: color.adjust($color-fg, $lightness: -50%);
+      }
+
+      &.indexed {
+        display: block;
+
+        &::before {
+          content: '[' attr(data-index) '] ';
+          color: color.adjust($color-fg, $lightness: -50%);
+        }
+      }
     }
   }
 
