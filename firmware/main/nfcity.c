@@ -331,11 +331,6 @@ static esp_err_t write_block(web_write_block_msg_t *msg, uint8_t *out_buffer)
         _exit,
         TAG,
         "read failed");
-    ESP_GOTO_ON_FALSE(memcmp(msg->data, verification_buffer, RC522_MIFARE_BLOCK_SIZE) == 0,
-        ESP_FAIL,
-        _exit,
-        TAG,
-        "write verification failed");
     memcpy(out_buffer, verification_buffer, RC522_MIFARE_BLOCK_SIZE);
 
 _exit:
