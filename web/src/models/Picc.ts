@@ -87,3 +87,11 @@ export function calculateAccessBitsCombo(accessBits: PiccBlockAccessBits): Acces
     | (accessBits.c3 << 0)
   ) & 0b111) as AccessBitsCombo;
 }
+
+export function calculateAccessBitsFromCombo(combo: AccessBitsCombo): PiccBlockAccessBits {
+  return {
+    c1: (combo >> 2) & 1,
+    c2: (combo >> 1) & 1,
+    c3: (combo >> 0) & 1,
+  };
+}

@@ -11,10 +11,11 @@ import Picc, {
   UpdatablePiccBlock,
   UpdatablePiccSector,
   calculateAccessBitsCombo,
+  calculateAccessBitsFromCombo,
   everyAccessBitCombo,
   keyA
 } from "@/models/Picc";
-import { hex, nibbles, unhexToArray } from "@/utils/helpers";
+import { assert, hex, invertedNibble, nibble, nibbles, nibblesToByte, unhexToArray } from "@/utils/helpers";
 
 export const keySize = 6;
 export const blockSize = 16;
@@ -128,6 +129,63 @@ const manufacturerBlockAccessConditions: Partial<MifareClassicKeyPermissions> = 
     keyB: [],
   }
 };
+
+type AccessBitsPoolIndex = 3 | 2 | 1 | 0;
+
+type AccessBitsPool = {
+  readonly [key in AccessBitsPoolIndex]: Readonly<PiccBlockAccessBits>;
+}
+
+type AccessBitsComboPool = {
+  readonly [key in AccessBitsPoolIndex]: Readonly<AccessBitsCombo>;
+}
+
+export function isAccessBitsPoolIndex(index: number): index is AccessBitsPoolIndex {
+  return index >= 0 && index <= 3;
+}
+
+export function accessBitsComboPoolToBitsPool(pool: AccessBitsComboPool): AccessBitsPool {
+  return {
+    3: calculateAccessBitsFromCombo(pool[3]),
+    2: calculateAccessBitsFromCombo(pool[2]),
+    1: calculateAccessBitsFromCombo(pool[1]),
+    0: calculateAccessBitsFromCombo(pool[0]),
+  };
+}
+
+export function accessBitsComboPoolToBytes(pool: AccessBitsComboPool): number[] {
+  return accessBitsPoolToBytes(accessBitsComboPoolToBitsPool(pool));
+}
+
+/*
+ * +-----+------+------+------+------+------+------+------+------+
+ * |     |   7  |   6  |   5  |   4  |   3  |   2  |   1  |   0  |
+ * +-----+------+------+------+------+------+------+------+------+
+ * | [6] | ~C23 | ~C22 | ~C21 | ~C20 | ~C13 | ~C12 | ~C11 | ~C10 |
+ * +-----+------+------+------+------+------+------+------+------+
+ * | [7] |  C13 |  C12 |  C11 |  C10 | ~C33 | ~C32 | ~C31 | ~C30 |
+ * +-----+------+------+------+------+------+------+------+------+
+ * | [8] |  C33 |  C32 |  C31 |  C30 |  C23 |  C22 |  C21 |  C20 |
+ * +-----+------+------+------+------+------+------+------+------+
+ */
+export function accessBitsPoolToBytes(accessBitsPool: AccessBitsPool): number[] {
+  const byte6 = nibblesToByte(
+    invertedNibble(accessBitsPool[3].c2, accessBitsPool[2].c2, accessBitsPool[1].c2, accessBitsPool[0].c2),
+    invertedNibble(accessBitsPool[3].c1, accessBitsPool[2].c1, accessBitsPool[1].c1, accessBitsPool[0].c1)
+  );
+
+  const byte7 = nibblesToByte(
+    nibble(accessBitsPool[3].c1, accessBitsPool[2].c1, accessBitsPool[1].c1, accessBitsPool[0].c1),
+    invertedNibble(accessBitsPool[3].c3, accessBitsPool[2].c3, accessBitsPool[1].c3, accessBitsPool[0].c3)
+  );
+
+  const byte8 = nibblesToByte(
+    nibble(accessBitsPool[3].c3, accessBitsPool[2].c3, accessBitsPool[1].c3, accessBitsPool[0].c3),
+    nibble(accessBitsPool[3].c2, accessBitsPool[2].c2, accessBitsPool[1].c2, accessBitsPool[0].c2)
+  );
+
+  return [byte6, byte7, byte8];
+}
 
 function isValueBlock(accessBits: PiccBlockAccessBits): boolean {
   return [0b110, 0b001].includes(calculateAccessBitsCombo(accessBits));
@@ -261,7 +319,7 @@ class MifareClassicUndefinedBlock extends MifareClassicBlock {
 }
 
 class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
-  readonly accessBitsPool: ReadonlyArray<PiccBlockAccessBits>;
+  readonly accessBitsPool: AccessBitsPool;
 
   constructor(
     sector: MifareClassicSector,
@@ -276,11 +334,12 @@ class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
     const [c1] = nibbles(data[7]);
     const [c3, c2] = nibbles(data[8]);
 
-    const _accessBitsPool = Array<PiccBlockAccessBits>(4);
-
-    for (let i = 0; i < 4; i++) {
-      _accessBitsPool[i] = MifareClassicSectorTrailerBlock.nibblesToAccessBits(c1, c2, c3, i);
-    }
+    const _accessBitsPool: AccessBitsPool = {
+      3: MifareClassicSectorTrailerBlock.nibblesToAccessBits(c1, c2, c3, 3),
+      2: MifareClassicSectorTrailerBlock.nibblesToAccessBits(c1, c2, c3, 2),
+      1: MifareClassicSectorTrailerBlock.nibblesToAccessBits(c1, c2, c3, 1),
+      0: MifareClassicSectorTrailerBlock.nibblesToAccessBits(c1, c2, c3, 0),
+    };
 
     super(
       MifareClassicBlockType.SectorTrailer,
@@ -297,12 +356,16 @@ class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
     this.accessBitsPool = _accessBitsPool;
   }
 
-  static calculateBlockAccessBitsPoolIndex(blockOffset: number, numberOfBlocks: number): number {
+  static calculateBlockAccessBitsPoolIndex(blockOffset: number, numberOfBlocks: number): AccessBitsPoolIndex {
+    let index = blockOffset;
+
     if (numberOfBlocks > 4) {
-      return Math.floor(blockOffset / 5);
+      index = Math.floor(blockOffset / 5);
     }
 
-    return blockOffset;
+    assert(isAccessBitsPoolIndex(index));
+
+    return index;
   }
 
   private static nibblesToAccessBits(c1: number, c2: number, c3: number, offset: number): PiccBlockAccessBits {
@@ -406,7 +469,7 @@ export class MifareClassicSector implements PiccSector {
     return this.blocks.at(offset)!; // FIXME: !
   }
 
-  private accessPoolIndexOfBlockAtOffset(blockOffset: number): number {
+  private accessPoolIndexOfBlockAtOffset(blockOffset: number) {
     return MifareClassicSectorTrailerBlock.calculateBlockAccessBitsPoolIndex(
       blockOffset,
       this.numberOfBlocks

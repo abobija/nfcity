@@ -78,7 +78,27 @@ export function ascii(bytes: number | number[], separator: string = ''): string 
 }
 
 export function nibbles(byte: number): [msb: number, lsb: number] {
-  return [byte >> 4, byte & 0x0F];
+  return [(byte & 0xFF) >> 4, byte & 0x0F];
+}
+
+export function nibble(bit4: number, bit3: number, bit2: number, bit1: number): number {
+  return ((bit4 & 1) << 3) | ((bit3 & 1) << 2) | ((bit2 & 1) << 1) | ((bit1 & 1) << 0);
+}
+
+export function nibblesToByte(msb: number, lsb: number): number {
+  return ((msb & 0x0F) << 4) | (lsb & 0x0F);
+}
+
+export function invertByte(byte: number): number {
+  return (~(byte & 0xFF)) & 0xFF;
+}
+
+export function invertNibble(nibble: number): number {
+  return (~(nibble & 0x0F)) & 0x0F;
+}
+
+export function invertedNibble(bit4: number, bit3: number, bit2: number, bit1: number): number {
+  return invertNibble(nibble(bit4, bit3, bit2, bit1));
 }
 
 function trimStart(str: string, chr: string) {

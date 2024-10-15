@@ -1,6 +1,6 @@
 import Client from "@/communication/Client";
 import WriteBlockWebMessage from "@/communication/messages/web/WriteBlockWebMessage";
-import { defaultKey } from "@/models/MifareClassic";
+import { accessBitsComboPoolToBytes, defaultKey } from "@/models/MifareClassic";
 import { KeyType } from "@/models/Picc";
 import { assert, hex, unhexToArray } from "./helpers";
 
@@ -9,6 +9,15 @@ export default class NFCityWNS {
     private readonly _client: Client,
   ) {
     assert(_client !== undefined);
+
+    const functionsMap = {
+      hex,
+      accessBitsComboPoolToBytes,
+    };
+
+    for (const [key, value] of Object.entries(functionsMap)) {
+      (this as any)[key] = value;
+    }
   }
 
   async piccWrite(
