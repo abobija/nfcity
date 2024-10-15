@@ -20,6 +20,7 @@ import {
   hex,
   invertedNibble,
   invertNibble,
+  isByte,
   nibble,
   nibbles,
   nibblesToByte,
@@ -194,10 +195,7 @@ export function accessBitsPoolToBytes(accessBitsPool: AccessBitsPool): number[] 
     nibble(accessBitsPool[3].c2, accessBitsPool[2].c2, accessBitsPool[1].c2, accessBitsPool[0].c2)
   );
 
-  assert(
-    !isAccessBitsIntegrityViolated(byte6, byte7, byte8),
-    new AccessBitsIntegrityViolationError()
-  );
+  throwIfAccessBitsIntegrityViolated(byte6, byte7, byte8);
 
   return [byte6, byte7, byte8];
 }
@@ -211,6 +209,12 @@ function isAccessBitsIntegrityViolated(byte6: number, byte7: number, byte8: numb
   const [c3, c2] = nibbles(byte8);
 
   return c1_ !== invertNibble(c1) || c2_ !== invertNibble(c2) || c3_ !== invertNibble(c3);
+}
+
+export function throwIfAccessBitsIntegrityViolated(byte6: number, byte7: number, byte8: number): void {
+  if (isAccessBitsIntegrityViolated(byte6, byte7, byte8)) {
+    throw new AccessBitsIntegrityViolationError();
+  }
 }
 
 function isValueBlock(accessBits: PiccBlockAccessBits): boolean {
@@ -353,10 +357,7 @@ class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
   ) {
     const { data } = block;
 
-    assert(
-      !isAccessBitsIntegrityViolated(data[6], data[7], data[8]),
-      new AccessBitsIntegrityViolationError()
-    );
+    throwIfAccessBitsIntegrityViolated(data[6], data[7], data[8]);
 
     const [c1] = nibbles(data[7]);
     const [c3, c2] = nibbles(data[8]);
@@ -613,6 +614,36 @@ export class MifareClassicMemory implements PiccMemory {
       default:
         throw new Error("Unsupported Mifare type");
     }
+  }
+
+  private static sectorOffsetFromBlockAddress(blockAddress: number): number {
+    let offset = 0;
+
+    if (blockAddress < 128) {
+      offset = Math.floor(blockAddress / 4);
+    }
+
+    offset = 32 + Math.floor((blockAddress - 128) / 16);
+
+    assert(isByte(offset));
+
+    return offset;
+  }
+
+  private static sectorBlock0Address(sectorOffset: number): number {
+    if (sectorOffset < 32) {
+      return sectorOffset * 4;
+    }
+
+    return 128 + (sectorOffset - 32) * 16;
+  }
+
+  static blockAtAddressIsSectorTrailer(blockAddress: number): boolean {
+    const sectorOffset = MifareClassicMemory.sectorOffsetFromBlockAddress(blockAddress);
+    const numberOfBlocks = MifareClassicMemory.numberOfBlocksInSector(sectorOffset);
+    const block0Address = MifareClassicMemory.sectorBlock0Address(sectorOffset);
+
+    return blockAddress === block0Address + numberOfBlocks - 1;
   }
 }
 

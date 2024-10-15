@@ -1,7 +1,7 @@
 import PiccBlockDto from "@/communication/dtos/PiccBlockDto";
 import PiccKeyDto from "@/communication/dtos/PiccKeyDto";
 import { AuthorizedWebMessage, WebMessageKind } from "@/communication/Message";
-import { blockSize } from "@/models/MifareClassic";
+import { blockSize, MifareClassicMemory, throwIfAccessBitsIntegrityViolated } from "@/models/MifareClassic";
 import { assert, isByte } from "@/utils/helpers";
 
 export default class WriteBlockWebMessage extends AuthorizedWebMessage implements PiccBlockDto {
@@ -10,10 +10,14 @@ export default class WriteBlockWebMessage extends AuthorizedWebMessage implement
   constructor(
     readonly address: number,
     readonly data: Uint8Array,
-    readonly key: PiccKeyDto
+    readonly key: PiccKeyDto,
   ) {
     assert(isByte(address), 'invalid address');
     assert(data?.length === blockSize, 'invalid data length');
+
+    if (MifareClassicMemory.blockAtAddressIsSectorTrailer(address)) {
+      throwIfAccessBitsIntegrityViolated(data[6], data[7], data[8]);
+    }
 
     super(key);
   }
