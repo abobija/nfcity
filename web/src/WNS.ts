@@ -2,9 +2,15 @@ import Client from "@/communication/Client";
 import WriteBlockWebMessage from "@/communication/messages/web/WriteBlockWebMessage";
 import { accessBitsComboPoolToBytes, defaultKey } from "@/models/MifareClassic";
 import { KeyType } from "@/models/Picc";
-import { assert, bin, hex, unhexToArray } from "./helpers";
+import { assert, bin, hex, unhexToArray } from "./utils/helpers";
 
-export default class NFCityWNS {
+/**
+ * Window Namespace
+ *
+ * Functions that are exposed to the window object,
+ * and can be called from the browser console.
+ */
+export default class WNS {
   constructor(
     private readonly _client: Client,
   ) {
