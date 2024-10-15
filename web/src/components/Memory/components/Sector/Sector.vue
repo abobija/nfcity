@@ -8,6 +8,7 @@ import {
   MifareClassicSector
 } from "@/models/MifareClassic";
 import { keyTypeName, PiccKey } from "@/models/Picc";
+import makeLogger from "@/utils/Logger";
 import Block from "@Memory/components/Block/Block.vue";
 import onSectorAuthFormShown from "@Memory/components/Sector/composables/onSectorAuthFormShown";
 import SectorAuthFormShownEvent from "@Memory/components/Sector/events/SectorAuthFormShownEvent";
@@ -31,6 +32,7 @@ const props = defineProps<{
 }>();
 
 const { client } = useClient();
+const logger = makeLogger('Sector');
 const state = ref<SectorState>(SectorState.Locked);
 const key = ref(props.sector.key || defaultKey);
 const classes = computed(() => ({
@@ -80,6 +82,7 @@ async function authenticateAndLoadSector(key: PiccKey) {
       return;
     }
   } catch (e) {
+    logger.warning('failed to authenticate sector', e);
     state.value = SectorState.AuthenticationForm;
   }
 }
