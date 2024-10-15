@@ -129,6 +129,33 @@ const dataBlockAccessConditions: Partial<MifareClassicKeyPermissions> = {
   }
 };
 
+const valueBlockAccessConditions: Partial<MifareClassicKeyPermissions> = {
+  read: {
+    keyA: [0b110, 0b001],
+    keyB: [0b110, 0b001],
+  },
+  write: { // TODO:
+    keyA: [],
+    keyB: [],
+  },
+  increment: { // TODO:
+    keyA: [],
+    keyB: [],
+  },
+  decrement: { // TODO:
+    keyA: [],
+    keyB: [],
+  },
+  transfer: { // TODO:
+    keyA: [],
+    keyB: [],
+  },
+  restore: { // TODO:
+    keyA: [],
+    keyB: [],
+  },
+}
+
 const manufacturerBlockAccessConditions: Partial<MifareClassicKeyPermissions> = {
   read: {
     keyA: Array.from(everyAccessBitCombo),
@@ -418,13 +445,13 @@ class MifareClassicValueBlock extends MifareClassicBlock {
     // TODO: Parse
 
     super(MifareClassicBlockType.Value, sector, block, [
-      new MifareClassicBlockGroup(MifareClassicBlockGroupType.Value, 0, 4),
-      new MifareClassicBlockGroup(MifareClassicBlockGroupType.ValueInverted, 4, 4),
-      new MifareClassicBlockGroup(MifareClassicBlockGroupType.Value, 8, 4),
-      new MifareClassicBlockGroup(MifareClassicBlockGroupType.Address, 12, 1),
-      new MifareClassicBlockGroup(MifareClassicBlockGroupType.AddressInverted, 13, 1),
-      new MifareClassicBlockGroup(MifareClassicBlockGroupType.Address, 14, 1),
-      new MifareClassicBlockGroup(MifareClassicBlockGroupType.AddressInverted, 15, 1),
+      new MifareClassicBlockGroup(MifareClassicBlockGroupType.Value, 0, 4, valueBlockAccessConditions),
+      new MifareClassicBlockGroup(MifareClassicBlockGroupType.ValueInverted, 4, 4, valueBlockAccessConditions),
+      new MifareClassicBlockGroup(MifareClassicBlockGroupType.Value, 8, 4, valueBlockAccessConditions),
+      new MifareClassicBlockGroup(MifareClassicBlockGroupType.Address, 12, 1, valueBlockAccessConditions),
+      new MifareClassicBlockGroup(MifareClassicBlockGroupType.AddressInverted, 13, 1, valueBlockAccessConditions),
+      new MifareClassicBlockGroup(MifareClassicBlockGroupType.Address, 14, 1, valueBlockAccessConditions),
+      new MifareClassicBlockGroup(MifareClassicBlockGroupType.AddressInverted, 15, 1, valueBlockAccessConditions),
     ]);
   }
 }
