@@ -98,6 +98,10 @@ watch(() => props.group, () => editMode.value = false);
     &>.group:not(:first-child) {
       margin-left: 1rem;
     }
+
+    .group.view {
+      flex-shrink: 0;
+    }
   }
 
   .bytes {
