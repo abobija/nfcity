@@ -170,9 +170,11 @@ export function overwriteArraySegment(target: number[], source: number[], offset
   return target;
 }
 
-export function assert(condition: any, message?: string): asserts condition {
+export function assert(condition: any, error?: Error | string): asserts condition {
   if (!condition) {
-    throw new Error(message);
+    throw error instanceof Error
+      ? error
+      : new Error(error !== undefined ? String(error) : 'assertion failed');
   }
 }
 
