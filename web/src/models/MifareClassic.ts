@@ -99,7 +99,7 @@ const keyAAccessConditions: Partial<MifareClassicKeyPermissions> =
 const accessBitsAccessConditions: Partial<MifareClassicKeyPermissions> = {
   read: {
     keyA: [0b000, 0b010, 0b100, 0b110, 0b001, 0b011, 0b101, 0b111],
-    keyB: [0b100, 0b110, 0b001, 0b011, 0b101, 0b111],
+    keyB: [0b000, 0b010, 0b100, 0b110, 0b001, 0b011, 0b101, 0b111],
   },
   write: {
     keyA: [0b001],
@@ -110,7 +110,7 @@ const accessBitsAccessConditions: Partial<MifareClassicKeyPermissions> = {
 const keyBAccessConditions: Partial<MifareClassicKeyPermissions> = {
   read: {
     keyA: [0b000, 0b010, 0b001],
-    keyB: [0b001],
+    keyB: [0b000, 0b010, 0b001],
   },
   write: {
     keyA: [0b000, 0b001],
@@ -173,7 +173,7 @@ type AccessBitsPool = {
   readonly [key in AccessBitsPoolIndex]: Readonly<PiccBlockAccessBits>;
 }
 
-type AccessBitsComboPool = {
+export type AccessBitsComboPool = {
   readonly [key in AccessBitsPoolIndex]: Readonly<AccessBitsCombo>;
 }
 
