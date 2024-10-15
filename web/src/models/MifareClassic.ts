@@ -1,6 +1,10 @@
 import PiccDto from "@/communication/dtos/PiccDto";
 import Picc, {
   AccessBitsCombo,
+  calculateAccessBitsCombo,
+  calculateAccessBitsFromCombo,
+  everyAccessBitCombo,
+  keyA,
   PiccBlock,
   PiccBlockAccessBits,
   PiccKey,
@@ -9,13 +13,18 @@ import Picc, {
   PiccState,
   PiccType,
   UpdatablePiccBlock,
-  UpdatablePiccSector,
-  calculateAccessBitsCombo,
-  calculateAccessBitsFromCombo,
-  everyAccessBitCombo,
-  keyA
+  UpdatablePiccSector
 } from "@/models/Picc";
-import { assert, hex, invertedNibble, nibble, nibbles, nibblesToByte, unhexToArray } from "@/utils/helpers";
+import {
+  assert,
+  hex,
+  invertedNibble,
+  invertNibble,
+  nibble,
+  nibbles,
+  nibblesToByte,
+  unhexToArray
+} from "@/utils/helpers";
 
 export const keySize = 6;
 export const blockSize = 16;
@@ -168,6 +177,7 @@ export function accessBitsComboPoolToBytes(pool: AccessBitsComboPool): number[] 
  * | [8] |  C33 |  C32 |  C31 |  C30 |  C23 |  C22 |  C21 |  C20 |
  * +-----+------+------+------+------+------+------+------+------+
  */
+
 export function accessBitsPoolToBytes(accessBitsPool: AccessBitsPool): number[] {
   const byte6 = nibblesToByte(
     invertedNibble(accessBitsPool[3].c2, accessBitsPool[2].c2, accessBitsPool[1].c2, accessBitsPool[0].c2),
@@ -184,7 +194,23 @@ export function accessBitsPoolToBytes(accessBitsPool: AccessBitsPool): number[] 
     nibble(accessBitsPool[3].c2, accessBitsPool[2].c2, accessBitsPool[1].c2, accessBitsPool[0].c2)
   );
 
+  assert(
+    !isAccessBitsIntegrityViolated(byte6, byte7, byte8),
+    new AccessBitsIntegrityViolationError()
+  );
+
   return [byte6, byte7, byte8];
+}
+
+/**
+ * bytes 6, 7, 8 of the sector trailer block
+ */
+function isAccessBitsIntegrityViolated(byte6: number, byte7: number, byte8: number): boolean {
+  const [c2_, c1_] = nibbles(byte6);
+  const [c1, c3_] = nibbles(byte7);
+  const [c3, c2] = nibbles(byte8);
+
+  return c1_ !== invertNibble(c1) || c2_ !== invertNibble(c2) || c3_ !== invertNibble(c3);
 }
 
 function isValueBlock(accessBits: PiccBlockAccessBits): boolean {
@@ -327,9 +353,10 @@ class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
   ) {
     const { data } = block;
 
-    if (MifareClassicSectorTrailerBlock.checkAccessBitsIntegrityViolation(data)) {
-      throw new Error('Access bits integrity violation');
-    }
+    assert(
+      !isAccessBitsIntegrityViolated(data[6], data[7], data[8]),
+      new AccessBitsIntegrityViolationError()
+    );
 
     const [c1] = nibbles(data[7]);
     const [c3, c2] = nibbles(data[8]);
@@ -374,14 +401,6 @@ class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
       c2: (c2 & (1 << offset)) >> offset,
       c3: (c3 & (1 << offset)) >> offset,
     }
-  }
-
-  private static checkAccessBitsIntegrityViolation(trailerData: number[]): Boolean {
-    const [c2_, c1_] = nibbles(trailerData[6]);
-    const [c1, c3_] = nibbles(trailerData[7]);
-    const [c3, c2] = nibbles(trailerData[8]);
-
-    return (c1 != (~c1_ & 0x0F)) || (c2 != (~c2_ & 0x0F)) || (c3 != (~c3_ & 0x0F));
   }
 }
 
@@ -648,5 +667,11 @@ export default class MifareClassic implements Picc {
     return picc.type === PiccType.Mifare1K
       || picc.type === PiccType.Mifare4K
       || picc.type === PiccType.MifareMini;
+  }
+}
+
+class AccessBitsIntegrityViolationError extends Error {
+  constructor() {
+    super('Access bits integrity violated');
   }
 }
