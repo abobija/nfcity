@@ -7,10 +7,10 @@ import { useClientMaybe } from "@/composables/useClient";
 import useClientStorage, { isValidClientStorage, ValidClientStorage } from "@/composables/useClientStorage";
 import makeLogger from "@/utils/Logger";
 import { onMounted, ref, watch } from "vue";
-import WNS from "./WNS";
+import wns from "./WNS";
+import { assert } from "./utils/helpers";
 
 const {
-  DEV,
   VITE_APP_NAME,
   VITE_APP_DESCRIPTION,
   VITE_APP_AUTHOR,
@@ -90,10 +90,9 @@ onClientReady(() => {
     state.value = AppState.ClientReady;
   }
 
-  if (DEV) {
-    (window as any).nfcity = new WNS(client.value!);
-    logger.info('nfcity Window namespace has been mounted');
-  }
+  assert(client.value);
+
+  wns.client = client.value;
 });
 </script>
 
