@@ -8,17 +8,12 @@ import { computed, ref, watch } from "vue";
 
 const props = defineProps<{
   group: MifareClassicBlockGroup;
-  view?: ByteRepresentation;
 }>();
 
-defineEmits<{
-  (e: 'viewChangeProposal', viewProposal: ByteRepresentation): void;
-}>();
-
+const representation = ref(ByteRepresentation.Hexadecimal);
 const block = computed(() => props.group.block);
 const key = computed(() => block.value.sector.key);
 const bytes = computed(() => props.group.data());
-const computedView = computed(() => props.view ?? ByteRepresentation.Hexadecimal);
 const editable = computed(() => {
   return props.group.type === MifareClassicBlockGroupType.Data
     && key.value !== undefined
@@ -30,19 +25,19 @@ watch(() => props.group, () => editMode.value = false);
 </script>
 
 <template>
-  <section class="MemoryViewer">
+  <section class="MemoryViewer" :class="{ unreadable: key && !group.keyCan(key, 'read') }">
     <header>
       <div v-if="!editMode" class="toolbar">
         <div class="view group">
           <div class="btn-group">
-            <button class="btn primary" :class="{ activated: computedView === ByteRepresentation.Hexadecimal }"
-              @click="$emit('viewChangeProposal', ByteRepresentation.Hexadecimal)">hex</button>
-            <button class="btn primary" :class="{ activated: computedView === ByteRepresentation.Binary }"
-              @click="$emit('viewChangeProposal', ByteRepresentation.Binary)">bin</button>
-            <button class="btn primary" :class="{ activated: computedView === ByteRepresentation.Decimal }"
-              @click="$emit('viewChangeProposal', ByteRepresentation.Decimal)">dec</button>
-            <button class="btn primary" :class="{ activated: computedView === ByteRepresentation.Ascii }"
-              @click="$emit('viewChangeProposal', ByteRepresentation.Ascii)">ascii</button>
+            <button class="btn primary" :class="{ activated: representation === ByteRepresentation.Hexadecimal }"
+              @click="representation = ByteRepresentation.Hexadecimal">hex</button>
+            <button class="btn primary" :class="{ activated: representation === ByteRepresentation.Binary }"
+              @click="representation = ByteRepresentation.Binary">bin</button>
+            <button class="btn primary" :class="{ activated: representation === ByteRepresentation.Decimal }"
+              @click="representation = ByteRepresentation.Decimal">dec</button>
+            <button class="btn primary" :class="{ activated: representation === ByteRepresentation.Ascii }"
+              @click="representation = ByteRepresentation.Ascii">ascii</button>
           </div>
         </div>
         <div class="modify group">
@@ -54,13 +49,13 @@ watch(() => props.group, () => editMode.value = false);
     </header>
     <main>
       <MemoryEditor v-if="editMode" :group @cancel="editMode = false" @done="editMode = false" />
-      <div v-else-if="computedView == ByteRepresentation.Decimal" class="bytes">
+      <div v-else-if="representation == ByteRepresentation.Decimal" class="bytes">
         {{ bytes.join(' ') }}
       </div>
-      <div v-else-if="computedView == ByteRepresentation.Binary" class="bytes">
+      <div v-else-if="representation == ByteRepresentation.Binary" class="bytes">
         {{ bin(bytes, ' ') }}
       </div>
-      <div v-else-if="computedView == ByteRepresentation.Ascii" class="bytes">
+      <div v-else-if="representation == ByteRepresentation.Ascii" class="bytes">
         <span v-for="b in bytes" class="ascii" :class="{ 'non-printable': !isAsciiPrintable(b) }"
           :title="!isAsciiPrintable(b) ? `0x${hex(b)}` : ''">
           {{ ascii(b) }}
@@ -102,13 +97,17 @@ watch(() => props.group, () => editMode.value = false);
     }
   }
 
+  &.unreadable .bytes {
+    color: color.adjust($color-fg, $lightness: -50%);
+  }
+
   main,
   footer {
     margin-top: .5rem;
   }
 
   .info {
-    color: color.adjust($color-fg, $lightness: -30%);
+    color: color.adjust($color-fg, $lightness: -20%);
     font-size: .8em;
   }
 }

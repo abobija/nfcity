@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import MemoryViewer from "@/components/MemoryViewer/MemoryViewer.vue";
 import { MifareClassicBlockGroup, MifareClassicBlockGroupType, MifareClassicBlockOperation } from "@/models/MifareClassic";
-import ByteRepresentation from "@Memory/ByteRepresentation";
-import { computed, ref } from "vue";
+import { computed } from "vue";
 
 const group = defineModel<MifareClassicBlockGroup>({ required: true });
-const view = ref(ByteRepresentation.Hexadecimal);
 const key = computed(() => group.value.block.sector.key);
 const operations = computed(() => Object.keys(group.value.accessConditions) as MifareClassicBlockOperation[]);
 const permissions = computed(() => key.value ? group.value.allowedOperationsFor(key.value) : []);
@@ -41,7 +39,7 @@ const permissions = computed(() => key.value ? group.value.allowedOperationsFor(
       <li class="prop memory">
         <div class="name">Content</div>
         <div class="value">
-          <MemoryViewer :view :group @view-change-proposal="v => view = v" />
+          <MemoryViewer :group />
         </div>
       </li>
     </ul>
