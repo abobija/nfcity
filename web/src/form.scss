@@ -14,6 +14,7 @@ $input-disabled-border-color: color.adjust($input-color, $alpha: $disabled-borde
 
 $color-primary: $color-3;
 $color-secondary: $color-4;
+$color-info: $color-1;
 
 form {
   display: block;
@@ -150,6 +151,8 @@ button.txt,
 @include define-button('primary', $color-primary, $color-bg);
 
 @include define-button('secondary', $color-secondary, $color-bg);
+
+@include define-button('info', $color-info, $color-bg);
 
 @mixin define-txt-button($class-name, $color-fg) {
 

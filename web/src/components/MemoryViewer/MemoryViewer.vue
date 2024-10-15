@@ -38,7 +38,7 @@ watch(() => props.group, () => editMode.value = false);
       <div v-if="!editMode" class="toolbar">
         <div class="view group">
           <div class="btn-group">
-            <button class="btn primary" v-for="r in representations" :class="{ activated: r === representation }"
+            <button class="btn info" v-for="r in representations" :class="{ activated: r === representation }"
               @click="representation = r">{{ byteRepresentationShortName(r) }}</button>
           </div>
         </div>
@@ -50,7 +50,7 @@ watch(() => props.group, () => editMode.value = false);
         </div>
         <div class="modify group">
           <div class="btn-group">
-            <button class="btn secondary" :disabled="!editable" @click="editMode = true">edit</button>
+            <button class="btn primary" :disabled="!editable" @click="editMode = true">edit</button>
           </div>
         </div>
       </div>
