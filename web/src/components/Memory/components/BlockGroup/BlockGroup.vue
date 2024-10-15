@@ -38,6 +38,17 @@ const groupClass: Map<MifareClassicBlockGroupType, string> = new Map([
   [MifareClassicBlockGroupType.ManufacturerData, 'manufacturer'],
 ]);
 
+const key = computed(() => props.group.block.sector.key);
+const permissions = computed(() => {
+  if (!key.value) {
+    return [];
+  }
+
+  return Object.fromEntries(new Map(
+    props.group.allowedOperationsFor(key.value).map(op => [`data-access-${op}`, true])
+  ));
+});
+
 const classes = computed(() => {
   const arr: string[] = [groupClass.get(props.group.type)!];
 
@@ -50,7 +61,7 @@ const classes = computed(() => {
 </script>
 
 <template>
-  <ul class="BlockGroup" :class="classes">
+  <ul class="BlockGroup" :class="classes" v-bind="permissions">
     <Byte :group="group" :index="group.offset + index" v-for="(_, index) in Array.from({ length: group.length })"
       :focus="focus?.byteFocus" />
   </ul>
@@ -66,6 +77,14 @@ const classes = computed(() => {
 
   &:hover {
     background-color: color.adjust($color-bg, $lightness: +1%);
+  }
+}
+
+.Block:not(.undefined) {
+  .BlockGroup {
+    &:not([data-access-read]) {
+      text-decoration: line-through;
+    }
   }
 }
 </style>
