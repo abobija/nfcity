@@ -73,8 +73,9 @@ watch(() => props.group, () => editMode.value = false);
     <footer>
       <div v-if="key && !group.keyCan(key, 'read')">
         <p class="info">
-          * Group is unreadable due to key {{ keyTypeName(key.type) }} restrictions, therefore the content is blanked
-          with zeros.
+          * Group {{ MifareClassicBlockGroupType[group.type] }} is unreadable
+          due to restrictions of the key ({{ keyTypeName(key.type) }}) used in sector authentication.
+          Therefore, the content is blanked with all zeros.
         </p>
       </div>
     </footer>
