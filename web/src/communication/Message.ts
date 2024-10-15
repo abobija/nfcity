@@ -1,5 +1,8 @@
 import Dto from "@/communication/Dto";
 import PiccKeyDto from "@/communication/dtos/PiccKeyDto";
+import { keySize } from "@/models/MifareClassic";
+import { keyA, keyB } from "@/models/Picc";
+import { assert } from "@/utils/helpers";
 
 export type WebMessageKind =
   | 'ping'
@@ -41,6 +44,9 @@ export abstract class BaseWebMessage implements WebMessage {
 
 export abstract class AuthorizedWebMessage extends BaseWebMessage {
   constructor(readonly key: PiccKeyDto) {
+    assert(key?.value?.length === keySize, 'invalid key length');
+    assert(key.type === keyA || key.type === keyB, 'invalid key type');
+
     super();
     this.key = key;
   }
