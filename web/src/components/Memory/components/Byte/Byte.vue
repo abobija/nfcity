@@ -19,7 +19,7 @@ const classes = computed(() => ({
 </script>
 
 <template>
-  <li class="Byte unselectable" :class="classes" :data-index="index"
+  <li class="Byte txt-unselectable" :class="classes" :data-index="index"
     @mouseenter="byteEmits.emit('mouseEnter', new ByteEvent(index, group))"
     @mouseleave="byteEmits.emit('mouseLeave', new ByteEvent(index, group))"
     @click="byteEmits.emit('mouseClick', new ByteEvent(index, group))">

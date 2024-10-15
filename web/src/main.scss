@@ -38,15 +38,15 @@ abbr {
   text-decoration: none;
 }
 
-@mixin unselectable {
+@mixin txt-unselectable {
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
 }
 
-.unselectable {
-  @include unselectable;
+.txt-unselectable {
+  @include txt-unselectable;
 }
 
 .full-screen {

@@ -83,7 +83,7 @@ function onPaste(e: ClipboardEvent) {
 
 <template>
   <section class="BytesInput">
-    <abbr class="byte-representation unselectable" :title="ByteRepresentation[byteRepresentation]">
+    <abbr class="byte-representation txt-unselectable" :title="ByteRepresentation[byteRepresentation]">
       {{ byteRepresentationSingleChar(byteRepresentation) }}
     </abbr>
     <textarea ref="bytesField" v-focus="autofocus === true" v-model="bytesFieldValue" spellcheck="false"
