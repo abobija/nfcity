@@ -17,6 +17,7 @@ import Picc, {
 import { hex, nibbles, unhexToArray } from "@/utils/helpers";
 
 export const keySize = 6;
+export const blockSize = 16;
 
 export const defaultKey: PiccKey = {
   type: keyA,
@@ -194,8 +195,6 @@ export class MifareClassicBlockGroup {
 };
 
 export abstract class MifareClassicBlock implements PiccBlock {
-  static readonly size: number = 16;
-
   readonly address: number;
   private _data: number[];
   readonly accessBits: PiccBlockAccessBits;
@@ -223,7 +222,7 @@ export abstract class MifareClassicBlock implements PiccBlock {
   }
 
   get loaded(): Boolean {
-    return this.data.length === MifareClassicBlock.size;
+    return this.data.length === blockSize;
   }
 
   hasSameAddressAs(that: MifareClassicBlock): boolean {
@@ -235,7 +234,7 @@ export abstract class MifareClassicBlock implements PiccBlock {
       throw new Error('Invalid block address');
     }
 
-    if (block.data.length != MifareClassicBlock.size) {
+    if (block.data.length != blockSize) {
       throw new Error('Invalid block data length');
     }
 
@@ -256,7 +255,7 @@ class MifareClassicUndefinedBlock extends MifareClassicBlock {
         accessBits: { c1: 0, c2: 0, c3: 0 },
       },
       [
-        new MifareClassicBlockGroup(MifareClassicBlockGroupType.Undefined, 0, MifareClassicBlock.size),
+        new MifareClassicBlockGroup(MifareClassicBlockGroupType.Undefined, 0, blockSize),
       ]);
   }
 }
@@ -326,7 +325,7 @@ class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
 class MifareClassicDataBlock extends MifareClassicBlock {
   constructor(sector: MifareClassicSector, block: PiccBlock) {
     super(MifareClassicBlockType.Data, sector, block, [
-      new MifareClassicBlockGroup(MifareClassicBlockGroupType.Data, 0, MifareClassicBlock.size, dataBlockAccessConditions),
+      new MifareClassicBlockGroup(MifareClassicBlockGroupType.Data, 0, blockSize, dataBlockAccessConditions),
     ]);
   }
 }
@@ -359,7 +358,7 @@ class MifareClassicManufacturerBlock extends MifareClassicBlock {
       new MifareClassicBlockGroup(
         MifareClassicBlockGroupType.ManufacturerData,
         uid.length + 4,
-        MifareClassicBlock.size - uid.length - 4,
+        blockSize - uid.length - 4,
         manufacturerBlockAccessConditions
       ),
     ]);
@@ -486,7 +485,7 @@ export class MifareClassicMemory implements PiccMemory {
       this.blockDistribution = [[32, 4], [16, 8]];
     }
 
-    this.size = this.blockDistribution.reduce((acc, [n, m]) => acc + n * m, 0) * MifareClassicBlock.size;
+    this.size = this.blockDistribution.reduce((acc, [n, m]) => acc + n * m, 0) * blockSize;
   }
 
   get isEmpty() {

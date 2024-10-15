@@ -16,6 +16,7 @@ import TargetByte from "@/components/Dashboard/TargetByte";
 import SystemInfo from "@/components/SystemInfo/SystemInfo.vue";
 import useClient from "@/composables/useClient";
 import MifareClassic, {
+  blockSize,
   MifareClassicBlock,
   MifareClassicBlockGroup,
   MifareClassicMemory,
@@ -321,7 +322,7 @@ onByteMouseClick(clickedByte => {
                 <p v-for="(d) in picc.memory.blockDistribution">
                   {{ d[0] }} sectors with {{ d[1] }} blocks,
                 </p>
-                <p>{{ MifareClassicBlock.size }} bytes per block,</p>
+                <p>{{ blockSize }} bytes per block,</p>
                 <p>{{ picc.memory.size }} bytes of memory.</p>
               </div>
             </Transition>
