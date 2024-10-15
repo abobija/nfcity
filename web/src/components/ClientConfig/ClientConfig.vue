@@ -43,7 +43,7 @@ function onSubmit() {
 </script>
 
 <template>
-  <div class="ClientConfig">
+  <section class="ClientConfig">
     <form @submit.prevent="onSubmit">
       <div class="form-group">
         <input type="text" placeholder="Broker" v-model.trim="localClientStorage.brokerUrl" ref="broker-url"
@@ -58,7 +58,7 @@ function onSubmit() {
         <button v-if="props.cancelable" class="btn secondary" @click="emits('cancel')" type="button">Cancel</button>
       </div>
     </form>
-  </div>
+  </section>
 </template>
 
 <style lang="scss">

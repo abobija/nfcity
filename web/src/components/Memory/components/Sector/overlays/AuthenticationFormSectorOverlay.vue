@@ -26,7 +26,7 @@ function onSubmit() {
 </script>
 
 <template>
-  <div class="AuthenticationFormSectorOverlay">
+  <section class="AuthenticationFormSectorOverlay">
     <form class="form" @submit.prevent="onSubmit">
       <div class="row key">
         <label :for="`keya-s${sector.offset}`" title="Use key A">
@@ -40,7 +40,7 @@ function onSubmit() {
         <button class="secondary" @click.prevent="$emit('cancel')" type="button">Cancel</button>
       </div>
     </form>
-  </div>
+  </section>
 </template>
 
 <style lang="scss">

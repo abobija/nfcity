@@ -24,9 +24,9 @@ const classes = computed(() => ({
 </script>
 
 <template>
-  <div class="Block" :class="classes">
+  <section class="Block" :class="classes">
     <BlockGroup :group="group" v-for="group in block.blockGroups" :focus="focus?.groupFocus" />
-  </div>
+  </section>
 </template>
 
 <style lang="scss">

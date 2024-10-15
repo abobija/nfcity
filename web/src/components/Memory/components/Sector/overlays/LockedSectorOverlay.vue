@@ -1,8 +1,8 @@
 <template>
-  <div class="LockedSectorOverlay unselectable">
+  <section class="LockedSectorOverlay unselectable">
     <p>This sector has not been loaded</p>
     <p>Click to unlock</p>
-  </div>
+  </section>
 </template>
 
 <style lang="scss">

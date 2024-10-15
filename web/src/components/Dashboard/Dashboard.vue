@@ -279,7 +279,7 @@ onByteMouseClick(clickedByte => {
 </script>
 
 <template>
-  <div class="Dashboard">
+  <section class="Dashboard">
 
     <main v-if="picc">
       <div class="header">
@@ -368,5 +368,5 @@ onByteMouseClick(clickedByte => {
       </div>
     </div>
 
-  </div>
+  </section>
 </template>

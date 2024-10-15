@@ -8,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="ByteInfoRenderer">
+  <section class="ByteInfoRenderer">
     <div class="header prop">
       <div class="name">Byte</div>
       <div class="value">{{ byte.index }}</div>
@@ -19,5 +19,5 @@ defineProps<{
         <div class="value">{{ hex(byte.group.block.data[byte.index]) }}</div>
       </li>
     </ul>
-  </div>
+  </section>
 </template>

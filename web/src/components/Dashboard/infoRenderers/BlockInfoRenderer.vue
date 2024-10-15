@@ -8,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="BlockInfoRenderer">
+  <section class="BlockInfoRenderer">
     <div class="header prop">
       <div class="name">Block</div>
       <div class="value">{{ hex(block.address) }}</div>
@@ -25,5 +25,5 @@ defineProps<{
         </div>
       </li>
     </ul>
-  </div>
+  </section>
 </template>

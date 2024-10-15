@@ -89,7 +89,7 @@ async function authenticateAndLoadSector(key: PiccKey) {
 </script>
 
 <template>
-  <div class="Sector" :class="classes">
+  <section class="Sector" :class="classes">
     <div class="meta">
       <span class="offset" title="Sector offset">
         {{ sector.offset }}
@@ -110,7 +110,7 @@ async function authenticateAndLoadSector(key: PiccKey) {
           v-else-if="state == SectorState.AuthenticationInProgress" />
       </Transition>
     </div>
-  </div>
+  </section>
 </template>
 
 <style lang="scss">

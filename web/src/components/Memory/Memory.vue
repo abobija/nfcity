@@ -15,9 +15,9 @@ const classes = computed(() => ({
 </script>
 
 <template>
-  <div class="Memory" :class="classes">
+  <section class="Memory" :class="classes">
     <Sector v-for="(sector, sectorOffset) in memory.sectors" :key="sectorOffset" :sector :focus="focus?.sectorFocus" />
-  </div>
+  </section>
 </template>
 
 <style lang="scss">

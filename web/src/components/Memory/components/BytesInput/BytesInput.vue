@@ -82,7 +82,7 @@ function onPaste(e: ClipboardEvent) {
 </script>
 
 <template>
-  <div class="BytesInput">
+  <section class="BytesInput">
     <abbr class="byte-representation unselectable" :title="ByteRepresentation[byteRepresentation]">
       {{ byteRepresentationSingleChar(byteRepresentation) }}
     </abbr>
@@ -92,7 +92,7 @@ function onPaste(e: ClipboardEvent) {
       }" :style="{
         resize: resizable === false ? 'none' : 'both',
       }" @keydown="onKeyDown" @paste="onPaste" name="bytes" :readonly="readonly"></textarea>
-  </div>
+  </section>
 </template>
 
 <style lang="scss">

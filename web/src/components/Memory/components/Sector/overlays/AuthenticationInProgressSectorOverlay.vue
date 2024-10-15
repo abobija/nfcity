@@ -1,5 +1,5 @@
 <template>
-  <div class="AuthenticationInProgressSectorOverlay">
+  <section class="AuthenticationInProgressSectorOverlay">
     Unlocking...
-  </div>
+  </section>
 </template>

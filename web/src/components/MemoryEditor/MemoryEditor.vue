@@ -146,7 +146,7 @@ function confirm() {
 </script>
 
 <template>
-  <div class="MemoryEditor">
+  <section class="MemoryEditor">
     <form v-if="state == MemoryEditorState.Editing" class="edit" @submit.prevent="confirm">
       <div class="form-group">
         <BytesInput v-model="editingBytes" :maxlength autofocus multiline resizable />
@@ -172,7 +172,7 @@ function confirm() {
     <div v-else-if="state == MemoryEditorState.Saving" class="saving">
       <p>Saving...</p>
     </div>
-  </div>
+  </section>
 </template>
 
 <style lang="scss">

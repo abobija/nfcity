@@ -32,7 +32,7 @@ onClientPongMissed(() => {
 </script>
 
 <template>
-  <div class="SystemInfo">
+  <section class="SystemInfo">
     <div class="ping">
       <span class="root-topic">
         {{ client.rootTopicMasked }} @ {{ client.brokerUrl.hostname }}
@@ -58,7 +58,7 @@ onClientPongMissed(() => {
         {{ pingLatency }}
       </span>
     </div>
-  </div>
+  </section>
 </template>
 
 <style lang="scss">
