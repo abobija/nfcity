@@ -8,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="sector renderer component">
+  <section class="SectorInfoRenderer">
     <div class="header prop">
       <div class="name">Sector</div>
       <div class="value">{{ sector.offset }}</div>
@@ -19,5 +19,5 @@ defineProps<{
         <div class="value">{{ keyTypeName(sector.key.type) }}</div>
       </li>
     </ul>
-  </div>
+  </section>
 </template>

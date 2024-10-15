@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import MemoryViewer from "@/components/MemoryViewer/MemoryViewer.vue";
-import { MifareClassicBlockGroup, MifareClassicBlockGroupType } from "@/models/MifareClassic";
+import { MifareClassicBlockGroup, MifareClassicBlockGroupType, MifareClassicBlockOperation } from "@/models/MifareClassic";
 import ByteRepresentation from "@Memory/ByteRepresentation";
 import { computed, ref } from "vue";
 
 const group = defineModel<MifareClassicBlockGroup>({ required: true });
 const view = ref(ByteRepresentation.Hexadecimal);
 const key = computed(() => group.value.block.sector.key);
+const operations = computed(() => Object.keys(group.value.accessConditions) as MifareClassicBlockOperation[]);
 const permissions = computed(() => key.value ? group.value.allowedOperationsFor(key.value) : []);
 </script>
 
 <template>
-  <div class="group renderer component">
+  <section class="GroupInfoRenderer">
     <div class="header prop">
       <div class="name">Group</div>
       <div class="value">
@@ -19,12 +20,13 @@ const permissions = computed(() => key.value ? group.value.allowedOperationsFor(
       </div>
     </div>
     <ul class="props">
-      <li class="prop">
+      <li class="prop access">
         <div class="name">Access</div>
         <div class="value">
-          <span v-if="permissions.length === 0">no-access</span>
-          <span v-else>
-            {{ permissions.join(', ') }}
+          <span v-for="operation in operations" class="operation" :class="{
+            allowed: permissions.includes(operation),
+          }">
+            {{ operation }}
           </span>
         </div>
       </li>
@@ -43,5 +45,26 @@ const permissions = computed(() => key.value ? group.value.allowedOperationsFor(
         </div>
       </li>
     </ul>
-  </div>
+  </section>
 </template>
+
+<style lang="scss">
+@use 'sass:color';
+@import '@/theme.scss';
+
+.GroupInfoRenderer {
+  .access {
+    .operation {
+      display: inline-block;
+
+      &:not(:last-child) {
+        margin-right: 0.5em;
+      }
+
+      &:not(.allowed) {
+        text-decoration: line-through;
+      }
+    }
+  }
+}
+</style>

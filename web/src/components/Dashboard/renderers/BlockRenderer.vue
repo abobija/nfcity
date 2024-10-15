@@ -8,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="block renderer component">
+  <div class="BlockInfoRenderer">
     <div class="header prop">
       <div class="name">Block</div>
       <div class="value">{{ hex(block.address) }}</div>

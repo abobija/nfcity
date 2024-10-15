@@ -8,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="byte renderer component">
+  <div class="ByteInfoRenderer">
     <div class="header prop">
       <div class="name">Byte</div>
       <div class="value">{{ byte.index }}</div>

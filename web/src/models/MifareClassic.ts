@@ -69,7 +69,7 @@ export enum MifareClassicBlockType {
   Manufacturer,
 }
 
-type MifareClassicBlockOperation =
+export type MifareClassicBlockOperation =
   | 'read'
   | 'write'
   | 'increment'
@@ -255,7 +255,7 @@ export class MifareClassicBlockGroup {
     readonly type: MifareClassicBlockGroupType,
     readonly offset: number,
     readonly length: number,
-    private readonly accessConditions: Partial<MifareClassicKeyPermissions> = {},
+    readonly accessConditions: Partial<MifareClassicKeyPermissions> = {},
   ) {
     this.type = type;
     this.offset = offset;
