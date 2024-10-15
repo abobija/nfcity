@@ -14,22 +14,26 @@ const permissions = computed(() => key.value ? group.value.allowedOperationsFor(
   <div class="group renderer component">
     <div class="header prop">
       <div class="name">Group</div>
-      <div class="value">{{ MifareClassicBlockGroupType[group.type] }}</div>
+      <div class="value">
+        {{ MifareClassicBlockGroupType[group.type] }}
+      </div>
     </div>
     <ul class="props">
       <li class="prop">
-        <div class="name">Offset</div>
-        <div class="value">{{ group.offset }}</div>
-      </li>
-      <li class="prop">
-        <div class="name">Length</div>
-        <div class="value">{{ group.length }}</div>
-      </li>
-      <li class="prop">
         <div class="name">Access</div>
         <div class="value">
-          Permissions
-          [ {{ permissions.join(', ') }} ]
+          <span v-if="permissions.length === 0">no-access</span>
+          <span v-else>
+            {{ permissions.join(', ') }}
+          </span>
+        </div>
+      </li>
+      <li class="prop">
+        <div class="name">Range</div>
+        <div class="value">
+          <abbr title="from_byte:to_byte">
+            {{ group.offset }}:{{ group.offset + group.length - 1 }}
+          </abbr>
         </div>
       </li>
       <li class="prop memory">

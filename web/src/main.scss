@@ -34,6 +34,10 @@ var {
   color: $color-5;
 }
 
+abbr {
+  text-decoration: none;
+}
+
 @mixin unselectable {
   user-select: none;
   -webkit-user-select: none;
