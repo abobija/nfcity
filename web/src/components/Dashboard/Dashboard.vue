@@ -8,10 +8,10 @@ import { isPiccDeviceMessage } from "@/communication/messages/device/PiccDeviceM
 import { isPiccStateChangedDeviceMessage } from "@/communication/messages/device/PiccStateChangedDeviceMessage";
 import GetPiccWebMessage from "@/communication/messages/web/GetPiccWebMessage";
 import '@/components/Dashboard/Dashboard.scss';
-import BlockRenderer from "@/components/Dashboard/renderers/BlockRenderer.vue";
-import ByteRenderer from "@/components/Dashboard/renderers/ByteRenderer.vue";
-import GroupRenderer from "@/components/Dashboard/renderers/GroupRenderer.vue";
-import SectorRenderer from "@/components/Dashboard/renderers/SectorRenderer.vue";
+import BlockInfoRenderer from "@/components/Dashboard/infoRenderers/BlockInfoRenderer.vue";
+import ByteInfoRenderer from "@/components/Dashboard/infoRenderers/ByteInfoRenderer.vue";
+import GroupInfoRenderer from "@/components/Dashboard/infoRenderers/GroupInfoRenderer.vue";
+import SectorInfoRenderer from "@/components/Dashboard/infoRenderers/SectorInfoRenderer.vue";
 import TargetByte from "@/components/Dashboard/TargetByte";
 import SystemInfo from "@/components/SystemInfo/SystemInfo.vue";
 import useClient from "@/composables/useClient";
@@ -328,10 +328,10 @@ onByteMouseClick(clickedByte => {
             </Transition>
 
             <div v-if="tByte">
-              <GroupRenderer class="InfoRenderer" v-model="tByte.group as MifareClassicBlockGroup" />
-              <BlockRenderer class="InfoRenderer" :block="tByte.group.block as MifareClassicBlock" />
-              <SectorRenderer class="InfoRenderer" :sector="tByte.group.block.sector as MifareClassicSector" />
-              <ByteRenderer class="InfoRenderer" :byte="tByte as TargetByte" />
+              <GroupInfoRenderer class="InfoRenderer" v-model="tByte.group as MifareClassicBlockGroup" />
+              <BlockInfoRenderer class="InfoRenderer" :block="tByte.group.block as MifareClassicBlock" />
+              <SectorInfoRenderer class="InfoRenderer" :sector="tByte.group.block.sector as MifareClassicSector" />
+              <ByteInfoRenderer class="InfoRenderer" :byte="tByte as TargetByte" />
             </div>
           </div>
         </div>
