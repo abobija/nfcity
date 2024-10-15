@@ -155,3 +155,7 @@ export function assert(condition: any, message?: string): asserts condition {
     throw new Error(message);
   }
 }
+
+export function isByte(value: number): boolean {
+  return Number.isInteger(value) && value >= 0 && value <= 0xFF;
+}

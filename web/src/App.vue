@@ -7,6 +7,7 @@ import { useClientMaybe } from "@/composables/useClient";
 import useClientStorage, { isValidClientStorage, ValidClientStorage } from "@/composables/useClientStorage";
 import makeLogger from "@/utils/Logger";
 import { onMounted, ref, watch } from "vue";
+import NFCityWNS from "./utils/NFCityWNS";
 
 const {
   VITE_APP_NAME,
@@ -87,6 +88,9 @@ onClientReady(() => {
   if (state.value < AppState.ClientReady) {
     state.value = AppState.ClientReady;
   }
+
+  (window as any).nfcity = new NFCityWNS(client.value!);
+  logger.info('nfcity window namespace has been mounted');
 });
 </script>
 
