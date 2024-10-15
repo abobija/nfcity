@@ -15,7 +15,7 @@ defineProps<{
     </div>
     <ul class="props">
       <li class="prop" v-if="sector.key">
-        <div class="name">Key</div>
+        <div class="name">Key type</div>
         <div class="value">{{ keyTypeName(sector.key.type) }}</div>
       </li>
     </ul>
