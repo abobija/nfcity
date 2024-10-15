@@ -2,7 +2,7 @@ import Client from "@/communication/Client";
 import WriteBlockWebMessage from "@/communication/messages/web/WriteBlockWebMessage";
 import { accessBitsComboPoolToBytes, defaultKey } from "@/models/MifareClassic";
 import { KeyType } from "@/models/Picc";
-import { assert, hex, unhexToArray } from "./helpers";
+import { assert, bin, hex, unhexToArray } from "./helpers";
 
 export default class NFCityWNS {
   constructor(
@@ -10,12 +10,13 @@ export default class NFCityWNS {
   ) {
     assert(_client !== undefined);
 
-    const functionsMap = {
+    const functionsToExpose = {
       hex,
+      bin,
       accessBitsComboPoolToBytes,
     };
 
-    for (const [key, value] of Object.entries(functionsMap)) {
+    for (const [key, value] of Object.entries(functionsToExpose)) {
       (this as any)[key] = value;
     }
   }
