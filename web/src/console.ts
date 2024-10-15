@@ -20,7 +20,9 @@ class Console {
     };
 
     for (const [key, value] of Object.entries(functionsToExpose)) {
-      (this as any)[key] = value;
+      const self = this as any;
+      assert(typeof self[key] === 'undefined');
+      self[key] = value;
     }
   }
 
