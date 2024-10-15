@@ -3,9 +3,9 @@ import { isErrorDeviceMessage } from "@/communication/messages/device/ErrorDevic
 import { isPiccBlockDeviceMessage } from "@/communication/messages/device/PiccBlockDeviceMessage";
 import WriteBlockWebMessage from "@/communication/messages/web/WriteBlockWebMessage";
 import useClient from "@/composables/useClient";
-import { MifareClassicBlockGroup } from "@/models/MifareClassic";
+import { MifareClassicBlockGroup, MifareClassicBlockType } from "@/models/MifareClassic";
 import { UpdatablePiccBlock } from "@/models/Picc";
-import { assert, hex, overwriteArraySegment } from "@/utils/helpers";
+import { arraysAreEqual, assert, hex, overwriteArraySegment } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";
 import BytesInput from "@Memory/components/BytesInput/BytesInput.vue";
 import { computed, onMounted, ref, watch } from "vue";
@@ -105,26 +105,16 @@ async function save() {
       return;
     }
 
-    if (!isPiccBlockDeviceMessage(response)) {
-      logger.warning('unexpected response, expecting picc block, got', response);
-      state.value = MemoryEditorState.SaveFailed;
-      return;
-    }
+    assert(isPiccBlockDeviceMessage(response), 'unexpected response, expecting picc block');
 
     const updatedBlock: UpdatablePiccBlock = {
       address: response.address,
       data: Array.from(response.data),
     };
 
-    if (updatedBlock.address != confirmBlock.value.address) {
-      logger.warning(
-        'unexpected response, address mismatch,',
-        'sent', confirmBlock.value.address,
-        'received', updatedBlock.address
-      );
-      state.value = MemoryEditorState.SaveFailed;
-      return;
-    }
+    assert(updatedBlock.address === confirmBlock.value.address, 'address mismatch');
+    assert(props.group.block.type !== MifareClassicBlockType.Data
+      || arraysAreEqual(updatedBlock.data, confirmBlock.value.data), 'data mismatch');
 
     block.value.updateWith(updatedBlock);
     state.value = MemoryEditorState.SaveSucceeded;
