@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import MemoryBlockEditor, { isBlockEditable } from "@/components/MemoryBlockEditor/MemoryBlockEditor.vue";
-import { MifareClassicBlock, MifareClassicBlockGroupType } from "@/models/MifareClassic";
+import { MifareClassicBlock, MifareClassicBlockGroupType, MifareClassicSectorTrailerBlock } from "@/models/MifareClassic";
 import { keyTypeName } from "@/models/Picc";
 import { ascii, bin, hex, isAsciiPrintable } from "@/utils/helpers";
 import ByteRepresentation, { byteRepresentationShortName } from "@Memory/ByteRepresentation";
@@ -22,7 +22,7 @@ const showIndexes = ref(false);
 const key = computed(() => props.block.sector.key);
 const editable = computed(() => isBlockEditable(props.block));
 const editMode = ref(false);
-const infos = computed<string[]>(() => {
+const keyRestrictions = computed<string[]>(() => {
   const list: string[] = [];
 
   const unreadableGroups = props.block.blockGroups
@@ -30,12 +30,17 @@ const infos = computed<string[]>(() => {
 
   if (unreadableGroups.length > 0 && key.value) {
     list.push(`
-        Group${unreadableGroups.length > 1 ? 's' : ''}
         ${unreadableGroups.map(group => MifareClassicBlockGroupType[group.type]).join(' & ')}
-        ${unreadableGroups.length > 1 ? 'are' : 'is'} unreadable
+        ${unreadableGroups.length > 1 ? 'are' : 'is'} unreadable and blanked with zeros
         due to restrictions of the key ${keyTypeName(key.value.type)} used in sector authentication.
-        Therefore, group${unreadableGroups.length > 1 ? 's' : ''} ${unreadableGroups.length > 1 ? 'are' : 'is'}
-        blanked with zeros.
+      `);
+  }
+
+  if (props.block instanceof MifareClassicSectorTrailerBlock
+    && key.value && !props.block.keyCanWriteToAnyGroup(key.value)) {
+    list.push(`
+      The key ${keyTypeName(key.value.type)} used for sector authentication
+      cannot write to any group in this sector trailer.
       `);
   }
 
@@ -97,8 +102,8 @@ watch(() => props.block, () => editMode.value = false);
       <MemoryBlockEditor v-if="editMode && editable" :block @cancel="editMode = false" @done="editMode = false" />
     </main>
     <footer>
-      <p v-for="info in infos" class="info">
-        * {{ info }}
+      <p v-for="restriction in keyRestrictions" class="restriction">
+        * {{ restriction }}
       </p>
     </footer>
   </section>
@@ -177,7 +182,7 @@ watch(() => props.block, () => editMode.value = false);
     margin-top: .5rem;
   }
 
-  footer .info {
+  footer .restriction {
     color: color.adjust($color-fg, $lightness: -40%);
     font-size: .7em;
     margin-top: .2rem;

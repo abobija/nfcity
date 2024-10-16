@@ -2,11 +2,14 @@
 export function isBlockEditable(block: MifareClassicBlock): boolean {
   const { key } = block.sector;
 
-  return key !== undefined
-    && (
-      block instanceof MifareClassicDataBlock
-      && block.keyCan(key, 'write')
-    );
+  if (key === undefined) {
+    return false;
+  }
+
+  return (
+    (block instanceof MifareClassicDataBlock && block.keyCan(key, 'write'))
+    || (block instanceof MifareClassicSectorTrailerBlock && block.keyCanWriteToAnyGroup(key))
+  );
 }
 </script>
 
@@ -16,7 +19,7 @@ import { isPiccBlockDeviceMessage } from "@/communication/messages/device/PiccBl
 import WriteBlockWebMessage from "@/communication/messages/web/WriteBlockWebMessage";
 import BytesInput from "@/components/BytesInput/BytesInput.vue";
 import useClient from "@/composables/useClient";
-import { MifareClassicBlock, MifareClassicBlockType, MifareClassicDataBlock } from "@/models/MifareClassic";
+import { MifareClassicBlock, MifareClassicBlockType, MifareClassicDataBlock, MifareClassicSectorTrailerBlock } from "@/models/MifareClassic";
 import { UpdatablePiccBlock } from "@/models/Picc";
 import { arraysAreEqual, assert, hex, overwriteArraySegment } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";
@@ -158,8 +161,14 @@ function confirm() {
 <template>
   <section class="MemoryBlockEditor">
     <form v-if="state == MemoryBlockEditorState.Editing" class="edit" @submit.prevent="confirm">
-      <div class="form-group">
-        <BytesInput v-model="editingBytes" :maxlength autofocus multiline resizable />
+      <div v-if="block instanceof MifareClassicDataBlock">
+        <div class="form-group">
+          <BytesInput v-model="editingBytes" :maxlength autofocus multiline resizable />
+        </div>
+      </div>
+      <div v-if="block instanceof MifareClassicSectorTrailerBlock">
+        <!-- TODO: -->
+        <p>Edit of sector trailer blocks is not supported yet.</p>
       </div>
       <div class="form-group">
         <button type="submit" class="btn primary" :disabled="!saveable">save</button>

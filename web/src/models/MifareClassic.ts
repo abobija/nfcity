@@ -411,6 +411,10 @@ export class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
     this.accessBitsPool = _accessBitsPool;
   }
 
+  keyCanWriteToAnyGroup(key: PiccKey): boolean {
+    return this.blockGroups.some(group => group.keyCan(key, 'write'));
+  }
+
   static calculateBlockAccessBitsPoolIndex(blockOffset: number, numberOfBlocks: number): AccessBitsPoolIndex {
     let index = blockOffset;
 
