@@ -115,7 +115,7 @@ watch(() => props.block, () => editMode.value = false);
     <footer v-if="key && showRestrictions && restrictions.length > 0">
       <div class="restrictions">
         <p class="intro">
-          Key {{ keyTypeName(key.type) }} restrictions:
+          Restrictions of key {{ keyTypeName(key.type) }}, used in sector authentication:
         </p>
 
         <ul class="list">
