@@ -115,7 +115,6 @@ async function save() {
     assert(props.block.type !== MifareClassicBlockType.Data
       || arraysAreEqual(updatedBlock.data, confirmBlock.value.data), 'data mismatch');
 
-    props.block.updateWith(updatedBlock);
     state.value = MemoryEditorState.SaveSucceeded;
   } catch (e) {
     logger.error('write failed', e);

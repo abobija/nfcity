@@ -65,21 +65,14 @@ async function authenticateAndLoadSector(key: PiccKey) {
       value: Uint8Array.from(key.value),
     }));
 
-    if (isPiccSectorDeviceMessage(msg)) {
-      props.sector.updateWith({
-        key,
-        blocks: msg.blocks.map(b => ({
-          address: b.address,
-          data: Array.from(b.data),
-        })),
-      });
-      state.value = SectorState.Authenticated;
-      return;
-    }
-
     if (isErrorDeviceMessage(msg)) {
       state.value = SectorState.AuthenticationForm;
-      return;
+    } else if (isPiccSectorDeviceMessage(msg)) {
+      props.sector.authenticate(key);
+      state.value = SectorState.Authenticated;
+    } else {
+      logger.warning('unexpected message', msg);
+      state.value = SectorState.AuthenticationForm;
     }
   } catch (e) {
     logger.warning('failed to authenticate sector', e);

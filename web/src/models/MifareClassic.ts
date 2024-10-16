@@ -561,7 +561,9 @@ export class MifareClassicSector implements PiccSector {
         this.blocks[offset] = new MifareClassicDataBlock(this, { ...block, accessBits });
       });
 
-    this.authenticate(sector.key);
+    if (sector.key !== undefined) {
+      this.authenticate(sector.key);
+    }
   }
 }
 
