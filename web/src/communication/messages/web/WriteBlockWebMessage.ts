@@ -10,7 +10,7 @@ export default class WriteBlockWebMessage extends AuthorizedWebMessage implement
   constructor(
     readonly address: number,
     readonly data: Uint8Array,
-    readonly key: PiccKeyDto,
+    key: PiccKeyDto,
   ) {
     assert(isByte(address), 'invalid address');
     assert(data?.length === blockSize, 'invalid data length');

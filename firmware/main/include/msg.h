@@ -31,6 +31,7 @@ extern const char *MSG_LOG_TAG;
 #define MSG_ID_FIELD   "$id"
 #define MSG_KIND_FIELD "$kind"
 #define MSG_CTX_FIELD  "$ctx"
+#define MSG_KEY_FIELD  "$key"
 
 typedef struct
 {

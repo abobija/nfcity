@@ -5,7 +5,7 @@ import { assert, isByte } from "@/utils/helpers";
 export default class ReadSectorWebMessage extends AuthorizedWebMessage {
   readonly $kind: WebMessageKind = 'read_sector';
 
-  constructor(readonly offset: number, readonly key: PiccKeyDto) {
+  constructor(readonly offset: number, key: PiccKeyDto) {
     assert(isByte(offset), 'invalid offset');
 
     super(key);

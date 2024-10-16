@@ -94,7 +94,7 @@ CborError dec_read_sector_msg(const uint8_t *buffer, size_t buffer_size, web_rea
     CBOR_ERRCHECK(cbor_value_map_find_value(&it, "offset", &value));
     CBOR_RETCHECK(cbor_value_is_unsigned_integer(&value), CborErrorIllegalType);
     CBOR_ERRCHECK(cbor_value_get_uint8(&value, &msg.offset));
-    CBOR_ERRCHECK(cbor_value_map_find_value(&it, "key", &value));
+    CBOR_ERRCHECK(cbor_value_map_find_value(&it, MSG_KEY_FIELD, &value));
     CBOR_RETCHECK(cbor_value_is_map(&value), CborErrorIllegalType);
     CBOR_ERRCHECK(dec_picc_key(&value, &msg.key));
 
@@ -119,7 +119,7 @@ CborError dec_write_block_msg(const uint8_t *buffer, size_t buffer_size, web_wri
     CBOR_ERRCHECK(cbor_value_get_string_length(&value, &len));
     CBOR_RETCHECK(len == RC522_MIFARE_BLOCK_SIZE, CborErrorUnknownLength);
     CBOR_ERRCHECK(cbor_value_copy_byte_string(&value, msg.data, &len, NULL));
-    CBOR_ERRCHECK(cbor_value_map_find_value(&it, "key", &value));
+    CBOR_ERRCHECK(cbor_value_map_find_value(&it, MSG_KEY_FIELD, &value));
     CBOR_RETCHECK(cbor_value_is_map(&value), CborErrorIllegalType);
     CBOR_ERRCHECK(dec_picc_key(&value, &msg.key));
 
