@@ -540,6 +540,14 @@ export class MifareClassicSector implements PiccSector {
     this._key = key;
   }
 
+  deauthenticate(): void {
+    this._key = undefined;
+
+    for (let i = this.numberOfBlocks - 1; i >= 0; i--) {
+      this.blocks[i] = new MifareClassicUndefinedBlock(this, this.blocks[i].address);
+    }
+  }
+
   updateWith(sector: UpdatablePiccSector): void {
     if (sector.blocks.length != this.numberOfBlocks) {
       throw new Error('Invalid number of blocks');
