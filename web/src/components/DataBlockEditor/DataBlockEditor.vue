@@ -2,12 +2,12 @@
 import { isErrorDeviceMessage } from "@/communication/messages/device/ErrorDeviceMessage";
 import { isPiccBlockDeviceMessage } from "@/communication/messages/device/PiccBlockDeviceMessage";
 import WriteBlockWebMessage from "@/communication/messages/web/WriteBlockWebMessage";
+import BytesInput from "@/components/BytesInput/BytesInput.vue";
 import useClient from "@/composables/useClient";
 import { MifareClassicBlock, MifareClassicBlockType } from "@/models/MifareClassic";
 import { UpdatablePiccBlock } from "@/models/Picc";
 import { arraysAreEqual, assert, hex, overwriteArraySegment } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";
-import BytesInput from "@Memory/components/BytesInput/BytesInput.vue";
 import { computed, onMounted, ref, watch } from "vue";
 
 enum DataBlockEditorState {
