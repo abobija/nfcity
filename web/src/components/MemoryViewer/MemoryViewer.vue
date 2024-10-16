@@ -171,7 +171,7 @@ watch(() => props.block, () => editMode.value = false);
       }
     }
 
-    .byte {
+    .byte:not(.indexed) {
       width: 1ch;
     }
   }
