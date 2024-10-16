@@ -50,7 +50,12 @@ watch(() => props.block, () => editMode.value = false);
 </script>
 
 <template>
-  <section class="MemoryViewer">
+  <section class="MemoryViewer" :class="{
+    hex: representation === ByteRepresentation.Hexadecimal,
+    dec: representation === ByteRepresentation.Decimal,
+    bin: representation === ByteRepresentation.Binary,
+    ascii: representation === ByteRepresentation.Ascii,
+  }">
     <header>
       <div v-if="!editMode" class="toolbar">
         <div class="view group">
@@ -154,6 +159,20 @@ watch(() => props.block, () => editMode.value = false);
     .unreadable .byte {
       text-decoration: line-through;
       color: color.adjust($color-fg, $lightness: -40%);
+    }
+  }
+
+  &.ascii {
+
+    .group,
+    .byte {
+      &:not(:last-child) {
+        margin-right: 0;
+      }
+    }
+
+    .byte {
+      width: 1ch;
     }
   }
 
