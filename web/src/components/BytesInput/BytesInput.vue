@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import vFocus from "@/directives/vFocus";
-import { hex, isHex, removeWhitespace, unhexToArray } from "@/utils/helpers";
+import { arraysAreEqual, assert, hex, isHex, removeWhitespace, unhexToArray } from "@/utils/helpers";
 import ByteRepresentation, { byteRepresentationSingleChar } from "@Memory/ByteRepresentation";
-import { computed, onMounted, ref, useTemplateRef, watch } from "vue";
+import { computed, ref, useTemplateRef, watch } from "vue";
 
 const props = defineProps<{
   offset?: number;
@@ -12,17 +12,17 @@ const props = defineProps<{
   multiline?: boolean;
   readonly?: boolean;
   placeholder?: string;
+  disabled?: boolean;
 }>();
 
 const byteRepresentation = ByteRepresentation.Hexadecimal;
 const modelBytes = defineModel<number[]>({ required: true });
+const modelBytesOrigin = ref(Array.from(modelBytes.value));
 const _offset = computed(() => props.offset ?? 0);
-const _length = computed(() => props.length ?? modelBytes.value.length - _offset.value);
-const maxlength = ref<number>();
-const bytesField = useTemplateRef('bytesField');
-const bytesFieldValue = ref(hex(modelBytes.value.slice(_offset.value, _offset.value + _length.value)));
-
-onMounted(() => maxlength.value = _length.value);
+const _length = computed(() => props.length ?? modelBytesOrigin.value.length - _offset.value);
+const maxlength = ref<number>(_length.value);
+const bytesField = useTemplateRef('field');
+const bytesFieldValue = ref(hex(modelBytesOrigin.value.slice(_offset.value, _offset.value + _length.value)));
 
 watch(bytesFieldValue, (newValue, oldValue) => {
   const newBytes = unhexToArray(newValue);
@@ -32,16 +32,37 @@ watch(bytesFieldValue, (newValue, oldValue) => {
     return;
   }
 
-  modelBytes.value = newBytes;
+  const newModelBytes = [
+    ...modelBytesOrigin.value.slice(0, _offset.value),
+    ...newBytes,
+    ...modelBytesOrigin.value.slice(_offset.value + _length.value),
+  ];
+
+  if (arraysAreEqual(newModelBytes, modelBytes.value)) {
+    return;
+  }
+
+  modelBytes.value = newModelBytes;
 });
 
 function onKeyDown(e: KeyboardEvent) {
-  if (e.key === 'Enter' && props.multiline !== true) {
-    e.preventDefault();
+  if (e.key === 'Enter') {
+    if (props.multiline !== true || modelBytes.value.length >= maxlength.value) {
+      e.preventDefault();
+    }
+
     return;
   }
 
   if (e.ctrlKey) {
+    return;
+  }
+
+  if (e.code === 'Space') {
+    if (modelBytes.value.length >= maxlength.value) {
+      e.preventDefault();
+    }
+
     return;
   }
 
@@ -50,7 +71,6 @@ function onKeyDown(e: KeyboardEvent) {
     'ArrowTop',
     'ArrowRight',
     'ArrowDown',
-    'Space',
     'Backspace',
     'Delete',
   ].includes(e.code)) {
@@ -78,7 +98,9 @@ function onPaste(e: ClipboardEvent) {
     return;
   }
 
-  const target = bytesField.value!;
+  assert(bytesField.value, 'bytes field not found');
+
+  const target = bytesField.value;
   const start = target.selectionStart;
   const end = target.selectionEnd;
   const newValue = bytesFieldValue.value.slice(0, start) + text + bytesFieldValue.value.slice(end);
@@ -95,12 +117,12 @@ function onPaste(e: ClipboardEvent) {
     <abbr class="byte-representation txt-unselectable" :title="ByteRepresentation[byteRepresentation]">
       {{ byteRepresentationSingleChar(byteRepresentation) }}
     </abbr>
-    <textarea ref="bytesField" v-focus="autofocus === true" v-model="bytesFieldValue" spellcheck="false"
+    <textarea ref="field" v-focus="autofocus === true" v-model="bytesFieldValue" spellcheck="false"
       :rows="multiline === true ? undefined : 1" :class="{
         readonly: readonly === true,
       }" :style="{
         resize: resizable === false ? 'none' : 'both',
-      }" @keydown="onKeyDown" @paste="onPaste" name="bytes" :readonly="readonly" :placeholder></textarea>
+      }" @keydown="onKeyDown" @paste="onPaste" name="bytes" :readonly="readonly" :placeholder :disabled></textarea>
   </section>
 </template>
 

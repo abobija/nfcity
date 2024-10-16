@@ -357,6 +357,10 @@ export abstract class MifareClassicBlock implements PiccBlock {
 
     return this;
   }
+
+  findGroup(type: MifareClassicBlockGroupType): MifareClassicBlockGroup | undefined {
+    return this.blockGroups.find(group => group.type === type);
+  }
 }
 
 class MifareClassicUndefinedBlock extends MifareClassicBlock {

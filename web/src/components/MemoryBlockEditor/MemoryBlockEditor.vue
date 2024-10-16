@@ -20,9 +20,17 @@ import { isPiccBlockDeviceMessage } from "@/communication/messages/device/PiccBl
 import WriteBlockWebMessage from "@/communication/messages/web/WriteBlockWebMessage";
 import BytesInput from "@/components/BytesInput/BytesInput.vue";
 import useClient from "@/composables/useClient";
-import { keySize, MifareClassicBlock, MifareClassicBlockType, MifareClassicDataBlock, MifareClassicSectorTrailerBlock } from "@/models/MifareClassic";
+import {
+  blockSize,
+  keySize,
+  MifareClassicBlock,
+  MifareClassicBlockGroupType,
+  MifareClassicBlockType,
+  MifareClassicDataBlock,
+  MifareClassicSectorTrailerBlock
+} from "@/models/MifareClassic";
 import { UpdatablePiccBlock } from "@/models/Picc";
-import { arraysAreEqual, assert, hex, overwriteArraySegment } from "@/utils/helpers";
+import { arraysAreEqual, assert, hex } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";
 import { computed, onMounted, ref, watch } from "vue";
 
@@ -144,10 +152,8 @@ function confirm() {
     return;
   }
 
-  const dataToWrite = overwriteArraySegment(
-    Array.from(props.block.data),
-    editingBytes.value
-  );
+  const dataToWrite = editingBytes.value;
+  assert(dataToWrite.length === blockSize, 'unexpected data length');
 
   confirmBlock.value = {
     address: props.block.address,
@@ -168,13 +174,16 @@ function confirm() {
       </div>
       <div v-if="block instanceof MifareClassicSectorTrailerBlock">
         <div class="form-group">
-          <BytesInput v-model="editingBytes" :offset="0" :length="keySize" placeholder="Key A" />
+          <BytesInput v-model="editingBytes" :offset="0" :length="keySize" placeholder="Key A"
+            :readonly="!key || block.findGroup(MifareClassicBlockGroupType.KeyA)?.keyCan(key, 'write') !== true" />
         </div>
         <div class="form-group">
-          <BytesInput v-model="editingBytes" :offset="keySize + 4" placeholder="Key B" />
+          <BytesInput v-model="editingBytes" :offset="keySize + 4" placeholder="Key B"
+            :readonly="!key || block.findGroup(MifareClassicBlockGroupType.KeyB)?.keyCan(key, 'write') !== true" />
         </div>
         <div class="form-group">
-          <BytesInput v-model="editingBytes" :offset="keySize + 3" :length="1" placeholder="User byte" />
+          <BytesInput v-model="editingBytes" :offset="keySize + 3" :length="1" placeholder="User byte"
+            :readonly="!key || block.findGroup(MifareClassicBlockGroupType.UserByte)?.keyCan(key, 'write') !== true" />
         </div>
       </div>
       <div class="form-group">

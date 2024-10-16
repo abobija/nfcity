@@ -22,7 +22,7 @@ defineProps<{
       <li class="prop">
         <div class="name" title="Access Bits">Access</div>
         <div class="value">
-          Bits {{ block.accessBits.c1 }}{{ block.accessBits.c2 }}{{ block.accessBits.c3 }}
+          Bits: {{ block.accessBits.c1 }}{{ block.accessBits.c2 }}{{ block.accessBits.c3 }}
         </div>
       </li>
       <li class="prop memory">

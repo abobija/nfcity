@@ -21,7 +21,7 @@ const permissions = computed(() => key.value ? group.value.allowedOperationsFor(
       <li class="prop access">
         <div class="name">Access</div>
         <div class="value">
-          Permissions
+          Permissions:
           <span v-for="operation in operations" class="operation" :class="{
             allowed: permissions.includes(operation),
           }">
