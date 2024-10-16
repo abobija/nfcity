@@ -10,7 +10,7 @@ import makeLogger from "@/utils/Logger";
 import BytesInput from "@Memory/components/BytesInput/BytesInput.vue";
 import { computed, onMounted, ref, watch } from "vue";
 
-enum MemoryEditorState {
+enum DataBlockEditorState {
   Undefined = 0,
   Initialized,
   Editing,
@@ -32,9 +32,9 @@ const emit = defineEmits<{
   (e: 'done'): void;
 }>();
 
-const logger = makeLogger('MemoryEditor');
+const logger = makeLogger('DataBlockEditor');
 const { client } = useClient();
-const state = ref(MemoryEditorState.Undefined);
+const state = ref(DataBlockEditorState.Undefined);
 const key = computed(() => props.block.sector.key);
 const bytesToEdit = computed(() => props.block.data);
 const editingBytes = ref(Array.from(bytesToEdit.value));
@@ -43,25 +43,25 @@ const saveable = ref(false);
 const confirmBlock = ref<UpdatablePiccBlock>();
 
 watch(state, async (newState, oldState) => {
-  logger.debug('state changed from', MemoryEditorState[oldState], 'to', MemoryEditorState[newState]);
+  logger.debug('state changed from', DataBlockEditorState[oldState], 'to', DataBlockEditorState[newState]);
 
   switch (newState) {
-    case MemoryEditorState.Initialized: {
-      state.value = MemoryEditorState.Editing;
+    case DataBlockEditorState.Initialized: {
+      state.value = DataBlockEditorState.Editing;
     } break;
-    case MemoryEditorState.Canceled: {
+    case DataBlockEditorState.Canceled: {
       emit('cancel');
     } break;
-    case MemoryEditorState.Confirmed: {
-      state.value = MemoryEditorState.Saving;
+    case DataBlockEditorState.Confirmed: {
+      state.value = DataBlockEditorState.Saving;
     } break;
-    case MemoryEditorState.Saving: {
+    case DataBlockEditorState.Saving: {
       await save();
     } break;
-    case MemoryEditorState.SaveSucceeded: {
-      state.value = MemoryEditorState.Done;
+    case DataBlockEditorState.SaveSucceeded: {
+      state.value = DataBlockEditorState.Done;
     } break;
-    case MemoryEditorState.Done: {
+    case DataBlockEditorState.Done: {
       emit('done');
     } break;
   }
@@ -70,11 +70,11 @@ watch(state, async (newState, oldState) => {
 onMounted(() => {
   if (!key.value) {
     logger.warning('sector has not been authenticated, cannot write');
-    state.value = MemoryEditorState.Canceled;
+    state.value = DataBlockEditorState.Canceled;
     return;
   }
 
-  state.value = MemoryEditorState.Initialized;
+  state.value = DataBlockEditorState.Initialized;
 });
 
 watch(editingBytes, (bytes) => {
@@ -100,7 +100,7 @@ async function save() {
 
     if (isErrorDeviceMessage(response)) {
       logger.warning('write failed, error code', response.code);
-      state.value = MemoryEditorState.SaveFailed;
+      state.value = DataBlockEditorState.SaveFailed;
       return;
     }
 
@@ -116,10 +116,10 @@ async function save() {
       || arraysAreEqual(updatedBlock.data, confirmBlock.value.data), 'data mismatch');
 
     props.block.updateWith(updatedBlock);
-    state.value = MemoryEditorState.SaveSucceeded;
+    state.value = DataBlockEditorState.SaveSucceeded;
   } catch (e) {
     logger.error('write failed', e);
-    state.value = MemoryEditorState.SaveFailed;
+    state.value = DataBlockEditorState.SaveFailed;
   }
 }
 
@@ -139,22 +139,22 @@ function confirm() {
     data: dataToWrite,
   };
 
-  state.value = MemoryEditorState.Confirming;
+  state.value = DataBlockEditorState.Confirming;
 }
 </script>
 
 <template>
-  <section class="MemoryEditor">
-    <form v-if="state == MemoryEditorState.Editing" class="edit" @submit.prevent="confirm">
+  <section class="DataBlockEditor">
+    <form v-if="state == DataBlockEditorState.Editing" class="edit" @submit.prevent="confirm">
       <div class="form-group">
         <BytesInput v-model="editingBytes" :maxlength autofocus multiline resizable />
       </div>
       <div class="form-group">
         <button type="submit" class="btn primary" :disabled="!saveable">save</button>
-        <button type="button" class="btn secondary" @click="state = MemoryEditorState.Canceled">cancel</button>
+        <button type="button" class="btn secondary" @click="state = DataBlockEditorState.Canceled">cancel</button>
       </div>
     </form>
-    <div v-else-if="state == MemoryEditorState.Confirming && confirmBlock" class="confirm">
+    <div v-else-if="state == DataBlockEditorState.Confirming && confirmBlock" class="confirm">
       <p>
         Click "yes" if you are sure you want to update block
         at address <var>{{ hex(confirmBlock.address) }}</var> with the next data:
@@ -163,11 +163,11 @@ function confirm() {
         <BytesInput v-model="confirmBlock.data" readonly multiline resizable />
       </div>
       <div class="form-group">
-        <button type="button" class="btn primary" @click="state = MemoryEditorState.Confirmed">yes</button>
-        <button type="button" class="btn secondary" @click="state = MemoryEditorState.Editing">no</button>
+        <button type="button" class="btn primary" @click="state = DataBlockEditorState.Confirmed">yes</button>
+        <button type="button" class="btn secondary" @click="state = DataBlockEditorState.Editing">no</button>
       </div>
     </div>
-    <div v-else-if="state == MemoryEditorState.Saving" class="saving">
+    <div v-else-if="state == DataBlockEditorState.Saving" class="saving">
       <p>Saving...</p>
     </div>
   </section>
@@ -176,7 +176,7 @@ function confirm() {
 <style lang="scss">
 @import '@/theme.scss';
 
-.MemoryEditor {
+.DataBlockEditor {
   .confirm-data {
     margin: 1rem 0;
     color: $color-5;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import MemoryEditor from "@/components/MemoryEditor/MemoryEditor.vue";
+import DataBlockEditor from "@/components/DataBlockEditor/DataBlockEditor.vue";
 import { MifareClassicBlock, MifareClassicBlockGroupType, MifareClassicDataBlock } from "@/models/MifareClassic";
 import { keyTypeName } from "@/models/Picc";
 import { ascii, bin, hex, isAsciiPrintable } from "@/utils/helpers";
@@ -98,7 +98,8 @@ watch(() => props.block, () => editMode.value = false);
           </span>
         </div>
       </div>
-      <MemoryEditor v-if="editMode" :block @cancel="editMode = false" @done="editMode = false" />
+      <DataBlockEditor v-if="editMode && block instanceof MifareClassicDataBlock" :block @cancel="editMode = false"
+        @done="editMode = false" />
     </main>
     <footer>
       <p v-for="info in infos" class="info">
