@@ -9,6 +9,8 @@ import {
 } from "@/models/MifareClassic";
 import { KeyType } from "@/models/Picc";
 import Client from "./communication/Client";
+import { isPiccSectorDeviceMessage } from "./communication/messages/device/PiccSectorDeviceMessage";
+import ReadSectorWebMessage from "./communication/messages/web/ReadSectorWebMessage";
 import { assert, bin, hex, unhexToArray } from "./utils/helpers";
 import { logi } from "./utils/Logger";
 
@@ -16,7 +18,7 @@ const {
   DEV,
 } = import.meta.env;
 
-class Console {
+class NFCityConsole {
   private _client?: Client;
 
   constructor() {
@@ -35,7 +37,7 @@ class Console {
   }
 
   get client() {
-    assert(this._client);
+    assert(this._client, 'client is not set');
     return this._client;
   }
 
@@ -66,6 +68,38 @@ class Console {
     )
   }
 
+  async readSector(
+    offset: number,
+    key: string = hex(defaultKey.value),
+    keyType: KeyType = defaultKey.type,
+  ) {
+    assert(typeof offset === 'number');
+    assert(typeof key === 'string');
+    assert(typeof keyType === 'number');
+
+    const response = await this.client.transceive(
+      new ReadSectorWebMessage(
+        offset,
+        {
+          value: Uint8Array.from(unhexToArray(key)),
+          type: keyType,
+        }
+      )
+    );
+
+    assert(isPiccSectorDeviceMessage(response));
+
+    console.table(Object.fromEntries(response.blocks.map(block => [
+      block.address,
+      {
+        address: hex(block.address),
+        data: hex(Array.from(block.data)),
+      }
+    ])));
+
+    return response;
+  }
+
   buildSectorTrailer(
     keyA: string,
     accessBitsComboPool: AccessBitsComboPool,
@@ -92,11 +126,11 @@ class Console {
   }
 }
 
-const console = new Console();
+const nfcityConsole = new NFCityConsole();
 
 if (DEV) {
-  (window as any).nfcity = console;
+  (window as any).nfcity = nfcityConsole;
   logi('Console mounted');
 }
 
-export default console;
+export default nfcityConsole;
