@@ -58,8 +58,8 @@ watch(() => props.block, () => editMode.value = false);
     ascii: representation === ByteRepresentation.Ascii,
     indexed: showIndexes,
   }">
-    <header>
-      <div v-if="!editMode" class="toolbar">
+    <header v-if="!editMode">
+      <div class="toolbar">
         <div class="view group">
           <div class="btn-group">
             <button class="btn info" v-for="r in representations" :class="{ activated: r === representation }"
@@ -101,7 +101,7 @@ watch(() => props.block, () => editMode.value = false);
       </div>
       <MemoryBlockEditor v-if="editMode && editable" :block @cancel="editMode = false" @done="editMode = false" />
     </main>
-    <footer>
+    <footer v-if="keyRestrictions.length > 0">
       <p v-for="restriction in keyRestrictions" class="restriction">
         * {{ restriction }}
       </p>
@@ -185,9 +185,9 @@ watch(() => props.block, () => editMode.value = false);
     }
   }
 
-  main,
-  footer {
-    margin-top: .5rem;
+  header,
+  main {
+    margin-bottom: .5rem;
   }
 
   footer .restriction {
