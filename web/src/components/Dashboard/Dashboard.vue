@@ -106,7 +106,7 @@ function onPiccOrPiccStateChangeDeviceMessage(message: PiccDeviceMessage | PiccS
     return;
   }
 
-  if (picc.value === undefined || (picc.value.id !== MifareClassic.calculateId(_picc))) {
+  if (picc.value === undefined || (picc.value.hash !== MifareClassic.calculateHash(_picc))) {
     picc.value = MifareClassic.fromDto(_picc);
   } else { // Same card
     picc.value.state = _picc.state;
@@ -286,7 +286,7 @@ onByteMouseClick(clickedByte => {
 
     <main v-if="picc">
       <div class="header">
-        <div class="picc" :key="picc.id">
+        <div class="picc" :key="picc.hash">
           <div class="general">
             <h1 class="type">{{ PiccType[picc.type] }}</h1>
             <ul class="metas">
@@ -311,7 +311,7 @@ onByteMouseClick(clickedByte => {
         </div>
       </div>
 
-      <div class="main" :key="picc.id">
+      <div class="main" :key="picc.hash">
         <div class="section memory">
           <Memory :memory="picc.memory as MifareClassicMemory" :focus="memoryFocus as MemoryFocus | undefined" />
         </div>

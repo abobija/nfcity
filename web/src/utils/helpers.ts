@@ -1,3 +1,5 @@
+import murmurhash from "murmurhash";
+
 export function isHex(str: string): boolean {
   return /^[0-9A-Fa-f]*$/.test(str);
 }
@@ -180,4 +182,8 @@ export function assert(condition: any, error?: Error | string): asserts conditio
 
 export function isByte(value: number): boolean {
   return Number.isInteger(value) && value >= 0 && value <= 0xFF;
+}
+
+export function hash(value: number[]): string {
+  return hex(murmurhash.v3(new Uint8Array(value))).toLowerCase();
 }

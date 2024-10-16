@@ -17,7 +17,7 @@ import Picc, {
 } from "@/models/Picc";
 import {
   assert,
-  hex,
+  hash,
   invertedNibble,
   invertNibble,
   isByte,
@@ -684,7 +684,7 @@ export class MifareClassicMemory implements PiccMemory {
 }
 
 export default class MifareClassic implements Picc {
-  private _id: string;
+  private _hash: string;
   readonly memory: MifareClassicMemory;
 
   protected constructor(
@@ -694,12 +694,12 @@ export default class MifareClassic implements Picc {
     readonly uid: number[],
     private _state: PiccState,
   ) {
-    this._id = MifareClassic.calculateId(this);
+    this._hash = MifareClassic.calculateHash(this);
     this.memory = new MifareClassicMemory(this, type);
   }
 
-  get id(): string {
-    return this._id;
+  get hash(): string {
+    return this._hash;
   };
 
   get state(): PiccState {
@@ -720,14 +720,13 @@ export default class MifareClassic implements Picc {
     );
   }
 
-  static calculateId(picc: Picc | PiccDto): string {
-    return hex(Math.abs(0
-      ^ (0xABCDEF)
-      ^ ([...picc.uid].reduce((acc, byte) => acc ^ byte, 0x00) << (8 * 2))
-      ^ (picc.atqa)
-      ^ (picc.type.valueOf() << 8)
-      ^ (picc.sak)
-    )).toLowerCase();
+  static calculateHash(picc: Picc | PiccDto): string {
+    return hash([
+      picc.type,
+      picc.atqa,
+      picc.sak,
+      ...picc.uid,
+    ]);
   }
 
   static isMifareClassic(picc: Picc | PiccDto): boolean {
