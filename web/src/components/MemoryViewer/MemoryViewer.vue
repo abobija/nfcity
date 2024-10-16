@@ -50,7 +50,7 @@ watch(() => props.group, () => editMode.value = false);
         </div>
         <div class="modify group">
           <div class="btn-group">
-            <button class="btn primary" :disabled="!editable" @click="editMode = true">edit</button>
+            <button v-if="editable" class="btn primary" @click="editMode = true">edit</button>
           </div>
         </div>
       </div>
