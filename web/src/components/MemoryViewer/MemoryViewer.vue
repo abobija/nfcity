@@ -2,7 +2,7 @@
 import MemoryBlockEditor, { isBlockEditable } from "@/components/MemoryBlockEditor/MemoryBlockEditor.vue";
 import { MifareClassicBlock, MifareClassicBlockGroupType, MifareClassicSectorTrailerBlock } from "@/models/MifareClassic";
 import { keyTypeName } from "@/models/Picc";
-import { ascii, bin, hex, isAsciiPrintable } from "@/utils/helpers";
+import { ascii, assert, bin, hex, isAsciiPrintable } from "@/utils/helpers";
 import ByteRepresentation, { byteRepresentationShortName } from "@Memory/ByteRepresentation";
 import { computed, ref, watch } from "vue";
 
@@ -22,26 +22,37 @@ const showIndexes = ref(false);
 const key = computed(() => props.block.sector.key);
 const editable = computed(() => isBlockEditable(props.block));
 const editMode = ref(false);
-const keyRestrictions = computed<string[]>(() => {
+const showRestrictions = ref(true);
+const restrictions = computed<string[]>(() => {
   const list: string[] = [];
 
-  const unreadableGroups = props.block.blockGroups
-    .filter((group) => key.value && !group.keyCan(key.value, 'read'));
+  assert(key.value !== undefined, 'key is undefined');
 
-  if (unreadableGroups.length > 0 && key.value) {
+  const unreadableGroups = props.block.blockGroups
+    .filter((group) => !group.keyCan(key.value!, 'read'));
+
+  if (unreadableGroups.length > 0) {
     list.push(`
-        ${unreadableGroups.map(group => MifareClassicBlockGroupType[group.type]).join(' & ')}
-        ${unreadableGroups.length > 1 ? 'are' : 'is'} unreadable and blanked with zeros
-        due to restrictions of the key ${keyTypeName(key.value.type)} used in sector authentication.
+        Cannot read ${unreadableGroups.map(group => MifareClassicBlockGroupType[group.type]).join(' & ')}
+        group${unreadableGroups.length > 1 ? 's' : ''},
+        so ${unreadableGroups.length > 1 ? 'they are' : 'it is'} blanked with zeros.
       `);
   }
 
-  if (props.block instanceof MifareClassicSectorTrailerBlock
-    && key.value && !props.block.keyCanWriteToAnyGroup(key.value)) {
-    list.push(`
-      The key ${keyTypeName(key.value.type)} used for sector authentication
-      cannot write to any group in this sector trailer.
-      `);
+  const unwritableGroups = props.block.blockGroups
+    .filter((group) => !group.keyCan(key.value!, 'write'));
+
+  if (unwritableGroups.length > 0) {
+    if (props.block instanceof MifareClassicSectorTrailerBlock) {
+      const allGroupsAreUnwritable = unwritableGroups.length === props.block.blockGroups.length;
+      const groups = unwritableGroups.map(group => MifareClassicBlockGroupType[group.type]).join(' & ');
+
+      list.push(`
+          Cannot write to
+          ${allGroupsAreUnwritable ? 'any (' : ''}${groups}${allGroupsAreUnwritable ? ')' : ''}
+          group${!allGroupsAreUnwritable && unwritableGroups.length > 1 ? 's' : ''}.
+        `);
+    }
   }
 
   return list;
@@ -101,10 +112,16 @@ watch(() => props.block, () => editMode.value = false);
       </div>
       <MemoryBlockEditor v-if="editMode && editable" :block @cancel="editMode = false" @done="editMode = false" />
     </main>
-    <footer v-if="keyRestrictions.length > 0">
-      <p v-for="restriction in keyRestrictions" class="restriction">
-        * {{ restriction }}
-      </p>
+    <footer v-if="key && showRestrictions && restrictions.length > 0">
+      <div class="restrictions">
+        <p class="intro">
+          Key {{ keyTypeName(key.type) }} restrictions:
+        </p>
+
+        <ul class="list">
+          <li v-for="restriction in restrictions" class="restriction">{{ restriction }}</li>
+        </ul>
+      </div>
     </footer>
   </section>
 </template>
@@ -141,7 +158,7 @@ watch(() => props.block, () => editMode.value = false);
 
     .byte {
       display: inline-block;
-      color: $color-1;
+      color: color.adjust($color-3, $hue: -20deg);
 
       &.unprintable {
         color: color.adjust($color-fg, $lightness: -50%);
@@ -192,15 +209,28 @@ watch(() => props.block, () => editMode.value = false);
     }
   }
 
-  header,
-  main {
-    margin-bottom: .5rem;
+  &>*:not(:last-child) {
+    margin-bottom: 1rem;
   }
 
-  footer .restriction {
+  footer .restrictions {
     color: color.adjust($color-fg, $lightness: -40%);
     font-size: .7em;
     margin-top: .2rem;
+
+    .intro {
+      font-weight: 600;
+    }
+
+    .list {
+      margin-top: .3rem;
+      list-style: square;
+      margin-left: .8rem;
+
+      .restriction:not(:last-child) {
+        margin-bottom: .2rem;
+      }
+    }
   }
 }
 </style>
