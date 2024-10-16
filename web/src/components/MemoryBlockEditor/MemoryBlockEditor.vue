@@ -1,10 +1,22 @@
+<script lang="ts">
+export function isBlockEditable(block: MifareClassicBlock): boolean {
+  const { key } = block.sector;
+
+  return key !== undefined
+    && (
+      block instanceof MifareClassicDataBlock
+      && block.keyCan(key, 'write')
+    );
+}
+</script>
+
 <script setup lang="ts">
 import { isErrorDeviceMessage } from "@/communication/messages/device/ErrorDeviceMessage";
 import { isPiccBlockDeviceMessage } from "@/communication/messages/device/PiccBlockDeviceMessage";
 import WriteBlockWebMessage from "@/communication/messages/web/WriteBlockWebMessage";
 import BytesInput from "@/components/BytesInput/BytesInput.vue";
 import useClient from "@/composables/useClient";
-import { MifareClassicBlock, MifareClassicBlockType } from "@/models/MifareClassic";
+import { MifareClassicBlock, MifareClassicBlockType, MifareClassicDataBlock } from "@/models/MifareClassic";
 import { UpdatablePiccBlock } from "@/models/Picc";
 import { arraysAreEqual, assert, hex, overwriteArraySegment } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";

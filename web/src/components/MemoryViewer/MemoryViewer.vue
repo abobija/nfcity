@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import MemoryBlockEditor from "@/components/MemoryBlockEditor/MemoryBlockEditor.vue";
-import { MifareClassicBlock, MifareClassicBlockGroupType, MifareClassicDataBlock } from "@/models/MifareClassic";
+import MemoryBlockEditor, { isBlockEditable } from "@/components/MemoryBlockEditor/MemoryBlockEditor.vue";
+import { MifareClassicBlock, MifareClassicBlockGroupType } from "@/models/MifareClassic";
 import { keyTypeName } from "@/models/Picc";
 import { ascii, bin, hex, isAsciiPrintable } from "@/utils/helpers";
 import ByteRepresentation, { byteRepresentationShortName } from "@Memory/ByteRepresentation";
@@ -20,11 +20,7 @@ const representations = [
 const representation = ref(ByteRepresentation.Hexadecimal);
 const showIndexes = ref(false);
 const key = computed(() => props.block.sector.key);
-const editable = computed(() => {
-  return props.block instanceof MifareClassicDataBlock
-    && key.value !== undefined
-    && props.block.keyCan(key.value, 'write');
-});
+const editable = computed(() => isBlockEditable(props.block));
 const editMode = ref(false);
 const infos = computed<string[]>(() => {
   const list: string[] = [];
@@ -98,8 +94,7 @@ watch(() => props.block, () => editMode.value = false);
           </span>
         </div>
       </div>
-      <MemoryBlockEditor v-if="editMode && block instanceof MifareClassicDataBlock" :block @cancel="editMode = false"
-        @done="editMode = false" />
+      <MemoryBlockEditor v-if="editMode && editable" :block @cancel="editMode = false" @done="editMode = false" />
     </main>
     <footer>
       <p v-for="info in infos" class="info">
