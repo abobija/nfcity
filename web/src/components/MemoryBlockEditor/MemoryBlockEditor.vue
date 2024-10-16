@@ -163,7 +163,7 @@ function confirm() {
     <form v-if="state == MemoryBlockEditorState.Editing" class="edit" @submit.prevent="confirm">
       <div v-if="block instanceof MifareClassicDataBlock">
         <div class="form-group">
-          <BytesInput v-model="editingBytes" autofocus multiline resizable />
+          <BytesInput v-model="editingBytes" autofocus multiline resizable placeholder="Data" />
         </div>
       </div>
       <div v-if="block instanceof MifareClassicSectorTrailerBlock">

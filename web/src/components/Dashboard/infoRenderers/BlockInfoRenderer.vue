@@ -38,7 +38,7 @@ defineProps<{
 <style lang="scss">
 .BlockInfoRenderer {
   .prop.memory {
-    margin-top: 0.3rem;
+    margin-top: .5rem;
   }
 }
 </style>

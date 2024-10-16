@@ -89,7 +89,9 @@ function onPaste(e: ClipboardEvent) {
 </script>
 
 <template>
-  <section class="BytesInput">
+  <section class="BytesInput" :data-placeholder="placeholder" :class="{
+    empty: bytesFieldValue.length === 0,
+  }">
     <abbr class="byte-representation txt-unselectable" :title="ByteRepresentation[byteRepresentation]">
       {{ byteRepresentationSingleChar(byteRepresentation) }}
     </abbr>
@@ -128,6 +130,20 @@ function onPaste(e: ClipboardEvent) {
     font-size: .5rem;
     font-weight: 600;
     color: color.adjust($color-bg, $lightness: +40%);
+  }
+
+  &:is([data-placeholder]):not(.empty) {
+    &::after {
+      content: attr(data-placeholder);
+      position: absolute;
+      top: -8px;
+      left: 8px;
+      font-size: .5rem;
+      font-weight: 600;
+      background: $color-bg;
+      padding: 0 .3rem;
+      color: color.adjust($color-fg, $lightness: -25%);
+    }
   }
 }
 </style>
