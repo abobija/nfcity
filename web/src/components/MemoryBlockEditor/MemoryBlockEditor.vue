@@ -9,6 +9,7 @@ export function isBlockEditable(block: MifareClassicBlock): boolean {
   return (
     (block instanceof MifareClassicDataBlock && block.keyCan(key, 'write'))
     || (block instanceof MifareClassicSectorTrailerBlock && block.keyCanWriteToAnyGroup(key))
+    // TODO: add support for value blocks
   );
 }
 </script>
