@@ -3,9 +3,10 @@ import onClientMessage from "@/communication/composables/onClientMessage";
 import onClientOffline from "@/communication/composables/onClientOffline";
 import onClientPongMissed from "@/communication/composables/onClientPongMissed";
 import onClientReady from "@/communication/composables/onClientReady";
-import { isHelloDeviceMessage } from "@/communication/messages/device/HelloDeviceMessage";
-import { isPiccDeviceMessage } from "@/communication/messages/device/PiccDeviceMessage";
-import { isPiccStateChangedDeviceMessage } from "@/communication/messages/device/PiccStateChangedDeviceMessage";
+import { DeviceMessage } from "@/communication/Message";
+import HelloDeviceMessage, { isHelloDeviceMessage } from "@/communication/messages/device/HelloDeviceMessage";
+import PiccDeviceMessage, { isPiccDeviceMessage } from "@/communication/messages/device/PiccDeviceMessage";
+import PiccStateChangedDeviceMessage, { isPiccStateChangedDeviceMessage } from "@/communication/messages/device/PiccStateChangedDeviceMessage";
 import GetPiccWebMessage from "@/communication/messages/web/GetPiccWebMessage";
 import '@/components/Dashboard/Dashboard.scss';
 import BlockInfoRenderer from "@/components/Dashboard/infoRenderers/BlockInfoRenderer.vue";
@@ -61,6 +62,72 @@ const retryCount = ref(0);
 const checkingForReaderCancelationToken = ref<CancelationToken>();
 const pingCancelationToken = ref<CancelationToken>();
 const overlay = ref(true);
+
+function onEveryDeviceMessage(_message: DeviceMessage) {
+  switch (state.value) {
+    case DashboardState.CheckingForReader: {
+      checkingForReaderCancelationToken.value?.cancel("new dev msg arrived");
+    } break;
+    case DashboardState.PongMissed: {
+      state.value = DashboardState.PiccPaired;
+      pingCancelationToken.value?.cancel("new dev msg arrived");
+    } break;
+  }
+
+  // start pinging on first message from device
+  if (!pingCancelationToken.value || pingCancelationToken.value.isCanceled) {
+    pingCancelationToken.value = new CancelationToken();
+    client.value.pingLoop(2500, pingCancelationToken.value);
+  }
+}
+
+function onHelloDeviceMessage(_message: HelloDeviceMessage) {
+  if (state.value >= DashboardState.PiccPaired) {
+    client.value.send(new GetPiccWebMessage());
+  }
+  else if (state.value > DashboardState.CeckingForPicc) {
+    state.value = DashboardState.CeckingForPicc;
+  } else {
+    state.value = DashboardState.CheckingForReader;
+  }
+}
+
+function onPiccOrPiccStateChangeDeviceMessage(message: PiccDeviceMessage | PiccStateChangedDeviceMessage) {
+  const _picc = message.picc;
+
+  if (_picc.type === PiccType.Undefined) {
+    // ignore, device did not scanned a single picc yet
+    return;
+  }
+
+  if (!MifareClassic.isMifareClassic(_picc)) {
+    logger.error('unsupported PICC type', PiccType[_picc.type]);
+    state.value = DashboardState.Exit;
+    return;
+  }
+
+  if (picc.value === undefined || (picc.value.id !== MifareClassic.calculateId(_picc))) {
+    picc.value = MifareClassic.fromDto(_picc);
+  } else { // Same card
+    picc.value.state = _picc.state;
+  }
+
+  if ([PiccState.Active, PiccState.ActiveH].includes(picc.value.state)) {
+    state.value = DashboardState.PiccPaired;
+    return;
+  }
+
+  if (picc.value.state == PiccState.Idle) {
+    if (isPiccStateChangedDeviceMessage(message)
+      && [PiccState.Active, PiccState.ActiveH].includes(message.old_state)) {
+      state.value = DashboardState.PiccRemoved;
+      return;
+    }
+
+    state.value = DashboardState.PiccNotPresent;
+    return;
+  }
+}
 
 watch(state, async (newState, oldState) => {
   logger.debug(
@@ -142,76 +209,12 @@ onClientPongMissed(() => {
 });
 
 onClientMessage(e => {
-  switch (state.value) {
-    case DashboardState.CheckingForReader: {
-      checkingForReaderCancelationToken.value?.cancel("new dev msg arrived");
-    } break;
-    case DashboardState.PongMissed: {
-      state.value = DashboardState.PiccPaired;
-      pingCancelationToken.value?.cancel("new dev msg arrived");
-    } break;
-  }
+  onEveryDeviceMessage(e.message);
 
-  // start pinging on first message from device
-  if (!pingCancelationToken.value || pingCancelationToken.value.isCanceled) {
-    pingCancelationToken.value = new CancelationToken();
-    client.value.pingLoop(2500, pingCancelationToken.value);
-  }
-
-  if (!isHelloDeviceMessage(e.message)) {
-    return;
-  }
-
-  if (state.value >= DashboardState.PiccPaired) {
-    client.value.send(new GetPiccWebMessage());
-  }
-  else if (state.value > DashboardState.CeckingForPicc) {
-    state.value = DashboardState.CeckingForPicc;
-  } else {
-    state.value = DashboardState.CheckingForReader;
-  }
-});
-
-onClientMessage(e => {
-  const { message } = e;
-
-  if (!isPiccDeviceMessage(message) && !isPiccStateChangedDeviceMessage(message)) {
-    return;
-  }
-
-  const piccDto = message.picc;
-
-  if (piccDto.type === PiccType.Undefined) {
-    // ignore, device did not scanned a single picc yet
-    return;
-  }
-
-  if (!MifareClassic.isMifareClassic(piccDto)) {
-    logger.error('unsupported PICC type', PiccType[piccDto.type]);
-    state.value = DashboardState.Exit;
-    return;
-  }
-
-  if (picc.value === undefined || (picc.value.id !== MifareClassic.calculateId(piccDto))) {
-    picc.value = MifareClassic.fromDto(piccDto);
-  } else { // Same card
-    picc.value.state = piccDto.state;
-  }
-
-  if ([PiccState.Active, PiccState.ActiveH].includes(picc.value.state)) {
-    state.value = DashboardState.PiccPaired;
-    return;
-  }
-
-  if (picc.value.state == PiccState.Idle) {
-    if (isPiccStateChangedDeviceMessage(message)
-      && [PiccState.Active, PiccState.ActiveH].includes(message.old_state)) {
-      state.value = DashboardState.PiccRemoved;
-      return;
-    }
-
-    state.value = DashboardState.PiccNotPresent;
-    return;
+  if (isHelloDeviceMessage(e.message)) {
+    onHelloDeviceMessage(e.message)
+  } else if (isPiccDeviceMessage(e.message) || isPiccStateChangedDeviceMessage(e.message)) {
+    onPiccOrPiccStateChangeDeviceMessage(e.message);
   }
 });
 
