@@ -115,6 +115,13 @@ watch(() => props.block, () => editMode.value = false);
 
 .MemoryViewer {
   .toolbar {
+    button {
+      padding: .2rem .3rem;
+      font-size: .5rem;
+    }
+  }
+
+  .toolbar {
     display: flex;
     justify-content: start;
 

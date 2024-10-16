@@ -80,25 +80,6 @@
 .Dashboard .InfoRenderer {
   font-size: .9rem;
 
-  .MemoryViewer {
-    .toolbar {
-      button {
-        padding: .2rem .3rem;
-        font-size: .5rem;
-      }
-    }
-
-    button,
-    textarea {
-      font-size: .9rem;
-      padding: .3rem .5rem;
-    }
-
-    textarea {
-      width: 18rem;
-    }
-  }
-
   &:not(:first-child) {
     margin-top: .8rem;
   }

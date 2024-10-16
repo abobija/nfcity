@@ -35,7 +35,7 @@ function onSubmit() {
         <label :for="`keyb-s${sector.offset}`" title="Use key B">
           <input type="radio" name="keyb" :id="`keyb-s${sector.offset}`" :value="keyB" v-model="keyType" /> B
         </label>
-        <BytesInput v-model="keyValue" :maxlength="keySize" autofocus />
+        <BytesInput v-model="keyValue" autofocus />
         <button class="primary" type="submit" :disabled="!unlockable">Unlock</button>
         <button class="secondary" @click.prevent="$emit('cancel')" type="button">Cancel</button>
       </div>

@@ -2,25 +2,32 @@
 import vFocus from "@/directives/vFocus";
 import { hex, isHex, removeWhitespace, unhexToArray } from "@/utils/helpers";
 import ByteRepresentation, { byteRepresentationSingleChar } from "@Memory/ByteRepresentation";
-import { ref, useTemplateRef, watch } from "vue";
+import { computed, onMounted, ref, useTemplateRef, watch } from "vue";
 
 const props = defineProps<{
-  maxlength?: number; // max number of bytes (not chars!) that can be entered
+  offset?: number;
+  length?: number;
   autofocus?: boolean;
   resizable?: boolean;
   multiline?: boolean;
   readonly?: boolean;
+  placeholder?: string;
 }>();
 
 const byteRepresentation = ByteRepresentation.Hexadecimal;
 const modelBytes = defineModel<number[]>({ required: true });
+const _offset = computed(() => props.offset ?? 0);
+const _length = computed(() => props.length ?? modelBytes.value.length - _offset.value);
+const maxlength = ref<number>();
 const bytesField = useTemplateRef('bytesField');
-const bytesFieldValue = ref(hex(modelBytes.value));
+const bytesFieldValue = ref(hex(modelBytes.value.slice(_offset.value, _offset.value + _length.value)));
+
+onMounted(() => maxlength.value = _length.value);
 
 watch(bytesFieldValue, (newValue, oldValue) => {
   const newBytes = unhexToArray(newValue);
 
-  if (props.maxlength !== undefined && newBytes.length > props.maxlength) {
+  if (maxlength.value !== undefined && newBytes.length > maxlength.value) {
     bytesFieldValue.value = oldValue;
     return;
   }
@@ -91,7 +98,7 @@ function onPaste(e: ClipboardEvent) {
         readonly: readonly === true,
       }" :style="{
         resize: resizable === false ? 'none' : 'both',
-      }" @keydown="onKeyDown" @paste="onPaste" name="bytes" :readonly="readonly"></textarea>
+      }" @keydown="onKeyDown" @paste="onPaste" name="bytes" :readonly="readonly" :placeholder></textarea>
   </section>
 </template>
 

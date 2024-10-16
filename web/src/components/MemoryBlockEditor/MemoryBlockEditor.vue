@@ -20,7 +20,7 @@ import { isPiccBlockDeviceMessage } from "@/communication/messages/device/PiccBl
 import WriteBlockWebMessage from "@/communication/messages/web/WriteBlockWebMessage";
 import BytesInput from "@/components/BytesInput/BytesInput.vue";
 import useClient from "@/composables/useClient";
-import { MifareClassicBlock, MifareClassicBlockType, MifareClassicDataBlock, MifareClassicSectorTrailerBlock } from "@/models/MifareClassic";
+import { keySize, MifareClassicBlock, MifareClassicBlockType, MifareClassicDataBlock, MifareClassicSectorTrailerBlock } from "@/models/MifareClassic";
 import { UpdatablePiccBlock } from "@/models/Picc";
 import { arraysAreEqual, assert, hex, overwriteArraySegment } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";
@@ -54,7 +54,6 @@ const state = ref(MemoryBlockEditorState.Undefined);
 const key = computed(() => props.block.sector.key);
 const bytesToEdit = computed(() => props.block.data);
 const editingBytes = ref(Array.from(bytesToEdit.value));
-const maxlength = computed(() => bytesToEdit.value.length);
 const saveable = ref(false);
 const confirmBlock = ref<UpdatablePiccBlock>();
 
@@ -164,12 +163,19 @@ function confirm() {
     <form v-if="state == MemoryBlockEditorState.Editing" class="edit" @submit.prevent="confirm">
       <div v-if="block instanceof MifareClassicDataBlock">
         <div class="form-group">
-          <BytesInput v-model="editingBytes" :maxlength autofocus multiline resizable />
+          <BytesInput v-model="editingBytes" autofocus multiline resizable />
         </div>
       </div>
       <div v-if="block instanceof MifareClassicSectorTrailerBlock">
-        <!-- TODO: -->
-        <p>Edit of sector trailer blocks is not supported yet.</p>
+        <div class="form-group">
+          <BytesInput v-model="editingBytes" :offset="0" :length="keySize" placeholder="Key A" />
+        </div>
+        <div class="form-group">
+          <BytesInput v-model="editingBytes" :offset="keySize + 4" placeholder="Key B" />
+        </div>
+        <div class="form-group">
+          <BytesInput v-model="editingBytes" :offset="keySize + 3" :length="1" placeholder="User byte" />
+        </div>
       </div>
       <div class="form-group">
         <button type="submit" class="btn primary" :disabled="!saveable">save</button>
@@ -199,6 +205,18 @@ function confirm() {
 @import '@/theme.scss';
 
 .MemoryBlockEditor {
+
+  button,
+  textarea,
+  input[type="text"] {
+    font-size: .9rem !important;
+    padding: .3rem .5rem !important;
+  }
+
+  textarea {
+    width: 18rem;
+  }
+
   .confirm-data {
     margin: 1rem 0;
     color: $color-5;
