@@ -12,7 +12,7 @@ import Client from "./communication/Client";
 import { isPiccSectorDeviceMessage } from "./communication/messages/device/PiccSectorDeviceMessage";
 import ReadSectorWebMessage from "./communication/messages/web/ReadSectorWebMessage";
 import { assert, bin, hex, unhexToArray } from "./utils/helpers";
-import { logi } from "./utils/Logger";
+import { logd } from "./utils/Logger";
 
 const {
   DEV,
@@ -130,7 +130,7 @@ const nfcityConsole = new NFCityConsole();
 
 if (DEV) {
   (window as any).nfcity = nfcityConsole;
-  logi('Console mounted');
+  logd('Console mounted');
 }
 
 export default nfcityConsole;
