@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import MemoryViewer from "@/components/MemoryViewer/MemoryViewer.vue";
 import { MifareClassicBlock, MifareClassicBlockType } from "@/models/MifareClassic";
 import { hex } from "@/utils/helpers";
 
@@ -24,6 +25,20 @@ defineProps<{
           Bits {{ block.accessBits.c1 }}{{ block.accessBits.c2 }}{{ block.accessBits.c3 }}
         </div>
       </li>
+      <li class="prop memory">
+        <div class="name">Content</div>
+        <div class="value">
+          <MemoryViewer :block />
+        </div>
+      </li>
     </ul>
   </section>
 </template>
+
+<style lang="scss">
+.BlockInfoRenderer {
+  .prop.memory {
+    margin-top: 0.3rem;
+  }
+}
+</style>

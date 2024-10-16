@@ -375,7 +375,7 @@ class MifareClassicUndefinedBlock extends MifareClassicBlock {
   }
 }
 
-class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
+export class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
   readonly accessBitsPool: AccessBitsPool;
 
   constructor(
@@ -432,15 +432,20 @@ class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
   }
 }
 
-class MifareClassicDataBlock extends MifareClassicBlock {
+export class MifareClassicDataBlock extends MifareClassicBlock {
   constructor(sector: MifareClassicSector, block: PiccBlock) {
     super(MifareClassicBlockType.Data, sector, block, [
       new MifareClassicBlockGroup(MifareClassicBlockGroupType.Data, 0, blockSize, dataBlockAccessConditions),
     ]);
   }
+
+  keyCan(key: PiccKey, operation: MifareClassicBlockOperation): boolean {
+    assert(this.blockGroups.length === 1);
+    return this.blockGroups[0].keyCan(key, operation);
+  }
 }
 
-class MifareClassicValueBlock extends MifareClassicBlock {
+export class MifareClassicValueBlock extends MifareClassicBlock {
   constructor(sector: MifareClassicSector, block: PiccBlock) {
     // TODO: Parse
 

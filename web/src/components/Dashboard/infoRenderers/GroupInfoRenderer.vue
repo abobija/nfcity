@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import MemoryViewer from "@/components/MemoryViewer/MemoryViewer.vue";
 import { MifareClassicBlockGroup, MifareClassicBlockGroupType, MifareClassicBlockOperation } from "@/models/MifareClassic";
+import { hex } from "@/utils/helpers";
 import { computed } from "vue";
 
 const group = defineModel<MifareClassicBlockGroup>({ required: true });
@@ -21,6 +21,7 @@ const permissions = computed(() => key.value ? group.value.allowedOperationsFor(
       <li class="prop access">
         <div class="name">Access</div>
         <div class="value">
+          Permissions
           <span v-for="operation in operations" class="operation" :class="{
             allowed: permissions.includes(operation),
           }">
@@ -36,10 +37,10 @@ const permissions = computed(() => key.value ? group.value.allowedOperationsFor(
           </abbr>
         </div>
       </li>
-      <li class="prop memory">
+      <li class="prop" v-if="group.type !== MifareClassicBlockGroupType.Data">
         <div class="name">Content</div>
-        <div class="value">
-          <MemoryViewer :group />
+        <div class="value content" :class="{ unreadable: key && !group.keyCan(key, 'read') }">
+          {{ hex(group.data(), '') }}
         </div>
       </li>
     </ul>
@@ -63,6 +64,10 @@ const permissions = computed(() => key.value ? group.value.allowedOperationsFor(
         text-decoration: line-through;
       }
     }
+  }
+
+  .prop .value.content.unreadable {
+    text-decoration: line-through;
   }
 }
 </style>

@@ -328,8 +328,8 @@ onByteMouseClick(clickedByte => {
             </Transition>
 
             <div v-if="tByte">
-              <GroupInfoRenderer class="InfoRenderer" v-model="tByte.group as MifareClassicBlockGroup" />
               <BlockInfoRenderer class="InfoRenderer" :block="tByte.group.block as MifareClassicBlock" />
+              <GroupInfoRenderer class="InfoRenderer" v-model="tByte.group as MifareClassicBlockGroup" />
               <SectorInfoRenderer class="InfoRenderer" :sector="tByte.group.block.sector as MifareClassicSector" />
               <ByteInfoRenderer class="InfoRenderer" :byte="tByte as TargetByte" />
             </div>

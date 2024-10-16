@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import MemoryEditor from "@/components/MemoryEditor/MemoryEditor.vue";
-import { MifareClassicBlockGroup, MifareClassicBlockGroupType } from "@/models/MifareClassic";
+import { MifareClassicBlock, MifareClassicBlockGroupType, MifareClassicDataBlock } from "@/models/MifareClassic";
 import { keyTypeName } from "@/models/Picc";
 import { ascii, bin, hex, isAsciiPrintable } from "@/utils/helpers";
 import ByteRepresentation, { byteRepresentationShortName } from "@Memory/ByteRepresentation";
 import { computed, ref, watch } from "vue";
 
 const props = defineProps<{
-  group: MifareClassicBlockGroup;
+  block: MifareClassicBlock;
 }>();
 
 const representations = [
@@ -19,21 +19,38 @@ const representations = [
 
 const representation = ref(ByteRepresentation.Hexadecimal);
 const showIndexes = ref(false);
-const block = computed(() => props.group.block);
-const key = computed(() => block.value.sector.key);
-const bytes = computed(() => props.group.data());
+const key = computed(() => props.block.sector.key);
 const editable = computed(() => {
-  return props.group.type === MifareClassicBlockGroupType.Data
+  return props.block instanceof MifareClassicDataBlock
     && key.value !== undefined
-    && props.group.keyCan(key.value, 'write');
+    && props.block.keyCan(key.value, 'write');
 });
 const editMode = ref(false);
+const infos = computed<string[]>(() => {
+  const list: string[] = [];
 
-watch(() => props.group, () => editMode.value = false);
+  const unreadableGroups = props.block.blockGroups
+    .filter((group) => key.value && !group.keyCan(key.value, 'read'));
+
+  if (unreadableGroups.length > 0 && key.value) {
+    list.push(`
+        Group${unreadableGroups.length > 1 ? 's' : ''}
+        ${unreadableGroups.map(group => MifareClassicBlockGroupType[group.type]).join(' & ')}
+        ${unreadableGroups.length > 1 ? 'are' : 'is'} unreadable
+        due to restrictions of the key ${keyTypeName(key.value.type)} used in sector authentication.
+        Therefore, group${unreadableGroups.length > 1 ? 's' : ''} ${unreadableGroups.length > 1 ? 'are' : 'is'}
+        blanked with zeros.
+      `);
+  }
+
+  return list;
+});
+
+watch(() => props.block, () => editMode.value = false);
 </script>
 
 <template>
-  <section class="MemoryViewer" :class="{ unreadable: key && !group.keyCan(key, 'read') }">
+  <section class="MemoryViewer">
     <header>
       <div v-if="!editMode" class="toolbar">
         <div class="view group">
@@ -50,38 +67,38 @@ watch(() => props.group, () => editMode.value = false);
         </div>
         <div class="modify group">
           <div class="btn-group">
-            <button v-if="editable" class="btn primary" @click="editMode = true">edit</button>
+            <button :disabled="!editable" class="btn primary" @click="editMode = true">edit</button>
           </div>
         </div>
       </div>
     </header>
     <main>
       <div class="bytes" v-if="!editMode">
-        <span v-for="(byte, index) in bytes" class="byte" :class="{
-          indexed: showIndexes,
-          unprintable: representation === ByteRepresentation.Ascii && !isAsciiPrintable(byte),
-        }" :data-index="String(group.offset + index).padStart(2, '0')">
-          {{
-            representation === ByteRepresentation.Decimal
-              ? byte
-              : representation === ByteRepresentation.Binary
-                ? bin(byte)
-                : representation === ByteRepresentation.Ascii
-                  ? ascii(byte)
-                  : hex(byte)
-          }}
-        </span>
+        <div v-for="group in block.blockGroups" class="group" :class="{
+          unreadable: key && !group.keyCan(key, 'read'),
+        }">
+          <span v-for="(byte, index) in group.data()" class="byte" :class="{
+            indexed: showIndexes,
+            unprintable: representation === ByteRepresentation.Ascii && !isAsciiPrintable(byte),
+          }" :data-index="String(index).padStart(2, '0')">
+            {{
+              representation === ByteRepresentation.Decimal
+                ? byte
+                : representation === ByteRepresentation.Binary
+                  ? bin(byte)
+                  : representation === ByteRepresentation.Ascii
+                    ? ascii(byte)
+                    : hex(byte)
+            }}
+          </span>
+        </div>
       </div>
-      <MemoryEditor v-if="editMode" :group @cancel="editMode = false" @done="editMode = false" />
+      <MemoryEditor v-if="editMode" :block @cancel="editMode = false" @done="editMode = false" />
     </main>
     <footer>
-      <div v-if="key && !group.keyCan(key, 'read')">
-        <p class="info">
-          * Group {{ MifareClassicBlockGroupType[group.type] }} is unreadable
-          due to restrictions of the key ({{ keyTypeName(key.type) }}) used in sector authentication.
-          Therefore, the content is blanked with all zeros.
-        </p>
-      </div>
+      <p v-for="info in infos" class="info">
+        * {{ info }}
+      </p>
     </footer>
   </section>
 </template>
@@ -105,12 +122,13 @@ watch(() => props.group, () => editMode.value = false);
   }
 
   .bytes {
+    .group {
+      display: inline;
+    }
+
     .byte {
       display: inline-block;
-
-      &:not(:last-child) {
-        margin-right: .5rem;
-      }
+      color: $color-1;
 
       &.unprintable {
         color: color.adjust($color-fg, $lightness: -50%);
@@ -125,10 +143,18 @@ watch(() => props.group, () => editMode.value = false);
         }
       }
     }
-  }
 
-  &.unreadable .bytes {
-    color: color.adjust($color-fg, $lightness: -50%);
+    .group,
+    .byte {
+      &:not(:last-child) {
+        margin-right: .4rem;
+      }
+    }
+
+    .unreadable .byte {
+      text-decoration: line-through;
+      color: color.adjust($color-fg, $lightness: -40%);
+    }
   }
 
   main,
@@ -136,9 +162,10 @@ watch(() => props.group, () => editMode.value = false);
     margin-top: .5rem;
   }
 
-  .info {
-    color: color.adjust($color-fg, $lightness: -20%);
-    font-size: .8em;
+  footer .info {
+    color: color.adjust($color-fg, $lightness: -40%);
+    font-size: .7em;
+    margin-top: .2rem;
   }
 }
 </style>

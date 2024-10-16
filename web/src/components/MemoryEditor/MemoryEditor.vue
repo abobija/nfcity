@@ -3,7 +3,7 @@ import { isErrorDeviceMessage } from "@/communication/messages/device/ErrorDevic
 import { isPiccBlockDeviceMessage } from "@/communication/messages/device/PiccBlockDeviceMessage";
 import WriteBlockWebMessage from "@/communication/messages/web/WriteBlockWebMessage";
 import useClient from "@/composables/useClient";
-import { MifareClassicBlockGroup, MifareClassicBlockType } from "@/models/MifareClassic";
+import { MifareClassicBlock, MifareClassicBlockType } from "@/models/MifareClassic";
 import { UpdatablePiccBlock } from "@/models/Picc";
 import { arraysAreEqual, assert, hex, overwriteArraySegment } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";
@@ -24,7 +24,7 @@ enum MemoryEditorState {
 }
 
 const props = defineProps<{
-  group: MifareClassicBlockGroup;
+  block: MifareClassicBlock;
 }>();
 
 const emit = defineEmits<{
@@ -35,10 +35,9 @@ const emit = defineEmits<{
 const logger = makeLogger('MemoryEditor');
 const { client } = useClient();
 const state = ref(MemoryEditorState.Undefined);
-const block = computed(() => props.group.block);
-const key = computed(() => block.value.sector.key);
-const bytesToEdit = computed(() => props.group.data());
-const editingBytes = ref(bytesToEdit.value);
+const key = computed(() => props.block.sector.key);
+const bytesToEdit = computed(() => props.block.data);
+const editingBytes = ref(Array.from(bytesToEdit.value));
 const maxlength = computed(() => bytesToEdit.value.length);
 const saveable = ref(false);
 const confirmBlock = ref<UpdatablePiccBlock>();
@@ -113,10 +112,10 @@ async function save() {
     };
 
     assert(updatedBlock.address === confirmBlock.value.address, 'address mismatch');
-    assert(props.group.block.type !== MifareClassicBlockType.Data
+    assert(props.block.type !== MifareClassicBlockType.Data
       || arraysAreEqual(updatedBlock.data, confirmBlock.value.data), 'data mismatch');
 
-    block.value.updateWith(updatedBlock);
+    props.block.updateWith(updatedBlock);
     state.value = MemoryEditorState.SaveSucceeded;
   } catch (e) {
     logger.error('write failed', e);
@@ -131,13 +130,12 @@ function confirm() {
   }
 
   const dataToWrite = overwriteArraySegment(
-    Array.from(block.value.data),
-    editingBytes.value,
-    props.group.offset
+    Array.from(props.block.data),
+    editingBytes.value
   );
 
   confirmBlock.value = {
-    address: block.value.address,
+    address: props.block.address,
     data: dataToWrite,
   };
 
