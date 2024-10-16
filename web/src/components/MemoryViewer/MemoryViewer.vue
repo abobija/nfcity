@@ -56,6 +56,7 @@ watch(() => props.block, () => editMode.value = false);
     dec: representation === ByteRepresentation.Decimal,
     bin: representation === ByteRepresentation.Binary,
     ascii: representation === ByteRepresentation.Ascii,
+    indexed: showIndexes,
   }">
     <header>
       <div v-if="!editMode" class="toolbar">
@@ -84,7 +85,6 @@ watch(() => props.block, () => editMode.value = false);
           unreadable: key && !group.keyCan(key, 'read'),
         }">
           <span v-for="(byte, index) in group.data()" class="byte" :class="{
-            indexed: showIndexes,
             unprintable: representation === ByteRepresentation.Ascii && !isAsciiPrintable(byte),
           }" :data-index="String(index).padStart(2, '0')">
             {{
@@ -139,15 +139,6 @@ watch(() => props.block, () => editMode.value = false);
       &.unprintable {
         color: color.adjust($color-fg, $lightness: -50%);
       }
-
-      &.indexed {
-        display: block;
-
-        &::before {
-          content: '[' attr(data-index) '] ';
-          color: color.adjust($color-fg, $lightness: -50%);
-        }
-      }
     }
 
     .group,
@@ -171,9 +162,26 @@ watch(() => props.block, () => editMode.value = false);
         margin-right: 0;
       }
     }
+  }
 
-    .byte:not(.indexed) {
+  &:not(.indexed).ascii {
+    .byte {
       width: 1ch;
+    }
+  }
+
+  &.indexed {
+    .group {
+      display: block;
+    }
+
+    .byte {
+      display: block;
+
+      &::before {
+        content: '[' attr(data-index) '] ';
+        color: color.adjust($color-fg, $lightness: -50%);
+      }
     }
   }
 
