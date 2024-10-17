@@ -25,10 +25,10 @@ watch(comboIndex, (newIndex) => combo.value = combos.value[newIndex]);
 <template>
   <section class="AccessBitsComboSwitcher">
     <div class="btn-group">
-      <button type="button" class="btn info dec" :disabled="readonly === true || comboIndex <= 0"
+      <button type="button" class="btn default dec" :disabled="readonly === true || comboIndex <= 0"
         @click="comboIndex--">&laquo;</button>
-      <button type="button" class="btn txt info combo" disabled>{{ bin(_combo).slice(-3) }}</button>
-      <button type="button" class="btn info inc" :disabled="readonly === true || comboIndex >= maxComboIndex"
+      <button type="button" class="btn default txt combo color-fg" disabled>{{ bin(_combo).slice(-3) }}</button>
+      <button type="button" class="btn default inc" :disabled="readonly === true || comboIndex >= maxComboIndex"
         @click="comboIndex++">&raquo;</button>
     </div>
   </section>

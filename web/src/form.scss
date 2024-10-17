@@ -151,12 +151,6 @@ button.txt,
   }
 }
 
-@include define-button('primary', $color-primary, $color-bg);
-
-@include define-button('secondary', $color-secondary, $color-bg);
-
-@include define-button('info', $color-info, $color-bg);
-
 @mixin define-txt-button($class-name, $color-fg) {
 
   button.txt.#{$class-name},
@@ -175,8 +169,11 @@ button.txt,
   }
 }
 
+@include define-button('default', $color-fg, $color-bg);
+@include define-button('primary', $color-primary, $color-bg);
+@include define-button('secondary', $color-secondary, $color-bg);
+@include define-button('info', $color-info, $color-bg);
 @include define-txt-button('primary', $color-primary);
-
 @include define-txt-button('secondary', $color-secondary);
 
 button.primary,

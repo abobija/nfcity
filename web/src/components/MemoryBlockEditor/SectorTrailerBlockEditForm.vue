@@ -85,7 +85,7 @@ watch(comboPoolArray, (newComboPoolArray) => {
         :readonly="!canWrite?.userByte" />
     </div>
     <div class="form-group access-bits">
-      <header>Access Bits</header>
+      <header>Access Bits Pool</header>
       <ul>
         <li class="pool-index" :data-index="index" v-for="index in ([3, 2, 1, 0] as AccessBitsPoolIndex[])">
           <header>
@@ -95,8 +95,6 @@ watch(comboPoolArray, (newComboPoolArray) => {
               {{ poolIndexTitle(index) }}
             </div>
           </header>
-          <main>
-          </main>
         </li>
       </ul>
     </div>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import MemoryViewer from "@/components/MemoryViewer/MemoryViewer.vue";
 import { MifareClassicBlock, MifareClassicBlockType } from "@/models/MifareClassic";
-import { hex } from "@/utils/helpers";
+import { bin, hex } from "@/utils/helpers";
 
 defineProps<{
   block: MifareClassicBlock;
@@ -10,28 +10,17 @@ defineProps<{
 
 <template>
   <section class="BlockInfoRenderer">
-    <div class="header prop">
-      <div class="name">Block</div>
-      <div class="value">{{ hex(block.address) }}</div>
-    </div>
-    <ul class="props">
-      <li class="prop">
-        <div class="name">Type</div>
-        <div class="value">{{ MifareClassicBlockType[block.type] }}</div>
-      </li>
-      <li class="prop">
-        <div class="name" title="Access Bits">Access</div>
-        <div class="value">
-          Bits: {{ block.accessBits.c1 }}{{ block.accessBits.c2 }}{{ block.accessBits.c3 }}
-        </div>
-      </li>
-      <li class="prop memory">
-        <div class="name">Content</div>
-        <div class="value">
-          <MemoryViewer :block />
-        </div>
-      </li>
-    </ul>
+    <header>
+      <p>
+        {{ MifareClassicBlockType[block.type] }} Block at address {{ hex(block.address) }}
+      </p>
+      <p>
+        Access bits {{ bin(block.accessBitsCombo).slice(-3) }}
+      </p>
+    </header>
+    <main>
+      <MemoryViewer :block />
+    </main>
   </section>
 </template>
 
@@ -42,31 +31,8 @@ defineProps<{
 .BlockInfoRenderer {
   font-size: .9rem;
 
-  &:not(:first-child) {
-    margin-top: .8rem;
-  }
-
-  .header {
-    font-weight: 600;
-    color: $color-3;
-  }
-
-  .prop {
-    display: flex;
-
-    .value {
-      flex-grow: 1;
-      color: $color-fg;
-    }
-  }
-
-  .prop>.name {
-    width: 5rem;
-    flex-shrink: 0;
-  }
-
-  .prop.memory {
-    margin-top: .5rem;
+  >main {
+    margin-top: 1rem;
   }
 }
 </style>
