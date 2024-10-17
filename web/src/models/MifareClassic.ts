@@ -314,7 +314,7 @@ export abstract class MifareClassicBlock implements PiccBlock {
   private _data: number[];
   readonly accessBits: PiccBlockAccessBits;
   readonly accessBitsCombo: AccessBitsCombo;
-  readonly blockGroups: MifareClassicBlockGroup[];
+  readonly groups: MifareClassicBlockGroup[];
 
   get data(): number[] {
     return this._data;
@@ -333,7 +333,7 @@ export abstract class MifareClassicBlock implements PiccBlock {
     this.accessBits = block.accessBits;
     this.accessBitsCombo = calculateAccessBitsCombo(this.accessBits);
     bytesGroups.forEach(group => group.block = this);
-    this.blockGroups = bytesGroups;
+    this.groups = bytesGroups;
   }
 
   get loaded(): Boolean {
@@ -359,7 +359,7 @@ export abstract class MifareClassicBlock implements PiccBlock {
   }
 
   findGroup(type: MifareClassicBlockGroupType): MifareClassicBlockGroup | undefined {
-    return this.blockGroups.find(group => group.type === type);
+    return this.groups.find(group => group.type === type);
   }
 }
 
@@ -416,7 +416,7 @@ export class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
   }
 
   keyCanWriteToAnyGroup(key: PiccKey): boolean {
-    return this.blockGroups.some(group => group.keyCan(key, 'write'));
+    return this.groups.some(group => group.keyCan(key, 'write'));
   }
 
   static calculateBlockAccessBitsPoolIndex(blockOffset: number, numberOfBlocks: number): AccessBitsPoolIndex {
@@ -448,8 +448,8 @@ export class MifareClassicDataBlock extends MifareClassicBlock {
   }
 
   keyCan(key: PiccKey, operation: MifareClassicBlockOperation): boolean {
-    assert(this.blockGroups.length === 1);
-    return this.blockGroups[0].keyCan(key, operation);
+    assert(this.groups.length === 1);
+    return this.groups[0].keyCan(key, operation);
   }
 }
 

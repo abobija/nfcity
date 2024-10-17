@@ -28,7 +28,7 @@ const restrictions = computed<string[]>(() => {
 
   assert(key.value !== undefined, 'key is undefined');
 
-  const unreadableGroups = props.block.blockGroups
+  const unreadableGroups = props.block.groups
     .filter((group) => !group.keyCan(key.value!, 'read'));
 
   if (unreadableGroups.length > 0) {
@@ -39,12 +39,12 @@ const restrictions = computed<string[]>(() => {
       `);
   }
 
-  const unwritableGroups = props.block.blockGroups
+  const unwritableGroups = props.block.groups
     .filter((group) => !group.keyCan(key.value!, 'write'));
 
   if (unwritableGroups.length > 0) {
     if (props.block instanceof MifareClassicSectorTrailerBlock) {
-      const allGroupsAreUnwritable = unwritableGroups.length === props.block.blockGroups.length;
+      const allGroupsAreUnwritable = unwritableGroups.length === props.block.groups.length;
       const groups = unwritableGroups.map(group => MifareClassicBlockGroupType[group.type]).join(' & ');
 
       list.push(`
@@ -92,7 +92,7 @@ watch(() => props.block, () => editMode.value = false);
     </header>
     <main>
       <div class="bytes" v-if="!editMode">
-        <div v-for="group in block.blockGroups" class="group" :class="{
+        <div v-for="group in block.groups" class="group" :class="{
           unreadable: key && !group.keyCan(key, 'read'),
         }">
           <span v-for="(byte, index) in group.data()" class="byte" :class="{
