@@ -3,7 +3,7 @@ import vFocus from "@/directives/vFocus";
 import { arraysAreEqual, assert, hex, isHex, removeWhitespace, unhexToArray } from "@/utils/helpers";
 import ByteRepresentation, { byteRepresentationSingleChar } from "@Memory/ByteRepresentation";
 import { computed, ref, useTemplateRef, watch } from "vue";
-import HoverablePlaceholder from "../HoverablePlaceholder/HoverablePlaceholder.vue";
+import HoverableInputPlaceholder from "../HoverableInputPlaceholder/HoverableInputPlaceholder.vue";
 
 const props = defineProps<{
   offset?: number;
@@ -121,14 +121,14 @@ function onPaste(e: ClipboardEvent) {
     <abbr class="byte-representation txt-unselectable" :title="ByteRepresentation[byteRepresentation]">
       {{ byteRepresentationSingleChar(byteRepresentation) }}
     </abbr>
-    <HoverablePlaceholder>
+    <HoverableInputPlaceholder>
       <textarea ref="field" v-focus="autofocus === true" v-model="bytesFieldValue" spellcheck="false"
         :rows="multiline === true ? undefined : 1" :class="{
           readonly: readonly === true,
         }" :style="{
-        resize: resizable === false ? 'none' : 'both',
-      }" @keydown="onKeyDown" @paste="onPaste" name="bytes" :readonly="readonly" :placeholder :disabled></textarea>
-    </HoverablePlaceholder>
+          resize: resizable === false ? 'none' : 'both',
+        }" @keydown="onKeyDown" @paste="onPaste" name="bytes" :readonly="readonly" :placeholder :disabled></textarea>
+    </HoverableInputPlaceholder>
   </section>
 </template>
 

@@ -39,7 +39,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="HoverablePlaceholder" ref="component">
+  <div class="HoverableInputPlaceholder" ref="component">
     <slot></slot>
     <div v-if="placeholder" class="placeholder">
       {{ placeholder }}
@@ -51,7 +51,7 @@ onUnmounted(() => {
 @use 'sass:color';
 @import '@/theme.scss';
 
-.HoverablePlaceholder {
+.HoverableInputPlaceholder {
   position: relative;
 
   >.placeholder {
