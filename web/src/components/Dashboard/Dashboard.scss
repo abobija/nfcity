@@ -2,7 +2,7 @@
 @import '@/theme.scss';
 
 .Dashboard>main {
-  margin: 1rem;
+  margin: 2rem 1rem 1rem 1rem;
 
   >.header {
     display: flex;
@@ -42,7 +42,6 @@
 
   >.main {
     margin-top: 1rem;
-    margin-bottom: 2rem; // because of StatusBar
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
@@ -58,7 +57,7 @@
 
       .info-panel {
         position: sticky;
-        top: 1rem;
+        top: 2rem;
         color: $color-4;
 
         p.hint {

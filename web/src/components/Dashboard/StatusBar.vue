@@ -19,16 +19,17 @@
 
 .StatusBar {
   position: fixed;
-  bottom: 0;
+  z-index: 2;
+  top: 0;
   left: 0;
   right: 0;
   display: flex;
   justify-content: space-between;
-  background-color: color.adjust($color-bg, $lightness: +2%);
+  background: color.adjust($color-bg, $lightness: +2%);
   border-top: 1px solid color.adjust($color-bg, $lightness: +10%);
-  padding: .2rem .5rem;
+  padding: .25rem .5rem;
   font-size: .6rem;
-  box-shadow: 0 -0.1rem .3rem color.adjust($color-bg, $lightness: -3%);
+  box-shadow: 0 0.1rem .3rem color.adjust($color-bg, $lightness: -3%);
   color: color.adjust($color-fg, $lightness: -25%);
 
   $margin-between-items: .8rem;

@@ -285,6 +285,20 @@ onByteMouseClick(clickedByte => {
 <template>
   <section class="Dashboard">
 
+    <StatusBar>
+      <template #left>
+        <div class="state">
+          <abbr title="Dashboard status">{{ DashboardState[state] }}</abbr>
+        </div>
+        <SectorStatusBarItem v-if="tByte" :sector="tByte.group.block.sector as MifareClassicSector" />
+        <BlockGroupStatusBarItem v-if="tByte" :group="tByte.group as MifareClassicBlockGroup" />
+        <ByteStatusBarItem v-if="tByte" :byte="tByte as TargetByte" />
+      </template>
+      <template #right>
+        <SystemInfo />
+      </template>
+    </StatusBar>
+
     <main v-if="picc">
       <div class="header">
         <div class="picc" :key="picc.hash">
@@ -332,20 +346,6 @@ onByteMouseClick(clickedByte => {
         </div>
       </div>
     </main>
-
-    <StatusBar>
-      <template #left>
-        <div class="state">
-          <span>{{ DashboardState[state] }}</span>
-        </div>
-        <SectorStatusBarItem v-if="tByte" :sector="tByte.group.block.sector as MifareClassicSector" />
-        <BlockGroupStatusBarItem v-if="tByte" :group="tByte.group as MifareClassicBlockGroup" />
-        <ByteStatusBarItem v-if="tByte" :byte="tByte as TargetByte" />
-      </template>
-      <template #right>
-        <SystemInfo />
-      </template>
-    </StatusBar>
 
     <div class="full-screen center overlay" v-if="overlay">
       <div class="content">
