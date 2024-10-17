@@ -10,6 +10,7 @@ import { computed, ref, watch } from 'vue';
 
 const props = defineProps<{
   poolIndex: AccessBitsPoolIndex,
+  readonly?: boolean,
 }>();
 
 const combo = defineModel<AccessBitsCombo>({ required: true });
@@ -24,9 +25,10 @@ watch(comboIndex, (newIndex) => combo.value = combos.value[newIndex]);
 <template>
   <section class="AccessBitsComboSwitcher">
     <div class="btn-group">
-      <button type="button" class="btn info dec" :disabled="comboIndex <= 0" @click="comboIndex--">&laquo;</button>
+      <button type="button" class="btn info dec" :disabled="readonly === true || comboIndex <= 0"
+        @click="comboIndex--">&laquo;</button>
       <button type="button" class="btn txt info combo" disabled>{{ bin(_combo).slice(-3) }}</button>
-      <button type="button" class="btn info inc" :disabled="comboIndex >= maxComboIndex"
+      <button type="button" class="btn info inc" :disabled="readonly === true || comboIndex >= maxComboIndex"
         @click="comboIndex++">&raquo;</button>
     </div>
   </section>
