@@ -122,7 +122,7 @@ watch(() => props.block, () => editMode.value = false);
           <li v-for="restriction in restrictions" class="restriction">{{ restriction }}</li>
         </ul>
       </div>
-      <div v-if="block instanceof MifareClassicValueBlock">
+      <div v-if="block instanceof MifareClassicValueBlock" class="color-5">
         Edit of value blocks is not supported yet.
       </div>
     </footer>
