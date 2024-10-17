@@ -57,7 +57,7 @@ const { client } = useClient();
 const state = ref<DashboardState>(DashboardState.Undefined);
 const picc = ref<MifareClassic | undefined>(undefined);
 const memoryFocus = ref<MemoryFocus | undefined>(undefined);
-const tByte = ref<TargetByte | undefined>(undefined);
+const targetByte = ref<TargetByte | undefined>(undefined);
 const retryMax = ref(5);
 const retryCount = ref(0);
 const checkingForReaderCancelationToken = ref<CancelationToken>();
@@ -189,7 +189,7 @@ watch(picc, (newPicc, oldPicc) => {
   logger.debug('picc changed', 'from', oldPicc, 'to', newPicc);
 
   memoryFocus.value = undefined;
-  tByte.value = undefined;
+  targetByte.value = undefined;
 }, { deep: false });
 
 onMounted(() => state.value = DashboardState.Initialized);
@@ -224,11 +224,11 @@ onByteMouseEnter(e => {
     return;
   }
 
-  if (tByte.value?.locked) {
+  if (targetByte.value?.locked) {
     return;
   }
 
-  tByte.value = {
+  targetByte.value = {
     index: e.index,
     group: e.group,
     locked: false,
@@ -240,11 +240,11 @@ onByteMouseLeave((e) => {
     return;
   }
 
-  if (tByte.value?.locked) {
+  if (targetByte.value?.locked) {
     return;
   }
 
-  tByte.value = undefined;
+  targetByte.value = undefined;
 });
 
 onByteMouseClick(clickedByte => {
@@ -252,11 +252,11 @@ onByteMouseClick(clickedByte => {
     return;
   }
 
-  if (!tByte.value) {
+  if (!targetByte.value) {
     return;
   }
 
-  let targetedByte = tByte.value;
+  let targetedByte = targetByte.value;
 
   if (
     targetedByte.locked
@@ -269,7 +269,7 @@ onByteMouseClick(clickedByte => {
   }
 
   // lock new byte
-  targetedByte = tByte.value = {
+  targetedByte = targetByte.value = {
     index: clickedByte.index,
     group: clickedByte.group,
     locked: true,
@@ -290,61 +290,59 @@ onByteMouseClick(clickedByte => {
         <div class="state">
           <abbr title="Dashboard status">{{ DashboardState[state] }}</abbr>
         </div>
-        <SectorStatusBarItem v-if="tByte" :sector="tByte.group.block.sector as MifareClassicSector" />
-        <BlockGroupStatusBarItem v-if="tByte" :group="tByte.group as MifareClassicBlockGroup" />
-        <ByteStatusBarItem v-if="tByte" :byte="tByte as TargetByte" />
+        <SectorStatusBarItem v-if="targetByte" :sector="targetByte.group.block.sector as MifareClassicSector" />
+        <BlockGroupStatusBarItem v-if="targetByte" :group="targetByte.group as MifareClassicBlockGroup" />
+        <ByteStatusBarItem v-if="targetByte" :byte="targetByte as TargetByte" />
       </template>
       <template #right>
         <SystemInfo />
       </template>
     </StatusBar>
 
-    <main v-if="picc">
-      <div class="header">
-        <div class="picc" :key="picc.hash">
-          <div class="general">
-            <h1 class="type">{{ PiccType[picc.type] }}</h1>
-            <ul class="metas">
-              <li class="meta">
-                <span class="name">UID</span>
-                <var class="value">{{ hex(picc.uid, ' ') }}</var>
-              </li>
-              <li class="meta">
-                <span class="name">ATQA</span>
-                <var class="value">{{ hex(picc.atqa) }}</var>
-              </li>
-              <li class="meta">
-                <span class="name">SAK</span>
-                <var class="value">{{ hex(picc.sak) }}</var>
-              </li>
-            </ul>
-          </div>
+    <header>
+      <div v-if="picc" class="picc" :key="picc.hash">
+        <div class="general">
+          <h1 class="type">{{ PiccType[picc.type] }}</h1>
+          <ul class="metas">
+            <li class="meta">
+              <span class="name">UID</span>
+              <var class="value">{{ hex(picc.uid, ' ') }}</var>
+            </li>
+            <li class="meta">
+              <span class="name">ATQA</span>
+              <var class="value">{{ hex(picc.atqa) }}</var>
+            </li>
+            <li class="meta">
+              <span class="name">SAK</span>
+              <var class="value">{{ hex(picc.sak) }}</var>
+            </li>
+          </ul>
         </div>
       </div>
+    </header>
 
-      <div class="main" :key="picc.hash">
-        <div class="section memory">
-          <Memory :memory="picc.memory as MifareClassicMemory" :focus="memoryFocus as MemoryFocus | undefined" />
-        </div>
-        <div class="section info">
-          <div class="info-panel">
-            <Transition appear>
-              <div v-if="picc.memory.isEmpty">
-                <p>
-                  {{ PiccType[picc.type] }} has
-                </p>
-                <p v-for="(d) in picc.memory.blockDistribution">
-                  {{ d[0] }} sectors with {{ d[1] }} blocks,
-                </p>
-                <p>{{ blockSize }} bytes per block,</p>
-                <p>{{ picc.memory.size }} bytes of memory.</p>
-              </div>
-            </Transition>
+    <main v-if="picc" :key="picc.hash">
+      <section class="memory">
+        <Memory :memory="picc.memory as MifareClassicMemory" :focus="memoryFocus as MemoryFocus | undefined" />
+      </section>
+      <section class="info">
+        <div class="info-panel">
+          <Transition appear>
+            <div v-if="picc.memory.isEmpty">
+              <p>
+                {{ PiccType[picc.type] }} card has
+              </p>
+              <p v-for="(d) in picc.memory.blockDistribution">
+                {{ d[0] }} sectors with {{ d[1] }} blocks,
+              </p>
+              <p>{{ blockSize }} bytes per block,</p>
+              <p>{{ picc.memory.size }} bytes of memory.</p>
+            </div>
+          </Transition>
 
-            <BlockInfoRenderer v-if="tByte" :block="tByte.group.block as MifareClassicBlock" />
-          </div>
+          <BlockInfoRenderer v-if="targetByte" :block="targetByte.group.block as MifareClassicBlock" />
         </div>
-      </div>
+      </section>
     </main>
 
     <div class="full-screen center overlay" v-if="overlay">

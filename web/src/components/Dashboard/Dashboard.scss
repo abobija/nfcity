@@ -1,73 +1,73 @@
 @use 'sass:color';
 @import '@/theme.scss';
 
-.Dashboard>main {
+.Dashboard {
   margin: 2rem 1rem 1rem 1rem;
+}
 
-  >.header {
-    display: flex;
-    justify-content: space-between;
+.Dashboard>header {
+  display: flex;
+  justify-content: space-between;
 
-    .meta {
-      .name {
-        color: rgba($color-fg, 0.5);
-      }
+  .meta {
+    .name {
+      color: rgba($color-fg, 0.5);
     }
+  }
 
-    .picc {
-      .general {
-        .type {
-          font-size: 1.5rem;
-          color: $color-3;
-          font-weight: 600;
-        }
+  .picc {
+    .general {
+      .type {
+        font-size: 1.5rem;
+        color: $color-3;
+        font-weight: 600;
+      }
 
-        .metas {
-          display: flex;
-          margin-top: .5rem;
+      .metas {
+        display: flex;
+        margin-top: .5rem;
 
-          .meta {
-            &:not(:last-child) {
-              margin-right: 1rem;
-            }
+        .meta {
+          &:not(:last-child) {
+            margin-right: 1rem;
+          }
 
-            .name {
-              margin-right: 1rem;
-            }
+          .name {
+            margin-right: 1rem;
           }
         }
       }
     }
   }
+}
 
-  >.main {
-    margin-top: 1rem;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
+.Dashboard>main {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
 
-    &>.section.info {
-      flex-grow: 1;
+  &>section.info {
+    flex-grow: 1;
+  }
+
+  >section {
+    &:not(:last-child) {
+      margin-right: 1rem;
     }
 
-    >.section {
-      &:not(:last-child) {
-        margin-right: 1rem;
+    .info-panel {
+      position: sticky;
+      top: 2rem;
+      color: $color-4;
+
+      p.hint {
+        color: $color-1;
+        font-size: .9rem;
       }
 
-      .info-panel {
-        position: sticky;
-        top: 2rem;
-        color: $color-4;
-
-        p.hint {
-          color: $color-1;
-          font-size: .9rem;
-        }
-
-        >p:not(:last-child) {
-          margin-bottom: 1.5rem;
-        }
+      >p:not(:last-child) {
+        margin-bottom: 1.5rem;
       }
     }
   }
