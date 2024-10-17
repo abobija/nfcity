@@ -22,9 +22,7 @@ import BytesInput from "@/components/BytesInput/BytesInput.vue";
 import useClient from "@/composables/useClient";
 import {
   blockSize,
-  keySize,
   MifareClassicBlock,
-  MifareClassicBlockGroupType,
   MifareClassicBlockType,
   MifareClassicDataBlock,
   MifareClassicSectorTrailerBlock
@@ -33,6 +31,7 @@ import { UpdatablePiccBlock } from "@/models/Picc";
 import { arraysAreEqual, assert, hex } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";
 import { computed, onMounted, ref, watch } from "vue";
+import SectorTrailerBlockEditForm from "./SectorTrailerBlockEditForm.vue";
 
 enum MemoryBlockEditorState {
   Undefined = 0,
@@ -173,18 +172,7 @@ function confirm() {
         </div>
       </div>
       <div v-if="block instanceof MifareClassicSectorTrailerBlock">
-        <div class="form-group">
-          <BytesInput v-model="editingBytes" :offset="0" :length="keySize" placeholder="Key A"
-            :readonly="!key || block.findGroup(MifareClassicBlockGroupType.KeyA)?.keyCan(key, 'write') !== true" />
-        </div>
-        <div class="form-group">
-          <BytesInput v-model="editingBytes" :offset="keySize + 4" placeholder="Key B"
-            :readonly="!key || block.findGroup(MifareClassicBlockGroupType.KeyB)?.keyCan(key, 'write') !== true" />
-        </div>
-        <div class="form-group">
-          <BytesInput v-model="editingBytes" :offset="keySize + 3" :length="1" placeholder="User byte"
-            :readonly="!key || block.findGroup(MifareClassicBlockGroupType.UserByte)?.keyCan(key, 'write') !== true" />
-        </div>
+        <SectorTrailerBlockEditForm v-model="editingBytes" :block />
       </div>
       <div class="form-group">
         <button type="submit" class="btn primary" :disabled="!saveable">save</button>
