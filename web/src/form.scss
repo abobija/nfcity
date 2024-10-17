@@ -58,10 +58,6 @@ button,
   border-width: 1px;
   padding: 0.5rem 1rem;
   transition: box-shadow 0.2s ease-in-out;
-
-  &:disabled {
-    cursor: not-allowed;
-  }
 }
 
 input[type="text"],
@@ -116,12 +112,19 @@ button.txt,
 }
 
 .btn-group {
-  button:not(:last-child) {
-    border-right: none;
+
+  button,
+  .btn {
+    margin: 0 !important;
   }
 }
 
 @mixin define-button($class-name, $color-fg, $color-bg) {
+
+  button.#{$class-name}.txt,
+  .btn.#{$class-name}.txt {
+    color: $color-fg;
+  }
 
   button.#{$class-name}:not(.txt),
   .btn.#{$class-name}:not(.txt) {

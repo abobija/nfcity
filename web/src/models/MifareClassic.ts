@@ -69,6 +69,31 @@ export const everyAccessBitCombo = [0, 1, 2, 3, 4, 5, 6, 7] as const;
 
 export type AccessBitsCombo = typeof everyAccessBitCombo[number];
 
+export const sectorTrailerCombos: AccessBitsCombo[] = [
+  0b000,
+  0b010,
+  0b100,
+  0b110,
+  0b001,
+  0b011,
+  0b101,
+  0b111,
+];
+
+export const dataBlockCombos: AccessBitsCombo[] = [
+  0b000,
+  0b010,
+  0b100,
+  0b110,
+  0b001,
+  0b011,
+  0b101,
+  0b111,
+];
+
+export const sectorTrailerDefaultCombo: AccessBitsCombo = 0b001;
+export const dataBlockDefaultCombo: AccessBitsCombo = 0b000;
+
 export function calculateAccessBitsCombo(accessBits: PiccBlockAccessBits): AccessBitsCombo {
   return ((
     (accessBits.c1 << 2)
@@ -185,7 +210,7 @@ const manufacturerBlockAccessConditions: Partial<MifareClassicKeyPermissions> = 
   }
 };
 
-type AccessBitsPool = {
+export type AccessBitsPool = {
   readonly [key in AccessBitsPoolIndex]: Readonly<PiccBlockAccessBits>;
 }
 

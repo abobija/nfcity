@@ -1,10 +1,20 @@
 <script setup lang="ts">
-import { keySize, MifareClassicBlock, MifareClassicBlockGroupType } from '@/models/MifareClassic';
-import { computed } from 'vue';
+import {
+  AccessBitsPoolIndex,
+  calculateAccessBitsCombo,
+  isAccessBitsPoolIndex,
+  keySize,
+  MifareClassicBlockGroupType,
+  MifareClassicSectorTrailerBlock
+} from '@/models/MifareClassic';
+import { logi } from '@/utils/Logger';
+import { assert } from '@vue/compiler-core';
+import { computed, ref, watch } from 'vue';
 import BytesInput from '../BytesInput/BytesInput.vue';
+import AccessBitsComboSwitcher from './AccessBitsComboSwitcher.vue';
 
 const props = defineProps<{
-  block: MifareClassicBlock;
+  block: MifareClassicSectorTrailerBlock;
 }>();
 
 const editingBytes = defineModel<number[]>({ required: true });
@@ -15,17 +25,93 @@ const canWrite = computed(() => (key.value === undefined ? undefined : {
   userByte: props.block.findGroup(MifareClassicBlockGroupType.UserByte)?.keyCan(key.value, 'write') === true,
   keyB: props.block.findGroup(MifareClassicBlockGroupType.KeyB)?.keyCan(key.value, 'write') === true,
 }));
+const combos = [
+  ref(calculateAccessBitsCombo(props.block.accessBitsPool[0])),
+  ref(calculateAccessBitsCombo(props.block.accessBitsPool[1])),
+  ref(calculateAccessBitsCombo(props.block.accessBitsPool[2])),
+  ref(calculateAccessBitsCombo(props.block.accessBitsPool[3])),
+];
+
+function poolIndexTitle(index: AccessBitsPoolIndex) {
+  assert(isAccessBitsPoolIndex(index));
+
+  if (index === 3) {
+    return 'Sector Trailer';
+  }
+
+  const { numberOfBlocks } = props.block.sector;
+
+  if (numberOfBlocks > 4) {
+    switch (index) {
+      case 2: return 'Blocks 10-14';
+      case 1: return 'Blocks 5-9';
+      case 0: return 'Blocks 0-4';
+    }
+  }
+
+  return `Block ${index}`;
+}
+
+watch(combos, (newCombos) => {
+  logi('TODO: new combos', newCombos);
+});
 </script>
 
 <template>
-  <div class="form-group">
-    <BytesInput v-model="editingBytes" :offset="0" :length="keySize" placeholder="Key A" :readonly="!canWrite?.keyA" />
-  </div>
-  <div class="form-group">
-    <BytesInput v-model="editingBytes" :offset="keySize + 4" placeholder="Key B" :readonly="!canWrite?.keyB" />
-  </div>
-  <div class="form-group">
-    <BytesInput v-model="editingBytes" :offset="keySize + 3" :length="1" placeholder="User byte"
-      :readonly="!canWrite?.userByte" />
+  <div class="SectorTrailerBlockEditForm">
+    <div class="form-group">
+      <BytesInput v-model="editingBytes" :offset="0" :length="keySize" placeholder="Key A"
+        :readonly="!canWrite?.keyA" />
+    </div>
+    <div class="form-group">
+      <BytesInput v-model="editingBytes" :offset="keySize + 4" placeholder="Key B" :readonly="!canWrite?.keyB" />
+    </div>
+    <div class="form-group">
+      <BytesInput v-model="editingBytes" :offset="keySize + 3" :length="1" placeholder="User byte"
+        :readonly="!canWrite?.userByte" />
+    </div>
+    <div class="form-group access-bits">
+      <header>Access Bits</header>
+      <ul>
+        <li class="pool-index" :data-index="index" v-for="index in ([3, 2, 1, 0] as AccessBitsPoolIndex[])">
+          <header>
+            <AccessBitsComboSwitcher :pool-index="index" v-model="combos[index].value" />
+            <div class="title">
+              {{ poolIndexTitle(index) }}
+            </div>
+          </header>
+          <main>
+          </main>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
+
+<style lang="scss">
+.SectorTrailerBlockEditForm {
+  .access-bits {
+    margin: .7rem 0 1.5rem 0;
+
+    >header {
+      margin-bottom: .5rem;
+    }
+
+    .pool-index {
+      >header {
+        display: flex;
+        align-items: center;
+
+        .AccessBitsComboSwitcher {
+          margin-right: .5rem;
+
+          button {
+            font-size: .8rem !important;
+            padding: .2rem .4rem !important;
+          }
+        }
+      }
+    }
+  }
+}
+</style>
