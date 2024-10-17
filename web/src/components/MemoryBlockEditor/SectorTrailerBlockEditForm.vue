@@ -74,18 +74,18 @@ watch(comboPoolArray, (newComboPoolArray) => {
 <template>
   <div class="SectorTrailerBlockEditForm">
     <div class="form-group">
-      <BytesInput v-model="editingBytes" :offset="0" :length="keySize" placeholder="Key A"
+      <BytesInput class="key" v-model="editingBytes" :offset="0" :length="keySize" placeholder="Key A"
         :readonly="!canWrite?.keyA" />
+
+      <BytesInput class="key" v-model="editingBytes" :offset="keySize + 4" placeholder="Key B"
+        :readonly="!canWrite?.keyB" />
     </div>
     <div class="form-group">
-      <BytesInput v-model="editingBytes" :offset="keySize + 4" placeholder="Key B" :readonly="!canWrite?.keyB" />
-    </div>
-    <div class="form-group">
-      <BytesInput v-model="editingBytes" :offset="keySize + 3" :length="1" placeholder="User byte"
+      <BytesInput class="user-byte" v-model="editingBytes" :offset="keySize + 3" :length="1" placeholder="User byte"
         :readonly="!canWrite?.userByte" />
     </div>
     <div class="form-group access-bits">
-      <header>Access Bits Pool</header>
+      <header>Access bits Pool</header>
       <ul>
         <li class="pool-index" :data-index="index" v-for="index in ([3, 2, 1, 0] as AccessBitsPoolIndex[])">
           <header>
@@ -103,6 +103,22 @@ watch(comboPoolArray, (newComboPoolArray) => {
 
 <style lang="scss">
 .SectorTrailerBlockEditForm {
+  .form-group:not(:first-child) {
+    margin-top: 1rem;
+  }
+
+  .BytesInput.key {
+    width: 10rem;
+
+    &:not(:last-child) {
+      margin-right: .5rem;
+    }
+  }
+
+  .BytesInput.user-byte {
+    width: 7rem;
+  }
+
   .access-bits {
     margin: .7rem 0 1.5rem 0;
 

@@ -170,7 +170,7 @@ function confirm() {
     <form v-if="state == MemoryBlockEditorState.Editing" class="edit" @submit.prevent="confirm">
       <div v-if="block instanceof MifareClassicDataBlock">
         <div class="form-group">
-          <BytesInput v-model="editingBytes" autofocus multiline resizable placeholder="Data" />
+          <BytesInput class="data" v-model="editingBytes" autofocus multiline resizable placeholder="Data" />
         </div>
       </div>
       <div v-if="block instanceof MifareClassicSectorTrailerBlock">
@@ -189,7 +189,7 @@ function confirm() {
         at address <var>{{ hex(confirmBlock.address) }}</var> with the next data:
       </p>
       <div class="confirm-data">
-        <BytesInput v-model="confirmBlock.data" readonly multiline resizable />
+        <BytesInput class="data" v-model="confirmBlock.data" readonly multiline resizable />
       </div>
       <div class="form-group">
         <button type="button" class="btn secondary" @click="state = MemoryBlockEditorState.Editing">
@@ -217,8 +217,9 @@ function confirm() {
     padding: .3rem .5rem !important;
   }
 
-  textarea {
-    width: 18rem;
+  .BytesInput.data {
+    width: 75%;
+    margin: .8rem 0 1.3rem 0;
   }
 
   .confirm-data {

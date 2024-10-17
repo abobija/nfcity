@@ -12,10 +12,9 @@ defineProps<{
   <section class="BlockInfoRenderer">
     <header>
       <p>
-        {{ MifareClassicBlockType[block.type] }} Block at address {{ hex(block.address) }}
-      </p>
-      <p>
-        Access bits {{ bin(block.accessBitsCombo).slice(-3) }}
+        <var>{{ MifareClassicBlockType[block.type] }}</var> block
+        at address <var>{{ hex(block.address) }}</var>
+        with access bits <var>{{ bin(block.accessBitsCombo).slice(-3) }}</var>
       </p>
     </header>
     <main>

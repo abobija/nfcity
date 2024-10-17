@@ -144,8 +144,12 @@ function onPaste(e: ClipboardEvent) {
   line-height: normal;
 
   textarea {
-    display: inline-block;
+    display: block;
     padding: .3rem .4rem;
+    width: 100%;
+    width: -moz-available;
+    width: -webkit-fill-available;
+    width: fill-available;
   }
 
   .byte-representation {

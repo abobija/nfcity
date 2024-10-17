@@ -16,7 +16,6 @@
 :root label,
 :root textarea {
   font-family: 'JetBrains Mono', monospace;
-  font-weight: 200;
   font-size: x-large;
 }
 
@@ -36,6 +35,11 @@ var {
 
 abbr {
   text-decoration: none;
+}
+
+strong,
+.strong {
+  font-weight: 600 !important;
 }
 
 @mixin txt-unselectable {

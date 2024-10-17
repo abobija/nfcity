@@ -115,7 +115,7 @@ watch(() => props.block, () => editMode.value = false);
     <footer>
       <div class="restrictions" v-if="key && showRestrictions && restrictions.length > 0">
         <p class="intro">
-          Restrictions of key {{ keyTypeName(key.type) }}, used in sector authentication:
+          Restrictions of key {{ keyTypeName(key.type) }} used in sector authentication:
         </p>
 
         <ul class="list">
@@ -161,7 +161,7 @@ watch(() => props.block, () => editMode.value = false);
 
     .byte {
       display: inline-block;
-      color: color.adjust($color-3, $hue: -20deg);
+      color: $color-fg;
 
       &.unprintable {
         color: color.adjust($color-fg, $lightness: -50%);
@@ -228,7 +228,7 @@ watch(() => props.block, () => editMode.value = false);
     .list {
       margin-top: .3rem;
       list-style: square;
-      margin-left: .8rem;
+      margin-left: 1.2rem;
 
       .restriction:not(:last-child) {
         margin-bottom: .2rem;
