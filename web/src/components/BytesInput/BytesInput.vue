@@ -150,6 +150,7 @@ function onPaste(e: ClipboardEvent) {
 
   .byte-representation {
     position: absolute;
+    z-index: 1;
     top: .1rem;
     right: .2rem;
     text-decoration: none;
