@@ -1,9 +1,5 @@
 import PiccDto from "@/communication/dtos/PiccDto";
 import Picc, {
-  AccessBitsCombo,
-  calculateAccessBitsCombo,
-  calculateAccessBitsFromCombo,
-  everyAccessBitCombo,
   keyA,
   PiccBlock,
   PiccBlockAccessBits,
@@ -68,6 +64,28 @@ export enum MifareClassicBlockType {
   Value,
   Manufacturer,
 }
+
+export const everyAccessBitCombo = [0, 1, 2, 3, 4, 5, 6, 7] as const;
+
+export type AccessBitsCombo = typeof everyAccessBitCombo[number];
+
+export function calculateAccessBitsCombo(accessBits: PiccBlockAccessBits): AccessBitsCombo {
+  return ((
+    (accessBits.c1 << 2)
+    | (accessBits.c2 << 1)
+    | (accessBits.c3 << 0)
+  ) & 0b111) as AccessBitsCombo;
+}
+
+export function calculateAccessBitsFromCombo(combo: AccessBitsCombo): PiccBlockAccessBits {
+  return {
+    c1: (combo >> 2) & 1,
+    c2: (combo >> 1) & 1,
+    c3: (combo >> 0) & 1,
+  };
+}
+
+export type AccessBitsPoolIndex = 3 | 2 | 1 | 0;
 
 export type MifareClassicBlockOperation =
   | 'read'
@@ -166,8 +184,6 @@ const manufacturerBlockAccessConditions: Partial<MifareClassicKeyPermissions> = 
     keyB: [],
   }
 };
-
-type AccessBitsPoolIndex = 3 | 2 | 1 | 0;
 
 type AccessBitsPool = {
   readonly [key in AccessBitsPoolIndex]: Readonly<PiccBlockAccessBits>;
