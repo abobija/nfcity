@@ -41,9 +41,11 @@ onUnmounted(() => {
 <template>
   <div class="HoverableInputPlaceholder" ref="component">
     <slot></slot>
-    <div v-if="placeholder" class="placeholder">
-      {{ placeholder }}
-    </div>
+    <Transition>
+      <div v-if="placeholder" class="placeholder" :key="placeholder">
+        {{ placeholder }}
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -60,9 +62,26 @@ onUnmounted(() => {
     top: -7px;
     left: 8px;
     font-weight: 600;
-    background: $color-bg;
+    background-color: $color-bg;
     padding: 0 .3rem;
     color: color.adjust($color-fg, $lightness: -25%);
+  }
+
+  .v-enter-from,
+  .v-leave-to {
+    transform: scale(0.5) rotateY(180deg);
+    opacity: 0;
+  }
+
+  .v-enter-active,
+  .v-leave-active {
+    transition: transform .3s, opacity .3s;
+  }
+
+  .v-enter-to,
+  .v-leave-from {
+    transform: scale(1) rotateY(0);
+    opacity: 1;
   }
 }
 </style>

@@ -83,5 +83,9 @@ function onSubmit() {
       margin-top: 1rem;
     }
   }
+
+  .form-group:not(:last-child) {
+    margin-bottom: .7rem;
+  }
 }
 </style>
