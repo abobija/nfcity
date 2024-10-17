@@ -49,6 +49,10 @@ function onKeyDown(e: KeyboardEvent) {
   if (e.key === 'Enter') {
     if (props.multiline !== true || modelBytes.value.length >= maxlength.value) {
       e.preventDefault();
+
+      if (props.multiline !== true) {
+        bytesField.value?.closest('form')?.requestSubmit();
+      }
     }
 
     return;
