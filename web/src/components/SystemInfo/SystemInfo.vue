@@ -67,13 +67,6 @@ onClientPongMissed(() => {
 
 .SystemInfo {
   display: flex;
-  flex-direction: column;
-  font-size: 0.6rem;
-  color: color.adjust($color-fg, $lightness: -40%);
-
-  >*:not(:first-child) {
-    margin-top: 0.2rem;
-  }
 
   .ping {
     display: flex;

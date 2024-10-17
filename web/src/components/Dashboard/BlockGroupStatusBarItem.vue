@@ -1,0 +1,55 @@
+<script setup lang="ts">
+import { MifareClassicBlockGroup, MifareClassicBlockGroupType, MifareClassicBlockOperation } from "@/models/MifareClassic";
+import { keyTypeName } from "@/models/Picc";
+import { computed } from "vue";
+
+const props = defineProps<{
+  group: MifareClassicBlockGroup;
+}>();
+
+const key = computed(() => props.group.block.sector.key);
+const operations = computed(() => Object.keys(props.group.accessConditions) as MifareClassicBlockOperation[]);
+const permissions = computed(() => key.value ? props.group.allowedOperationsFor(key.value) : []);
+</script>
+
+<template>
+  <section class="BlockGroupStatusBarItem">
+    <abbr class="name" title="Block Group">G</abbr>
+    <ul>
+      <li>
+        <abbr title="Group Range [FROM_BYTE:TO_BYTE]">
+          {{ group.offset }}:{{ group.offset + group.length - 1 }}
+        </abbr>
+      </li>
+      <li title="Group Type">
+        {{ MifareClassicBlockGroupType[group.type] }}
+      </li>
+      <li v-if="key" :title="`Permissions of key ${keyTypeName(key.type)}`">
+        <span v-for="operation in operations" class="operation" :class="{
+          allowed: permissions.includes(operation),
+        }">
+          {{ operation }}
+        </span>
+      </li>
+    </ul>
+  </section>
+</template>
+
+<style lang="scss">
+@use 'sass:color';
+@import '@/theme.scss';
+
+.BlockGroupStatusBarItem {
+  .operation {
+    display: inline-block;
+
+    &:not(:last-child) {
+      margin-right: 0.5em;
+    }
+
+    &:not(.allowed) {
+      text-decoration: line-through;
+    }
+  }
+}
+</style>

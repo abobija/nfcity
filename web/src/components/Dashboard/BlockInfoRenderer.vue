@@ -36,7 +36,35 @@ defineProps<{
 </template>
 
 <style lang="scss">
+@use 'sass:color';
+@import '@/theme.scss';
+
 .BlockInfoRenderer {
+  font-size: .9rem;
+
+  &:not(:first-child) {
+    margin-top: .8rem;
+  }
+
+  .header {
+    font-weight: 600;
+    color: $color-3;
+  }
+
+  .prop {
+    display: flex;
+
+    .value {
+      flex-grow: 1;
+      color: $color-fg;
+    }
+  }
+
+  .prop>.name {
+    width: 5rem;
+    flex-shrink: 0;
+  }
+
   .prop.memory {
     margin-top: .5rem;
   }

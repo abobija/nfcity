@@ -38,14 +38,11 @@
         }
       }
     }
-
-    .misc {
-      display: flex;
-    }
   }
 
   >.main {
     margin-top: 1rem;
+    margin-bottom: 2rem; // because of StatusBar
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
@@ -74,33 +71,6 @@
         }
       }
     }
-  }
-}
-
-.Dashboard .InfoRenderer {
-  font-size: .9rem;
-
-  &:not(:first-child) {
-    margin-top: .8rem;
-  }
-
-  .header {
-    font-weight: 600;
-    color: $color-3;
-  }
-
-  .prop {
-    display: flex;
-
-    .value {
-      flex-grow: 1;
-      color: $color-fg;
-    }
-  }
-
-  .prop>.name {
-    width: 5rem;
-    flex-shrink: 0;
   }
 }
 

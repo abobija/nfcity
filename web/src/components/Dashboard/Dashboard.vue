@@ -8,11 +8,8 @@ import HelloDeviceMessage, { isHelloDeviceMessage } from "@/communication/messag
 import PiccDeviceMessage, { isPiccDeviceMessage } from "@/communication/messages/device/PiccDeviceMessage";
 import PiccStateChangedDeviceMessage, { isPiccStateChangedDeviceMessage } from "@/communication/messages/device/PiccStateChangedDeviceMessage";
 import GetPiccWebMessage from "@/communication/messages/web/GetPiccWebMessage";
+import BlockInfoRenderer from "@/components/Dashboard/BlockInfoRenderer.vue";
 import '@/components/Dashboard/Dashboard.scss';
-import BlockInfoRenderer from "@/components/Dashboard/infoRenderers/BlockInfoRenderer.vue";
-import ByteInfoRenderer from "@/components/Dashboard/infoRenderers/ByteInfoRenderer.vue";
-import GroupInfoRenderer from "@/components/Dashboard/infoRenderers/GroupInfoRenderer.vue";
-import SectorInfoRenderer from "@/components/Dashboard/infoRenderers/SectorInfoRenderer.vue";
 import TargetByte from "@/components/Dashboard/TargetByte";
 import SystemInfo from "@/components/SystemInfo/SystemInfo.vue";
 import useClient from "@/composables/useClient";
@@ -33,6 +30,10 @@ import onByteMouseLeave from "@Memory/components/Byte/composables/onByteMouseLea
 import Memory from "@Memory/Memory.vue";
 import MemoryFocus from "@Memory/MemoryFocus";
 import { onMounted, onUnmounted, ref, watch } from "vue";
+import BlockGroupStatusBarItem from "./BlockGroupStatusBarItem.vue";
+import ByteStatusBarItem from "./ByteStatusBarItem.vue";
+import SectorStatusBarItem from "./SectorStatusBarItem.vue";
+import StatusBar from "./StatusBar.vue";
 
 enum DashboardState {
   Exit = -1,
@@ -305,10 +306,6 @@ onByteMouseClick(clickedByte => {
             </ul>
           </div>
         </div>
-
-        <div class="misc">
-          <SystemInfo />
-        </div>
       </div>
 
       <div class="main" :key="picc.hash">
@@ -330,16 +327,25 @@ onByteMouseClick(clickedByte => {
               </div>
             </Transition>
 
-            <div v-if="tByte">
-              <BlockInfoRenderer class="InfoRenderer" :block="tByte.group.block as MifareClassicBlock" />
-              <GroupInfoRenderer class="InfoRenderer" v-model="tByte.group as MifareClassicBlockGroup" />
-              <SectorInfoRenderer class="InfoRenderer" :sector="tByte.group.block.sector as MifareClassicSector" />
-              <ByteInfoRenderer class="InfoRenderer" :byte="tByte as TargetByte" />
-            </div>
+            <BlockInfoRenderer v-if="tByte" :block="tByte.group.block as MifareClassicBlock" />
           </div>
         </div>
       </div>
     </main>
+
+    <StatusBar>
+      <template #left>
+        <div class="state">
+          <span>{{ DashboardState[state] }}</span>
+        </div>
+        <SectorStatusBarItem v-if="tByte" :sector="tByte.group.block.sector as MifareClassicSector" />
+        <BlockGroupStatusBarItem v-if="tByte" :group="tByte.group as MifareClassicBlockGroup" />
+        <ByteStatusBarItem v-if="tByte" :byte="tByte as TargetByte" />
+      </template>
+      <template #right>
+        <SystemInfo />
+      </template>
+    </StatusBar>
 
     <div class="full-screen center overlay" v-if="overlay">
       <div class="content">
