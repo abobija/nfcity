@@ -100,6 +100,8 @@ onMounted(() => {
 });
 
 watch(editingBytes, (bytes) => {
+  logger.debug('editing-bytes', hex(bytes));
+
   saveable.value = editingBytes.value.length === bytesToEdit.value.length
     && bytes.some((b, i) => b !== bytesToEdit.value[i]) === true;
 });

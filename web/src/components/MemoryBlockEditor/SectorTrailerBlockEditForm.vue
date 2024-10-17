@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import {
+  AccessBitsComboPool,
+  accessBitsComboPoolToBytes,
+  accessBitsPoolFromSectorTrailerData,
   AccessBitsPoolIndex,
   calculateAccessBitsCombo,
   isAccessBitsPoolIndex,
@@ -7,7 +10,6 @@ import {
   MifareClassicBlockGroupType,
   MifareClassicSectorTrailerBlock
 } from '@/models/MifareClassic';
-import { logi } from '@/utils/Logger';
 import { assert } from '@vue/compiler-core';
 import { computed, ref, watch } from 'vue';
 import BytesInput from '../BytesInput/BytesInput.vue';
@@ -18,6 +20,7 @@ const props = defineProps<{
 }>();
 
 const editingBytes = defineModel<number[]>({ required: true });
+const editingBytesOrigin = ref(Array.from(editingBytes.value));
 const key = computed(() => props.block.sector.key);
 const canWrite = computed(() => (key.value === undefined ? undefined : {
   keyA: props.block.findGroup(MifareClassicBlockGroupType.KeyA)?.keyCan(key.value, 'write') === true,
@@ -25,11 +28,12 @@ const canWrite = computed(() => (key.value === undefined ? undefined : {
   userByte: props.block.findGroup(MifareClassicBlockGroupType.UserByte)?.keyCan(key.value, 'write') === true,
   keyB: props.block.findGroup(MifareClassicBlockGroupType.KeyB)?.keyCan(key.value, 'write') === true,
 }));
-const combos = [
-  ref(calculateAccessBitsCombo(props.block.accessBitsPool[0])),
-  ref(calculateAccessBitsCombo(props.block.accessBitsPool[1])),
-  ref(calculateAccessBitsCombo(props.block.accessBitsPool[2])),
-  ref(calculateAccessBitsCombo(props.block.accessBitsPool[3])),
+const accessBitsPool = computed(() => accessBitsPoolFromSectorTrailerData(editingBytesOrigin.value));
+const comboPoolArray = [
+  ref(calculateAccessBitsCombo(accessBitsPool.value[0])),
+  ref(calculateAccessBitsCombo(accessBitsPool.value[1])),
+  ref(calculateAccessBitsCombo(accessBitsPool.value[2])),
+  ref(calculateAccessBitsCombo(accessBitsPool.value[3])),
 ];
 
 function poolIndexTitle(index: AccessBitsPoolIndex) {
@@ -52,8 +56,18 @@ function poolIndexTitle(index: AccessBitsPoolIndex) {
   return `Block ${index}`;
 }
 
-watch(combos, (newCombos) => {
-  logi('TODO: new combos', newCombos);
+watch(comboPoolArray, (newComboPoolArray) => {
+  const newComboPool = Object.fromEntries(
+    newComboPoolArray.map((combo, index) => [index, combo])
+  ) as AccessBitsComboPool;
+
+  const accessBitsBytes = accessBitsComboPoolToBytes(newComboPool);
+
+  editingBytes.value = [
+    ...editingBytes.value.slice(0, keySize),
+    ...accessBitsBytes,
+    ...editingBytes.value.slice(keySize + accessBitsBytes.length),
+  ];
 });
 </script>
 
@@ -75,7 +89,8 @@ watch(combos, (newCombos) => {
       <ul>
         <li class="pool-index" :data-index="index" v-for="index in ([3, 2, 1, 0] as AccessBitsPoolIndex[])">
           <header>
-            <AccessBitsComboSwitcher :pool-index="index" v-model="combos[index].value" />
+            <AccessBitsComboSwitcher :pool-index="index" v-model="comboPoolArray[index].value"
+              :readonly="!canWrite?.accessBits" />
             <div class="title">
               {{ poolIndexTitle(index) }}
             </div>

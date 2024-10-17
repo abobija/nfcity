@@ -291,6 +291,31 @@ function isValueBlock(accessBits: PiccBlockAccessBits): boolean {
   return [0b110, 0b001].includes(calculateAccessBitsCombo(accessBits));
 }
 
+export function accessBitsNibblesToAccessBits(
+  c1: number, c2: number, c3: number, offset: number
+): PiccBlockAccessBits {
+  return {
+    c1: (c1 & (1 << offset)) >> offset,
+    c2: (c2 & (1 << offset)) >> offset,
+    c3: (c3 & (1 << offset)) >> offset,
+  }
+}
+
+export function accessBitsPoolFromSectorTrailerData(data: number[]): AccessBitsPool {
+  assert(data.length === blockSize);
+  throwIfAccessBitsIntegrityViolated(data[6], data[7], data[8]);
+
+  const [c1] = nibbles(data[7]);
+  const [c3, c2] = nibbles(data[8]);
+
+  return {
+    3: accessBitsNibblesToAccessBits(c1, c2, c3, 3),
+    2: accessBitsNibblesToAccessBits(c1, c2, c3, 2),
+    1: accessBitsNibblesToAccessBits(c1, c2, c3, 1),
+    0: accessBitsNibblesToAccessBits(c1, c2, c3, 0),
+  };
+}
+
 export class MifareClassicBlockGroup {
   private _block?: MifareClassicBlock;
 
@@ -429,19 +454,7 @@ export class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
     sector: MifareClassicSector,
     block: Omit<PiccBlock, 'accessBits'>,
   ) {
-    const { data } = block;
-
-    throwIfAccessBitsIntegrityViolated(data[6], data[7], data[8]);
-
-    const [c1] = nibbles(data[7]);
-    const [c3, c2] = nibbles(data[8]);
-
-    const _accessBitsPool: AccessBitsPool = {
-      3: MifareClassicSectorTrailerBlock.nibblesToAccessBits(c1, c2, c3, 3),
-      2: MifareClassicSectorTrailerBlock.nibblesToAccessBits(c1, c2, c3, 2),
-      1: MifareClassicSectorTrailerBlock.nibblesToAccessBits(c1, c2, c3, 1),
-      0: MifareClassicSectorTrailerBlock.nibblesToAccessBits(c1, c2, c3, 0),
-    };
+    const _accessBitsPool = accessBitsPoolFromSectorTrailerData(block.data);
 
     super(
       MifareClassicBlockType.SectorTrailer,
@@ -472,14 +485,6 @@ export class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
     assert(isAccessBitsPoolIndex(index));
 
     return index;
-  }
-
-  private static nibblesToAccessBits(c1: number, c2: number, c3: number, offset: number): PiccBlockAccessBits {
-    return {
-      c1: (c1 & (1 << offset)) >> offset,
-      c2: (c2 & (1 << offset)) >> offset,
-      c3: (c3 & (1 << offset)) >> offset,
-    }
   }
 }
 

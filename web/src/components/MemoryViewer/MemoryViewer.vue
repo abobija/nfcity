@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import MemoryBlockEditor, { isBlockEditable } from "@/components/MemoryBlockEditor/MemoryBlockEditor.vue";
-import { MifareClassicBlock, MifareClassicBlockGroupType, MifareClassicSectorTrailerBlock } from "@/models/MifareClassic";
+import { MifareClassicBlock, MifareClassicBlockGroupType, MifareClassicSectorTrailerBlock, MifareClassicValueBlock } from "@/models/MifareClassic";
 import { keyTypeName } from "@/models/Picc";
 import { ascii, assert, bin, hex, isAsciiPrintable } from "@/utils/helpers";
 import ByteRepresentation, { byteRepresentationShortName } from "@Memory/ByteRepresentation";
@@ -112,8 +112,8 @@ watch(() => props.block, () => editMode.value = false);
       </div>
       <MemoryBlockEditor v-if="editMode && editable" :block @cancel="editMode = false" @done="editMode = false" />
     </main>
-    <footer v-if="key && showRestrictions && restrictions.length > 0">
-      <div class="restrictions">
+    <footer>
+      <div class="restrictions" v-if="key && showRestrictions && restrictions.length > 0">
         <p class="intro">
           Restrictions of key {{ keyTypeName(key.type) }}, used in sector authentication:
         </p>
@@ -121,6 +121,9 @@ watch(() => props.block, () => editMode.value = false);
         <ul class="list">
           <li v-for="restriction in restrictions" class="restriction">{{ restriction }}</li>
         </ul>
+      </div>
+      <div v-if="block instanceof MifareClassicValueBlock">
+        Edit of value blocks is not supported yet.
       </div>
     </footer>
   </section>
