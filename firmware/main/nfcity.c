@@ -64,7 +64,7 @@ static uint8_t picc_mem_buffer[PICC_MEM_BUFFER_SIZE] = { 0 }; // protect?
 static rc522_picc_t picc = { 0 };
 
 static rc522_spi_config_t rc522_driver_config = {
-    .host_id = VSPI_HOST,
+    .host_id = SPI3_HOST,
     .bus_config = &(spi_bus_config_t){
         .miso_io_num = RC522_SPI_BUS_GPIO_MISO,
         .mosi_io_num = RC522_SPI_BUS_GPIO_MOSI,
