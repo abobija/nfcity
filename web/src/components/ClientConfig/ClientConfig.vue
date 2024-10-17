@@ -54,8 +54,8 @@ function onSubmit() {
           spellcheck="false" :maxlength="ClientValidator.RootTopicLength" required name="rootTopic" />
       </div>
       <div class="form-group">
-        <button class="btn primary" type="submit">Save</button>
         <button v-if="props.cancelable" class="btn secondary" @click="emits('cancel')" type="button">Cancel</button>
+        <button class="btn primary" type="submit">Save</button>
       </div>
     </form>
   </section>

@@ -177,8 +177,10 @@ function confirm() {
         <SectorTrailerBlockEditForm v-model="editingBytes" :block />
       </div>
       <div class="form-group">
-        <button type="submit" class="btn primary" :disabled="!saveable">next</button>
         <button type="button" class="btn secondary" @click="state = MemoryBlockEditorState.Canceled">cancel</button>
+        <button type="submit" class="btn secondary" :disabled="!saveable">
+          next &raquo;
+        </button>
       </div>
     </form>
     <div v-else-if="state == MemoryBlockEditorState.Confirming && confirmBlock" class="confirm">
@@ -190,8 +192,10 @@ function confirm() {
         <BytesInput v-model="confirmBlock.data" readonly multiline resizable />
       </div>
       <div class="form-group">
+        <button type="button" class="btn secondary" @click="state = MemoryBlockEditorState.Editing">
+          &laquo; back
+        </button>
         <button type="button" class="btn primary" @click="state = MemoryBlockEditorState.Confirmed">save</button>
-        <button type="button" class="btn secondary" @click="state = MemoryBlockEditorState.Editing">back</button>
       </div>
     </div>
     <div v-else-if="state == MemoryBlockEditorState.Saving" class="saving">
