@@ -195,6 +195,7 @@ function confirm() {
         <button type="button" class="btn secondary" @click="state = MemoryBlockEditorState.Editing">
           &laquo; back
         </button>
+        <button type="button" class="btn secondary" @click="state = MemoryBlockEditorState.Canceled">cancel</button>
         <button type="button" class="btn primary" @click="state = MemoryBlockEditorState.Confirmed">save</button>
       </div>
     </div>
