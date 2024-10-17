@@ -7,6 +7,7 @@ const element = computed(() => {
     || component.value?.getElementsByTagName('textarea')?.item(0);
 });
 const placeholder = ref<string>();
+const observer = ref<MutationObserver>();
 
 function inputHasValue() {
   return !!element.value?.value;
@@ -18,10 +19,23 @@ function onInputChanged() {
 
 onMounted(() => {
   onInputChanged();
+
   element.value?.addEventListener('input', onInputChanged);
+  element.value?.addEventListener('propertychange', onInputChanged);
+
+  if (element.value) {
+    observer.value = new MutationObserver(() => onInputChanged());
+    observer.value.observe(element.value, {
+      attributes: true,
+      attributeFilter: ['placeholder'],
+    });
+  }
 });
 
-onUnmounted(() => element.value?.removeEventListener('input', onInputChanged));
+onUnmounted(() => {
+  element.value?.removeEventListener('input', onInputChanged);
+  observer.value?.disconnect();
+});
 </script>
 
 <template>
@@ -42,9 +56,9 @@ onUnmounted(() => element.value?.removeEventListener('input', onInputChanged));
 
   >.placeholder {
     position: absolute;
-    top: -6px;
-    left: 8px;
     font-size: .5rem;
+    top: -7px;
+    left: 8px;
     font-weight: 600;
     background: $color-bg;
     padding: 0 .3rem;

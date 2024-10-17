@@ -3,6 +3,7 @@ import vFocus from "@/directives/vFocus";
 import { arraysAreEqual, assert, hex, isHex, removeWhitespace, unhexToArray } from "@/utils/helpers";
 import ByteRepresentation, { byteRepresentationSingleChar } from "@Memory/ByteRepresentation";
 import { computed, ref, useTemplateRef, watch } from "vue";
+import HoverablePlaceholder from "../HoverablePlaceholder/HoverablePlaceholder.vue";
 
 const props = defineProps<{
   offset?: number;
@@ -116,18 +117,18 @@ function onPaste(e: ClipboardEvent) {
 </script>
 
 <template>
-  <section class="BytesInput" :data-placeholder="placeholder" :class="{
-    empty: bytesFieldValue.length === 0,
-  }">
+  <section class="BytesInput" :data-placeholder="placeholder">
     <abbr class="byte-representation txt-unselectable" :title="ByteRepresentation[byteRepresentation]">
       {{ byteRepresentationSingleChar(byteRepresentation) }}
     </abbr>
-    <textarea ref="field" v-focus="autofocus === true" v-model="bytesFieldValue" spellcheck="false"
-      :rows="multiline === true ? undefined : 1" :class="{
-        readonly: readonly === true,
-      }" :style="{
+    <HoverablePlaceholder>
+      <textarea ref="field" v-focus="autofocus === true" v-model="bytesFieldValue" spellcheck="false"
+        :rows="multiline === true ? undefined : 1" :class="{
+          readonly: readonly === true,
+        }" :style="{
         resize: resizable === false ? 'none' : 'both',
       }" @keydown="onKeyDown" @paste="onPaste" name="bytes" :readonly="readonly" :placeholder :disabled></textarea>
+    </HoverablePlaceholder>
   </section>
 </template>
 
@@ -157,20 +158,6 @@ function onPaste(e: ClipboardEvent) {
     font-size: .5rem;
     font-weight: 600;
     color: color.adjust($color-bg, $lightness: +40%);
-  }
-
-  &:is([data-placeholder]):not(.empty) {
-    &::after {
-      content: attr(data-placeholder);
-      position: absolute;
-      top: -8px;
-      left: 8px;
-      font-size: .5rem;
-      font-weight: 600;
-      background: $color-bg;
-      padding: 0 .3rem;
-      color: color.adjust($color-fg, $lightness: -25%);
-    }
   }
 }
 </style>
