@@ -65,6 +65,8 @@ export enum MifareClassicBlockType {
   Manufacturer,
 }
 
+export type AccessBitsBytes = [byte6: number, byte7: number, byte8: number];
+
 export const everyAccessBitCombo = [0, 1, 2, 3, 4, 5, 6, 7] as const;
 
 export type AccessBitsCombo = typeof everyAccessBitCombo[number];
@@ -231,7 +233,7 @@ export function accessBitsComboPoolToBitsPool(pool: AccessBitsComboPool): Access
   };
 }
 
-export function accessBitsComboPoolToBytes(pool: AccessBitsComboPool): number[] {
+export function accessBitsComboPoolToBytes(pool: AccessBitsComboPool): AccessBitsBytes {
   return accessBitsPoolToBytes(accessBitsComboPoolToBitsPool(pool));
 }
 
@@ -247,7 +249,7 @@ export function accessBitsComboPoolToBytes(pool: AccessBitsComboPool): number[] 
  * +-----+------+------+------+------+------+------+------+------+
  */
 
-export function accessBitsPoolToBytes(accessBitsPool: AccessBitsPool): number[] {
+export function accessBitsPoolToBytes(accessBitsPool: AccessBitsPool): AccessBitsBytes {
   const byte6 = nibblesToByte(
     invertedNibble(accessBitsPool[3].c2, accessBitsPool[2].c2, accessBitsPool[1].c2, accessBitsPool[0].c2),
     invertedNibble(accessBitsPool[3].c1, accessBitsPool[2].c1, accessBitsPool[1].c1, accessBitsPool[0].c1)
