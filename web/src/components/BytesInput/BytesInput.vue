@@ -67,6 +67,7 @@ function onKeyDown(e: KeyboardEvent) {
   }
 
   if ([
+    'Tab',
     'ArrowLeft',
     'ArrowTop',
     'ArrowRight',
