@@ -9,7 +9,6 @@ import PiccDeviceMessage, { isPiccDeviceMessage } from "@/communication/messages
 import PiccStateChangedDeviceMessage, { isPiccStateChangedDeviceMessage } from "@/communication/messages/device/PiccStateChangedDeviceMessage";
 import GetPiccWebMessage from "@/communication/messages/web/GetPiccWebMessage";
 import BlockInfoRenderer from "@/components/Dashboard/BlockInfoRenderer.vue";
-import '@/components/Dashboard/Dashboard.scss';
 import TargetByte from "@/components/Dashboard/TargetByte";
 import SystemInfo from "@/components/SystemInfo/SystemInfo.vue";
 import useClient from "@/composables/useClient";
@@ -377,3 +376,125 @@ onByteMouseClick(clickedByte => {
 
   </section>
 </template>
+
+<style lang="scss">
+@use 'sass:color';
+@import '@/theme.scss';
+
+.Dashboard {
+  margin: 2rem 1rem 1rem 1rem;
+}
+
+.Dashboard>header {
+  display: flex;
+  justify-content: space-between;
+
+  .meta {
+    .name {
+      color: rgba($color-fg, 0.5);
+    }
+  }
+
+  .picc {
+    .general {
+      .type {
+        font-size: 1.5rem;
+        color: $color-3;
+        font-weight: 600;
+      }
+
+      .metas {
+        display: flex;
+        margin-top: .5rem;
+
+        .meta {
+          &:not(:last-child) {
+            margin-right: 1rem;
+          }
+
+          .name {
+            margin-right: 1rem;
+          }
+        }
+      }
+    }
+  }
+}
+
+.Dashboard>main {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+
+  &>section.info {
+    flex-grow: 1;
+  }
+
+  >section {
+    &:not(:last-child) {
+      margin-right: 1rem;
+    }
+
+    .info-panel {
+      position: sticky;
+      top: 2rem;
+      color: $color-4;
+
+      p.hint {
+        color: $color-1;
+        font-size: .9rem;
+      }
+
+      >p:not(:last-child) {
+        margin-bottom: 1.5rem;
+      }
+    }
+  }
+}
+
+.Dashboard>.overlay {
+  background-color: rgba($color-bg, .6);
+
+  .content {
+    padding: 1rem;
+    background-color: $color-bg;
+    box-shadow: 0 0 3rem 3rem $color-bg;
+    text-shadow: 0 0 .2rem $color-bg,
+      0 0 1.5rem rgba($color-3, .75);
+  }
+
+  .message {
+    font-size: 1.3rem;
+    color: $color-3;
+    text-align: center;
+
+    &:not(:first-child) {
+      margin-top: 0.5rem;
+    }
+
+    &.sub {
+      font-size: 0.8rem;
+      color: color.adjust($color-4, $blackness: +50%);
+    }
+
+    &:not(.sub) {
+      animation: glichy-overlay-message 3s ease-in-out infinite;
+
+      @keyframes glichy-overlay-message {
+
+        49%,
+        51%,
+        53% {
+          transform: skewX(0);
+        }
+
+        50%,
+        52% {
+          transform: skewX(15deg);
+        }
+      }
+    }
+  }
+}
+</style>
