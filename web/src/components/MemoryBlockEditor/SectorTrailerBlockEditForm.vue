@@ -7,7 +7,6 @@ import {
   calculateAccessBitsCombo,
   isAccessBitsPoolIndex,
   keySize,
-  MifareClassicBlockGroupType,
   MifareClassicSectorTrailerBlock
 } from '@/models/MifareClassic';
 import { assert } from '@vue/compiler-core';
@@ -23,10 +22,10 @@ const editingBytes = defineModel<number[]>({ required: true });
 const editingBytesOrigin = ref(Array.from(editingBytes.value));
 const key = computed(() => props.block.sector.key);
 const canWrite = computed(() => (key.value === undefined ? undefined : {
-  keyA: props.block.findGroup(MifareClassicBlockGroupType.KeyA)?.keyCan(key.value, 'write') === true,
-  accessBits: props.block.findGroup(MifareClassicBlockGroupType.AccessBits)?.keyCan(key.value, 'write') === true,
-  userByte: props.block.findGroup(MifareClassicBlockGroupType.UserByte)?.keyCan(key.value, 'write') === true,
-  keyB: props.block.findGroup(MifareClassicBlockGroupType.KeyB)?.keyCan(key.value, 'write') === true,
+  keyA: props.block.findGroup('KeyA')?.keyCan(key.value, 'write') === true,
+  accessBits: props.block.findGroup('AccessBits')?.keyCan(key.value, 'write') === true,
+  userByte: props.block.findGroup('UserByte')?.keyCan(key.value, 'write') === true,
+  keyB: props.block.findGroup('KeyB')?.keyCan(key.value, 'write') === true,
 }));
 const accessBitsPool = computed(() => accessBitsPoolFromSectorTrailerData(editingBytesOrigin.value));
 const comboPoolArray = [

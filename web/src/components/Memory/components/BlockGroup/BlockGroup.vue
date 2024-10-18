@@ -13,29 +13,29 @@ const props = defineProps<{
 }>();
 
 const groupClass: Map<MifareClassicBlockGroupType, string> = new Map([
-  [MifareClassicBlockGroupType.Undefined, 'undefined'],
+  ['Undefined', 'undefined'],
 
   // Trailer
-  [MifareClassicBlockGroupType.KeyA, 'key key-a'],
-  [MifareClassicBlockGroupType.AccessBits, 'access-bits'],
-  [MifareClassicBlockGroupType.UserByte, 'user-byte'],
-  [MifareClassicBlockGroupType.KeyB, 'key key-b'],
+  ['KeyA', 'key key-a'],
+  ['AccessBits', 'access-bits'],
+  ['UserByte', 'user-byte'],
+  ['KeyB', 'key key-b'],
 
   // Value
-  [MifareClassicBlockGroupType.Value, 'value'],
-  [MifareClassicBlockGroupType.ValueInverted, 'value-inverted'],
-  [MifareClassicBlockGroupType.Address, 'addr'],
-  [MifareClassicBlockGroupType.AddressInverted, 'addr-inverted'],
+  ['Value', 'value'],
+  ['ValueInverted', 'value-inverted'],
+  ['Address', 'addr'],
+  ['AddressInverted', 'addr-inverted'],
 
   // Data
-  [MifareClassicBlockGroupType.Data, 'data'],
+  ['Data', 'data'],
 
   // Manufacturer
-  [MifareClassicBlockGroupType.UID, 'uid'],
-  [MifareClassicBlockGroupType.BCC, 'bcc'],
-  [MifareClassicBlockGroupType.SAK, 'sak'],
-  [MifareClassicBlockGroupType.ATQA, 'atqa'],
-  [MifareClassicBlockGroupType.ManufacturerData, 'manufacturer'],
+  ['UID', 'uid'],
+  ['BCC', 'bcc'],
+  ['SAK', 'sak'],
+  ['ATQA', 'atqa'],
+  ['ManufacturerData', 'manufacturer'],
 ]);
 
 const key = computed(() => props.group.block.sector.key);

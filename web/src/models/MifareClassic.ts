@@ -31,32 +31,6 @@ export const defaultKey: PiccKey = {
   value: unhexToArray('FFFFFFFFFFFF'),
 };
 
-export enum MifareClassicBlockGroupType {
-  Undefined,
-
-  // Sector trailer
-  KeyA,
-  AccessBits,
-  UserByte,
-  KeyB,
-
-  // Value block
-  Value,
-  ValueInverted,
-  Address,
-  AddressInverted,
-
-  // Data block
-  Data,
-
-  // Manufacturer block
-  UID,
-  BCC,
-  SAK,
-  ATQA,
-  ManufacturerData,
-}
-
 export enum MifareClassicBlockType {
   Undefined,
   SectorTrailer,
@@ -64,6 +38,25 @@ export enum MifareClassicBlockType {
   Value,
   Manufacturer,
 }
+
+const undefinedBlockGroupNames = ['Undefined'] as const;
+export const sectorTrailerBlockGroupNames = ['KeyA', 'AccessBits', 'UserByte', 'KeyB'] as const;
+export const dataBlockGroupNames = ['Data'] as const;
+export const valueBlockGroupNames = ['Value', 'ValueInverted', 'Address', 'AddressInverted'] as const;
+const manufacturerBlockGroupNames = ['UID', 'BCC', 'SAK', 'ATQA', 'ManufacturerData'] as const;
+
+type UndefinedBlockGroupType = typeof undefinedBlockGroupNames[number];
+type SectorTrailerBlockGroupType = typeof sectorTrailerBlockGroupNames[number];
+type DataBlockGroupType = typeof dataBlockGroupNames[number];
+type ValueBlockGroupType = typeof valueBlockGroupNames[number];
+type ManufacturerBlockGroupType = typeof manufacturerBlockGroupNames[number];
+
+export type MifareClassicBlockGroupType =
+  | UndefinedBlockGroupType
+  | SectorTrailerBlockGroupType
+  | DataBlockGroupType
+  | ValueBlockGroupType
+  | ManufacturerBlockGroupType;
 
 export type AccessBitsBytes = [byte6: number, byte7: number, byte8: number];
 
@@ -316,11 +309,11 @@ export function accessBitsPoolFromSectorTrailerData(data: number[]): AccessBitsP
   };
 }
 
-export class MifareClassicBlockGroup {
-  private _block?: MifareClassicBlock;
+export class MifareClassicBlockGroup<T extends MifareClassicBlockGroupType = MifareClassicBlockGroupType> {
+  private _block?: MifareClassicBlock<T>;
 
   constructor(
-    readonly type: MifareClassicBlockGroupType,
+    readonly type: T,
     readonly offset: number,
     readonly length: number,
     readonly accessConditions: Partial<MifareClassicKeyPermissions> = {},
@@ -331,7 +324,7 @@ export class MifareClassicBlockGroup {
     this._block = undefined;
   }
 
-  get block(): MifareClassicBlock {
+  get block(): MifareClassicBlock<T> {
     if (this._block === undefined) {
       throw new Error('Block not set');
     }
@@ -339,7 +332,7 @@ export class MifareClassicBlockGroup {
     return this._block;
   }
 
-  set block(block: MifareClassicBlock) {
+  set block(block: MifareClassicBlock<T>) {
     if (this._block !== undefined) {
       throw new Error('Block already set');
     }
@@ -362,11 +355,11 @@ export class MifareClassicBlockGroup {
       ?? false;
   }
 
-  hasSameTypeAs(that: MifareClassicBlockGroup): boolean {
+  hasSameTypeAs(that: MifareClassicBlockGroup<T>): boolean {
     return this.type === that.type;
   }
 
-  isSameAs(that: MifareClassicBlockGroup): boolean {
+  isSameAs(that: MifareClassicBlockGroup<T>): boolean {
     return this.block.hasSameAddressAs(that.block)
       && this.offset === that.offset
       && this.length === that.length;
@@ -377,12 +370,12 @@ export class MifareClassicBlockGroup {
   }
 };
 
-export abstract class MifareClassicBlock implements PiccBlock {
+export abstract class MifareClassicBlock<G extends MifareClassicBlockGroupType = MifareClassicBlockGroupType> implements PiccBlock {
   readonly address: number;
   private _data: number[];
   readonly accessBits: PiccBlockAccessBits;
   readonly accessBitsCombo: AccessBitsCombo;
-  readonly groups: MifareClassicBlockGroup[];
+  readonly groups: MifareClassicBlockGroup<G>[];
 
   get data(): number[] {
     return this._data;
@@ -392,7 +385,7 @@ export abstract class MifareClassicBlock implements PiccBlock {
     readonly type: MifareClassicBlockType,
     readonly sector: MifareClassicSector,
     block: PiccBlock,
-    bytesGroups: MifareClassicBlockGroup[]
+    groups: MifareClassicBlockGroup<G>[]
   ) {
     this.type = type;
     this.sector = sector;
@@ -400,19 +393,19 @@ export abstract class MifareClassicBlock implements PiccBlock {
     this._data = block.data;
     this.accessBits = block.accessBits;
     this.accessBitsCombo = calculateAccessBitsCombo(this.accessBits);
-    bytesGroups.forEach(group => group.block = this);
-    this.groups = bytesGroups;
+    groups.forEach(group => group.block = this);
+    this.groups = groups;
   }
 
   get loaded(): Boolean {
     return this.data.length === blockSize;
   }
 
-  hasSameAddressAs(that: MifareClassicBlock): boolean {
+  hasSameAddressAs(that: MifareClassicBlock<G>): boolean {
     return this.address == that.address;
   }
 
-  updateWith(block: UpdatablePiccBlock): MifareClassicBlock {
+  updateWith(block: UpdatablePiccBlock): MifareClassicBlock<G> {
     if (this.address != block.address) {
       throw new Error('Invalid block address');
     }
@@ -426,12 +419,12 @@ export abstract class MifareClassicBlock implements PiccBlock {
     return this;
   }
 
-  findGroup(type: MifareClassicBlockGroupType): MifareClassicBlockGroup | undefined {
+  findGroup(type: G): MifareClassicBlockGroup<G> | undefined {
     return this.groups.find(group => group.type === type);
   }
 }
 
-class MifareClassicUndefinedBlock extends MifareClassicBlock {
+class MifareClassicUndefinedBlock extends MifareClassicBlock<UndefinedBlockGroupType> {
   constructor(sector: MifareClassicSector, address: number) {
     super(
       MifareClassicBlockType.Undefined,
@@ -442,12 +435,12 @@ class MifareClassicUndefinedBlock extends MifareClassicBlock {
         accessBits: { c1: 0, c2: 0, c3: 0 },
       },
       [
-        new MifareClassicBlockGroup(MifareClassicBlockGroupType.Undefined, 0, blockSize),
+        new MifareClassicBlockGroup('Undefined', 0, blockSize),
       ]);
   }
 }
 
-export class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
+export class MifareClassicSectorTrailerBlock extends MifareClassicBlock<SectorTrailerBlockGroupType> {
   readonly accessBitsPool: AccessBitsPool;
 
   constructor(
@@ -461,10 +454,10 @@ export class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
       sector,
       { ...block, accessBits: _accessBitsPool[3] },
       [
-        new MifareClassicBlockGroup(MifareClassicBlockGroupType.KeyA, 0, 6, keyAAccessConditions),
-        new MifareClassicBlockGroup(MifareClassicBlockGroupType.AccessBits, 6, 3, accessBitsAccessConditions),
-        new MifareClassicBlockGroup(MifareClassicBlockGroupType.UserByte, 9, 1, accessBitsAccessConditions),
-        new MifareClassicBlockGroup(MifareClassicBlockGroupType.KeyB, 10, 6, keyBAccessConditions),
+        new MifareClassicBlockGroup('KeyA', 0, 6, keyAAccessConditions),
+        new MifareClassicBlockGroup('AccessBits', 6, 3, accessBitsAccessConditions),
+        new MifareClassicBlockGroup('UserByte', 9, 1, accessBitsAccessConditions),
+        new MifareClassicBlockGroup('KeyB', 10, 6, keyBAccessConditions),
       ]
     );
 
@@ -488,10 +481,10 @@ export class MifareClassicSectorTrailerBlock extends MifareClassicBlock {
   }
 }
 
-export class MifareClassicDataBlock extends MifareClassicBlock {
+export class MifareClassicDataBlock extends MifareClassicBlock<DataBlockGroupType> {
   constructor(sector: MifareClassicSector, block: PiccBlock) {
     super(MifareClassicBlockType.Data, sector, block, [
-      new MifareClassicBlockGroup(MifareClassicBlockGroupType.Data, 0, blockSize, dataBlockAccessConditions),
+      new MifareClassicBlockGroup('Data', 0, blockSize, dataBlockAccessConditions),
     ]);
   }
 
@@ -501,33 +494,33 @@ export class MifareClassicDataBlock extends MifareClassicBlock {
   }
 }
 
-export class MifareClassicValueBlock extends MifareClassicBlock {
+export class MifareClassicValueBlock extends MifareClassicBlock<ValueBlockGroupType> {
   constructor(sector: MifareClassicSector, block: PiccBlock) {
     // TODO: Parse
 
     super(MifareClassicBlockType.Value, sector, block, [
-      new MifareClassicBlockGroup(MifareClassicBlockGroupType.Value, 0, 4, valueBlockAccessConditions),
-      new MifareClassicBlockGroup(MifareClassicBlockGroupType.ValueInverted, 4, 4, valueBlockAccessConditions),
-      new MifareClassicBlockGroup(MifareClassicBlockGroupType.Value, 8, 4, valueBlockAccessConditions),
-      new MifareClassicBlockGroup(MifareClassicBlockGroupType.Address, 12, 1, valueBlockAccessConditions),
-      new MifareClassicBlockGroup(MifareClassicBlockGroupType.AddressInverted, 13, 1, valueBlockAccessConditions),
-      new MifareClassicBlockGroup(MifareClassicBlockGroupType.Address, 14, 1, valueBlockAccessConditions),
-      new MifareClassicBlockGroup(MifareClassicBlockGroupType.AddressInverted, 15, 1, valueBlockAccessConditions),
+      new MifareClassicBlockGroup('Value', 0, 4, valueBlockAccessConditions),
+      new MifareClassicBlockGroup('ValueInverted', 4, 4, valueBlockAccessConditions),
+      new MifareClassicBlockGroup('Value', 8, 4, valueBlockAccessConditions),
+      new MifareClassicBlockGroup('Address', 12, 1, valueBlockAccessConditions),
+      new MifareClassicBlockGroup('AddressInverted', 13, 1, valueBlockAccessConditions),
+      new MifareClassicBlockGroup('Address', 14, 1, valueBlockAccessConditions),
+      new MifareClassicBlockGroup('AddressInverted', 15, 1, valueBlockAccessConditions),
     ]);
   }
 }
 
-class MifareClassicManufacturerBlock extends MifareClassicBlock {
+class MifareClassicManufacturerBlock extends MifareClassicBlock<ManufacturerBlockGroupType> {
   constructor(sector: MifareClassicSector, block: PiccBlock) {
     const { uid } = sector.memory.picc;
 
     super(MifareClassicBlockType.Manufacturer, sector, block, [
-      new MifareClassicBlockGroup(MifareClassicBlockGroupType.UID, 0, uid.length, manufacturerBlockAccessConditions),
-      new MifareClassicBlockGroup(MifareClassicBlockGroupType.BCC, uid.length, 1, manufacturerBlockAccessConditions),
-      new MifareClassicBlockGroup(MifareClassicBlockGroupType.SAK, uid.length + 1, 1, manufacturerBlockAccessConditions),
-      new MifareClassicBlockGroup(MifareClassicBlockGroupType.ATQA, uid.length + 2, 2, manufacturerBlockAccessConditions),
+      new MifareClassicBlockGroup('UID', 0, uid.length, manufacturerBlockAccessConditions),
+      new MifareClassicBlockGroup('BCC', uid.length, 1, manufacturerBlockAccessConditions),
+      new MifareClassicBlockGroup('SAK', uid.length + 1, 1, manufacturerBlockAccessConditions),
+      new MifareClassicBlockGroup('ATQA', uid.length + 2, 2, manufacturerBlockAccessConditions),
       new MifareClassicBlockGroup(
-        MifareClassicBlockGroupType.ManufacturerData,
+        'ManufacturerData',
         uid.length + 4,
         blockSize - uid.length - 4,
         manufacturerBlockAccessConditions

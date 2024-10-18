@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { MifareClassicBlockGroup, MifareClassicBlockGroupType, MifareClassicBlockOperation } from "@/models/MifareClassic";
+import { MifareClassicBlockGroup, MifareClassicBlockOperation } from "@/models/MifareClassic";
 import { keyTypeName } from "@/models/Picc";
 import { computed } from "vue";
 
@@ -22,7 +22,7 @@ const permissions = computed(() => key.value ? props.group.allowedOperationsFor(
         </abbr>
       </li>
       <li title="Group Type">
-        {{ MifareClassicBlockGroupType[group.type] }}
+        {{ group.type }}
       </li>
       <li v-if="key" :title="`Permissions of key ${keyTypeName(key.type)}`">
         <span v-for="operation in operations" class="operation" :class="{

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import MemoryBlockEditor, { isBlockEditable } from "@/components/MemoryBlockEditor/MemoryBlockEditor.vue";
-import { MifareClassicBlock, MifareClassicBlockGroupType, MifareClassicSectorTrailerBlock, MifareClassicValueBlock } from "@/models/MifareClassic";
+import { MifareClassicBlock, MifareClassicSectorTrailerBlock, MifareClassicValueBlock } from "@/models/MifareClassic";
 import { keyTypeName } from "@/models/Picc";
 import { ascii, assert, bin, hex, isAsciiPrintable } from "@/utils/helpers";
 import ByteRepresentation, { byteRepresentationShortName } from "@Memory/ByteRepresentation";
@@ -33,7 +33,7 @@ const restrictions = computed<string[]>(() => {
 
   if (unreadableGroups.length > 0) {
     list.push(`
-        Cannot read ${unreadableGroups.map(group => MifareClassicBlockGroupType[group.type]).join(' & ')}
+        Cannot read ${unreadableGroups.map(group => group.type).join(' & ')}
         group${unreadableGroups.length > 1 ? 's' : ''},
         so ${unreadableGroups.length > 1 ? 'they are' : 'it is'} blanked with zeros.
       `);
@@ -45,7 +45,7 @@ const restrictions = computed<string[]>(() => {
   if (unwritableGroups.length > 0) {
     if (props.block instanceof MifareClassicSectorTrailerBlock) {
       const allGroupsAreUnwritable = unwritableGroups.length === props.block.groups.length;
-      const groups = unwritableGroups.map(group => MifareClassicBlockGroupType[group.type]).join(' & ');
+      const groups = unwritableGroups.map(group => group.type).join(' & ');
 
       list.push(`
           Cannot write to
