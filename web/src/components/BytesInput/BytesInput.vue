@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import HoverableInputPlaceholder from "@/components/HoverableInputPlaceholder/HoverableInputPlaceholder.vue";
 import vFocus from "@/directives/vFocus";
 import { arraysAreEqual, assert, hex, isHex, removeWhitespace, unhexToArray } from "@/utils/helpers";
 import ByteRepresentation, { byteRepresentationSingleChar } from "@Memory/ByteRepresentation";
 import { computed, ref, useTemplateRef, watch } from "vue";
-import HoverableInputPlaceholder from "../HoverableInputPlaceholder/HoverableInputPlaceholder.vue";
 
 const props = defineProps<{
   offset?: number;

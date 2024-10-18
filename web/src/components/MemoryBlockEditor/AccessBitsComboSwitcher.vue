@@ -4,9 +4,9 @@ import {
   AccessBitsPoolIndex,
   dataBlockCombos,
   sectorTrailerCombos
-} from '@/models/MifareClassic';
-import { bin } from '@/utils/helpers';
-import { computed, ref, watch } from 'vue';
+} from "@/models/MifareClassic";
+import { bin } from "@/utils/helpers";
+import { computed, ref, watch } from "vue";
 
 const props = defineProps<{
   poolIndex: AccessBitsPoolIndex,

@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import BytesInput from "@/components/BytesInput/BytesInput.vue";
+import AccessBitsComboSwitcher from "@/components/MemoryBlockEditor/AccessBitsComboSwitcher.vue";
+import AccessConditionsDescriptionRenderer from "@/components/MemoryBlockEditor/AccessConditionsDescriptionRenderer.vue";
 import {
   AccessBitsComboPool,
   accessBitsComboPoolToBytes,
@@ -8,12 +11,9 @@ import {
   isAccessBitsPoolIndex,
   keySize,
   MifareClassicSectorTrailerBlock
-} from '@/models/MifareClassic';
-import { assert } from '@vue/compiler-core';
-import { computed, ref, watch } from 'vue';
-import BytesInput from '../BytesInput/BytesInput.vue';
-import AccessBitsComboSwitcher from './AccessBitsComboSwitcher.vue';
-import AccessConditionsDescriptionRenderer from './AccessConditionsDescriptionRenderer.vue';
+} from "@/models/MifareClassic";
+import { assert } from "@vue/compiler-core";
+import { computed, ref, watch } from "vue";
 
 const props = defineProps<{
   block: MifareClassicSectorTrailerBlock;

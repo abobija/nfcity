@@ -1,3 +1,6 @@
+import Client from "@/communication/Client";
+import { isPiccSectorDeviceMessage } from "@/communication/messages/device/PiccSectorDeviceMessage";
+import ReadSectorWebMessage from "@/communication/messages/web/ReadSectorWebMessage";
 import WriteBlockWebMessage from "@/communication/messages/web/WriteBlockWebMessage";
 import {
   AccessBitsComboPool,
@@ -8,11 +11,8 @@ import {
   defaultKey
 } from "@/models/MifareClassic";
 import { KeyType } from "@/models/Picc";
-import Client from "./communication/Client";
-import { isPiccSectorDeviceMessage } from "./communication/messages/device/PiccSectorDeviceMessage";
-import ReadSectorWebMessage from "./communication/messages/web/ReadSectorWebMessage";
-import { assert, bin, hex, unhexToArray } from "./utils/helpers";
-import { logd } from "./utils/Logger";
+import { assert, bin, hex, unhexToArray } from "@/utils/helpers";
+import { logd } from "@/utils/Logger";
 
 const {
   DEV,

@@ -8,7 +8,11 @@ import HelloDeviceMessage, { isHelloDeviceMessage } from "@/communication/messag
 import PiccDeviceMessage, { isPiccDeviceMessage } from "@/communication/messages/device/PiccDeviceMessage";
 import PiccStateChangedDeviceMessage, { isPiccStateChangedDeviceMessage } from "@/communication/messages/device/PiccStateChangedDeviceMessage";
 import GetPiccWebMessage from "@/communication/messages/web/GetPiccWebMessage";
+import BlockGroupStatusBarItem from "@/components/Dashboard/BlockGroupStatusBarItem.vue";
 import BlockInfoRenderer from "@/components/Dashboard/BlockInfoRenderer.vue";
+import ByteStatusBarItem from "@/components/Dashboard/ByteStatusBarItem.vue";
+import SectorStatusBarItem from "@/components/Dashboard/SectorStatusBarItem.vue";
+import StatusBar from "@/components/Dashboard/StatusBar.vue";
 import TargetByte from "@/components/Dashboard/TargetByte";
 import SystemInfo from "@/components/SystemInfo/SystemInfo.vue";
 import useClient from "@/composables/useClient";
@@ -29,10 +33,6 @@ import onByteMouseLeave from "@Memory/components/Byte/composables/onByteMouseLea
 import Memory from "@Memory/Memory.vue";
 import MemoryFocus from "@Memory/MemoryFocus";
 import { onMounted, onUnmounted, ref, watch } from "vue";
-import BlockGroupStatusBarItem from "./BlockGroupStatusBarItem.vue";
-import ByteStatusBarItem from "./ByteStatusBarItem.vue";
-import SectorStatusBarItem from "./SectorStatusBarItem.vue";
-import StatusBar from "./StatusBar.vue";
 
 enum DashboardState {
   Exit = -1,

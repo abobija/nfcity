@@ -5,10 +5,10 @@ import ClientConfig from "@/components/ClientConfig/ClientConfig.vue";
 import Dashboard from "@/components/Dashboard/Dashboard.vue";
 import { useClientMaybe } from "@/composables/useClient";
 import useClientStorage, { isValidClientStorage, ValidClientStorage } from "@/composables/useClientStorage";
+import nfcityConsole from "@/console";
+import { assert } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";
 import { onMounted, ref, watch } from "vue";
-import nfcityConsole from "./console";
-import { assert } from "./utils/helpers";
 
 const {
   VITE_APP_NAME,

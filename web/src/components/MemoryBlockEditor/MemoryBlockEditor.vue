@@ -19,6 +19,7 @@ import { isErrorDeviceMessage } from "@/communication/messages/device/ErrorDevic
 import { isPiccBlockDeviceMessage } from "@/communication/messages/device/PiccBlockDeviceMessage";
 import WriteBlockWebMessage from "@/communication/messages/web/WriteBlockWebMessage";
 import BytesInput from "@/components/BytesInput/BytesInput.vue";
+import SectorTrailerBlockEditForm from "@/components/MemoryBlockEditor/SectorTrailerBlockEditForm.vue";
 import useClient from "@/composables/useClient";
 import {
   blockSize,
@@ -31,7 +32,6 @@ import { UpdatablePiccBlock } from "@/models/Picc";
 import { arraysAreEqual, assert, hex } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";
 import { computed, onMounted, ref, watch } from "vue";
-import SectorTrailerBlockEditForm from "./SectorTrailerBlockEditForm.vue";
 
 enum MemoryBlockEditorState {
   Undefined = 0,

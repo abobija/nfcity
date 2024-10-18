@@ -4,9 +4,9 @@ import { newClientStorageInjection } from "@/composables/useClientStorage";
 import '@/form.scss';
 import { keys } from "@/keys";
 import '@/main.scss';
+import { logi } from "@/utils/Logger";
 import 'reset-css';
 import { createApp } from "vue";
-import { logi } from "./utils/Logger";
 
 createApp(App)
   .provide(keys.clientStorage, newClientStorageInjection())

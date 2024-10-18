@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { AccessBitsCombo, AccessBitsPoolIndex, calculateAccessBitsFromCombo, dataBlockAccessConditions, isValueBlock, sectorTrailerAccessConditions, valueBlockAccessConditions } from '@/models/MifareClassic';
-import { keyA, keyB } from '@/models/Picc';
-import { computed } from 'vue';
-import KeyTypePermissions from './KeyTypePermissions.vue';
+import KeyTypePermissions from "@/components/MemoryBlockEditor/KeyTypePermissions.vue";
+import { AccessBitsCombo, AccessBitsPoolIndex, calculateAccessBitsFromCombo, dataBlockAccessConditions, isValueBlock, sectorTrailerAccessConditions, valueBlockAccessConditions } from "@/models/MifareClassic";
+import { keyA, keyB } from "@/models/Picc";
+import { computed } from "vue";
 
 const props = defineProps<{
   accessBitsPoolIndex: AccessBitsPoolIndex;

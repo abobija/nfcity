@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ClientValidator } from "@/communication/Client";
+import HoverableInputPlaceholder from "@/components/HoverableInputPlaceholder/HoverableInputPlaceholder.vue";
 import { ClientStorage, validateClientStorage, ValidClientStorage } from "@/composables/useClientStorage";
 import vFocus from "@/directives/vFocus";
 import { cloneObject } from "@/utils/helpers";
 import { logd } from "@/utils/Logger";
 import { ref, useTemplateRef } from "vue";
-import HoverableInputPlaceholder from "../HoverableInputPlaceholder/HoverableInputPlaceholder.vue";
 
 const props = defineProps<{
   clientStorage: ClientStorage;

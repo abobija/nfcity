@@ -3,8 +3,8 @@ import { MifareClassicBlockGroup } from "@/models/MifareClassic";
 import { hex } from "@/utils/helpers";
 import ByteFocus from "@Memory/components/Byte/ByteFocus";
 import byteEmits from "@Memory/components/Byte/byteEmits";
+import ByteEvent from "@Memory/components/Byte/events/ByteEvent";
 import { computed } from "vue";
-import ByteEvent from "./events/ByteEvent";
 
 const props = defineProps<{
   group: MifareClassicBlockGroup;
