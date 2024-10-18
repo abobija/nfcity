@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import MemoryViewer from "@/components/MemoryViewer/MemoryViewer.vue";
 import { MifareClassicBlock, MifareClassicBlockType } from "@/models/MifareClassic";
-import { bin, hex } from "@/utils/helpers";
+import { hex } from "@/utils/helpers";
 
 defineProps<{
   block: MifareClassicBlock;
@@ -13,8 +13,7 @@ defineProps<{
     <header>
       <p>
         <var>{{ MifareClassicBlockType[block.type] }}</var> block
-        at address <var>{{ hex(block.address) }}</var>
-        with access bits <var>{{ bin(block.accessBitsCombo).slice(-3) }}</var>
+        @ address <var>{{ hex(block.address) }}</var>
       </p>
     </header>
     <main>

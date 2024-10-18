@@ -185,25 +185,25 @@ export const valueBlockAccessConditions: Partial<MifareClassicKeyPermissions> = 
     keyA: [0b110, 0b001],
     keyB: [0b110, 0b001],
   },
-  write: { // TODO:
+  write: {
     keyA: [],
-    keyB: [],
+    keyB: [0b110],
   },
-  increment: { // TODO:
+  increment: {
     keyA: [],
-    keyB: [],
+    keyB: [0b110],
   },
-  decrement: { // TODO:
-    keyA: [],
-    keyB: [],
+  decrement: {
+    keyA: [0b110, 0b001],
+    keyB: [0b110, 0b001],
   },
-  transfer: { // TODO:
-    keyA: [],
-    keyB: [],
+  transfer: {
+    keyA: [0b110, 0b001],
+    keyB: [0b110, 0b001],
   },
-  restore: { // TODO:
-    keyA: [],
-    keyB: [],
+  restore: {
+    keyA: [0b110, 0b001],
+    keyB: [0b110, 0b001],
   },
 }
 

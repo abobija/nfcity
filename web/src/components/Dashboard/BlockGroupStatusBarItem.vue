@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { MifareClassicBlockGroup, MifareClassicBlockOperation } from "@/models/MifareClassic";
+import { MifareClassicBlockGroup, MifareClassicBlockOperation, operationShortName } from "@/models/MifareClassic";
 import { keyTypeName } from "@/models/Picc";
 import { computed } from "vue";
 
@@ -28,7 +28,7 @@ const permissions = computed(() => key.value ? props.group.allowedOperationsFor(
         <span v-for="operation in operations" class="operation" :class="{
           allowed: permissions.includes(operation),
         }">
-          {{ operation }}
+          {{ operationShortName(operation) }}
         </span>
       </li>
     </ul>
@@ -42,9 +42,10 @@ const permissions = computed(() => key.value ? props.group.allowedOperationsFor(
 .BlockGroupStatusBarItem {
   .operation {
     display: inline-block;
+    font-weight: 600;
 
     &:not(:last-child) {
-      margin-right: 0.5em;
+      margin-right: 0.25em;
     }
 
     &:not(.allowed) {
