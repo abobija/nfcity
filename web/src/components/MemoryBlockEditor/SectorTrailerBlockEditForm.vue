@@ -13,6 +13,7 @@ import { assert } from '@vue/compiler-core';
 import { computed, ref, watch } from 'vue';
 import BytesInput from '../BytesInput/BytesInput.vue';
 import AccessBitsComboSwitcher from './AccessBitsComboSwitcher.vue';
+import AccessConditionsDescriptionRenderer from './AccessConditionsDescriptionRenderer.vue';
 
 const props = defineProps<{
   block: MifareClassicSectorTrailerBlock;
@@ -39,7 +40,7 @@ function poolIndexTitle(index: AccessBitsPoolIndex) {
   assert(isAccessBitsPoolIndex(index));
 
   if (index === 3) {
-    return 'Sector Trailer';
+    return 'Trailer';
   }
 
   const { numberOfBlocks } = props.block.sector;
@@ -93,6 +94,9 @@ watch(comboPoolArray, (newComboPoolArray) => {
             <div class="title">
               {{ poolIndexTitle(index) }}
             </div>
+
+            <AccessConditionsDescriptionRenderer :access-bits-pool-index="index"
+              :access-bits-combo="comboPoolArray[index].value" />
           </header>
         </li>
       </ul>
@@ -130,9 +134,11 @@ watch(comboPoolArray, (newComboPoolArray) => {
         display: flex;
         align-items: center;
 
-        .AccessBitsComboSwitcher {
-          margin-right: .5rem;
+        >*:not(:last-child) {
+          margin-right: 1rem;
+        }
 
+        .AccessBitsComboSwitcher {
           button {
             font-size: .8rem !important;
             padding: .2rem .4rem !important;

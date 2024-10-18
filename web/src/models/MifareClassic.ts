@@ -1,6 +1,7 @@
 import PiccDto from "@/communication/dtos/PiccDto";
 import Picc, {
   keyA,
+  KeyType,
   PiccBlock,
   PiccBlockAccessBits,
   PiccKey,
@@ -107,13 +108,18 @@ export function calculateAccessBitsFromCombo(combo: AccessBitsCombo): PiccBlockA
 
 export type AccessBitsPoolIndex = 3 | 2 | 1 | 0;
 
-export type MifareClassicBlockOperation =
-  | 'read'
-  | 'write'
-  | 'increment'
-  | 'decrement'
-  | 'transfer'
-  | 'restore';
+const blockOperationNames = ['read', 'write', 'increment', 'decrement', 'transfer', 'restore'] as const;
+
+export type MifareClassicBlockOperation = typeof blockOperationNames[number];
+
+export function operationShortName(operation: MifareClassicBlockOperation): string {
+  switch (operation) {
+    case 'restore':
+      return operation.charAt(0).toUpperCase();
+    default:
+      return operation.charAt(0);
+  }
+}
 
 type MifareClassicKeyPermissions = {
   readonly [key in MifareClassicBlockOperation]: {
@@ -156,7 +162,7 @@ const keyBAccessConditions: Partial<MifareClassicKeyPermissions> = {
   },
 };
 
-const dataBlockAccessConditions: Partial<MifareClassicKeyPermissions> = {
+export const dataBlockAccessConditions: Partial<MifareClassicKeyPermissions> = {
   read: {
     keyA: [0b000, 0b010, 0b100, 0b110, 0b001],
     keyB: [0b000, 0b010, 0b100, 0b110, 0b001, 0b011, 0b101],
@@ -167,7 +173,7 @@ const dataBlockAccessConditions: Partial<MifareClassicKeyPermissions> = {
   }
 };
 
-const valueBlockAccessConditions: Partial<MifareClassicKeyPermissions> = {
+export const valueBlockAccessConditions: Partial<MifareClassicKeyPermissions> = {
   read: {
     keyA: [0b110, 0b001],
     keyB: [0b110, 0b001],
@@ -204,6 +210,46 @@ const manufacturerBlockAccessConditions: Partial<MifareClassicKeyPermissions> = 
     keyB: [],
   }
 };
+
+function operations(accessConditions: Partial<MifareClassicKeyPermissions>) {
+  return Object.keys(accessConditions) as MifareClassicBlockOperation[];
+}
+
+function keyTypeCan(
+  keyType: KeyType,
+  operation: MifareClassicBlockOperation,
+  accessConditions: Partial<MifareClassicKeyPermissions>,
+  accessBitsCombo: AccessBitsCombo
+): boolean {
+  return accessConditions[operation]
+    ?.[keyType == keyA ? 'keyA' : 'keyB']
+    ?.includes(accessBitsCombo)
+    ?? false;
+}
+
+export function keyTypePermissions(
+  keyType: KeyType,
+  accessConditions: Partial<MifareClassicKeyPermissions>,
+  accessBitsCombo: AccessBitsCombo,
+): { operation: MifareClassicBlockOperation, allowed: boolean }[] {
+  return operations(accessConditions).map(operation => {
+    return {
+      operation,
+      allowed: keyTypeCan(keyType, operation, accessConditions, accessBitsCombo),
+    };
+  });
+}
+
+function allowedOperationsForKeyType(
+  keyType: KeyType,
+  accessConditions: Partial<MifareClassicKeyPermissions>,
+  accessBitsCombo: AccessBitsCombo
+): MifareClassicBlockOperation[] {
+  return keyTypePermissions(keyType, accessConditions, accessBitsCombo)
+    .filter(({ allowed }) => allowed)
+    .map(({ operation }) => operation);
+}
+
 
 export type AccessBitsPool = {
   readonly [key in AccessBitsPoolIndex]: Readonly<PiccBlockAccessBits>;
@@ -280,7 +326,7 @@ export function throwIfAccessBitsIntegrityViolated(byte6: number, byte7: number,
   }
 }
 
-function isValueBlock(accessBits: PiccBlockAccessBits): boolean {
+export function isValueBlock(accessBits: PiccBlockAccessBits): boolean {
   return [0b110, 0b001].includes(calculateAccessBitsCombo(accessBits));
 }
 
@@ -341,18 +387,11 @@ export class MifareClassicBlockGroup<T extends MifareClassicBlockGroupType = Mif
   }
 
   allowedOperationsFor(key: PiccKey): MifareClassicBlockOperation[] {
-    return (Object.keys(this.accessConditions) as MifareClassicBlockOperation[]).filter(op =>
-      this.accessConditions[op]
-        ?.[key.type == keyA ? 'keyA' : 'keyB']
-        .includes(this.block.accessBitsCombo)
-    );
+    return allowedOperationsForKeyType(key.type, this.accessConditions, this.block.accessBitsCombo);
   }
 
   keyCan(key: PiccKey, operation: MifareClassicBlockOperation): boolean {
-    return this.accessConditions[operation]
-      ?.[key.type == keyA ? 'keyA' : 'keyB']
-      ?.includes(this.block.accessBitsCombo)
-      ?? false;
+    return keyTypeCan(key.type, operation, this.accessConditions, this.block.accessBitsCombo);
   }
 
   hasSameTypeAs(that: MifareClassicBlockGroup<T>): boolean {
