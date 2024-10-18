@@ -124,7 +124,6 @@ onClientReady(() => {
         </Transition>
         <div class="footer">
           <p class="version">
-            <span>v</span>
             <a v-if="VITE_APP_REPO" :href="`${VITE_APP_REPO}/tree/${VITE_APP_REPO_TAG}`" target="_blank">
               {{ VITE_APP_REPO_TAG_NAME || VITE_APP_REPO_TAG }}
             </a>
