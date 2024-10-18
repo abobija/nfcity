@@ -2,9 +2,8 @@
 import {
   AccessBitsCombo,
   keyTypePermissions,
-  MifareClassicKeyPermissions,
-  operationShortName
-} from "@/models/MifareClassic/MifareClassic";
+  MifareClassicKeyPermissions, operationShortName
+} from "@/models/MifareClassic/MifareClassicAuthorization";
 import { KeyType, keyTypeName } from "@/models/Picc";
 
 defineProps<{

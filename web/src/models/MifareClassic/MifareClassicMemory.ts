@@ -1,9 +1,9 @@
+import MifareClassic, { blockSize } from "@/models/MifareClassic/MifareClassic";
+import MifareClassicBlock from "@/models/MifareClassic/MifareClassicBlock";
+import MifareClassicSector from "@/models/MifareClassic/MifareClassicSector";
+import MifareClassicUndefinedBlock from "@/models/MifareClassic/blocks/MifareClassicUndefinedBlock";
+import { PiccMemory, PiccType } from "@/models/Picc";
 import { assert, isByte } from "@/utils/helpers";
-import { PiccMemory, PiccType } from "../Picc";
-import MifareClassic, { blockSize } from "./MifareClassic";
-import MifareClassicBlock from "./MifareClassicBlock";
-import MifareClassicSector from "./MifareClassicSector";
-import MifareClassicUndefinedBlock from "./blocks/MifareClassicUndefinedBlock";
 
 export default class MifareClassicMemory implements PiccMemory {
   readonly sectors: MifareClassicSector[];

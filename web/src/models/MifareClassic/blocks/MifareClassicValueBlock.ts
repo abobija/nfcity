@@ -1,8 +1,8 @@
-import { PiccBlock, PiccBlockAccessBits } from "../../Picc";
-import { calculateAccessBitsCombo, MifareClassicKeyPermissions } from "../MifareClassic";
-import MifareClassicBlock, { MifareClassicBlockType } from "../MifareClassicBlock";
-import MifareClassicBlockGroup from "../MifareClassicBlockGroup";
-import MifareClassicSector from "../MifareClassicSector";
+import { calculateAccessBitsCombo, MifareClassicKeyPermissions } from "@/models/MifareClassic/MifareClassicAuthorization";
+import MifareClassicBlock, { MifareClassicBlockType } from "@/models/MifareClassic/MifareClassicBlock";
+import MifareClassicBlockGroup from "@/models/MifareClassic/MifareClassicBlockGroup";
+import MifareClassicSector from "@/models/MifareClassic/MifareClassicSector";
+import { PiccBlock, PiccBlockAccessBits } from "@/models/Picc";
 
 export const valueBlockGroupNames = ['Value', 'ValueInverted', 'Address', 'AddressInverted'] as const;
 

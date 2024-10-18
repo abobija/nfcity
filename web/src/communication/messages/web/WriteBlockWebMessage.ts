@@ -1,7 +1,8 @@
 import PiccBlockDto from "@/communication/dtos/PiccBlockDto";
 import PiccKeyDto from "@/communication/dtos/PiccKeyDto";
 import { AuthorizedWebMessage, WebMessageKind } from "@/communication/Message";
-import { blockSize, throwIfAccessBitsIntegrityViolated } from "@/models/MifareClassic/MifareClassic";
+import { blockSize } from "@/models/MifareClassic/MifareClassic";
+import { throwIfAccessBitsIntegrityViolated } from "@/models/MifareClassic/MifareClassicAuthorization";
 import MifareClassicMemory from "@/models/MifareClassic/MifareClassicMemory";
 import { assert, isByte } from "@/utils/helpers";
 

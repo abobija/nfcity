@@ -1,11 +1,11 @@
-import { PiccKey, PiccSector, UpdatablePiccSector } from "../Picc";
-import MifareClassicDataBlock from "./blocks/MifareClassicDataBlock";
-import { MifareClassicManufacturerBlock } from "./blocks/MifareClassicManufacturerBlock";
-import MifareClassicSectorTrailerBlock from "./blocks/MifareClassicSectorTrailerBlock";
-import MifareClassicUndefinedBlock from "./blocks/MifareClassicUndefinedBlock";
-import { isValueBlock, MifareClassicValueBlock } from "./blocks/MifareClassicValueBlock";
-import MifareClassicBlock from "./MifareClassicBlock";
-import MifareClassicMemory from "./MifareClassicMemory";
+import MifareClassicDataBlock from "@/models/MifareClassic/blocks/MifareClassicDataBlock";
+import { MifareClassicManufacturerBlock } from "@/models/MifareClassic/blocks/MifareClassicManufacturerBlock";
+import MifareClassicSectorTrailerBlock from "@/models/MifareClassic/blocks/MifareClassicSectorTrailerBlock";
+import MifareClassicUndefinedBlock from "@/models/MifareClassic/blocks/MifareClassicUndefinedBlock";
+import { isValueBlock, MifareClassicValueBlock } from "@/models/MifareClassic/blocks/MifareClassicValueBlock";
+import MifareClassicBlock from "@/models/MifareClassic/MifareClassicBlock";
+import MifareClassicMemory from "@/models/MifareClassic/MifareClassicMemory";
+import { PiccKey, PiccSector, UpdatablePiccSector } from "@/models/Picc";
 
 export default class MifareClassicSector implements PiccSector {
   private _key?: PiccKey;

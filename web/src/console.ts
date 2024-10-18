@@ -2,14 +2,8 @@ import Client from "@/communication/Client";
 import { isPiccSectorDeviceMessage } from "@/communication/messages/device/PiccSectorDeviceMessage";
 import ReadSectorWebMessage from "@/communication/messages/web/ReadSectorWebMessage";
 import WriteBlockWebMessage from "@/communication/messages/web/WriteBlockWebMessage";
-import {
-  AccessBitsComboPool,
-  accessBitsComboPoolToBitsPool,
-  accessBitsComboPoolToBytes,
-  accessBitsPoolToBytes,
-  blockSize,
-  defaultKey
-} from "@/models/MifareClassic/MifareClassic";
+import { blockSize } from "@/models/MifareClassic/MifareClassic";
+import { AccessBitsComboPool, accessBitsComboPoolToBitsPool, accessBitsComboPoolToBytes, accessBitsPoolToBytes, defaultKey } from "@/models/MifareClassic/MifareClassicAuthorization";
 import { KeyType } from "@/models/Picc";
 import { assert, bin, hex, unhexToArray } from "@/utils/helpers";
 import { logd } from "@/utils/Logger";

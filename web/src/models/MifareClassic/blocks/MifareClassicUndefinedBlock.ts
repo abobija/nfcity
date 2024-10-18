@@ -1,7 +1,7 @@
-import { blockSize } from "../MifareClassic";
-import MifareClassicBlock, { MifareClassicBlockType } from "../MifareClassicBlock";
-import MifareClassicBlockGroup from "../MifareClassicBlockGroup";
-import MifareClassicSector from "../MifareClassicSector";
+import { blockSize } from "@/models/MifareClassic/MifareClassic";
+import MifareClassicBlock, { MifareClassicBlockType } from "@/models/MifareClassic/MifareClassicBlock";
+import MifareClassicBlockGroup from "@/models/MifareClassic/MifareClassicBlockGroup";
+import MifareClassicSector from "@/models/MifareClassic/MifareClassicSector";
 
 export const undefinedBlockGroupNames = ['Undefined'] as const;
 

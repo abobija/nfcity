@@ -1,9 +1,12 @@
+import {
+  blockSize
+} from "@/models/MifareClassic/MifareClassic";
+import { AccessBitsCombo, MifareClassicBlockOperation, MifareClassicKeyPermissions } from "@/models/MifareClassic/MifareClassicAuthorization";
+import MifareClassicBlock, { MifareClassicBlockType } from "@/models/MifareClassic/MifareClassicBlock";
+import MifareClassicBlockGroup from "@/models/MifareClassic/MifareClassicBlockGroup";
+import MifareClassicSector from "@/models/MifareClassic/MifareClassicSector";
+import { PiccBlock, PiccKey } from "@/models/Picc";
 import { assert } from "@/utils/helpers";
-import { PiccBlock, PiccKey } from "../../Picc";
-import { AccessBitsCombo, blockSize, MifareClassicBlockOperation, MifareClassicKeyPermissions } from "../MifareClassic";
-import MifareClassicBlock, { MifareClassicBlockType } from "../MifareClassicBlock";
-import MifareClassicBlockGroup from "../MifareClassicBlockGroup";
-import MifareClassicSector from "../MifareClassicSector";
 
 export const dataBlockGroupNames = ['Data'] as const;
 

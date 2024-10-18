@@ -3,7 +3,7 @@ import KeyTypePermissions from "@/components/MemoryBlockEditor/KeyTypePermission
 import { dataBlockAccessConditions } from "@/models/MifareClassic/blocks/MifareClassicDataBlock";
 import { sectorTrailerAccessConditions } from "@/models/MifareClassic/blocks/MifareClassicSectorTrailerBlock";
 import { isValueBlock, valueBlockAccessConditions } from "@/models/MifareClassic/blocks/MifareClassicValueBlock";
-import { AccessBitsCombo, AccessBitsPoolIndex, calculateAccessBitsFromCombo } from "@/models/MifareClassic/MifareClassic";
+import { AccessBitsCombo, AccessBitsPoolIndex, calculateAccessBitsFromCombo } from "@/models/MifareClassic/MifareClassicAuthorization";
 import { keyA, keyB } from "@/models/Picc";
 import { computed } from "vue";
 

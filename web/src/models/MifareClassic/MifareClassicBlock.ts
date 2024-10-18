@@ -1,8 +1,9 @@
+import { blockSize, } from "@/models/MifareClassic/MifareClassic";
+import { AccessBitsCombo, calculateAccessBitsCombo } from "@/models/MifareClassic/MifareClassicAuthorization";
+import MifareClassicBlockGroup, { MifareClassicBlockGroupType } from "@/models/MifareClassic/MifareClassicBlockGroup";
+import MifareClassicSector from "@/models/MifareClassic/MifareClassicSector";
+import { PiccBlock, PiccBlockAccessBits, UpdatablePiccBlock } from "@/models/Picc";
 import { assert } from "@/utils/helpers";
-import { PiccBlock, PiccBlockAccessBits, UpdatablePiccBlock } from "../Picc";
-import { AccessBitsCombo, blockSize, calculateAccessBitsCombo, MifareClassicBlockGroupType } from "./MifareClassic";
-import MifareClassicBlockGroup from "./MifareClassicBlockGroup";
-import MifareClassicSector from "./MifareClassicSector";
 
 export enum MifareClassicBlockType {
   Undefined,

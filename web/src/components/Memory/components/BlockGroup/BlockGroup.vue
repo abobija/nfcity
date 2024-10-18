@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import {
-  MifareClassicBlockGroupType
-} from "@/models/MifareClassic/MifareClassic";
-import MifareClassicBlockGroup from "@/models/MifareClassic/MifareClassicBlockGroup";
+import MifareClassicBlockGroup, { MifareClassicBlockGroupType } from "@/models/MifareClassic/MifareClassicBlockGroup";
 import BlockGroupFocus from "@Memory/components/BlockGroup/BlockGroupFocus";
 import Byte from "@Memory/components/Byte/Byte.vue";
 import { computed } from "vue";

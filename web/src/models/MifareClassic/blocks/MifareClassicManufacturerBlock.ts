@@ -1,8 +1,9 @@
-import { PiccBlock } from "../../Picc";
-import { blockSize, MifareClassicKeyPermissions } from "../MifareClassic";
-import MifareClassicBlock, { MifareClassicBlockType } from "../MifareClassicBlock";
-import MifareClassicBlockGroup from "../MifareClassicBlockGroup";
-import MifareClassicSector from "../MifareClassicSector";
+import { blockSize } from "@/models/MifareClassic/MifareClassic";
+import { MifareClassicKeyPermissions } from "@/models/MifareClassic/MifareClassicAuthorization";
+import MifareClassicBlock, { MifareClassicBlockType } from "@/models/MifareClassic/MifareClassicBlock";
+import MifareClassicBlockGroup from "@/models/MifareClassic/MifareClassicBlockGroup";
+import MifareClassicSector from "@/models/MifareClassic/MifareClassicSector";
+import { PiccBlock } from "@/models/Picc";
 
 export const manufacturerBlockGroupNames = ['UID', 'BCC', 'SAK', 'ATQA', 'ManufacturerData'] as const;
 

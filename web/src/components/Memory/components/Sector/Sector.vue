@@ -3,9 +3,7 @@ import { isErrorDeviceMessage } from "@/communication/messages/device/ErrorDevic
 import { isPiccSectorDeviceMessage } from "@/communication/messages/device/PiccSectorDeviceMessage";
 import ReadSectorWebMessage from "@/communication/messages/web/ReadSectorWebMessage";
 import useClient from "@/composables/useClient";
-import {
-  defaultKey,
-} from "@/models/MifareClassic/MifareClassic";
+import { defaultKey } from "@/models/MifareClassic/MifareClassicAuthorization";
 import MifareClassicSector from "@/models/MifareClassic/MifareClassicSector";
 import { keyTypeName, PiccKey } from "@/models/Picc";
 import makeLogger from "@/utils/Logger";
