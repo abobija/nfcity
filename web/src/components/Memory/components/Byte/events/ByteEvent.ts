@@ -1,4 +1,4 @@
-import { MifareClassicBlockGroup } from "@/models/MifareClassic";
+import MifareClassicBlockGroup from "@/models/MifareClassic/MifareClassicBlockGroup";
 
 export default class ByteEvent {
   constructor(

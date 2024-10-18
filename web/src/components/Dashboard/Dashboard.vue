@@ -18,11 +18,11 @@ import SystemInfo from "@/components/SystemInfo/SystemInfo.vue";
 import useClient from "@/composables/useClient";
 import MifareClassic, {
   blockSize,
-  MifareClassicBlock,
-  MifareClassicBlockGroup,
-  MifareClassicMemory,
-  MifareClassicSector
-} from "@/models/MifareClassic";
+} from "@/models/MifareClassic/MifareClassic";
+import MifareClassicBlock from "@/models/MifareClassic/MifareClassicBlock";
+import MifareClassicBlockGroup from "@/models/MifareClassic/MifareClassicBlockGroup";
+import MifareClassicMemory from "@/models/MifareClassic/MifareClassicMemory";
+import MifareClassicSector from "@/models/MifareClassic/MifareClassicSector";
 import { PiccState, PiccType } from "@/models/Picc";
 import { CancelationToken, OperationCanceledError } from "@/utils/CancelationToken";
 import { hex } from "@/utils/helpers";

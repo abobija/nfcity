@@ -5,24 +5,23 @@ import Picc, {
   PiccBlock,
   PiccBlockAccessBits,
   PiccKey,
-  PiccMemory,
-  PiccSector,
   PiccState,
-  PiccType,
-  UpdatablePiccBlock,
-  UpdatablePiccSector
+  PiccType
 } from "@/models/Picc";
 import {
   assert,
   hash,
   invertedNibble,
   invertNibble,
-  isByte,
   nibble,
   nibbles,
   nibblesToByte,
   unhexToArray
 } from "@/utils/helpers";
+import MifareClassicBlock from "./MifareClassicBlock";
+import MifareClassicBlockGroup from "./MifareClassicBlockGroup";
+import MifareClassicMemory from "./MifareClassicMemory";
+import MifareClassicSector from "./MifareClassicSector";
 
 export const keySize = 6;
 export const blockSize = 16;
@@ -222,7 +221,7 @@ function operations(accessConditions: Partial<MifareClassicKeyPermissions>) {
   return Object.keys(accessConditions) as MifareClassicBlockOperation[];
 }
 
-function keyTypeCan(
+export function keyTypeCan(
   keyType: KeyType,
   operation: MifareClassicBlockOperation,
   accessConditions: Partial<MifareClassicKeyPermissions>,
@@ -247,7 +246,7 @@ export function keyTypePermissions(
   });
 }
 
-function allowedOperationsForKeyType(
+export function allowedOperationsForKeyType(
   keyType: KeyType,
   accessConditions: Partial<MifareClassicKeyPermissions>,
   accessBitsCombo: AccessBitsCombo
@@ -256,7 +255,6 @@ function allowedOperationsForKeyType(
     .filter(({ allowed }) => allowed)
     .map(({ operation }) => operation);
 }
-
 
 export type AccessBitsPool = {
   readonly [key in AccessBitsPoolIndex]: Readonly<PiccBlockAccessBits>;
@@ -362,115 +360,7 @@ export function accessBitsPoolFromSectorTrailerData(data: number[]): AccessBitsP
   };
 }
 
-export class MifareClassicBlockGroup<T extends MifareClassicBlockGroupType = MifareClassicBlockGroupType> {
-  private _block?: MifareClassicBlock<T>;
-
-  constructor(
-    readonly type: T,
-    readonly offset: number,
-    readonly length: number,
-    readonly accessConditions: Partial<MifareClassicKeyPermissions> = {},
-  ) {
-    this.type = type;
-    this.offset = offset;
-    this.length = length;
-    this._block = undefined;
-  }
-
-  get block(): MifareClassicBlock<T> {
-    if (this._block === undefined) {
-      throw new Error('Block not set');
-    }
-
-    return this._block;
-  }
-
-  set block(block: MifareClassicBlock<T>) {
-    if (this._block !== undefined) {
-      throw new Error('Block already set');
-    }
-
-    this._block = block;
-  }
-
-  allowedOperationsFor(key: PiccKey): MifareClassicBlockOperation[] {
-    return allowedOperationsForKeyType(key.type, this.accessConditions, this.block.accessBitsCombo);
-  }
-
-  keyCan(key: PiccKey, operation: MifareClassicBlockOperation): boolean {
-    return keyTypeCan(key.type, operation, this.accessConditions, this.block.accessBitsCombo);
-  }
-
-  hasSameTypeAs(that: MifareClassicBlockGroup<T>): boolean {
-    return this.type === that.type;
-  }
-
-  isSameAs(that: MifareClassicBlockGroup<T>): boolean {
-    return this.block.hasSameAddressAs(that.block)
-      && this.offset === that.offset
-      && this.length === that.length;
-  }
-
-  data(): number[] {
-    return this.block.data.slice(this.offset, this.offset + this.length);
-  }
-};
-
-export abstract class MifareClassicBlock<G extends MifareClassicBlockGroupType = MifareClassicBlockGroupType> implements PiccBlock {
-  readonly address: number;
-  private _data: number[];
-  readonly accessBits: PiccBlockAccessBits;
-  readonly accessBitsCombo: AccessBitsCombo;
-  readonly groups: MifareClassicBlockGroup<G>[];
-
-  get data(): number[] {
-    return this._data;
-  }
-
-  protected constructor(
-    readonly type: MifareClassicBlockType,
-    readonly sector: MifareClassicSector,
-    block: PiccBlock,
-    groups: MifareClassicBlockGroup<G>[]
-  ) {
-    this.type = type;
-    this.sector = sector;
-    this.address = block.address;
-    this._data = block.data;
-    this.accessBits = block.accessBits;
-    this.accessBitsCombo = calculateAccessBitsCombo(this.accessBits);
-    groups.forEach(group => group.block = this);
-    this.groups = groups;
-  }
-
-  get loaded(): Boolean {
-    return this.data.length === blockSize;
-  }
-
-  hasSameAddressAs(that: MifareClassicBlock<G>): boolean {
-    return this.address == that.address;
-  }
-
-  updateWith(block: UpdatablePiccBlock): MifareClassicBlock<G> {
-    if (this.address != block.address) {
-      throw new Error('Invalid block address');
-    }
-
-    if (block.data.length != blockSize) {
-      throw new Error('Invalid block data length');
-    }
-
-    this._data = block.data;
-
-    return this;
-  }
-
-  findGroup(type: G): MifareClassicBlockGroup<G> | undefined {
-    return this.groups.find(group => group.type === type);
-  }
-}
-
-class MifareClassicUndefinedBlock extends MifareClassicBlock<UndefinedBlockGroupType> {
+export class MifareClassicUndefinedBlock extends MifareClassicBlock<UndefinedBlockGroupType> {
   constructor(sector: MifareClassicSector, address: number) {
     super(
       MifareClassicBlockType.Undefined,
@@ -556,7 +446,7 @@ export class MifareClassicValueBlock extends MifareClassicBlock<ValueBlockGroupT
   }
 }
 
-class MifareClassicManufacturerBlock extends MifareClassicBlock<ManufacturerBlockGroupType> {
+export class MifareClassicManufacturerBlock extends MifareClassicBlock<ManufacturerBlockGroupType> {
   constructor(sector: MifareClassicSector, block: PiccBlock) {
     const { uid } = sector.memory.picc;
 
@@ -572,213 +462,6 @@ class MifareClassicManufacturerBlock extends MifareClassicBlock<ManufacturerBloc
         manufacturerBlockAccessConditions
       ),
     ]);
-  }
-}
-
-export class MifareClassicSector implements PiccSector {
-  private _key?: PiccKey;
-  private _offset?: number;
-
-  constructor(
-    readonly memory: MifareClassicMemory,
-    readonly blocks: MifareClassicBlock[]
-  ) {
-    this.memory = memory;
-    this.blocks = blocks;
-  }
-
-  get key(): PiccKey | undefined {
-    return this._key;
-  }
-
-  get offset() {
-    return this._offset ?? (this._offset = this.memory.offsetOfSector(this));
-  }
-
-  get block0Address() {
-    return this.blockAtOffset(0).address;
-  }
-
-  get numberOfBlocks() {
-    return this.blocks.length;
-  }
-
-  // returns true if none of the blocks in the sector are loaded
-  get isEmpty() {
-    return Array.from(this.blocks.values()).every(block => !block.loaded);
-  }
-
-  get trailerOffset() {
-    return this.numberOfBlocks - 1;
-  }
-
-  private blockAtOffset(offset: number): MifareClassicBlock {
-    return this.blocks.at(offset)!; // FIXME: !
-  }
-
-  private accessPoolIndexOfBlockAtOffset(blockOffset: number) {
-    return MifareClassicSectorTrailerBlock.calculateBlockAccessBitsPoolIndex(
-      blockOffset,
-      this.numberOfBlocks
-    );
-  }
-
-  authenticate(key: PiccKey): void {
-    this._key = key;
-  }
-
-  deauthenticate(): void {
-    this._key = undefined;
-
-    for (let i = this.numberOfBlocks - 1; i >= 0; i--) {
-      this.blocks[i] = new MifareClassicUndefinedBlock(this, this.blocks[i].address);
-    }
-  }
-
-  updateWith(sector: UpdatablePiccSector): void {
-    if (sector.blocks.length != this.numberOfBlocks) {
-      throw new Error('Invalid number of blocks');
-    }
-
-    const trailer = new MifareClassicSectorTrailerBlock(this,
-      sector.blocks.at(-1)! // FIXME: !
-    );
-
-    this.blocks[this.trailerOffset] = trailer;
-
-    sector.blocks.slice(0, -1)
-      .forEach((block, offset) => {
-        const accessPoolIndex = this.accessPoolIndexOfBlockAtOffset(offset);
-        const accessBits = trailer.accessBitsPool[accessPoolIndex];
-
-        if (block.address === 0) {
-          this.blocks[offset] = new MifareClassicManufacturerBlock(this, { ...block, accessBits });
-          return;
-        }
-
-        if (isValueBlock(accessBits)) {
-          this.blocks[offset] = new MifareClassicValueBlock(this, { ...block, accessBits });
-          return;
-        }
-
-        this.blocks[offset] = new MifareClassicDataBlock(this, { ...block, accessBits });
-      });
-
-    this.authenticate(sector.key);
-  }
-}
-
-export class MifareClassicMemory implements PiccMemory {
-  readonly sectors: MifareClassicSector[];
-  readonly numberOfSectors: number;
-  readonly blockDistribution: Array<[number, number]>;
-  readonly size: number;
-
-  constructor(readonly picc: MifareClassic, piccType: PiccType) {
-    this.picc = picc;
-    this.numberOfSectors = MifareClassicMemory.numberOfSectors(piccType);
-
-    // Initialize sectors
-    this.sectors = [];
-
-    let blockAddress = 0;
-    for (let sectorOffset = 0; sectorOffset < this.numberOfSectors; sectorOffset++) {
-      const sector = new MifareClassicSector(this, []);
-      const numberOfBlocks = MifareClassicMemory.numberOfBlocksInSector(sectorOffset);
-
-      for (let blockOffset = 0; blockOffset < numberOfBlocks; blockOffset++) {
-        sector.blocks.push(new MifareClassicUndefinedBlock(sector, blockAddress++));
-      }
-
-      this.sectors.push(sector);
-    }
-
-    if (this.numberOfSectors < 16) {
-      this.blockDistribution = [[5, 4]];
-    }
-    else if (this.numberOfSectors < 32) {
-      this.blockDistribution = [[16, 4]];
-    }
-    else {
-      this.blockDistribution = [[32, 4], [16, 8]];
-    }
-
-    this.size = this.blockDistribution.reduce((acc, [n, m]) => acc + n * m, 0) * blockSize;
-  }
-
-  get isEmpty() {
-    return this.sectors.every(sector => sector.isEmpty);
-  }
-
-  sectorAtOffset(offset: number): MifareClassicSector {
-    return this.sectors.at(offset)!; // FIXME: !
-  }
-
-  offsetOfSector(sector: MifareClassicSector): number {
-    return this.sectors.indexOf(sector);
-  }
-
-  blockAtAddress(address: number): MifareClassicBlock | undefined {
-    for (const sector of this.sectors) {
-      for (const block of sector.blocks) {
-        if (block.address === address) {
-          return block;
-        }
-      }
-    }
-
-    return undefined;
-  }
-
-  private static numberOfBlocksInSector(sectorOffset: number): number {
-    if (sectorOffset < 32) {
-      return 4;
-    }
-
-    return 16;
-  }
-
-  private static numberOfSectors(type: PiccType): number {
-    switch (type) {
-      case PiccType.Mifare1K:
-        return 16;
-      case PiccType.Mifare4K:
-        return 40;
-      case PiccType.MifareMini:
-        return 5;
-      default:
-        throw new Error("Unsupported Mifare type");
-    }
-  }
-
-  private static sectorOffsetFromBlockAddress(blockAddress: number): number {
-    let offset = 0;
-
-    if (blockAddress < 128) {
-      offset = Math.floor(blockAddress / 4);
-    }
-
-    offset = 32 + Math.floor((blockAddress - 128) / 16);
-
-    assert(isByte(offset));
-
-    return offset;
-  }
-
-  private static sectorBlock0Address(sectorOffset: number): number {
-    if (sectorOffset < 32) {
-      return sectorOffset * 4;
-    }
-
-    return 128 + (sectorOffset - 32) * 16;
-  }
-
-  static blockAtAddressIsSectorTrailer(blockAddress: number): boolean {
-    const sectorOffset = MifareClassicMemory.sectorOffsetFromBlockAddress(blockAddress);
-    const numberOfBlocks = MifareClassicMemory.numberOfBlocksInSector(sectorOffset);
-    const block0Address = MifareClassicMemory.sectorBlock0Address(sectorOffset);
-
-    return blockAddress === block0Address + numberOfBlocks - 1;
   }
 }
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import MemoryViewer from "@/components/MemoryViewer/MemoryViewer.vue";
-import { MifareClassicBlock, MifareClassicBlockType } from "@/models/MifareClassic";
+import { MifareClassicBlockType } from "@/models/MifareClassic/MifareClassic";
+import MifareClassicBlock from "@/models/MifareClassic/MifareClassicBlock";
 import { hex } from "@/utils/helpers";
 
 defineProps<{

@@ -9,7 +9,7 @@ import {
   accessBitsPoolToBytes,
   blockSize,
   defaultKey
-} from "@/models/MifareClassic";
+} from "@/models/MifareClassic/MifareClassic";
 import { KeyType } from "@/models/Picc";
 import { assert, bin, hex, unhexToArray } from "@/utils/helpers";
 import { logd } from "@/utils/Logger";

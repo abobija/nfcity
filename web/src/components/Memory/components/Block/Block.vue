@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import {
-  MifareClassicBlock,
   MifareClassicBlockType
-} from "@/models/MifareClassic";
+} from "@/models/MifareClassic/MifareClassic";
+import MifareClassicBlock from "@/models/MifareClassic/MifareClassicBlock";
 import BlockFocus from "@Memory/components/Block/BlockFocus";
 import BlockGroup from "@Memory/components/BlockGroup/BlockGroup.vue";
 import { computed } from "vue";

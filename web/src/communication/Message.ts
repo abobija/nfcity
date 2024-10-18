@@ -1,6 +1,6 @@
 import Dto from "@/communication/Dto";
 import PiccKeyDto from "@/communication/dtos/PiccKeyDto";
-import { keySize } from "@/models/MifareClassic";
+import { keySize } from "@/models/MifareClassic/MifareClassic";
 import { keyA, keyB } from "@/models/Picc";
 import { assert } from "@/utils/helpers";
 

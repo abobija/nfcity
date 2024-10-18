@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import BytesInput from "@/components/BytesInput/BytesInput.vue";
-import { keySize, MifareClassicSector } from "@/models/MifareClassic";
+import { keySize } from "@/models/MifareClassic/MifareClassic";
+import MifareClassicSector from "@/models/MifareClassic/MifareClassicSector";
 import { keyA, keyB, KeyType, keyTypeName, PiccKey } from "@/models/Picc";
 import { computed, ref } from "vue";
 

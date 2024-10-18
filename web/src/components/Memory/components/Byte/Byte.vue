@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { MifareClassicBlockGroup } from "@/models/MifareClassic";
+import MifareClassicBlockGroup from "@/models/MifareClassic/MifareClassicBlockGroup";
 import { hex } from "@/utils/helpers";
 import ByteFocus from "@Memory/components/Byte/ByteFocus";
 import byteEmits from "@Memory/components/Byte/byteEmits";

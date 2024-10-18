@@ -23,11 +23,11 @@ import SectorTrailerBlockEditForm from "@/components/MemoryBlockEditor/SectorTra
 import useClient from "@/composables/useClient";
 import {
   blockSize,
-  MifareClassicBlock,
   MifareClassicBlockType,
   MifareClassicDataBlock,
   MifareClassicSectorTrailerBlock
-} from "@/models/MifareClassic";
+} from "@/models/MifareClassic/MifareClassic";
+import MifareClassicBlock from "@/models/MifareClassic/MifareClassicBlock";
 import { UpdatablePiccBlock } from "@/models/Picc";
 import { arraysAreEqual, assert, hex } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";

@@ -4,7 +4,7 @@ import {
   keyTypePermissions,
   MifareClassicKeyPermissions,
   operationShortName
-} from "@/models/MifareClassic";
+} from "@/models/MifareClassic/MifareClassic";
 import { KeyType, keyTypeName } from "@/models/Picc";
 
 defineProps<{

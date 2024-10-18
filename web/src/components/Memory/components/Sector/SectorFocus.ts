@@ -1,5 +1,4 @@
-
-import { MifareClassicSector } from "@/models/MifareClassic";
+import MifareClassicSector from "@/models/MifareClassic/MifareClassicSector";
 import BlockFocus from "@Memory/components/Block/BlockFocus";
 
 export default class SectorFocus {

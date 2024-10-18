@@ -5,8 +5,8 @@ import ReadSectorWebMessage from "@/communication/messages/web/ReadSectorWebMess
 import useClient from "@/composables/useClient";
 import {
   defaultKey,
-  MifareClassicSector
-} from "@/models/MifareClassic";
+} from "@/models/MifareClassic/MifareClassic";
+import MifareClassicSector from "@/models/MifareClassic/MifareClassicSector";
 import { keyTypeName, PiccKey } from "@/models/Picc";
 import makeLogger from "@/utils/Logger";
 import Block from "@Memory/components/Block/Block.vue";

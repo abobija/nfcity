@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { MifareClassicBlockGroup, MifareClassicBlockOperation, operationShortName } from "@/models/MifareClassic";
+import { MifareClassicBlockOperation, operationShortName } from "@/models/MifareClassic/MifareClassic";
+import MifareClassicBlockGroup from "@/models/MifareClassic/MifareClassicBlockGroup";
 import { keyTypeName } from "@/models/Picc";
 import { computed } from "vue";
 

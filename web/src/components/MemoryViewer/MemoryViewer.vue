@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import MemoryBlockEditor, { isBlockEditable } from "@/components/MemoryBlockEditor/MemoryBlockEditor.vue";
-import { MifareClassicBlock, MifareClassicSectorTrailerBlock, MifareClassicValueBlock } from "@/models/MifareClassic";
+import { MifareClassicSectorTrailerBlock, MifareClassicValueBlock } from "@/models/MifareClassic/MifareClassic";
+import MifareClassicBlock from "@/models/MifareClassic/MifareClassicBlock";
 import { keyTypeName } from "@/models/Picc";
 import { ascii, assert, bin, hex, isAsciiPrintable } from "@/utils/helpers";
 import ByteRepresentation, { byteRepresentationShortName } from "@Memory/ByteRepresentation";

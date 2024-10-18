@@ -4,7 +4,7 @@ import {
   AccessBitsPoolIndex,
   dataBlockCombos,
   sectorTrailerCombos
-} from "@/models/MifareClassic";
+} from "@/models/MifareClassic/MifareClassic";
 import { bin } from "@/utils/helpers";
 import { computed, ref, watch } from "vue";
 

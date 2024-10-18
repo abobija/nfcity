@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { MifareClassicMemory } from "@/models/MifareClassic";
+import MifareClassicMemory from "@/models/MifareClassic/MifareClassicMemory";
 import MemoryFocus from "@Memory/MemoryFocus";
 import Sector from "@Memory/components/Sector/Sector.vue";
 import { computed } from "vue";

@@ -1,4 +1,4 @@
-import { MifareClassicBlockGroup } from "@/models/MifareClassic";
+import MifareClassicBlockGroup from "@/models/MifareClassic/MifareClassicBlockGroup";
 import BlockFocus from "@Memory/components/Block/BlockFocus";
 import BlockGroupFocus from "@Memory/components/BlockGroup/BlockGroupFocus";
 import ByteFocus from "@Memory/components/Byte/ByteFocus";
