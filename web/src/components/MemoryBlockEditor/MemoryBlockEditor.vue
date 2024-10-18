@@ -25,9 +25,8 @@ import MifareClassicDataBlock from "@/models/MifareClassic/blocks/MifareClassicD
 import MifareClassicSectorTrailerBlock from "@/models/MifareClassic/blocks/MifareClassicSectorTrailerBlock";
 import {
   blockSize,
-  MifareClassicBlockType,
 } from "@/models/MifareClassic/MifareClassic";
-import MifareClassicBlock from "@/models/MifareClassic/MifareClassicBlock";
+import MifareClassicBlock, { MifareClassicBlockType } from "@/models/MifareClassic/MifareClassicBlock";
 import { UpdatablePiccBlock } from "@/models/Picc";
 import { arraysAreEqual, assert, hex } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";

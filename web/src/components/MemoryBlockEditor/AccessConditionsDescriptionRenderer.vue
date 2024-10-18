@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import KeyTypePermissions from "@/components/MemoryBlockEditor/KeyTypePermissions.vue";
-import { AccessBitsCombo, AccessBitsPoolIndex, calculateAccessBitsFromCombo, dataBlockAccessConditions, isValueBlock, sectorTrailerAccessConditions, valueBlockAccessConditions } from "@/models/MifareClassic/MifareClassic";
+import { dataBlockAccessConditions } from "@/models/MifareClassic/blocks/MifareClassicDataBlock";
+import { sectorTrailerAccessConditions } from "@/models/MifareClassic/blocks/MifareClassicSectorTrailerBlock";
+import { isValueBlock, valueBlockAccessConditions } from "@/models/MifareClassic/blocks/MifareClassicValueBlock";
+import { AccessBitsCombo, AccessBitsPoolIndex, calculateAccessBitsFromCombo } from "@/models/MifareClassic/MifareClassic";
 import { keyA, keyB } from "@/models/Picc";
 import { computed } from "vue";
 

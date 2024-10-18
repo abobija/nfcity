@@ -1,8 +1,43 @@
-import { PiccBlock } from "../../Picc";
-import { MifareClassicBlockType, valueBlockAccessConditions, ValueBlockGroupType } from "../MifareClassic";
-import MifareClassicBlock from "../MifareClassicBlock";
+import { PiccBlock, PiccBlockAccessBits } from "../../Picc";
+import { calculateAccessBitsCombo, MifareClassicKeyPermissions } from "../MifareClassic";
+import MifareClassicBlock, { MifareClassicBlockType } from "../MifareClassicBlock";
 import MifareClassicBlockGroup from "../MifareClassicBlockGroup";
 import MifareClassicSector from "../MifareClassicSector";
+
+export const valueBlockGroupNames = ['Value', 'ValueInverted', 'Address', 'AddressInverted'] as const;
+
+export type ValueBlockGroupType = typeof valueBlockGroupNames[number];
+
+export const valueBlockAccessConditions: Partial<MifareClassicKeyPermissions> = {
+  read: {
+    keyA: [0b110, 0b001],
+    keyB: [0b110, 0b001],
+  },
+  write: {
+    keyA: [],
+    keyB: [0b110],
+  },
+  increment: {
+    keyA: [],
+    keyB: [0b110],
+  },
+  decrement: {
+    keyA: [0b110, 0b001],
+    keyB: [0b110, 0b001],
+  },
+  transfer: {
+    keyA: [0b110, 0b001],
+    keyB: [0b110, 0b001],
+  },
+  restore: {
+    keyA: [0b110, 0b001],
+    keyB: [0b110, 0b001],
+  },
+};
+
+export function isValueBlock(accessBits: PiccBlockAccessBits): boolean {
+  return [0b110, 0b001].includes(calculateAccessBitsCombo(accessBits));
+}
 
 export class MifareClassicValueBlock extends MifareClassicBlock<ValueBlockGroupType> {
   constructor(sector: MifareClassicSector, block: PiccBlock) {

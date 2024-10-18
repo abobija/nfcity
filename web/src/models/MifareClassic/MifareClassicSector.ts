@@ -3,8 +3,7 @@ import MifareClassicDataBlock from "./blocks/MifareClassicDataBlock";
 import { MifareClassicManufacturerBlock } from "./blocks/MifareClassicManufacturerBlock";
 import MifareClassicSectorTrailerBlock from "./blocks/MifareClassicSectorTrailerBlock";
 import MifareClassicUndefinedBlock from "./blocks/MifareClassicUndefinedBlock";
-import { MifareClassicValueBlock } from "./blocks/MifareClassicValueBlock";
-import { isValueBlock } from "./MifareClassic";
+import { isValueBlock, MifareClassicValueBlock } from "./blocks/MifareClassicValueBlock";
 import MifareClassicBlock from "./MifareClassicBlock";
 import MifareClassicMemory from "./MifareClassicMemory";
 

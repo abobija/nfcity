@@ -1,8 +1,23 @@
 import { PiccBlock } from "../../Picc";
-import { blockSize, manufacturerBlockAccessConditions, ManufacturerBlockGroupType, MifareClassicBlockType } from "../MifareClassic";
-import MifareClassicBlock from "../MifareClassicBlock";
+import { blockSize, MifareClassicKeyPermissions } from "../MifareClassic";
+import MifareClassicBlock, { MifareClassicBlockType } from "../MifareClassicBlock";
 import MifareClassicBlockGroup from "../MifareClassicBlockGroup";
 import MifareClassicSector from "../MifareClassicSector";
+
+export const manufacturerBlockGroupNames = ['UID', 'BCC', 'SAK', 'ATQA', 'ManufacturerData'] as const;
+
+export type ManufacturerBlockGroupType = typeof manufacturerBlockGroupNames[number];
+
+export const manufacturerBlockAccessConditions: Partial<MifareClassicKeyPermissions> = {
+  read: {
+    keyA: [0, 1, 2, 3, 4, 5, 6, 7],
+    keyB: [0, 1, 2, 3, 4, 5, 6, 7],
+  },
+  write: {
+    keyA: [],
+    keyB: [],
+  }
+};
 
 export class MifareClassicManufacturerBlock extends MifareClassicBlock<ManufacturerBlockGroupType> {
   constructor(sector: MifareClassicSector, block: PiccBlock) {

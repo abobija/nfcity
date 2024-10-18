@@ -27,63 +27,11 @@ export const defaultKey: PiccKey = {
   value: unhexToArray('FFFFFFFFFFFF'),
 };
 
-export enum MifareClassicBlockType {
-  Undefined,
-  SectorTrailer,
-  Data,
-  Value,
-  Manufacturer,
-}
-
-export const undefinedBlockGroupNames = ['Undefined'] as const;
-export const sectorTrailerBlockGroupNames = ['KeyA', 'AccessBits', 'UserByte', 'KeyB'] as const;
-export const dataBlockGroupNames = ['Data'] as const;
-export const valueBlockGroupNames = ['Value', 'ValueInverted', 'Address', 'AddressInverted'] as const;
-export const manufacturerBlockGroupNames = ['UID', 'BCC', 'SAK', 'ATQA', 'ManufacturerData'] as const;
-
-export type UndefinedBlockGroupType = typeof undefinedBlockGroupNames[number];
-export type SectorTrailerBlockGroupType = typeof sectorTrailerBlockGroupNames[number];
-export type DataBlockGroupType = typeof dataBlockGroupNames[number];
-export type ValueBlockGroupType = typeof valueBlockGroupNames[number];
-export type ManufacturerBlockGroupType = typeof manufacturerBlockGroupNames[number];
-
-export type MifareClassicBlockGroupType =
-  | UndefinedBlockGroupType
-  | SectorTrailerBlockGroupType
-  | DataBlockGroupType
-  | ValueBlockGroupType
-  | ManufacturerBlockGroupType;
-
 export type AccessBitsBytes = [byte6: number, byte7: number, byte8: number];
 
-export const everyAccessBitCombo = [0, 1, 2, 3, 4, 5, 6, 7] as const;
+export const accessBitCombos = [0, 1, 2, 3, 4, 5, 6, 7] as const;
 
-export type AccessBitsCombo = typeof everyAccessBitCombo[number];
-
-export const sectorTrailerCombos: AccessBitsCombo[] = [
-  0b000,
-  0b010,
-  0b100,
-  0b110,
-  0b001,
-  0b011,
-  0b101,
-  0b111,
-];
-
-export const dataBlockCombos: AccessBitsCombo[] = [
-  0b000,
-  0b010,
-  0b100,
-  0b110,
-  0b001,
-  0b011,
-  0b101,
-  0b111,
-];
-
-export const sectorTrailerDefaultCombo: AccessBitsCombo = 0b001;
-export const dataBlockDefaultCombo: AccessBitsCombo = 0b000;
+export type AccessBitsCombo = typeof accessBitCombos[number];
 
 export function calculateAccessBitsCombo(accessBits: PiccBlockAccessBits): AccessBitsCombo {
   return ((
@@ -122,96 +70,6 @@ export type MifareClassicKeyPermissions = {
     readonly keyB: ReadonlyArray<AccessBitsCombo>;
   }
 }
-
-export const keyAAccessConditions: Partial<MifareClassicKeyPermissions> =
-{
-  read: {
-    keyA: [],
-    keyB: [],
-  },
-  write: {
-    keyA: [0b000, 0b001],
-    keyB: [0b100, 0b011],
-  },
-};
-
-export const accessBitsAccessConditions: Partial<MifareClassicKeyPermissions> = {
-  read: {
-    keyA: [0b000, 0b010, 0b100, 0b110, 0b001, 0b011, 0b101, 0b111],
-    keyB: [0b000, 0b010, 0b100, 0b110, 0b001, 0b011, 0b101, 0b111],
-  },
-  write: {
-    keyA: [0b001],
-    keyB: [0b011, 0b101],
-  },
-};
-
-export const keyBAccessConditions: Partial<MifareClassicKeyPermissions> = {
-  read: {
-    keyA: [0b000, 0b010, 0b001],
-    keyB: [0b000, 0b010, 0b001],
-  },
-  write: {
-    keyA: [0b000, 0b001],
-    keyB: [0b100, 0b011],
-  },
-};
-
-export const sectorTrailerAccessConditions: Map<SectorTrailerBlockGroupType, Partial<MifareClassicKeyPermissions>> = new Map([
-  ['KeyA', keyAAccessConditions],
-  ['AccessBits', accessBitsAccessConditions],
-  ['UserByte', accessBitsAccessConditions],
-  ['KeyB', keyBAccessConditions],
-]);
-
-export const dataBlockAccessConditions: Partial<MifareClassicKeyPermissions> = {
-  read: {
-    keyA: [0b000, 0b010, 0b100, 0b110, 0b001],
-    keyB: [0b000, 0b010, 0b100, 0b110, 0b001, 0b011, 0b101],
-  },
-  write: {
-    keyA: [0b000],
-    keyB: [0b000, 0b100, 0b110, 0b011],
-  }
-};
-
-export const valueBlockAccessConditions: Partial<MifareClassicKeyPermissions> = {
-  read: {
-    keyA: [0b110, 0b001],
-    keyB: [0b110, 0b001],
-  },
-  write: {
-    keyA: [],
-    keyB: [0b110],
-  },
-  increment: {
-    keyA: [],
-    keyB: [0b110],
-  },
-  decrement: {
-    keyA: [0b110, 0b001],
-    keyB: [0b110, 0b001],
-  },
-  transfer: {
-    keyA: [0b110, 0b001],
-    keyB: [0b110, 0b001],
-  },
-  restore: {
-    keyA: [0b110, 0b001],
-    keyB: [0b110, 0b001],
-  },
-}
-
-export const manufacturerBlockAccessConditions: Partial<MifareClassicKeyPermissions> = {
-  read: {
-    keyA: Array.from(everyAccessBitCombo),
-    keyB: Array.from(everyAccessBitCombo),
-  },
-  write: {
-    keyA: [],
-    keyB: [],
-  }
-};
 
 function operations(accessConditions: Partial<MifareClassicKeyPermissions>) {
   return Object.keys(accessConditions) as MifareClassicBlockOperation[];
@@ -325,10 +183,6 @@ export function throwIfAccessBitsIntegrityViolated(byte6: number, byte7: number,
   if (isAccessBitsIntegrityViolated(byte6, byte7, byte8)) {
     throw new AccessBitsIntegrityViolationError();
   }
-}
-
-export function isValueBlock(accessBits: PiccBlockAccessBits): boolean {
-  return [0b110, 0b001].includes(calculateAccessBitsCombo(accessBits));
 }
 
 export function accessBitsNibblesToAccessBits(

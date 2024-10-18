@@ -1,6 +1,18 @@
 import { PiccKey } from "../Picc";
-import { allowedOperationsForKeyType, keyTypeCan, MifareClassicBlockGroupType, MifareClassicBlockOperation, MifareClassicKeyPermissions } from "./MifareClassic";
+import { DataBlockGroupType } from "./blocks/MifareClassicDataBlock";
+import { ManufacturerBlockGroupType } from "./blocks/MifareClassicManufacturerBlock";
+import { SectorTrailerBlockGroupType } from "./blocks/MifareClassicSectorTrailerBlock";
+import { UndefinedBlockGroupType } from "./blocks/MifareClassicUndefinedBlock";
+import { ValueBlockGroupType } from "./blocks/MifareClassicValueBlock";
+import { allowedOperationsForKeyType, keyTypeCan, MifareClassicBlockOperation, MifareClassicKeyPermissions } from "./MifareClassic";
 import MifareClassicBlock from "./MifareClassicBlock";
+
+export type MifareClassicBlockGroupType =
+  | UndefinedBlockGroupType
+  | SectorTrailerBlockGroupType
+  | DataBlockGroupType
+  | ValueBlockGroupType
+  | ManufacturerBlockGroupType;
 
 export default class MifareClassicBlockGroup<
   T extends MifareClassicBlockGroupType = MifareClassicBlockGroupType

@@ -1,9 +1,67 @@
 import { assert } from "@/utils/helpers";
 import { PiccBlock, PiccKey } from "../../Picc";
-import { accessBitsAccessConditions, AccessBitsPool, accessBitsPoolFromSectorTrailerData, AccessBitsPoolIndex, isAccessBitsPoolIndex, keyAAccessConditions, keyBAccessConditions, MifareClassicBlockType, SectorTrailerBlockGroupType } from "../MifareClassic";
-import MifareClassicBlock from "../MifareClassicBlock";
+import { AccessBitsCombo, AccessBitsPool, accessBitsPoolFromSectorTrailerData, AccessBitsPoolIndex, isAccessBitsPoolIndex, MifareClassicKeyPermissions } from "../MifareClassic";
+import MifareClassicBlock, { MifareClassicBlockType } from "../MifareClassicBlock";
 import MifareClassicBlockGroup from "../MifareClassicBlockGroup";
 import MifareClassicSector from "../MifareClassicSector";
+
+export const sectorTrailerBlockGroupNames = ['KeyA', 'AccessBits', 'UserByte', 'KeyB'] as const;
+
+export type SectorTrailerBlockGroupType = typeof sectorTrailerBlockGroupNames[number];
+
+export const sectorTrailerCombos: AccessBitsCombo[] = [
+  0b000,
+  0b010,
+  0b100,
+  0b110,
+  0b001,
+  0b011,
+  0b101,
+  0b111,
+];
+
+export const sectorTrailerDefaultCombo: AccessBitsCombo = 0b001;
+
+export const keyAAccessConditions: Partial<MifareClassicKeyPermissions> =
+{
+  read: {
+    keyA: [],
+    keyB: [],
+  },
+  write: {
+    keyA: [0b000, 0b001],
+    keyB: [0b100, 0b011],
+  },
+};
+
+export const accessBitsAccessConditions: Partial<MifareClassicKeyPermissions> = {
+  read: {
+    keyA: [0b000, 0b010, 0b100, 0b110, 0b001, 0b011, 0b101, 0b111],
+    keyB: [0b000, 0b010, 0b100, 0b110, 0b001, 0b011, 0b101, 0b111],
+  },
+  write: {
+    keyA: [0b001],
+    keyB: [0b011, 0b101],
+  },
+};
+
+export const keyBAccessConditions: Partial<MifareClassicKeyPermissions> = {
+  read: {
+    keyA: [0b000, 0b010, 0b001],
+    keyB: [0b000, 0b010, 0b001],
+  },
+  write: {
+    keyA: [0b000, 0b001],
+    keyB: [0b100, 0b011],
+  },
+};
+
+export const sectorTrailerAccessConditions: Map<SectorTrailerBlockGroupType, Partial<MifareClassicKeyPermissions>> = new Map([
+  ['KeyA', keyAAccessConditions],
+  ['AccessBits', accessBitsAccessConditions],
+  ['UserByte', accessBitsAccessConditions],
+  ['KeyB', keyBAccessConditions],
+]);
 
 export default class MifareClassicSectorTrailerBlock extends MifareClassicBlock<SectorTrailerBlockGroupType> {
   readonly accessBitsPool: AccessBitsPool;

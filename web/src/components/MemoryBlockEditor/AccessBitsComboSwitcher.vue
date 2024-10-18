@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import { dataBlockCombos } from "@/models/MifareClassic/blocks/MifareClassicDataBlock";
+import { sectorTrailerCombos } from "@/models/MifareClassic/blocks/MifareClassicSectorTrailerBlock";
 import {
   AccessBitsCombo,
-  AccessBitsPoolIndex,
-  dataBlockCombos,
-  sectorTrailerCombos
+  AccessBitsPoolIndex
 } from "@/models/MifareClassic/MifareClassic";
 import { bin } from "@/utils/helpers";
 import { computed, ref, watch } from "vue";

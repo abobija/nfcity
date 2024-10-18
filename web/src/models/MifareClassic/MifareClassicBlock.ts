@@ -1,8 +1,16 @@
 import { assert } from "@/utils/helpers";
 import { PiccBlock, PiccBlockAccessBits, UpdatablePiccBlock } from "../Picc";
-import { AccessBitsCombo, blockSize, calculateAccessBitsCombo, MifareClassicBlockGroupType, MifareClassicBlockType } from "./MifareClassic";
+import { AccessBitsCombo, blockSize, calculateAccessBitsCombo, MifareClassicBlockGroupType } from "./MifareClassic";
 import MifareClassicBlockGroup from "./MifareClassicBlockGroup";
 import MifareClassicSector from "./MifareClassicSector";
+
+export enum MifareClassicBlockType {
+  Undefined,
+  SectorTrailer,
+  Data,
+  Value,
+  Manufacturer,
+}
 
 export default abstract class MifareClassicBlock<
   G extends MifareClassicBlockGroupType = MifareClassicBlockGroupType
