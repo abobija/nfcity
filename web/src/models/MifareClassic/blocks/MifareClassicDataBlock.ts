@@ -1,9 +1,9 @@
 import { assert } from "@/utils/helpers";
-import { PiccBlock, PiccKey } from "../Picc";
-import { blockSize, dataBlockAccessConditions, DataBlockGroupType, MifareClassicBlockOperation, MifareClassicBlockType } from "./MifareClassic";
-import MifareClassicBlock from "./MifareClassicBlock";
-import MifareClassicBlockGroup from "./MifareClassicBlockGroup";
-import MifareClassicSector from "./MifareClassicSector";
+import { PiccBlock, PiccKey } from "../../Picc";
+import { blockSize, dataBlockAccessConditions, DataBlockGroupType, MifareClassicBlockOperation, MifareClassicBlockType } from "../MifareClassic";
+import MifareClassicBlock from "../MifareClassicBlock";
+import MifareClassicBlockGroup from "../MifareClassicBlockGroup";
+import MifareClassicSector from "../MifareClassicSector";
 
 export default class MifareClassicDataBlock extends MifareClassicBlock<DataBlockGroupType> {
   constructor(sector: MifareClassicSector, block: PiccBlock) {

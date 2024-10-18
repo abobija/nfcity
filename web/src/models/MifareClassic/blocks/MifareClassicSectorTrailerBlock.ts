@@ -1,9 +1,9 @@
 import { assert } from "@/utils/helpers";
-import { PiccBlock, PiccKey } from "../Picc";
-import { accessBitsAccessConditions, AccessBitsPool, accessBitsPoolFromSectorTrailerData, AccessBitsPoolIndex, isAccessBitsPoolIndex, keyAAccessConditions, keyBAccessConditions, MifareClassicBlockType, SectorTrailerBlockGroupType } from "./MifareClassic";
-import MifareClassicBlock from "./MifareClassicBlock";
-import MifareClassicBlockGroup from "./MifareClassicBlockGroup";
-import MifareClassicSector from "./MifareClassicSector";
+import { PiccBlock, PiccKey } from "../../Picc";
+import { accessBitsAccessConditions, AccessBitsPool, accessBitsPoolFromSectorTrailerData, AccessBitsPoolIndex, isAccessBitsPoolIndex, keyAAccessConditions, keyBAccessConditions, MifareClassicBlockType, SectorTrailerBlockGroupType } from "../MifareClassic";
+import MifareClassicBlock from "../MifareClassicBlock";
+import MifareClassicBlockGroup from "../MifareClassicBlockGroup";
+import MifareClassicSector from "../MifareClassicSector";
 
 export default class MifareClassicSectorTrailerBlock extends MifareClassicBlock<SectorTrailerBlockGroupType> {
   readonly accessBitsPool: AccessBitsPool;

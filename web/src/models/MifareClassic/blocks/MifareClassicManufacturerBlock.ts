@@ -1,8 +1,8 @@
-import { PiccBlock } from "../Picc";
-import { blockSize, manufacturerBlockAccessConditions, ManufacturerBlockGroupType, MifareClassicBlockType } from "./MifareClassic";
-import MifareClassicBlock from "./MifareClassicBlock";
-import MifareClassicBlockGroup from "./MifareClassicBlockGroup";
-import MifareClassicSector from "./MifareClassicSector";
+import { PiccBlock } from "../../Picc";
+import { blockSize, manufacturerBlockAccessConditions, ManufacturerBlockGroupType, MifareClassicBlockType } from "../MifareClassic";
+import MifareClassicBlock from "../MifareClassicBlock";
+import MifareClassicBlockGroup from "../MifareClassicBlockGroup";
+import MifareClassicSector from "../MifareClassicSector";
 
 export class MifareClassicManufacturerBlock extends MifareClassicBlock<ManufacturerBlockGroupType> {
   constructor(sector: MifareClassicSector, block: PiccBlock) {

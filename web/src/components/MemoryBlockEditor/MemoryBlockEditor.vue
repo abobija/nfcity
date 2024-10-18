@@ -21,13 +21,13 @@ import WriteBlockWebMessage from "@/communication/messages/web/WriteBlockWebMess
 import BytesInput from "@/components/BytesInput/BytesInput.vue";
 import SectorTrailerBlockEditForm from "@/components/MemoryBlockEditor/SectorTrailerBlockEditForm.vue";
 import useClient from "@/composables/useClient";
+import MifareClassicDataBlock from "@/models/MifareClassic/blocks/MifareClassicDataBlock";
+import MifareClassicSectorTrailerBlock from "@/models/MifareClassic/blocks/MifareClassicSectorTrailerBlock";
 import {
   blockSize,
   MifareClassicBlockType,
 } from "@/models/MifareClassic/MifareClassic";
 import MifareClassicBlock from "@/models/MifareClassic/MifareClassicBlock";
-import MifareClassicDataBlock from "@/models/MifareClassic/MifareClassicDataBlock";
-import MifareClassicSectorTrailerBlock from "@/models/MifareClassic/MifareClassicSectorTrailerBlock";
 import { UpdatablePiccBlock } from "@/models/Picc";
 import { arraysAreEqual, assert, hex } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";

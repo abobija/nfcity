@@ -1,7 +1,7 @@
-import { blockSize, MifareClassicBlockType, UndefinedBlockGroupType } from "./MifareClassic";
-import MifareClassicBlock from "./MifareClassicBlock";
-import MifareClassicBlockGroup from "./MifareClassicBlockGroup";
-import MifareClassicSector from "./MifareClassicSector";
+import { blockSize, MifareClassicBlockType, UndefinedBlockGroupType } from "../MifareClassic";
+import MifareClassicBlock from "../MifareClassicBlock";
+import MifareClassicBlockGroup from "../MifareClassicBlockGroup";
+import MifareClassicSector from "../MifareClassicSector";
 
 export default class MifareClassicUndefinedBlock extends MifareClassicBlock<UndefinedBlockGroupType> {
   constructor(sector: MifareClassicSector, address: number) {

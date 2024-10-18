@@ -3,7 +3,7 @@ import { PiccMemory, PiccType } from "../Picc";
 import MifareClassic, { blockSize } from "./MifareClassic";
 import MifareClassicBlock from "./MifareClassicBlock";
 import MifareClassicSector from "./MifareClassicSector";
-import MifareClassicUndefinedBlock from "./MifareClassicUndefinedBlock";
+import MifareClassicUndefinedBlock from "./blocks/MifareClassicUndefinedBlock";
 
 export default class MifareClassicMemory implements PiccMemory {
   readonly sectors: MifareClassicSector[];
