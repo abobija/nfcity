@@ -1,8 +1,9 @@
 import { assert, isByte } from "@/utils/helpers";
 import { PiccMemory, PiccType } from "../Picc";
-import MifareClassic, { blockSize, MifareClassicUndefinedBlock } from "./MifareClassic";
+import MifareClassic, { blockSize } from "./MifareClassic";
 import MifareClassicBlock from "./MifareClassicBlock";
 import MifareClassicSector from "./MifareClassicSector";
+import MifareClassicUndefinedBlock from "./MifareClassicUndefinedBlock";
 
 export default class MifareClassicMemory implements PiccMemory {
   readonly sectors: MifareClassicSector[];

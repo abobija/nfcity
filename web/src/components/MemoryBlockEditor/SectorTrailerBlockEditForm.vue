@@ -9,9 +9,9 @@ import {
   AccessBitsPoolIndex,
   calculateAccessBitsCombo,
   isAccessBitsPoolIndex,
-  keySize,
-  MifareClassicSectorTrailerBlock
+  keySize
 } from "@/models/MifareClassic/MifareClassic";
+import MifareClassicSectorTrailerBlock from "@/models/MifareClassic/MifareClassicSectorTrailerBlock";
 import { assert } from "@vue/compiler-core";
 import { computed, ref, watch } from "vue";
 

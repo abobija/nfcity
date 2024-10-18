@@ -24,10 +24,10 @@ import useClient from "@/composables/useClient";
 import {
   blockSize,
   MifareClassicBlockType,
-  MifareClassicDataBlock,
-  MifareClassicSectorTrailerBlock
 } from "@/models/MifareClassic/MifareClassic";
 import MifareClassicBlock from "@/models/MifareClassic/MifareClassicBlock";
+import MifareClassicDataBlock from "@/models/MifareClassic/MifareClassicDataBlock";
+import MifareClassicSectorTrailerBlock from "@/models/MifareClassic/MifareClassicSectorTrailerBlock";
 import { UpdatablePiccBlock } from "@/models/Picc";
 import { arraysAreEqual, assert, hex } from "@/utils/helpers";
 import makeLogger from "@/utils/Logger";
