@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { AccessBitsCombo, AccessBitsPoolIndex, calculateAccessBitsFromCombo, dataBlockAccessConditions, isValueBlock, keyTypePermissions, operationShortName, valueBlockAccessConditions } from '@/models/MifareClassic';
+import { AccessBitsCombo, AccessBitsPoolIndex, calculateAccessBitsFromCombo, dataBlockAccessConditions, isValueBlock, sectorTrailerAccessConditions, valueBlockAccessConditions } from '@/models/MifareClassic';
 import { keyA, keyB } from '@/models/Picc';
 import { computed } from 'vue';
+import KeyTypePermissions from './KeyTypePermissions.vue';
 
 const props = defineProps<{
   accessBitsPoolIndex: AccessBitsPoolIndex;
@@ -24,50 +25,49 @@ const dataBlockAC = computed(() => {
 <template>
   <section class="AccessConditionsDescriptionRenderer">
     <div v-if="accessBitsPoolIndex === 3" class="block trailer">
-      TODO: trailer
+      <div v-for="group in sectorTrailerAccessConditions" class="group">
+        <span class="name">{{ group[0] }}</span>
+
+        <KeyTypePermissions :key-type="keyA" :access-conditions="group[1]" :access-bits-combo="accessBitsCombo" />
+        <KeyTypePermissions :key-type="keyB" :access-conditions="group[1]" :access-bits-combo="accessBitsCombo" />
+      </div>
     </div>
     <div v-else-if="dataBlockAC" class="block data">
-      <div class="key key-a">
-        <span class="name">A</span>
-        <span v-for="permission in keyTypePermissions(keyA, dataBlockAC, accessBitsCombo)" class="operation" :class="{
-          allowed: permission.allowed,
-        }">
-          {{ operationShortName(permission.operation) }}
-        </span>
-      </div>
-      <div class="key key-b">
-        <span class="name">B</span>
-        <span v-for="permission in keyTypePermissions(keyB, dataBlockAC, accessBitsCombo)" class="operation" :class="{
-          allowed: permission.allowed,
-        }">
-          {{ operationShortName(permission.operation) }}
-        </span>
-      </div>
+      <KeyTypePermissions :key-type="keyA" :access-conditions="dataBlockAC" :access-bits-combo="accessBitsCombo" />
+      <KeyTypePermissions :key-type="keyB" :access-conditions="dataBlockAC" :access-bits-combo="accessBitsCombo" />
     </div>
   </section>
 </template>
 
 <style lang="scss">
+@use 'sass:color';
+@import '@/theme.scss';
+
 .AccessConditionsDescriptionRenderer {
   display: inline;
 
-  .block {
+  .block.trailer {
     display: flex;
 
-    .key {
-      &:not(:first-child) {
-        margin-left: 1em;
-      }
-
-      .name {
-        margin-right: 0.5em;
-        font-weight: 600;
-      }
+    .group:not(:first-child) {
+      margin-left: 1em;
+      padding-left: 1em;
+      border-left: 1px solid color.adjust($color-4, $alpha: -0.7);
     }
+  }
+
+  .operation:not(:first-child) {
+    margin-left: .1em;
+  }
+
+  .operation.allowed {
+    font-weight: bold;
+    color: $color-1;
   }
 
   .operation:not(.allowed) {
     text-decoration: line-through;
+    opacity: .5;
   }
 }
 </style>

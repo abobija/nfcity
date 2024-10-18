@@ -40,7 +40,7 @@ function poolIndexTitle(index: AccessBitsPoolIndex) {
   assert(isAccessBitsPoolIndex(index));
 
   if (index === 3) {
-    return 'Trailer';
+    return 'Sector Trailer';
   }
 
   const { numberOfBlocks } = props.block.sector;
@@ -85,19 +85,20 @@ watch(comboPoolArray, (newComboPoolArray) => {
         :readonly="!canWrite?.userByte" />
     </div>
     <div class="form-group access-bits">
-      <header>Access bits Pool</header>
+      <header>Access Bits and Conditions</header>
       <ul>
         <li class="pool-index" :data-index="index" v-for="index in ([3, 2, 1, 0] as AccessBitsPoolIndex[])">
-          <header>
-            <AccessBitsComboSwitcher :pool-index="index" v-model="comboPoolArray[index].value"
-              :readonly="!canWrite?.accessBits" />
+          <AccessBitsComboSwitcher :pool-index="index" v-model="comboPoolArray[index].value"
+            :readonly="!canWrite?.accessBits" />
+
+          <div class="conditions">
             <div class="title">
               {{ poolIndexTitle(index) }}
             </div>
 
             <AccessConditionsDescriptionRenderer :access-bits-pool-index="index"
               :access-bits-combo="comboPoolArray[index].value" />
-          </header>
+          </div>
         </li>
       </ul>
     </div>
@@ -105,6 +106,8 @@ watch(comboPoolArray, (newComboPoolArray) => {
 </template>
 
 <style lang="scss">
+@import '@/theme.scss';
+
 .SectorTrailerBlockEditForm {
   .form-group:not(:first-child) {
     margin-top: 1rem;
@@ -130,19 +133,34 @@ watch(comboPoolArray, (newComboPoolArray) => {
     }
 
     .pool-index {
-      >header {
-        display: flex;
-        align-items: center;
+      display: flex;
+      align-items: center;
 
-        >*:not(:last-child) {
-          margin-right: 1rem;
+      &:not(:first-child) {
+        margin-top: 1rem;
+      }
+
+      >*:not(:last-child) {
+        margin-right: 1rem;
+      }
+
+      .AccessBitsComboSwitcher {
+        button {
+          font-size: .8rem !important;
+          padding: .2rem .4rem !important;
+        }
+      }
+
+      .conditions {
+        font-size: .8rem;
+
+        >.title {
+          margin-bottom: .2rem;
         }
 
-        .AccessBitsComboSwitcher {
-          button {
-            font-size: .8rem !important;
-            padding: .2rem .4rem !important;
-          }
+        >.title,
+        .group>.name {
+          font-weight: 600;
         }
       }
     }
