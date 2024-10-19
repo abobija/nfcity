@@ -1,14 +1,14 @@
 # NFCity
 
-NFCity is a project that provides a simple way to inspect and modify data on NFC/RFID cards.
+Project that provides a simple way to inspect and modify data on NFC/RFID cards.
 
 ![web-app-dashboard](docs/web-app-dashboard.png)
 
-Through an in-browser web application, users can unlock memory sectors and write data to them.
+Through an in-browser web application, you can unlock and modify the card's memory blocks.
 
 ## 1. Motivation
 
-While developing a library for interacting with NFC cards using the [MFRC522](https://www.nxp.com/docs/en/data-sheet/MFRC522.pdf) reader, I gained significant knowledge about card memory structure and interaction. This knowledge came from reading datasheets and through trial and error. These resources are often technical and difficult for beginners, but they contain valuable information on how NFC cards work.
+While developing a [library](https://github.com/abobija/esp-idf-rc522) for interacting with NFC cards using the [MFRC522](https://www.nxp.com/docs/en/data-sheet/MFRC522.pdf) reader, I gained significant knowledge about card memory structure and interaction. This knowledge came from reading datasheets and through trial and error. These resources are often technical and difficult for beginners, but they contain valuable information on how NFC cards work.
 
 Although libraries for NFC card interaction are helpful, they usually hide the card's complexity, offering only a high-level API for reading and writing data. This project aims to provide a simple way to directly interact with NFC card memory, offering a detailed view of how the memory is structured, how to write data, and how to configure access conditions and sector keys.
 
@@ -55,14 +55,14 @@ The application has a retro-hacker look and feel, with a synthwave color palette
 
 The device is an ESP32 microcontroller with an attached [MFRC522](https://www.nxp.com/docs/en/data-sheet/MFRC522.pdf) reader. Once powered on, it connects to the local network and the MQTT bus, waiting for incoming messages from the web application. Upon receiving a message, the device processes it and sends a response back. Most messages from the web app involve operations on the NFC card, such as reading or writing data to memory sectors.
 
-The firmware is written in C using the [ESP-IDF](https://github.com/espressif/esp-idf) framework. It leverages ESP-IDF's MQTT library for broker communication and the [MFRC522 library](https://github.com/abobija/esp-idf-rc522) for NFC card interaction.
+The firmware is written in C using the [ESP-IDF](https://github.com/espressif/esp-idf) framework. It leverages ESP-IDF's MQTT library for broker communication and the MFRC522 [library](https://github.com/abobija/esp-idf-rc522) for NFC card interaction.
 
 ## 3. Installation
 
 ### 3.1. Web Application
 
 > [!TIP]
-> If you want to skip building the application yourself, you can use the hosted version at abobija.github.io/nfcity.
+> If you want to skip building the application yourself, you can use the [hosted version](https://abobija.github.io/nfcity)
 
 The web application is located in the `web` directory. To build it, you'll need Node.js and npm installed. To run the application in development mode with hot-reloading, use the following commands:
 
@@ -78,7 +78,7 @@ Once the commands run successfully, the terminal will display the local address 
 
 The device firmware is in the firmware directory. To build and flash the firmware to the ESP32, you must have ESP-IDF installed. Follow the instructions in the [official documentation](https://docs.espressif.com/projects/esp-idf/en/v5.3.1/esp32/get-started/index.html). 
 
-Once ESP-IDF is installed, navigate to the `firmware` directory and follow these steps:
+Once ESP-IDF is installed, navigate to the `firmware` directory. Firmware configuration can be done with `idf.py menuconfig` or by manually creating a local configuration file. To create a local configuration file, follow these steps:
 
 1. Create a local configuration file by copying the example:
    ```bash
@@ -103,11 +103,14 @@ When you open the web application, the first step is to copy the root topic from
 
 After connecting to the broker, place an NFC card on the reader. Once detected, the card info will appear in the app, and you can start reading and writing data to the card.
 
+## 5. Support
 
-## 5. License
+The project currently supports cards that are compatible with the underlying firmware [library](https://github.com/abobija/esp-idf-rc522) used for communication with the MFRC522 reader. This includes cards from the Mifare Classic family, such as Mifare 1k, 4k, and Mini.
+
+## 6. License
 
 This project is licensed under Apache License 2.0. See the [LICENSE](LICENSE.txt) file for more details.
 
-## 6. Issues and Contributions
+## 7. Issues and Contributions
 
 There are many features that can be added. If you have suggestions or want to contribute, feel free to open an issue or a pull request. All feedback and improvements are welcome.
