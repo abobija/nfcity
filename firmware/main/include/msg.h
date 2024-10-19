@@ -7,11 +7,13 @@
 
 // {{ common
 
+extern const char *MSG_LOG_TAG;
+
 #define CBOR_ERRCHECK(expression)                                                                                      \
     do {                                                                                                               \
         CborError err_rc_ = (expression);                                                                              \
         if (unlikely(err_rc_ != CborNoError)) {                                                                        \
-            ESP_LOGE(NFCITY_TAG, "%s(%d): => %d", __FUNCTION__, __LINE__, err_rc_);                                    \
+            ESP_LOGE(MSG_LOG_TAG, "%s(%d): => %d", __FUNCTION__, __LINE__, err_rc_);                                   \
             return err_rc_;                                                                                            \
         }                                                                                                              \
     }                                                                                                                  \
@@ -20,7 +22,7 @@
 #define CBOR_RETCHECK(condition, err_code)                                                                             \
     {                                                                                                                  \
         if (unlikely(!(condition))) {                                                                                  \
-            ESP_LOGE(NFCITY_TAG, "%s(%d): %s => %d", __FUNCTION__, __LINE__, #condition, err_code);                    \
+            ESP_LOGE(MSG_LOG_TAG, "%s(%d): %s => %d", __FUNCTION__, __LINE__, #condition, err_code);                   \
             return err_code;                                                                                           \
         }                                                                                                              \
     }                                                                                                                  \
