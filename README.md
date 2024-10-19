@@ -99,7 +99,7 @@ After flashing, if the correct WiFi credentials are set, the terminal should sho
 
 ## 4. Usage
 
-When you open the web application, the first step is to copy the root topic from the terminal and paste it into the client configuration form. Click the connect button to connect to the MQTT broker. The configuration is saved in the browser's local storage, so you don’t need to re-enter it every time.
+When you open the web application, the first step is to copy the root topic from the Device's terminal and paste it into the client configuration form. Click the connect button to connect to the MQTT broker. The configuration is saved in the browser's local storage, so you don’t need to re-enter it every time.
 
 After connecting to the broker, place an NFC card on the reader. Once detected, the card info will appear in the app, and you can start reading and writing data to the card.
 
