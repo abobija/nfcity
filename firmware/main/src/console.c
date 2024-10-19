@@ -80,7 +80,7 @@ console_err_t console_wifi_join(wifi_config_t *wifi_config, int timeout_ms)
 
     if (bits & WIFI_CONNECTED_BIT) {
         ESP_LOGI(NFCITY_TAG, "connected to wifi network");
-        return CONSOLE_ERR_OK;
+        return CONSOLE_NOERR;
     }
     else {
         ESP_LOGW(NFCITY_TAG, "connection timed out");
@@ -105,7 +105,7 @@ static int console_wifi_cmd_handler(int argc, char **argv)
         strlcpy((char *)wifi_config.sta.password, wifi_cmd_args.password->sval[0], sizeof(wifi_config.sta.password));
     }
 
-    return console_wifi_join(&wifi_config, wifi_cmd_args.timeout->ival[0]) == CONSOLE_ERR_OK ? 0 : 1;
+    return console_wifi_join(&wifi_config, wifi_cmd_args.timeout->ival[0]) == CONSOLE_NOERR ? 0 : 1;
 }
 
 static esp_err_t console_wifi_register_cmd()
@@ -199,43 +199,43 @@ esp_err_t console_init()
     return ESP_OK;
 }
 
-esp_err_t console_run()
+console_err_t console_process_line(const char *prompt)
 {
-    const char *prompt = LOG_COLOR_I "nfcity> " LOG_RESET_COLOR;
-    char *line = NULL;
+    char *line = linenoise(prompt);
 
-    while (true) {
-        line = linenoise(prompt);
-
-        if (line == NULL) {
-            // no command entered
-            continue;
-        }
-        else if (strcmp(line, "exit") == 0 || strcmp(line, "quit") == 0) {
-            linenoiseFree(line);
-            break;
-        }
-
-        int ret;
-        esp_err_t err = esp_console_run(line, &ret);
-
-        if (err == ESP_ERR_NOT_FOUND) {
-            ESP_LOGE(NFCITY_TAG, "unrecognized command");
-        }
-        else if (err == ESP_ERR_INVALID_ARG) {
-            // command was empty
-        }
-        else if (err == ESP_OK && ret != ESP_OK) {
-            ESP_LOGE(NFCITY_TAG, "command returned non-zero error code: 0x%x (%s)", ret, esp_err_to_name(ret));
-        }
-        else if (err != ESP_OK) {
-            ESP_LOGE(NFCITY_TAG, "internal error: %s", esp_err_to_name(err));
-        }
-
-        linenoiseFree(line);
+    if (line == NULL) {
+        return CONSOLE_ERR_CMD_EMPTY;
     }
 
-    return ESP_OK;
+    if (strcmp(line, "exit") == 0 || strcmp(line, "quit") == 0) {
+        linenoiseFree(line);
+        return CONSOLE_ERR_CMD_EXIT;
+    }
+
+    int ret = 0;
+    esp_err_t err = ESP_OK;
+    switch (err = esp_console_run(line, &ret)) {
+        case ESP_OK: {
+            if (ret != 0) {
+                ESP_LOGE(NFCITY_TAG, "command returned non-zero error code: 0x%x (%s)", ret, esp_err_to_name(ret));
+                return CONSOLE_ERR_CMD_FAIL;
+            }
+        } break;
+        case ESP_ERR_NOT_FOUND: {
+            ESP_LOGE(NFCITY_TAG, "unrecognized command");
+            return CONSOLE_ERR_CMD_NOT_FOUND;
+        } break;
+        case ESP_ERR_INVALID_ARG: {
+            return CONSOLE_ERR_CMD_EMPTY;
+        } break;
+        default: {
+            ESP_LOGE(NFCITY_TAG, "internal error: %s", esp_err_to_name(err));
+            return CONSOLE_ERR_CMD_INTERNAL;
+        } break;
+    }
+
+    linenoiseFree(line);
+    return CONSOLE_NOERR;
 }
 
 inline esp_err_t console_deinit()
