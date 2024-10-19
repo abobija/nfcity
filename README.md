@@ -64,7 +64,7 @@ The firmware is written in C using the [ESP-IDF](https://github.com/espressif/es
 > [!TIP]
 > If you want to skip building the application yourself, you can use the [hosted version](https://abobija.github.io/nfcity)
 
-The web application is located in the `web` directory. To build it, you'll need Node.js and npm installed. To run the application in development mode with hot-reloading, use the following commands:
+The web application is located in the [`web`](web/) directory. To build it, you'll need Node.js and npm installed. To run the application in development mode with hot-reloading, use the following commands:
 
 ```bash
 cd web
@@ -76,7 +76,7 @@ Once the commands run successfully, the terminal will display the local address 
 
 ### 3.2. Device
 
-The device firmware is in the firmware directory. To build and flash the firmware to the ESP32, you must have ESP-IDF installed. Follow the instructions in the [official documentation](https://docs.espressif.com/projects/esp-idf/en/v5.3.1/esp32/get-started/index.html). 
+The device firmware is in the [`firmware`](firmware/) directory. To build and flash the firmware to the ESP32, you must have ESP-IDF installed. Follow the instructions in the [official documentation](https://docs.espressif.com/projects/esp-idf/en/v5.3.1/esp32/get-started/index.html). 
 
 Once ESP-IDF is installed, navigate to the `firmware` directory. Firmware configuration can be done with `idf.py menuconfig` or by manually creating a local configuration file. To create a local configuration file, follow these steps:
 
