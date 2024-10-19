@@ -1,5 +1,21 @@
 {
     "files.associations": {
-        "sdkconfig*": "ini"
+        "*.module": "php",
+        "sdkconfig*": "ini",
+        "rc522_spi.h": "c",
+        "rc522_mifare.h": "c",
+        "freertos.h": "c",
+        "console.h": "c",
+        "esp_check.h": "c",
+        "esp_wifi.h": "c",
+        "argtable3.h": "c",
+        "esp_system.h": "c",
+        "event_groups.h": "c",
+        "semphr.h": "c",
+        "bitset": "c",
+        "format": "c",
+        "esp_err.h": "c",
+        "stdbool.h": "c",
+        "unistd.h": "c"
     }
 }

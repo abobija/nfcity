@@ -4,16 +4,15 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/event_groups.h"
 #include "freertos/semphr.h"
-#include "esp_wifi.h"
 #include "esp_system.h"
 #include "esp_check.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
 #include "esp_event.h"
-#include "esp_netif.h"
 #include "esp_random.h"
-#include "protocol_examples_common.h"
+#include "esp_netif.h"
 #include "mqtt_client.h"
+#include "console.h"
 #include "msg.h"
 #include "rc522.h"
 #include "driver/rc522_spi.h"
@@ -46,8 +45,7 @@ const uint8_t *mqtt_broker_pem_end = mqtt_broker_pem_start;
 
 #define PICC_MEM_BUFFER_SIZE       1024
 
-const char *TAG = "nfcity";
-const char *MSG_LOG_TAG = "nfcity";
+const char *NFCITY_TAG = "nfcity";
 
 static rc522_driver_handle_t rc522_driver;
 static rc522_handle_t rc522_scanner;
@@ -133,7 +131,7 @@ static void on_mqtt_event(void *arg, esp_event_base_t base, int32_t id, void *da
         } break;
     }
     ESP_LOG_LEVEL_LOCAL(log_level,
-        TAG,
+        NFCITY_TAG,
         "mqtt event (id=%d, name=%s)",
         event->event_id,
         mqtt_event_name((esp_mqtt_event_id_t)event->event_id));
@@ -144,7 +142,7 @@ static void on_mqtt_connected(void *arg, esp_event_base_t base, int32_t id, void
     esp_mqtt_client_subscribe_single(mqtt_client, mqtt_subtopic(MQTT_WEB_SUBTOPIC), MQTT_QOS_0);
 
     if (xSemaphoreTake(enc_buffer_mutex, pdMS_TO_TICKS(enc_buffer_mutex_take_timeout_ms)) != pdTRUE) {
-        ESP_LOGE(TAG, "Failed to take enc_buffer_mutex");
+        ESP_LOGE(NFCITY_TAG, "Failed to take enc_buffer_mutex");
         return;
     }
 
@@ -156,7 +154,7 @@ static void on_mqtt_connected(void *arg, esp_event_base_t base, int32_t id, void
     mqtt_pub(enc_buffer, enc_length, MQTT_QOS_0);
 
     if (xSemaphoreGive(enc_buffer_mutex) != pdTRUE) {
-        ESP_LOGE(TAG, "Failed to give enc_buffer_mutex");
+        ESP_LOGE(NFCITY_TAG, "Failed to give enc_buffer_mutex");
     }
 
     xEventGroupSetBits(wait_bits, MQTT_READY_BIT);
@@ -171,18 +169,18 @@ static void on_mqtt_data(void *arg, esp_event_base_t base, int32_t eid, void *da
     CborError dec_err = CborNoError;
     web_msg_t web_msg = { 0 };
     if ((dec_err = dec_msg((uint8_t *)event->data, event->data_len, &web_msg)) != CborNoError) {
-        ESP_LOGE(TAG, "Failed to decode message (dec_err=%d)", dec_err);
+        ESP_LOGE(NFCITY_TAG, "Failed to decode message (dec_err=%d)", dec_err);
         return;
     }
 
     if (web_msg.kind != WEB_MSG_PING) {
-        ESP_LOGI(TAG, "msg received (kind=%d, id=%s)", web_msg.kind, web_msg.id);
+        ESP_LOGI(NFCITY_TAG, "msg received (kind=%d, id=%s)", web_msg.kind, web_msg.id);
     }
 
     // encoding response
 
     if (xSemaphoreTake(enc_buffer_mutex, pdMS_TO_TICKS(enc_buffer_mutex_take_timeout_ms)) != pdTRUE) {
-        ESP_LOGE(TAG, "Failed to take enc_buffer_mutex");
+        ESP_LOGE(NFCITY_TAG, "Failed to take enc_buffer_mutex");
         return;
     }
 
@@ -216,7 +214,7 @@ static void on_mqtt_data(void *arg, esp_event_base_t base, int32_t eid, void *da
             }
         } break;
         default: {
-            ESP_LOGW(TAG, "Unsupported meessage kind: %d", web_msg.kind);
+            ESP_LOGW(NFCITY_TAG, "Unsupported meessage kind: %d", web_msg.kind);
             err = ESP_ERR_NOT_SUPPORTED;
         } break;
     }
@@ -232,7 +230,7 @@ static void on_mqtt_data(void *arg, esp_event_base_t base, int32_t eid, void *da
     }
 
     if (xSemaphoreGive(enc_buffer_mutex) != pdTRUE) {
-        ESP_LOGE(TAG, "Failed to give enc_buffer_mutex");
+        ESP_LOGE(NFCITY_TAG, "Failed to give enc_buffer_mutex");
     }
 }
 
@@ -240,12 +238,12 @@ static void on_picc_state_changed(void *arg, esp_event_base_t base, int32_t even
 {
     rc522_picc_state_changed_event_t *event = (rc522_picc_state_changed_event_t *)data;
 
-    ESP_LOGD(TAG, "picc state changed from %d to %d", event->old_state, event->picc->state);
+    ESP_LOGD(NFCITY_TAG, "picc state changed from %d to %d", event->old_state, event->picc->state);
 
     memcpy(&picc, event->picc, sizeof(rc522_picc_t));
 
     if (xSemaphoreTake(enc_buffer_mutex, pdMS_TO_TICKS(enc_buffer_mutex_take_timeout_ms)) != pdTRUE) {
-        ESP_LOGE(TAG, "Failed to take enc_buffer_mutex");
+        ESP_LOGE(NFCITY_TAG, "Failed to take enc_buffer_mutex");
         return;
     }
 
@@ -257,7 +255,7 @@ static void on_picc_state_changed(void *arg, esp_event_base_t base, int32_t even
     mqtt_pub(enc_buffer, enc_length, MQTT_QOS_0);
 
     if (xSemaphoreGive(enc_buffer_mutex) != pdTRUE) {
-        ESP_LOGE(TAG, "Failed to give enc_buffer_mutex");
+        ESP_LOGE(NFCITY_TAG, "Failed to give enc_buffer_mutex");
     }
 }
 
@@ -275,12 +273,12 @@ static const char *mqtt_event_name(esp_mqtt_event_id_t id)
 static esp_err_t read_sector(web_read_sector_msg_t *msg, rc522_mifare_sector_desc_t *sector_desc, uint8_t *buffer)
 {
     if (picc.state != RC522_PICC_STATE_ACTIVE && picc.state != RC522_PICC_STATE_ACTIVE_H) {
-        ESP_LOGW(TAG, "cannot read memory. picc is not active");
+        ESP_LOGW(NFCITY_TAG, "cannot read memory. picc is not active");
         return ESP_FAIL;
     }
 
     if (xSemaphoreTake(rc522_task_mutex, pdMS_TO_TICKS(rc522_task_mutex_take_timeout_ms)) != pdTRUE) {
-        ESP_LOGE(TAG, "Failed to take rc522_task_mutex");
+        ESP_LOGE(NFCITY_TAG, "Failed to take rc522_task_mutex");
         return ESP_FAIL;
     }
 
@@ -292,13 +290,19 @@ static esp_err_t read_sector(web_read_sector_msg_t *msg, rc522_mifare_sector_des
 
     esp_err_t ret = ESP_OK;
 
-    ESP_GOTO_ON_ERROR(rc522_mifare_auth_sector(rc522_scanner, &picc, sector_desc, &key), _exit, TAG, "auth failed");
+    ESP_GOTO_ON_ERROR(rc522_mifare_auth_sector(rc522_scanner, &picc, sector_desc, &key),
+        _exit,
+        NFCITY_TAG,
+        "auth failed");
 
     for (uint8_t i = 0; i < sector_desc->number_of_blocks; i++) {
         uint8_t block_addr = sector_desc->block_0_address + i;
         uint8_t *buffer_ptr = buffer + (i * RC522_MIFARE_BLOCK_SIZE);
 
-        ESP_GOTO_ON_ERROR(rc522_mifare_read(rc522_scanner, &picc, block_addr, buffer_ptr), _exit, TAG, "read failed");
+        ESP_GOTO_ON_ERROR(rc522_mifare_read(rc522_scanner, &picc, block_addr, buffer_ptr),
+            _exit,
+            NFCITY_TAG,
+            "read failed");
     }
 _exit:
     rc522_mifare_deauth(rc522_scanner, &picc);
@@ -312,11 +316,11 @@ static esp_err_t write_block(web_write_block_msg_t *msg, uint8_t *out_buffer)
     esp_err_t ret = ESP_OK;
 
     if (picc.state != RC522_PICC_STATE_ACTIVE && picc.state != RC522_PICC_STATE_ACTIVE_H) {
-        ESP_LOGW(TAG, "cannot write memory. picc is not active");
+        ESP_LOGW(NFCITY_TAG, "cannot write memory. picc is not active");
         return ESP_FAIL;
     }
     if (xSemaphoreTake(rc522_task_mutex, pdMS_TO_TICKS(rc522_task_mutex_take_timeout_ms)) != pdTRUE) {
-        ESP_LOGE(TAG, "Failed to take rc522_task_mutex");
+        ESP_LOGE(NFCITY_TAG, "Failed to take rc522_task_mutex");
         return ESP_FAIL;
     }
     rc522_mifare_key_t key = {
@@ -324,12 +328,15 @@ static esp_err_t write_block(web_write_block_msg_t *msg, uint8_t *out_buffer)
     };
     memcpy(key.value, msg->key.value, RC522_MIFARE_KEY_SIZE);
 
-    ESP_GOTO_ON_ERROR(rc522_mifare_auth(rc522_scanner, &picc, msg->address, &key), _exit, TAG, "auth failed");
-    ESP_GOTO_ON_ERROR(rc522_mifare_write(rc522_scanner, &picc, msg->address, msg->data), _exit, TAG, "write failed");
+    ESP_GOTO_ON_ERROR(rc522_mifare_auth(rc522_scanner, &picc, msg->address, &key), _exit, NFCITY_TAG, "auth failed");
+    ESP_GOTO_ON_ERROR(rc522_mifare_write(rc522_scanner, &picc, msg->address, msg->data),
+        _exit,
+        NFCITY_TAG,
+        "write failed");
     uint8_t verification_buffer[RC522_MIFARE_BLOCK_SIZE] = { 0 };
     ESP_GOTO_ON_ERROR(rc522_mifare_read(rc522_scanner, &picc, msg->address, verification_buffer),
         _exit,
-        TAG,
+        NFCITY_TAG,
         "read failed");
     memcpy(out_buffer, verification_buffer, RC522_MIFARE_BLOCK_SIZE);
 
@@ -342,9 +349,21 @@ _exit:
 
 void app_main()
 {
+    esp_log_level_set("*", ESP_LOG_WARN);
+    esp_log_level_set(NFCITY_TAG, ESP_LOG_INFO);
+
     ESP_ERROR_CHECK(esp_event_loop_create_default());
     ESP_ERROR_CHECK(nvs_flash_init());
     ESP_ERROR_CHECK(esp_netif_init());
+
+    { // console
+        ESP_ERROR_CHECK(console_init());
+        if (console_wifi_join(NULL, 5000) != CONSOLE_ERR_OK) {
+            ESP_LOGW(NFCITY_TAG, "Cannot auto-join WiFi network. Use 'wifi' command to join manually.");
+            ESP_ERROR_CHECK(console_run());
+        }
+        ESP_ERROR_CHECK(console_deinit());
+    }
 
     { // concurrency
         wait_bits = xEventGroupCreate();
@@ -356,10 +375,6 @@ void app_main()
         assert(rc522_task_mutex != NULL);
     }
 
-    { // wifi
-        ESP_ERROR_CHECK(example_connect());
-    }
-
     { // mqtt
         char root_topic[MQTT_ROOT_TOPIC_LENGTH + 1] = { 0 };
         nvs_handle_t nfcity_nvs;
@@ -368,11 +383,11 @@ void app_main()
         esp_err_t nvs_err = nvs_get_str(nfcity_nvs, NVS_KEY_MQTT_ROOT_TOPIC, NULL, &root_topic_size);
         assert(nvs_err == ESP_OK || nvs_err == ESP_ERR_NVS_NOT_FOUND);
         if (nvs_err == ESP_OK) { // retrieve root_topic from cache
-            ESP_LOGI(TAG, "size of root_topic retrieved from cache: %d", root_topic_size);
+            ESP_LOGI(NFCITY_TAG, "size of root_topic retrieved from cache: %d", root_topic_size);
             assert(root_topic_size == (MQTT_ROOT_TOPIC_LENGTH + 1));
             ESP_ERROR_CHECK(nvs_get_str(nfcity_nvs, NVS_KEY_MQTT_ROOT_TOPIC, root_topic, &root_topic_size));
             root_topic[MQTT_ROOT_TOPIC_LENGTH] = 0;
-            ESP_LOGI(TAG, "root_topic retrieved from cache: %s", root_topic);
+            ESP_LOGI(NFCITY_TAG, "root_topic retrieved from cache: %s", root_topic);
         }
         else { // generate and cache random root_topic
             root_topic_size = MQTT_ROOT_TOPIC_LENGTH + 1;
@@ -382,20 +397,20 @@ void app_main()
                 sprintf(root_topic + (i * 2), "%02x", rnd_root_topic_bytes[i]);
             }
             root_topic[MQTT_ROOT_TOPIC_LENGTH] = 0;
-            ESP_LOGI(TAG, "root_topic generated: %s", root_topic);
+            ESP_LOGI(NFCITY_TAG, "root_topic generated: %s", root_topic);
             ESP_ERROR_CHECK(nvs_set_str(nfcity_nvs, NVS_KEY_MQTT_ROOT_TOPIC, root_topic));
             ESP_ERROR_CHECK(nvs_commit(nfcity_nvs));
-            ESP_LOGI(TAG, "root_topic cached");
+            ESP_LOGI(NFCITY_TAG, "root_topic cached");
         }
         nvs_close(nfcity_nvs);
         memset(mqtt_topic_buffer, 0, sizeof(mqtt_topic_buffer));
         sprintf(mqtt_topic_buffer, "/%.*s", MQTT_ROOT_TOPIC_LENGTH, root_topic);
         mqtt_subtopic_ptr = mqtt_topic_buffer + strlen(mqtt_topic_buffer);
-        ESP_LOGI(TAG, "*** +-----------------------------------+");
-        ESP_LOGI(TAG, "*** |%*c", 36, '|');
-        ESP_LOGI(TAG, "*** | MQTT_ROOT_TOPIC: %s |", mqtt_topic_buffer + 1);
-        ESP_LOGI(TAG, "*** |%*c", 36, '|');
-        ESP_LOGI(TAG, "*** +-----------------------------------+");
+        ESP_LOGI(NFCITY_TAG, "*** +-----------------------------------+");
+        ESP_LOGI(NFCITY_TAG, "*** |%*c", 36, '|');
+        ESP_LOGI(NFCITY_TAG, "*** | MQTT_ROOT_TOPIC: %s |", mqtt_topic_buffer + 1);
+        ESP_LOGI(NFCITY_TAG, "*** |%*c", 36, '|');
+        ESP_LOGI(NFCITY_TAG, "*** +-----------------------------------+");
 
         const esp_mqtt_client_config_t mqtt_cfg = {
             .broker.address.uri = CONFIG_NFCITY_MQTT_BROKER,

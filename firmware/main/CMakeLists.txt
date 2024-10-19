@@ -36,7 +36,13 @@ idf_component_register(
         include
     SRCS
         nfcity.c
+        src/console.c
         src/msg.c
+    REQUIRES
+        nvs_flash
+        console
+        esp_wifi
+        mqtt
     EMBED_TXTFILES
         ${TXT_EMBEDS}
 )

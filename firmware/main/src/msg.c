@@ -1,5 +1,7 @@
 #include "msg.h"
 
+extern const char *NFCITY_TAG;
+
 // {{ decoding
 
 struct
