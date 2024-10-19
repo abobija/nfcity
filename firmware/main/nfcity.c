@@ -134,17 +134,13 @@ static void on_mqtt_event(void *arg, esp_event_base_t base, int32_t id, void *da
     esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)data;
     esp_log_level_t log_level = ESP_LOG_NONE;
     switch (id) {
-        case MQTT_EVENT_PUBLISHED:
-        case MQTT_EVENT_DATA: {
-            log_level = ESP_LOG_DEBUG;
-        } break;
         case MQTT_EVENT_ERROR:
         case MQTT_EVENT_DISCONNECTED:
         case MQTT_EVENT_UNSUBSCRIBED: {
             log_level = ESP_LOG_WARN;
         } break;
         default: {
-            log_level = ESP_LOG_INFO;
+            log_level = ESP_LOG_DEBUG;
         } break;
     }
     ESP_LOG_LEVEL_LOCAL(log_level,
@@ -376,11 +372,11 @@ static esp_err_t get_or_build_root_topic(char buffer[MQTT_ROOT_TOPIC_LENGTH + 1]
     esp_err_t nvs_err = nvs_get_str(nfcity_nvs, NVS_KEY_MQTT_ROOT_TOPIC, NULL, &root_topic_size);
     assert(nvs_err == ESP_OK || nvs_err == ESP_ERR_NVS_NOT_FOUND);
     if (nvs_err == ESP_OK) { // retrieve root_topic from cache
-        ESP_LOGI(NFCITY_TAG, "size of root_topic retrieved from cache: %d", root_topic_size);
+        ESP_LOGD(NFCITY_TAG, "size of root_topic retrieved from cache: %d", root_topic_size);
         assert(root_topic_size == (MQTT_ROOT_TOPIC_LENGTH + 1));
         ESP_ERROR_CHECK(nvs_get_str(nfcity_nvs, NVS_KEY_MQTT_ROOT_TOPIC, root_topic, &root_topic_size));
         root_topic[MQTT_ROOT_TOPIC_LENGTH] = 0;
-        ESP_LOGI(NFCITY_TAG, "root_topic retrieved from cache: %s", root_topic);
+        ESP_LOGD(NFCITY_TAG, "root_topic retrieved from cache: %s", root_topic);
     }
     else { // generate and cache random root_topic
         root_topic_size = MQTT_ROOT_TOPIC_LENGTH + 1;
@@ -390,7 +386,7 @@ static esp_err_t get_or_build_root_topic(char buffer[MQTT_ROOT_TOPIC_LENGTH + 1]
             sprintf(root_topic + (i * 2), "%02x", rnd_root_topic_bytes[i]);
         }
         root_topic[MQTT_ROOT_TOPIC_LENGTH] = 0;
-        ESP_LOGI(NFCITY_TAG, "root_topic generated: %s", root_topic);
+        ESP_LOGD(NFCITY_TAG, "root_topic generated: %s", root_topic);
         ESP_ERROR_CHECK(nvs_set_str(nfcity_nvs, NVS_KEY_MQTT_ROOT_TOPIC, root_topic));
         ESP_ERROR_CHECK(nvs_commit(nfcity_nvs));
         ESP_LOGI(NFCITY_TAG, "root_topic cached");
@@ -404,7 +400,7 @@ static esp_err_t get_or_build_root_topic(char buffer[MQTT_ROOT_TOPIC_LENGTH + 1]
 void app_main()
 {
     esp_log_level_set("*", ESP_LOG_WARN);
-    esp_log_level_set(NFCITY_TAG, ESP_LOG_INFO);
+    esp_log_level_set(NFCITY_TAG, LOG_LOCAL_LEVEL);
 
     ESP_ERROR_CHECK(esp_event_loop_create_default());
     ESP_ERROR_CHECK(nvs_flash_init());
@@ -448,9 +444,11 @@ void app_main()
 
     { // console
         ESP_ERROR_CHECK(console_init());
+        ESP_LOGI(NFCITY_TAG, "console mounted");
+        ESP_LOGI(NFCITY_TAG, "use 'help' command to list available commands");
         ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &on_wifi_connected, NULL));
         if (console_wifi_join(NULL, 5000) != CONSOLE_NOERR) {
-            ESP_LOGW(NFCITY_TAG, "Cannot auto-join WiFi network. Use 'wifi' command to join manually.");
+            ESP_LOGW(NFCITY_TAG, "cannot auto-join wifi network, use 'wifi' command to join manually");
         }
         const char *prompt = LOG_COLOR_I "nfcity> " LOG_RESET_COLOR;
         while (true) {
