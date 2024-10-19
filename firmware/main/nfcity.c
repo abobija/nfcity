@@ -35,6 +35,7 @@ const uint8_t *mqtt_broker_pem_end = mqtt_broker_pem_start;
 #define MQTT_QOS_0                 0
 #define MQTT_QOS_1                 1
 #define MQTT_QOS_2                 2
+#define MQTT_READY_BIT             BIT0
 
 #define RC522_SPI_BUS_GPIO_MISO    21
 #define RC522_SPI_BUS_GPIO_MOSI    23
@@ -48,6 +49,7 @@ const char *NFCITY_TAG = "nfcity";
 
 static rc522_driver_handle_t rc522_driver;
 static rc522_handle_t rc522_scanner;
+static EventGroupHandle_t wait_bits;
 static SemaphoreHandle_t rc522_task_mutex;
 static const uint16_t rc522_task_mutex_take_timeout_ms = 1000;
 static esp_mqtt_client_handle_t mqtt_client;
@@ -58,8 +60,6 @@ static SemaphoreHandle_t enc_buffer_mutex;
 static const uint16_t enc_buffer_mutex_take_timeout_ms = 1000;
 static uint8_t picc_mem_buffer[PICC_MEM_BUFFER_SIZE] = { 0 }; // protect?
 static rc522_picc_t picc = { 0 };
-static bool mqtt_started = false;
-static bool rc522_started = false;
 
 static rc522_spi_config_t rc522_driver_config = {
     .host_id = SPI3_HOST,
@@ -94,29 +94,12 @@ static mqtt_event_name_map_entry_t mqtt_event_name_map[] = {
 };
 
 static const char *mqtt_event_name(esp_mqtt_event_id_t id);
+
 static esp_err_t read_sector(web_read_sector_msg_t *msg, rc522_mifare_sector_desc_t *sector_desc, uint8_t *buffer);
+
 static esp_err_t write_block(web_write_block_msg_t *msg, uint8_t *out_buffer);
-static esp_err_t get_or_build_root_topic(char buffer[MQTT_ROOT_TOPIC_LENGTH + 1]);
 
 // TODO: Check for return values everywhere
-
-static void on_wifi_connected(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
-{
-    if (!mqtt_started) {
-        char root_topic[MQTT_ROOT_TOPIC_LENGTH + 1] = { 0 };
-        ESP_ERROR_CHECK(get_or_build_root_topic(root_topic));
-        memset(mqtt_topic_buffer, 0, sizeof(mqtt_topic_buffer));
-        sprintf(mqtt_topic_buffer, "/%.*s", MQTT_ROOT_TOPIC_LENGTH, root_topic);
-        mqtt_subtopic_ptr = mqtt_topic_buffer + strlen(mqtt_topic_buffer);
-        ESP_LOGI(NFCITY_TAG, "*** +-----------------------------------+");
-        ESP_LOGI(NFCITY_TAG, "*** |%*c", 36, '|');
-        ESP_LOGI(NFCITY_TAG, "*** | MQTT_ROOT_TOPIC: %s |", mqtt_topic_buffer + 1);
-        ESP_LOGI(NFCITY_TAG, "*** |%*c", 36, '|');
-        ESP_LOGI(NFCITY_TAG, "*** +-----------------------------------+");
-        ESP_ERROR_CHECK(esp_mqtt_client_start(mqtt_client));
-        mqtt_started = true;
-    }
-}
 
 static inline char *mqtt_subtopic(const char *subtopic)
 {
@@ -174,10 +157,7 @@ static void on_mqtt_connected(void *arg, esp_event_base_t base, int32_t id, void
         ESP_LOGE(NFCITY_TAG, "Failed to give enc_buffer_mutex");
     }
 
-    if (!rc522_started) {
-        ESP_ERROR_CHECK(rc522_start(rc522_scanner));
-        rc522_started = true;
-    }
+    xEventGroupSetBits(wait_bits, MQTT_READY_BIT);
 }
 
 static void on_mqtt_data(void *arg, esp_event_base_t base, int32_t eid, void *data)
@@ -367,40 +347,6 @@ _exit:
     return ret;
 }
 
-static esp_err_t get_or_build_root_topic(char buffer[MQTT_ROOT_TOPIC_LENGTH + 1])
-{
-    char root_topic[MQTT_ROOT_TOPIC_LENGTH + 1] = { 0 };
-    nvs_handle_t nfcity_nvs;
-    ESP_ERROR_CHECK(nvs_open(NVS_NAMESPACE, NVS_READWRITE, &nfcity_nvs));
-    size_t root_topic_size = 0;
-    esp_err_t nvs_err = nvs_get_str(nfcity_nvs, NVS_KEY_MQTT_ROOT_TOPIC, NULL, &root_topic_size);
-    assert(nvs_err == ESP_OK || nvs_err == ESP_ERR_NVS_NOT_FOUND);
-    if (nvs_err == ESP_OK) { // retrieve root_topic from cache
-        ESP_LOGI(NFCITY_TAG, "size of root_topic retrieved from cache: %d", root_topic_size);
-        assert(root_topic_size == (MQTT_ROOT_TOPIC_LENGTH + 1));
-        ESP_ERROR_CHECK(nvs_get_str(nfcity_nvs, NVS_KEY_MQTT_ROOT_TOPIC, root_topic, &root_topic_size));
-        root_topic[MQTT_ROOT_TOPIC_LENGTH] = 0;
-        ESP_LOGI(NFCITY_TAG, "root_topic retrieved from cache: %s", root_topic);
-    }
-    else { // generate and cache random root_topic
-        root_topic_size = MQTT_ROOT_TOPIC_LENGTH + 1;
-        uint8_t rnd_root_topic_bytes[MQTT_ROOT_TOPIC_LENGTH / 2] = { 0 };
-        esp_fill_random(rnd_root_topic_bytes, sizeof(rnd_root_topic_bytes));
-        for (uint8_t i = 0; i < sizeof(rnd_root_topic_bytes); ++i) {
-            sprintf(root_topic + (i * 2), "%02x", rnd_root_topic_bytes[i]);
-        }
-        root_topic[MQTT_ROOT_TOPIC_LENGTH] = 0;
-        ESP_LOGI(NFCITY_TAG, "root_topic generated: %s", root_topic);
-        ESP_ERROR_CHECK(nvs_set_str(nfcity_nvs, NVS_KEY_MQTT_ROOT_TOPIC, root_topic));
-        ESP_ERROR_CHECK(nvs_commit(nfcity_nvs));
-        ESP_LOGI(NFCITY_TAG, "root_topic cached");
-    }
-    nvs_close(nfcity_nvs);
-
-    memcpy(buffer, root_topic, sizeof(root_topic));
-    return ESP_OK;
-}
-
 void app_main()
 {
     esp_log_level_set("*", ESP_LOG_WARN);
@@ -410,7 +356,19 @@ void app_main()
     ESP_ERROR_CHECK(nvs_flash_init());
     ESP_ERROR_CHECK(esp_netif_init());
 
+    { // console
+        ESP_ERROR_CHECK(console_init());
+        if (console_wifi_join(NULL, 5000) != CONSOLE_ERR_OK) {
+            ESP_LOGW(NFCITY_TAG, "Cannot auto-join WiFi network. Use 'wifi' command to join manually.");
+            ESP_ERROR_CHECK(console_run());
+        }
+        ESP_ERROR_CHECK(console_deinit());
+    }
+
     { // concurrency
+        wait_bits = xEventGroupCreate();
+        assert(wait_bits != NULL);
+        xEventGroupClearBits(wait_bits, MQTT_READY_BIT);
         enc_buffer_mutex = xSemaphoreCreateMutex();
         assert(enc_buffer_mutex != NULL);
         rc522_task_mutex = xSemaphoreCreateMutex();
@@ -418,6 +376,42 @@ void app_main()
     }
 
     { // mqtt
+        char root_topic[MQTT_ROOT_TOPIC_LENGTH + 1] = { 0 };
+        nvs_handle_t nfcity_nvs;
+        ESP_ERROR_CHECK(nvs_open(NVS_NAMESPACE, NVS_READWRITE, &nfcity_nvs));
+        size_t root_topic_size = 0;
+        esp_err_t nvs_err = nvs_get_str(nfcity_nvs, NVS_KEY_MQTT_ROOT_TOPIC, NULL, &root_topic_size);
+        assert(nvs_err == ESP_OK || nvs_err == ESP_ERR_NVS_NOT_FOUND);
+        if (nvs_err == ESP_OK) { // retrieve root_topic from cache
+            ESP_LOGI(NFCITY_TAG, "size of root_topic retrieved from cache: %d", root_topic_size);
+            assert(root_topic_size == (MQTT_ROOT_TOPIC_LENGTH + 1));
+            ESP_ERROR_CHECK(nvs_get_str(nfcity_nvs, NVS_KEY_MQTT_ROOT_TOPIC, root_topic, &root_topic_size));
+            root_topic[MQTT_ROOT_TOPIC_LENGTH] = 0;
+            ESP_LOGI(NFCITY_TAG, "root_topic retrieved from cache: %s", root_topic);
+        }
+        else { // generate and cache random root_topic
+            root_topic_size = MQTT_ROOT_TOPIC_LENGTH + 1;
+            uint8_t rnd_root_topic_bytes[MQTT_ROOT_TOPIC_LENGTH / 2] = { 0 };
+            esp_fill_random(rnd_root_topic_bytes, sizeof(rnd_root_topic_bytes));
+            for (uint8_t i = 0; i < sizeof(rnd_root_topic_bytes); ++i) {
+                sprintf(root_topic + (i * 2), "%02x", rnd_root_topic_bytes[i]);
+            }
+            root_topic[MQTT_ROOT_TOPIC_LENGTH] = 0;
+            ESP_LOGI(NFCITY_TAG, "root_topic generated: %s", root_topic);
+            ESP_ERROR_CHECK(nvs_set_str(nfcity_nvs, NVS_KEY_MQTT_ROOT_TOPIC, root_topic));
+            ESP_ERROR_CHECK(nvs_commit(nfcity_nvs));
+            ESP_LOGI(NFCITY_TAG, "root_topic cached");
+        }
+        nvs_close(nfcity_nvs);
+        memset(mqtt_topic_buffer, 0, sizeof(mqtt_topic_buffer));
+        sprintf(mqtt_topic_buffer, "/%.*s", MQTT_ROOT_TOPIC_LENGTH, root_topic);
+        mqtt_subtopic_ptr = mqtt_topic_buffer + strlen(mqtt_topic_buffer);
+        ESP_LOGI(NFCITY_TAG, "*** +-----------------------------------+");
+        ESP_LOGI(NFCITY_TAG, "*** |%*c", 36, '|');
+        ESP_LOGI(NFCITY_TAG, "*** | MQTT_ROOT_TOPIC: %s |", mqtt_topic_buffer + 1);
+        ESP_LOGI(NFCITY_TAG, "*** |%*c", 36, '|');
+        ESP_LOGI(NFCITY_TAG, "*** +-----------------------------------+");
+
         const esp_mqtt_client_config_t mqtt_cfg = {
             .broker.address.uri = CONFIG_NFCITY_MQTT_BROKER,
             .broker.verification.certificate = (const char *)mqtt_broker_pem_start,
@@ -427,38 +421,31 @@ void app_main()
             .credentials.authentication.password = CONFIG_NFCITY_MQTT_PASSWORD,
 #endif
         };
+
         mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
         assert(mqtt_client != NULL);
+
         ESP_ERROR_CHECK(esp_mqtt_client_register_event(mqtt_client, ESP_EVENT_ANY_ID, on_mqtt_event, NULL));
         ESP_ERROR_CHECK(esp_mqtt_client_register_event(mqtt_client, MQTT_EVENT_CONNECTED, on_mqtt_connected, NULL));
         ESP_ERROR_CHECK(esp_mqtt_client_register_event(mqtt_client, MQTT_EVENT_DATA, on_mqtt_data, NULL));
+
+        ESP_ERROR_CHECK(esp_mqtt_client_start(mqtt_client));
     }
 
     { // rc522
+        xEventGroupWaitBits(wait_bits, MQTT_READY_BIT, pdFALSE, pdTRUE, portMAX_DELAY);
+
         ESP_ERROR_CHECK(rc522_spi_create(&rc522_driver_config, &rc522_driver));
         ESP_ERROR_CHECK(rc522_driver_install(rc522_driver));
+
         rc522_config_t rc522_scanner_config = {
             .driver = rc522_driver,
             .task_mutex = rc522_task_mutex,
         };
+
         ESP_ERROR_CHECK(rc522_create(&rc522_scanner_config, &rc522_scanner));
         ESP_ERROR_CHECK(
             rc522_register_events(rc522_scanner, RC522_EVENT_PICC_STATE_CHANGED, on_picc_state_changed, NULL));
-    }
-
-    { // console
-        ESP_ERROR_CHECK(console_init());
-        ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &on_wifi_connected, NULL));
-        if (console_wifi_join(NULL, 5000) != CONSOLE_NOERR) {
-            ESP_LOGW(NFCITY_TAG, "Cannot auto-join WiFi network. Use 'wifi' command to join manually.");
-        }
-        const char *prompt = LOG_COLOR_I "nfcity> " LOG_RESET_COLOR;
-        while (true) {
-            if (console_process_line(prompt) == CONSOLE_ERR_CMD_EXIT) {
-                ESP_LOGW(NFCITY_TAG, "exit not supported");
-            }
-        }
-        ESP_ERROR_CHECK(console_deinit());
-        ESP_LOGW(NFCITY_TAG, "exited from main task, console deinitialized");
+        ESP_ERROR_CHECK(rc522_start(rc522_scanner));
     }
 }
