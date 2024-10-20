@@ -1,6 +1,6 @@
 # NFCity
 
-Project that provides a simple way to inspect and modify data on NFC/RFID cards.
+Project that provides a simple way to inspect and modify memory of NFC/RFID cards.
 
 ![web-app-dashboard](docs/web-app-dashboard.png)
 
