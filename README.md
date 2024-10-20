@@ -76,6 +76,20 @@ Once the commands run successfully, the terminal will display the local address 
 
 ### 3.2. Device
 
+### 3.2.1. Hardware
+
+The device consists of an ESP32 microcontroller and an MFRC522 reader. The wiring is as follows:
+
+| ESP32 | MFRC522 |
+|-------|---------|
+| 21    | MISO    |
+| 23    | MOSI    |
+| 19    | SCLK    |
+| 22    | SDA     |
+| 18    | RST     |
+
+### 3.2.2. Firmware
+
 The device firmware is in the [`firmware`](firmware/) directory. To build and flash the firmware to the ESP32, you must have ESP-IDF installed. Follow the instructions in the [official documentation](https://docs.espressif.com/projects/esp-idf/en/v5.3.1/esp32/get-started/index.html). 
 
 Once ESP-IDF is installed, navigate to the `firmware` directory. Firmware configuration can be done with `idf.py menuconfig` or by manually creating a local configuration file. To create a local configuration file, follow these steps:
@@ -95,7 +109,7 @@ Once ESP-IDF is installed, navigate to the `firmware` directory. Firmware config
 After flashing, if the correct WiFi credentials are set, the terminal should show that the device has connected to the network and MQTT broker.
 
 > [!IMPORTANT]
-> In the terminal, a randomly generated root topic will appear. The device uses this topic for publishing messages to the MQTT broker. Use this root topic in the web application to subscribe to messages from the device.
+> In the terminal, a randomly generated root topic will appear. The device uses this topic for publishing messages to the MQTT broker. Use this root topic in the web application to subscribe to messages from the device. Root topics are unique to each device to avoid message collisions on public brokers. It's saved in the device's flash memory and will persist across reboots.
 
 ## 4. Usage
 
