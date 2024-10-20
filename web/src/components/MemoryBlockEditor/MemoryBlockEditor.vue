@@ -205,7 +205,7 @@ function confirm() {
 </template>
 
 <style lang="scss">
-@import '@/theme.scss';
+@use '@/theme' as *;
 
 .MemoryBlockEditor {
 

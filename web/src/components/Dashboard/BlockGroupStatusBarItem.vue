@@ -38,7 +38,7 @@ const permissions = computed(() => key.value ? props.group.allowedOperationsFor(
 
 <style lang="scss">
 @use 'sass:color';
-@import '@/theme.scss';
+@use '@/theme' as *;
 
 .BlockGroupStatusBarItem {
   .operation {

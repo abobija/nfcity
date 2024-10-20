@@ -1,5 +1,5 @@
 @use 'sass:color';
-@import '@/theme.scss';
+@use '@/theme' as *;
 
 $focus-alpha: -0.6;
 $disabled-alpha: -0.5;

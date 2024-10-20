@@ -113,7 +113,7 @@ async function authenticateAndLoadSector(key: PiccKey) {
 
 <style lang="scss">
 @use 'sass:color';
-@import '@/theme.scss';
+@use '@/theme' as *;
 
 $transition: .3s ease-in-out;
 

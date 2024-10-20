@@ -44,7 +44,7 @@ const dataBlockAC = computed(() => {
 
 <style lang="scss">
 @use 'sass:color';
-@import '@/theme.scss';
+@use '@/theme' as *;
 
 .AccessConditionsDescriptionRenderer {
   display: inline;

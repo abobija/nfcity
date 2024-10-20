@@ -379,7 +379,7 @@ onByteMouseClick(clickedByte => {
 
 <style lang="scss">
 @use 'sass:color';
-@import '@/theme.scss';
+@use '@/theme' as *;
 
 .Dashboard {
   margin: 2rem 1rem 1rem 1rem;

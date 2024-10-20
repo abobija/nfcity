@@ -142,7 +142,7 @@ onClientReady(() => {
 
 <style lang="scss">
 @use 'sass:color';
-@import '@/theme.scss';
+@use '@/theme' as *;
 
 .App {
   .login {

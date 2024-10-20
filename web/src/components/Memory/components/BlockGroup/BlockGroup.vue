@@ -66,7 +66,7 @@ const classes = computed(() => {
 
 <style lang="scss">
 @use 'sass:color';
-@import '@/theme.scss';
+@use '@/theme' as *;
 
 .BlockGroup {
   display: flex;

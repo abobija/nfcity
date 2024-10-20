@@ -24,7 +24,7 @@ defineProps<{
 
 <style lang="scss">
 @use 'sass:color';
-@import '@/theme.scss';
+@use '@/theme' as *;
 
 .BlockInfoRenderer {
   font-size: .9rem;

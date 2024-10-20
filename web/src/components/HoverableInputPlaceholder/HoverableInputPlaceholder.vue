@@ -51,7 +51,7 @@ onUnmounted(() => {
 
 <style lang="scss">
 @use 'sass:color';
-@import '@/theme.scss';
+@use '@/theme' as *;
 
 .HoverableInputPlaceholder {
   position: relative;

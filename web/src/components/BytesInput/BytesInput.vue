@@ -134,7 +134,7 @@ function onPaste(e: ClipboardEvent) {
 
 <style lang="scss">
 @use 'sass:color';
-@import '@/theme.scss';
+@use '@/theme' as *;
 
 .BytesInput {
   position: relative;

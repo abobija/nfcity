@@ -105,7 +105,7 @@ watch(comboPoolArray, (newComboPoolArray) => {
 </template>
 
 <style lang="scss">
-@import '@/theme.scss';
+@use '@/theme' as *;
 
 .SectorTrailerBlockEditForm {
   .form-group:not(:first-child) {

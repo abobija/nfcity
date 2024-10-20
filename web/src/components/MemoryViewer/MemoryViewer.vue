@@ -133,7 +133,7 @@ watch(() => props.block, () => editMode.value = false);
 
 <style lang="scss">
 @use 'sass:color';
-@import '@/theme.scss';
+@use '@/theme' as *;
 
 .MemoryViewer {
   .toolbar {
