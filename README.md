@@ -2,7 +2,7 @@
 
 Project that provides a simple way to inspect and modify memory of NFC/RFID cards.
 
-![web-app-dashboard](docs/web-app-dashboard.png)
+[![web-app-dashboard](docs/web-app-dashboard.png)](https://youtu.be/X7W1hfjEc5A)
 
 Through an in-browser web application, you can unlock and modify the card's memory blocks.
 
