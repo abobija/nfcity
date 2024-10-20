@@ -92,28 +92,39 @@ The device consists of an ESP32 microcontroller and an MFRC522 reader. The wirin
 
 The device firmware is in the [`firmware`](firmware/) directory. To build and flash the firmware to the ESP32, you must have ESP-IDF installed. Follow the instructions in the [official documentation](https://docs.espressif.com/projects/esp-idf/en/v5.3.1/esp32/get-started/index.html). 
 
-Once ESP-IDF is installed, navigate to the `firmware` directory. Firmware configuration can be done with `idf.py menuconfig` or by manually creating a local configuration file. To create a local configuration file, follow these steps:
+Once ESP-IDF is installed, navigate to the `firmware` directory. Execute next command to configure the project:
 
-1. Create a local configuration file by copying the example:
-   ```bash
-   cp sdkconfig.defaults.local.example sdkconfig.defaults.local
-   ```
+```bash
+idf.py menuconfig
+```
 
-2. Open the newly created `sdkconfig.defaults.local` file and set your WiFi SSID, password, and MQTT broker address. For testing purposes, you can use the default MQTT address provided, which points to a public broker.
+In the configuration menu, set the next options:
 
-3. Build and flash the firmware:
-   ```bash
-   idf.py build flash monitor
-   ```
+| Option        | Path                                                  |
+|---------------|-------------------------------------------------------|
+| WiFi SSID     | `Example Connection Configuration` -> `WiFi SSID`     |
+| WiFi Password | `Example Connection Configuration` -> `WiFi Password` |
+| MQTT Broker   | `NFCity` -> `MQTT Broker`                             |
 
-After flashing, if the correct WiFi credentials are set, the terminal should show that the device has connected to the network and MQTT broker.
+
+Save and exit the configuration menu. Then, build and flash the firmware:
+
+```bash
+idf.py build flash monitor
+```
+
+If the correct WiFi credentials are set, the terminal should show that the device has connected to the network and MQTT broker.
 
 > [!IMPORTANT]
 > In the terminal, a randomly generated root topic will appear. The device uses this topic for publishing messages to the MQTT broker. Use this root topic in the web application to subscribe to messages from the device. Root topics are unique to each device to avoid message collisions on public brokers. It's saved in the device's flash memory and will persist across reboots.
 
 ## 4. Usage
 
-When you open the web application, the first step is to copy the root topic from the Device's terminal and paste it into the client configuration form. Click the connect button to connect to the MQTT broker. The configuration is saved in the browser's local storage, so you don’t need to re-enter it every time.
+When you open the web application, the first step is to copy the root topic from the Device's terminal and paste it into the client configuration form. 
+
+![root-topic-pairing](docs/root-topic-pairing.png)
+
+Save configuration and click the connect button to connect to the MQTT broker. The configuration is saved in the browser's local storage, so you don’t need to re-enter it every time.
 
 After connecting to the broker, place an NFC card on the reader. Once detected, the card info will appear in the app, and you can start reading and writing data to the card.
 
