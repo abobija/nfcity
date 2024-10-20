@@ -11,8 +11,7 @@
     "cbor-x": "^1.6.0",
     "mitt": "^3.0.1",
     "mqtt": "^5.10.1",
-    "murmurhash": "^2.0.1",
-    "vue": "^3.5.11"
+    "murmurhash": "^2.0.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.1.4",
@@ -21,6 +20,7 @@
     "sass-loader": "^16.0.2",
     "typescript": "^5.6.3",
     "vite": "^5.4.8",
+    "vue": "^3.5.11",
     "vue-tsc": "^2.1.6"
   }
 }
