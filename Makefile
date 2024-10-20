@@ -30,17 +30,6 @@ web-dev: web-deps
 	cd $(WEB_DIR) \
 	&& npm run dev -- --open
 
-# args are optional and can be passed as
-# `make web-docker TAG=latest REPO_TAG=1.0.0 REPO_TAG_NAME=v1.0.0`
-web-docker:
-	@echo "Building web docker image"
-	docker build \
-		-t nfcity:$(if $(TAG),$(TAG),latest) \
-		-f $(DOCKER_WEB_DIR)/Dockerfile \
-		$(WEB_DIR) \
-		$(if $(REPO_TAG),--build-arg REPO_TAG=$(REPO_TAG)) \
-		$(if $(REPO_TAG_NAME),--build-arg REPO_TAG_NAME=$(REPO_TAG_NAME))
-
 clean:
 	@echo "Cleaning"
 	rm -rf $(WEB_DEPS_INSTALLED_FLAG)
