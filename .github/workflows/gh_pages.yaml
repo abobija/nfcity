@@ -1,9 +1,8 @@
 name: Deploy GitHub Pages
 
 on:
-  push:
-    branches:
-      - main
+  release:
+    types: [ published ]
 
 permissions:
   contents: read
@@ -26,8 +25,11 @@ jobs:
         with:
           node-version: 20
       - uses: actions/configure-pages/@v5
-      - run: npm install && npm run build
+      - env:
+          VITE_APP_REPO_TAG: ${{ github.event.release.tag_name }}
+          VITE_APP_REPO_TAG_NAME: ${{ github.event.release.name }}
         working-directory: ./web
+        run: npm install && npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./web/dist
