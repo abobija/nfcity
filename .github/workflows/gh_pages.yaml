@@ -28,11 +28,8 @@ jobs:
       - uses: actions/configure-pages/@v5
       - run: npm install && npm run build
         working-directory: ./web
-      - run: tar -cvf nfcity.tar ./web/dist
       - uses: actions/upload-pages-artifact@v3
         with:
-          #name: github-pages
           path: ./web/dist
-          #if-no-files-found: error
       - id: deployment
         uses: actions/deploy-pages@v4
