@@ -130,7 +130,7 @@ onClientReady(() => {
             <span v-else>{{ VITE_APP_REPO_TAG_NAME || VITE_APP_REPO_TAG }}</span>
           </p>
           <p class="copyright">
-            copyright 2024 <a :href="VITE_APP_AUTHOR_URL" target="_blank">{{ VITE_APP_AUTHOR }}</a>,
+            copyright 2024 - 2025 <a :href="VITE_APP_AUTHOR_URL" target="_blank">{{ VITE_APP_AUTHOR }}</a>,
             <a :href="VITE_APP_LICENSE_URL" class="license" target="_blank">{{ VITE_APP_LICENSE_NAME }}</a>
           </p>
         </div>
