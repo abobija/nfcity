@@ -6,6 +6,9 @@ Project that provides a simple way to inspect and modify memory of NFC/RFID card
 
 Through an in-browser web application, you can unlock and modify the card's memory blocks.
 
+Project page:
+https://abobija.com/projects/nfcity-esp32-nfc-card-tool
+
 ## 1. Motivation
 
 While developing a [library](https://github.com/abobija/esp-idf-rc522) for interacting with NFC cards using the [MFRC522](https://www.nxp.com/docs/en/data-sheet/MFRC522.pdf) reader, I gained significant knowledge about card memory structure and interaction. This knowledge came from reading datasheets and through trial and error. These resources are often technical and difficult for beginners, but they contain valuable information on how NFC cards work.
@@ -132,10 +135,15 @@ After connecting to the broker, place an NFC card on the reader. Once detected, 
 
 The project currently supports cards that are compatible with the underlying firmware [library](https://github.com/abobija/esp-idf-rc522) used for communication with the MFRC522 reader. This includes cards from the Mifare Classic family, such as Mifare 1k, 4k, and Mini.
 
-## 6. License
+## 6. Author
+
+GitHub: [abobija](https://github.com/abobija)<br />
+Homepage: [abobija.com](https://abobija.com)
+
+## 7. License
 
 This project is licensed under Apache License 2.0. See the [LICENSE](LICENSE.txt) file for more details.
 
-## 7. Issues and Contributions
+## 8. Issues and Contributions
 
 There are many features that can be added. If you have suggestions or want to contribute, feel free to open an issue or a pull request. All feedback and improvements are welcome.
