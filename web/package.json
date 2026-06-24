@@ -14,12 +14,12 @@
     "murmurhash": "^2.0.1"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.2.4",
+    "@vitejs/plugin-vue": "^6.0.7",
     "reset-css": "^5.0.2",
     "sass": "^1.91.0",
     "sass-loader": "^16.0.5",
     "typescript": "^5.9.2",
-    "vite": "^5.4.19",
+    "vite": "^8.1.0",
     "vue": "^3.5.20",
     "vue-tsc": "^2.2.12"
   }
